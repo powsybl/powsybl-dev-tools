@@ -6,7 +6,7 @@
  */
 package com.powsybl.sld.viewer;
 
-import com.powsybl.sld.force.layout.ForceSubstationLayout;
+import com.powsybl.sld.layout.ForceSubstationLayout;
 import com.powsybl.sld.layout.LayoutParameters;
 import com.powsybl.sld.library.ComponentSize;
 import com.powsybl.sld.model.BaseNode;
