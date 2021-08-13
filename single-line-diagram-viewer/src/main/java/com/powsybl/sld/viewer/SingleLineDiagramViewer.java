@@ -8,7 +8,6 @@ package com.powsybl.sld.viewer;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.collect.ImmutableMap;
 import com.powsybl.commons.json.JsonUtil;
 import com.powsybl.computation.local.LocalComputationManager;
 import com.powsybl.iidm.import_.ImportConfig;
@@ -25,7 +24,6 @@ import com.powsybl.sld.layout.*;
 import com.powsybl.sld.layout.positionbyclustering.PositionByClustering;
 import com.powsybl.sld.layout.positionfromextension.PositionFromExtension;
 import com.powsybl.sld.library.ComponentLibrary;
-import com.powsybl.sld.library.ConvergenceComponentLibrary;
 import com.powsybl.sld.svg.*;
 import com.powsybl.sld.util.NominalVoltageDiagramStyleProvider;
 import com.powsybl.sld.util.TopologicalStyleProvider;
@@ -94,10 +92,8 @@ public class SingleLineDiagramViewer extends Application implements DisplayVolta
 
     private Map<String, SubstationLayoutFactory> substationsLayouts = new LinkedHashMap<>();
 
-    private final ComponentLibrary convergenceComponentLibrary = new ConvergenceComponentLibrary();
-
     private final Map<String, ComponentLibrary> svgLibraries
-            = ImmutableMap.of("CVG Design", convergenceComponentLibrary);
+            = ComponentLibrary.findAll().stream().collect(Collectors.toMap(ComponentLibrary::getName, Function.identity()));
 
     private final ObservableList<SelectableSubstation> selectableSubstations = FXCollections.observableArrayList();
 
