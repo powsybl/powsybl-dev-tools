@@ -12,7 +12,9 @@ import com.powsybl.sld.library.ComponentSize;
 import com.powsybl.sld.model.BaseNode;
 import com.powsybl.sld.model.BusCell;
 import com.powsybl.sld.model.Coord;
+import com.powsybl.sld.model.Point;
 import com.powsybl.sld.svg.GraphMetadata;
+import javafx.geometry.Point2D;
 import javafx.scene.Node;
 import javafx.scene.shape.Polyline;
 import org.apache.commons.lang3.StringUtils;
@@ -77,17 +79,19 @@ public class VoltageLevelHandler implements BaseNode {
     }
 
     @Override
-    public double getX() {
+    public Point getCoordinates() {
         ComponentSize size = new ComponentSize(0, 0);
-        return node.localToParent(node.getLayoutX() + size.getWidth() / 2,
-                                  node.getLayoutY() + size.getHeight() / 2).getX();
+        Point2D parent = node.localToParent(node.getLayoutX() + size.getWidth() / 2,
+            node.getLayoutY() + size.getHeight() / 2);
+        return new Point(parent.getX(), parent.getY());
     }
 
-    @Override
+    public double getX() {
+        return getCoordinates().getX();
+    }
+
     public double getY() {
-        ComponentSize size = new ComponentSize(0, 0);
-        return node.localToParent(node.getLayoutX() + size.getWidth() / 2,
-                                  node.getLayoutY() + size.getHeight() / 2).getY();
+        return getCoordinates().getY();
     }
 
     public void addNodeHandlers(List<NodeHandler> nodeHandlers) {
@@ -146,18 +150,14 @@ public class VoltageLevelHandler implements BaseNode {
         }
 
         for (WireHandler wh : whSnakeLines) {
-            List<Double> pol = calculatePolylineSnakeLine(metadata.getLayoutParameters(),
-                    wh,
-                    posVL,
-                    nbSnakeLinesTopBottom,
-                    nbSnakeLinesBetween);
+            List<Point> pol = calculatePolylineSnakeLine(metadata.getLayoutParameters(), wh, posVL, nbSnakeLinesTopBottom, nbSnakeLinesBetween);
             if (!pol.isEmpty()) {
-                ((Polyline) wh.getNode()).getPoints().setAll(pol);
+                ((Polyline) wh.getNode()).getPoints().setAll(Point.pointsToDoubles(pol));
             }
         }
     }
 
-    private List<Double> calculatePolylineSnakeLine(LayoutParameters layoutParam,
+    private List<Point> calculatePolylineSnakeLine(LayoutParameters layoutParam,
                                                     WireHandler wh,
                                                     Map<String, Coord> posVL,
                                                     Map<String, Map<BusCell.Direction, Integer>> nbSnakeLinesTopBottom,
@@ -183,9 +183,7 @@ public class VoltageLevelHandler implements BaseNode {
             idMaxGraph = nh2.getVId();
         }
 
-        double x1 = nh1.getX();
         double y1 = nh1.getY();
-        double x2 = nh2.getX();
         double y2 = nh2.getY();
 
         ForceSubstationLayout.ForceInfoCalcPoints info = new ForceSubstationLayout.ForceInfoCalcPoints();
@@ -196,11 +194,9 @@ public class VoltageLevelHandler implements BaseNode {
         info.setdNode2(dNode2);
         info.setNbSnakeLinesTopBottom(nbSnakeLinesTopBottom);
         info.setNbSnakeLinesBetween(nbSnakeLinesBetween);
-        info.setX1(x1);
-        info.setX2(x2);
-        info.setY1(y1);
+        info.setCoord1(nh1.getCoordinates());
+        info.setCoord2(nh2.getCoordinates());
         info.setInitY1(y1);
-        info.setY2(y2);
         info.setInitY2(y2);
         info.setxMaxGraph(xMaxGraph);
         info.setIdMaxGraph(idMaxGraph);
