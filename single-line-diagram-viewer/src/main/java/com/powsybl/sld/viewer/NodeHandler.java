@@ -9,8 +9,10 @@ package com.powsybl.sld.viewer;
 import com.powsybl.sld.library.ComponentSize;
 import com.powsybl.sld.model.BaseNode;
 import com.powsybl.sld.model.BusCell;
+import com.powsybl.sld.model.Point;
 import com.powsybl.sld.svg.GraphMetadata;
 
+import javafx.geometry.Point2D;
 import javafx.scene.Node;
 import javafx.scene.control.Tooltip;
 import javafx.scene.input.MouseButton;
@@ -119,26 +121,26 @@ public class NodeHandler implements BaseNode {
         return rotationAngle != null;
     }
 
+    @Override
+    public Point getCoordinates() {
+        ComponentSize size = componentType != null
+            ? metadata.getComponentMetadata(componentType).getSize()
+            : new ComponentSize(0, 0);
+        Point2D parent = node.localToParent(node.getLayoutX() + size.getWidth() / 2,
+            node.getLayoutY() + size.getHeight() / 2);
+        return new Point(parent.getX(), parent.getY());
+    }
+
     public void setDisplayVL(DisplayVoltageLevel displayVL) {
         this.displayVL = displayVL;
     }
 
-    @Override
     public double getX() {
-        ComponentSize size = componentType != null
-                ? metadata.getComponentMetadata(componentType).getSize()
-                : new ComponentSize(0, 0);
-        return node.localToParent(node.getLayoutX() + size.getWidth() / 2,
-                                  node.getLayoutY() + size.getHeight() / 2).getX();
+        return getCoordinates().getX();
     }
 
-    @Override
     public double getY() {
-        ComponentSize size = componentType != null
-                ? metadata.getComponentMetadata(componentType).getSize()
-                : new ComponentSize(0, 0);
-        return node.localToParent(node.getLayoutX() + size.getWidth() / 2,
-                                  node.getLayoutY() + size.getHeight() / 2).getY();
+        return getCoordinates().getY();
     }
 
     public void setDragAndDrop() {
