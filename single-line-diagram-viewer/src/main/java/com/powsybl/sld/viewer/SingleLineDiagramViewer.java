@@ -8,7 +8,6 @@ package com.powsybl.sld.viewer;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.collect.ImmutableMap;
 import com.powsybl.commons.json.JsonUtil;
 import com.powsybl.computation.local.LocalComputationManager;
 import com.powsybl.iidm.import_.ImportConfig;
@@ -21,12 +20,10 @@ import com.powsybl.sld.VoltageLevelDiagram;
 import com.powsybl.sld.cgmes.dl.iidm.extensions.NetworkDiagramData;
 import com.powsybl.sld.cgmes.layout.CgmesSubstationLayoutFactory;
 import com.powsybl.sld.cgmes.layout.CgmesVoltageLevelLayoutFactory;
-import com.powsybl.sld.force.layout.ForceSubstationLayoutFactory;
 import com.powsybl.sld.layout.*;
 import com.powsybl.sld.layout.positionbyclustering.PositionByClustering;
 import com.powsybl.sld.layout.positionfromextension.PositionFromExtension;
 import com.powsybl.sld.library.ComponentLibrary;
-import com.powsybl.sld.library.ResourcesComponentLibrary;
 import com.powsybl.sld.svg.*;
 import com.powsybl.sld.util.NominalVoltageDiagramStyleProvider;
 import com.powsybl.sld.util.TopologicalStyleProvider;
@@ -95,10 +92,8 @@ public class SingleLineDiagramViewer extends Application implements DisplayVolta
 
     private Map<String, SubstationLayoutFactory> substationsLayouts = new LinkedHashMap<>();
 
-    private final ComponentLibrary convergenceComponentLibrary = new ResourcesComponentLibrary("/ConvergenceLibrary");
-
     private final Map<String, ComponentLibrary> svgLibraries
-            = ImmutableMap.of("CVG Design", convergenceComponentLibrary);
+            = ComponentLibrary.findAll().stream().collect(Collectors.toMap(ComponentLibrary::getName, Function.identity()));
 
     private final ObservableList<SelectableSubstation> selectableSubstations = FXCollections.observableArrayList();
 
@@ -254,7 +249,7 @@ public class SingleLineDiagramViewer extends Application implements DisplayVolta
                 DiagramStyleProvider styleProvider = styles.get(styleComboBox.getSelectionModel().getSelectedItem());
 
                 String dName = getSelectedDiagramName();
-                LayoutParameters diagramLayoutParameters = new LayoutParameters(layoutParameters.get()).setDiagramName(dName).setCssInternal(true);
+                LayoutParameters diagramLayoutParameters = new LayoutParameters(layoutParameters.get()).setDiagramName(dName).setCssLocation(LayoutParameters.CssLocation.INSERTED_IN_SVG);
                 diagramLayoutParameters.setComponentsSize(getComponentLibrary().getComponentsSize());
 
                 DiagramLabelProvider initProvider = new DefaultDiagramLabelProvider(networkProperty.get(), getComponentLibrary(), diagramLayoutParameters);
