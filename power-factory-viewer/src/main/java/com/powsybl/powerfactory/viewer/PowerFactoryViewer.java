@@ -115,7 +115,7 @@ public class PowerFactoryViewer extends Application {
 
         fileChooser.setTitle("Open PowerFactory file");
         List<String> extensions = StreamSupport.stream(ServiceLoader.load(ProjectLoader.class).spliterator(), false)
-                .map(loader -> "*." + loader.getExtension())
+                .map(l -> "*." + l.getExtension())
                 .collect(Collectors.toList());
         String filterDescr = "PowerFactory files (" + String.join(", ", extensions) + ")";
         fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter(filterDescr, extensions));
