@@ -68,11 +68,8 @@ public abstract class AbstractContainerDiagramView extends BorderPane {
 
     private void registerEvents() {
         setOnScroll(event -> {
-            double zoomFactor = 1.05;
             double deltaY = event.getDeltaY();
-            if (deltaY < 0) {
-                zoomFactor = 2.0 - zoomFactor;
-            }
+            double zoomFactor = deltaY < 0 ? 0.9 : 1.05;
             svgImage.setScaleX(svgImage.getScaleX() * zoomFactor);
             svgImage.setScaleY(svgImage.getScaleY() * zoomFactor);
 
