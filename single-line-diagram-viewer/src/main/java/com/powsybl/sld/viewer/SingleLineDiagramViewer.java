@@ -1019,7 +1019,7 @@ public class SingleLineDiagramViewer extends Application implements DisplayVolta
      */
     private void checkVoltageLevel(VoltageLevel v, Boolean checked) {
         selectableVoltageLevels.stream()
-                .filter(selectableVoltageLevel -> selectableVoltageLevel.getIdOrName().equals(showNames.isSelected() ? v.getName() : v.getId()))
+                .filter(selectableVoltageLevel -> selectableVoltageLevel.getId().equals(v.getId()))
                 .forEach(selectableVoltageLevel -> selectableVoltageLevel.setCheckedProperty(checked));
     }
 
@@ -1028,7 +1028,7 @@ public class SingleLineDiagramViewer extends Application implements DisplayVolta
      */
     private void checkSubstation(Substation s, Boolean checked) {
         selectableSubstations.stream()
-                .filter(selectableSubstation -> selectableSubstation.getIdOrName().equals(showNames.isSelected() ? s.getName() : s.getId()))
+                .filter(selectableSubstation -> selectableSubstation.getId().equals(s.getId()))
                 .forEach(selectableSubstation -> selectableSubstation.setCheckedProperty(checked));
     }
 
