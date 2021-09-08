@@ -833,7 +833,7 @@ public class SingleLineDiagramViewer extends Application implements DisplayVolta
 
     private String getString(Container<?> value) {
         String cNameOrId = showNames.isSelected() ? value.getNameOrId() : value.getId();
-        if (value instanceof Substation) {
+        if (value instanceof Substation && hideVoltageLevels.isSelected()) {
             long nbVoltageLevels = ((Substation) value).getVoltageLevelStream().count();
             return cNameOrId + " [" + nbVoltageLevels + "]";
         }
