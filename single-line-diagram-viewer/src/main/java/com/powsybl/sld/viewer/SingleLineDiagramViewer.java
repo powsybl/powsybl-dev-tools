@@ -134,6 +134,8 @@ public class SingleLineDiagramViewer extends Application implements DisplayVolta
 
     private final CheckBox hideSubstations = new CheckBox("Hide substations");
 
+    private final CheckBox hideVoltageLevels = new CheckBox("Hide voltage levels");
+
     private final ComboBox<String> diagramNamesComboBox = new ComboBox<>();
 
     private class ContainerDiagramPane extends BorderPane {
@@ -813,7 +815,7 @@ public class SingleLineDiagramViewer extends Application implements DisplayVolta
                 @Override
                 public String toString(TreeItem<Container> c) {
                     if (c.getValue() != null) {
-                        return showNames.isSelected() ? c.getValue().getName() : c.getValue().getId();
+                        return getString(c.getValue());
                     } else {
                         return "";
                     }
@@ -827,6 +829,15 @@ public class SingleLineDiagramViewer extends Application implements DisplayVolta
             treeCell.setConverter(strConvert);
             return treeCell;
         });
+    }
+
+    private String getString(Container<?> value) {
+        String cNameOrId = showNames.isSelected() ? value.getNameOrId() : value.getId();
+        if (value instanceof Substation) {
+            long nbVoltageLevels = ((Substation) value).getVoltageLevelStream().count();
+            return cNameOrId + " [" + nbVoltageLevels + "]";
+        }
+        return cNameOrId;
     }
 
     @Override
@@ -843,6 +854,11 @@ public class SingleLineDiagramViewer extends Application implements DisplayVolta
         });
 
         hideSubstations.selectedProperty().addListener((observable, oldValue, newValue) -> {
+            initSubstationsTree();
+            substationsTree.refresh();
+        });
+
+        hideVoltageLevels.selectedProperty().addListener((observable, oldValue, newValue) -> {
             initSubstationsTree();
             substationsTree.refresh();
         });
@@ -881,8 +897,9 @@ public class SingleLineDiagramViewer extends Application implements DisplayVolta
         voltageLevelToolBar.setPadding(new Insets(5, 5, 5, 5));
         voltageLevelToolBar.add(showNames, 0, 0, 2, 1);
         voltageLevelToolBar.add(hideSubstations, 0, 1, 2, 1);
-        voltageLevelToolBar.add(filterLabel, 0, 2);
-        voltageLevelToolBar.add(filterInput, 1, 2);
+        voltageLevelToolBar.add(hideVoltageLevels, 0, 2, 2, 1);
+        voltageLevelToolBar.add(filterLabel, 0, 3);
+        voltageLevelToolBar.add(filterInput, 1, 3);
         ColumnConstraints c0 = new ColumnConstraints();
         ColumnConstraints c1 = new ColumnConstraints();
         c1.setHgrow(Priority.ALWAYS);
@@ -1029,12 +1046,6 @@ public class SingleLineDiagramViewer extends Application implements DisplayVolta
                 continue;
             }
 
-            CheckBoxTreeItem<Container> vItem = new CheckBoxTreeItem<>(v);
-            vItem.setIndependent(true);
-            if (mapVoltageLevels.containsKey(v.getId()) && mapVoltageLevels.get(v.getId()).checkedProperty().get()) {
-                vItem.setSelected(true);
-            }
-
             if (firstVL && !hideSubstations.isSelected()) {
                 sItem = new CheckBoxTreeItem<>(s);
                 sItem.setIndependent(true);
@@ -1050,14 +1061,22 @@ public class SingleLineDiagramViewer extends Application implements DisplayVolta
 
             firstVL = false;
 
-            if (sItem != null) {
-                sItem.getChildren().add(vItem);
-            } else {
-                rootItem.getChildren().add(vItem);
+            if (!hideVoltageLevels.isSelected()) {
+                CheckBoxTreeItem<Container> vItem = new CheckBoxTreeItem<>(v);
+                vItem.setIndependent(true);
+                if (mapVoltageLevels.containsKey(v.getId()) && mapVoltageLevels.get(v.getId()).checkedProperty().get()) {
+                    vItem.setSelected(true);
+                }
+                if (sItem != null) {
+                    sItem.getChildren().add(vItem);
+                } else {
+                    rootItem.getChildren().add(vItem);
+                }
+
+                vItem.selectedProperty().addListener((obs, oldVal, newVal) ->
+                    checkVoltageLevel(v, newVal));
             }
 
-            vItem.selectedProperty().addListener((obs, oldVal, newVal) ->
-                    checkVoltageLevel(v, newVal));
         }
     }
 
