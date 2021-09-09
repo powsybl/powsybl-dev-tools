@@ -6,25 +6,16 @@
  */
 package com.powsybl.sld.viewer;
 
-import com.powsybl.sld.layout.ForceSubstationLayout;
-import com.powsybl.sld.layout.LayoutParameters;
 import com.powsybl.sld.library.ComponentSize;
 import com.powsybl.sld.model.BaseNode;
-import com.powsybl.sld.model.BusCell;
-import com.powsybl.sld.model.Coord;
 import com.powsybl.sld.model.Point;
 import com.powsybl.sld.svg.GraphMetadata;
 import javafx.geometry.Point2D;
 import javafx.scene.Node;
-import javafx.scene.shape.Polyline;
-import org.apache.commons.lang3.StringUtils;
 
-import java.util.*;
-import java.util.function.Function;
-import java.util.stream.Collectors;
-
-import static com.powsybl.sld.library.ComponentTypeName.BUSBAR_SECTION;
-import static com.powsybl.sld.model.Coord.Dimension.X;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
 
 /**
  * @author Franck Lecuyer <franck.lecuyer at rte-france.com>
@@ -79,7 +70,7 @@ public class VoltageLevelHandler implements BaseNode {
     }
 
     @Override
-    public Point getCoordinates() {
+    public Point getDiagramCoordinates() {
         ComponentSize size = new ComponentSize(0, 0);
         Point2D parent = node.localToParent(node.getLayoutX() + size.getWidth() / 2,
             node.getLayoutY() + size.getHeight() / 2);
@@ -87,11 +78,11 @@ public class VoltageLevelHandler implements BaseNode {
     }
 
     public double getX() {
-        return getCoordinates().getX();
+        return getDiagramCoordinates().getX();
     }
 
     public double getY() {
-        return getCoordinates().getY();
+        return getDiagramCoordinates().getY();
     }
 
     public void addNodeHandlers(List<NodeHandler> nodeHandlers) {
