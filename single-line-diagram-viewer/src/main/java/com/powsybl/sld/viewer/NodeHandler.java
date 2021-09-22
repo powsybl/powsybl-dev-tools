@@ -122,7 +122,7 @@ public class NodeHandler implements BaseNode {
     }
 
     @Override
-    public Point getCoordinates() {
+    public Point getDiagramCoordinates() {
         ComponentSize size = componentType != null
             ? metadata.getComponentMetadata(componentType).getSize()
             : new ComponentSize(0, 0);
@@ -136,11 +136,11 @@ public class NodeHandler implements BaseNode {
     }
 
     public double getX() {
-        return getCoordinates().getX();
+        return getDiagramCoordinates().getX();
     }
 
     public double getY() {
-        return getCoordinates().getY();
+        return getDiagramCoordinates().getY();
     }
 
     public void setDragAndDrop() {

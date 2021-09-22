@@ -684,13 +684,13 @@ public class SingleLineDiagramViewer extends Application implements DisplayVolta
         voltageLevelLayoutComboBox.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> setDiagramsNamesContent(networkProperty.get(), false));
         rowIndex += 1;
 
-        addSpinner("Horizontal substation padding:", 50, 300, 5, rowIndex, LayoutParameters::getHorizontalSubstationPadding, LayoutParameters::setHorizontalSubstationPadding);
+        addSpinner("Diagram padding top/bottom:", 0, 300, 5, rowIndex, lp -> lp.getDiagramPadding().getTop(), (lp, value) -> lp.setDiagrammPadding(lp.getDiagramPadding().getLeft(), value, lp.getDiagramPadding().getRight(), value));
         rowIndex += 2;
-        addSpinner("Vertical substation padding:", 50, 300, 5, rowIndex, LayoutParameters::getVerticalSubstationPadding, LayoutParameters::setVerticalSubstationPadding);
+        addSpinner("Diagram padding left/right:", 0, 300, 5, rowIndex, lp -> lp.getDiagramPadding().getLeft(), (lp, value) -> lp.setDiagrammPadding(value, lp.getDiagramPadding().getTop(), value, lp.getDiagramPadding().getBottom()));
         rowIndex += 2;
-        addSpinner("Initial busbar X:", 0, 100, 5, rowIndex, LayoutParameters::getInitialXBus, LayoutParameters::setInitialXBus);
+        addSpinner("Voltage padding top/bottom:", 0, 300, 5, rowIndex, lp -> lp.getVoltageLevelPadding().getTop(), (lp, value) -> lp.setVoltageLevelPadding(lp.getVoltageLevelPadding().getLeft(), value, lp.getVoltageLevelPadding().getRight(), value));
         rowIndex += 2;
-        addSpinner("Initial busbar Y:", 0, 500, 5, rowIndex, LayoutParameters::getInitialYBus, LayoutParameters::setInitialYBus);
+        addSpinner("Voltage padding left/right:", 0, 300, 5, rowIndex, lp -> lp.getVoltageLevelPadding().getLeft(), (lp, value) -> lp.setVoltageLevelPadding(value, lp.getVoltageLevelPadding().getTop(), value, lp.getVoltageLevelPadding().getBottom()));
         rowIndex += 2;
         addSpinner("Busbar vertical space:", 10, 100, 5, rowIndex, LayoutParameters::getVerticalSpaceBus, LayoutParameters::setVerticalSpaceBus);
         rowIndex += 2;
