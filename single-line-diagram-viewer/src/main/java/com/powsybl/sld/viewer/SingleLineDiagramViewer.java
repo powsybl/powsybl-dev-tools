@@ -738,6 +738,8 @@ public class SingleLineDiagramViewer extends Application implements DisplayVolta
         rowIndex += 2;
         addCheckBox("Center label:", rowIndex, LayoutParameters::isLabelCentered, LayoutParameters::setLabelCentered);
         rowIndex += 2;
+        addCheckBox("Label diagonal:", rowIndex, LayoutParameters::isLabelDiagonal, LayoutParameters::setLabelDiagonal);
+        rowIndex += 2;
         addSpinner("Angle Label:", -360, 360, 1, rowIndex, LayoutParameters::getAngleLabelShift, LayoutParameters::setAngleLabelShift);
 
         rowIndex += 2;
