@@ -307,7 +307,7 @@ public class SingleLineDiagramViewer extends Application implements DisplayVolta
             Switch sw = null;
             if (c.getContainerType() == ContainerType.VOLTAGE_LEVEL) {
                 VoltageLevel v = (VoltageLevel) c;
-                sw = v.getSubstation().getNetwork().getSwitch(switchId);
+                sw = v.getNetwork().getSwitch(switchId);
             } else if (c.getContainerType() == ContainerType.SUBSTATION) {
                 Substation s = (Substation) c;
                 sw = s.getNetwork().getSwitch(switchId);
