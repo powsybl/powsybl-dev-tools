@@ -22,7 +22,7 @@ By participating, you are expected to uphold this code. Please report unacceptab
 
 ## PowSyBl vs PowSyBl Dev Tools
 
-PowSyBl Dev Tools are components meant for debugging various PowSyBl components - in particular for [PowSyBl Single Line Diagram](https://github.com/powsybl/powsybl-single-line-diagram).
+PowSyBl Dev Tools are components meant solely for debugging various PowSyBl components - in particular for [PowSyBl Single Line Diagram](https://github.com/powsybl/powsybl-single-line-diagram).
 
 ## PowSyBl single-line-diagram-viewer Dev Tool
 Not to be confused with JavaScript viewer [powsybl-single-line-diagram-viewer](https://github.com/powsybl/powsybl-single-line-diagram-viewer)!
