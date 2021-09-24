@@ -35,3 +35,7 @@ PowSyBl single-line-diagram-viewer Dev Tool is a JavaFX basic viewer used to dis
   ```
   --module-path /path/to/openjfx/lib --add-modules=javafx.controls
   ```  
+- Select the file you want to import in the viewer
+- Once the file is imported, select the substation or the voltage level you want to display; you should obtain something similar to the following screenshot:
+
+![Viewer screenshot](.github/screenshot.png)
