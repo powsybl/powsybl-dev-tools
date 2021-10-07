@@ -6,7 +6,6 @@
  */
 package com.powsybl.sld.viewer;
 
-import afester.javafx.svg.SvgLoader;
 import com.powsybl.commons.PowsyblException;
 import com.powsybl.sld.svg.GraphMetadata;
 import javafx.scene.Group;
@@ -14,6 +13,7 @@ import javafx.scene.Node;
 import javafx.scene.input.MouseButton;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.shape.Polyline;
+import javafx.scene.web.WebView;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,15 +27,16 @@ import static com.powsybl.sld.library.ComponentTypeName.*;
 
 /**
  * @author Franck Lecuyer <franck.lecuyer at rte-france.com>
+ *     FIXME: delete this class as now it is a webview, hence moving static methods used
  */
-public abstract class AbstractContainerDiagramView extends BorderPane {
-    private static final Logger LOGGER = LoggerFactory.getLogger(AbstractContainerDiagramView.class);
+public abstract class ContainerDiagramView extends BorderPane {
+    private static final Logger LOGGER = LoggerFactory.getLogger(ContainerDiagramView.class);
 
     private double pressedX;
     private double pressedY;
     private final Group svgImage;
 
-    protected AbstractContainerDiagramView(Group svgImage) {
+    protected ContainerDiagramView(Group svgImage) {
         super(svgImage);
         this.svgImage = svgImage;
 
@@ -206,26 +207,24 @@ public abstract class AbstractContainerDiagramView extends BorderPane {
         vlHandlers.values().forEach(v -> v.addNodeHandlers(new ArrayList<>(nodeHandlers.values())));
     }
 
-    protected static Group loadSvgAndMetadata(InputStream svgInputStream,
+    protected static void loadSvgAndMetadata(WebView diagramView, String svgInputStream,
                                               InputStream metadataInputStream,
                                               SwitchPositionChangeListener listener,
                                               DisplayVoltageLevel displayVL) {
         // convert svg file to JavaFX components
-        Group svgImage = null;
         try {
-            svgImage = new SvgLoader().loadSvg(svgInputStream);
+            diagramView.getEngine().loadContent(svgInputStream);
 
             // load metadata
             GraphMetadata metadata = GraphMetadata.parseJson(metadataInputStream);
 
             // install node and wire handlers to allow diagram edition
-            installHandlers(svgImage, metadata, listener, displayVL);
+//            installHandlers(svgImage, metadata, listener, displayVL);  FIXME: add handlers with js
         } catch (Exception e) {
             // to feed the content of the 'SVG' and 'Metadata' tab, even if the
             // svg diagram cannot be loaded by svg loader, or if the handlers cannot be installed
             LOGGER.warn("Error in loading svg image or installing handlers : {}", e.getMessage());
         }
 
-        return svgImage;
     }
 }

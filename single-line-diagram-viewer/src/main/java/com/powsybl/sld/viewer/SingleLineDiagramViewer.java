@@ -47,8 +47,7 @@ import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.CheckBoxTreeCell;
 import javafx.scene.layout.*;
-import javafx.scene.text.Font;
-import javafx.scene.text.Text;
+import javafx.scene.web.WebView;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javafx.util.StringConverter;
@@ -118,7 +117,7 @@ public class SingleLineDiagramViewer extends Application implements DisplayVolta
             .setShowGrid(true)
             .setAdaptCellHeightToContent(true));
 
-    protected final Preferences preferences = Preferences.userNodeForPackage(VoltageLevelDiagramView.class);
+    protected final Preferences preferences = Preferences.userNodeForPackage(SingleLineDiagramViewer.class);
 
     private final ObjectMapper objectMapper = JsonUtil.createObjectMapper();
 
@@ -201,23 +200,16 @@ public class SingleLineDiagramViewer extends Application implements DisplayVolta
 
         class ContainerDiagramResult {
 
-            private final AbstractContainerDiagramView view;
-
             private final String svgData;
 
             private final String metadataData;
 
             private final String jsonData;
 
-            ContainerDiagramResult(AbstractContainerDiagramView view, String svgData, String metadataData, String jsonData) {
-                this.view = view;
+            ContainerDiagramResult(String svgData, String metadataData, String jsonData) {
                 this.svgData = svgData;
                 this.metadataData = metadataData;
                 this.jsonData = jsonData;
-            }
-
-            AbstractContainerDiagramView getView() {
-                return view;
             }
 
             String getSvgData() {
@@ -241,7 +233,7 @@ public class SingleLineDiagramViewer extends Application implements DisplayVolta
             return diagramNamesComboBox.getSelectionModel().getSelectedItem();
         }
 
-        private ContainerDiagramResult createContainerDiagramView(Container c) {
+        private ContainerDiagramResult createContainerDiagramView(WebView diagramView, Container c) {
             String svgData;
             String metadataData;
             String jsonData;
@@ -279,28 +271,19 @@ public class SingleLineDiagramViewer extends Application implements DisplayVolta
 
                 svgWriter.flush();
                 metadataWriter.flush();
-                svgData = svgWriter.toString()
-                    .replace("visibility: hidden", "stroke-opacity:0; fill-opacity:0;"); // visibility not supported by afester library
+                svgData = svgWriter.toString();
                 metadataData = metadataWriter.toString();
                 jsonData = jsonWriter.toString();
             } catch (IOException e) {
                 throw new UncheckedIOException(e);
             }
 
-            AbstractContainerDiagramView diagramView = null;
-            try (InputStream svgInputStream = new ByteArrayInputStream(svgData.getBytes(StandardCharsets.UTF_8));
-                 InputStream metadataInputStream = new ByteArrayInputStream(metadataData.getBytes(StandardCharsets.UTF_8))) {
-                if (c.getContainerType() == ContainerType.VOLTAGE_LEVEL) {
-                    diagramView = VoltageLevelDiagramView.load(svgInputStream, metadataInputStream, switchId -> handleSwitchPositionchange(c, switchId), SingleLineDiagramViewer.this);
-                } else if (c.getContainerType() == ContainerType.SUBSTATION) {
-                    diagramView = SubstationDiagramView.load(svgInputStream, metadataInputStream, switchId -> handleSwitchPositionchange(c, switchId), SingleLineDiagramViewer.this);
-                } else {
-                    throw new AssertionError();
-                }
+            try (InputStream metadataInputStream = new ByteArrayInputStream(metadataData.getBytes(StandardCharsets.UTF_8))) {
+                ContainerDiagramView.loadSvgAndMetadata(diagramView, svgData, metadataInputStream, switchId -> handleSwitchPositionchange(c, switchId), SingleLineDiagramViewer.this);
             } catch (IOException e) {
                 throw new UncheckedIOException(e);
             }
-            return new ContainerDiagramResult(diagramView, svgData, metadataData, jsonData);
+            return new ContainerDiagramResult(svgData, metadataData, jsonData);
         }
 
         private void handleSwitchPositionchange(Container c, String switchId) {
@@ -321,39 +304,12 @@ public class SingleLineDiagramViewer extends Application implements DisplayVolta
         }
 
         private void loadDiagram(Container c) {
-            Service<ContainerDiagramResult> loader = new Service<ContainerDiagramResult>() {
-                @Override
-                protected Task<ContainerDiagramResult> createTask() {
-                    return new Task<ContainerDiagramResult>() {
-                        @Override
-                        protected ContainerDiagramResult call() {
-                            return createContainerDiagramView(c);
-                        }
-                    };
-                }
-            };
-            loader.setOnScheduled(event -> {
-                Text loading = new Text("Loading...");
-                loading.setFont(Font.font(30));
-                flowPane.setContent(loading);
-                svgTextArea.setText("");
-                metadataTextArea.setText("");
-                jsonTextArea.setText("");
-            });
-            loader.setOnSucceeded(event -> {
-                ContainerDiagramResult result = (ContainerDiagramResult) event.getSource().getValue();
-                if (result.getView() != null) {
-                    flowPane.setContent(result.getView());
-                }
-                svgTextArea.setText(result.getSvgData());
-                metadataTextArea.setText(result.getMetadataData());
-                jsonTextArea.setText(result.getJsonData());
-            });
-            loader.setOnFailed(event -> {
-                Throwable e = event.getSource().getException();
-                LOGGER.error(e.toString(), e);
-            });
-            loader.start();
+            WebView diagramView = new WebView();
+            ContainerDiagramResult result = createContainerDiagramView(diagramView, c);
+            flowPane.setContent(diagramView);
+            svgTextArea.setText(result.getSvgData());
+            metadataTextArea.setText(result.getMetadataData());
+            jsonTextArea.setText(result.getJsonData());
         }
 
         private ComponentLibrary getComponentLibrary() {
@@ -637,7 +593,7 @@ public class SingleLineDiagramViewer extends Application implements DisplayVolta
                     pane = (ContainerDiagramPane) selectedDiagramPane.getCenter();
                 }
                 if (pane != null) {
-                    ((AbstractContainerDiagramView) pane.getFlowPane().getContent()).fitToContent(
+                    ((ContainerDiagramView) pane.getFlowPane().getContent()).fitToContent(
                             pane.getFlowPane().getViewportBounds().getWidth(), 20.,
                             pane.getFlowPane().getViewportBounds().getHeight(), 20.);
                     pane.getFlowPane().setHvalue(pane.getFlowPane().getHmin());

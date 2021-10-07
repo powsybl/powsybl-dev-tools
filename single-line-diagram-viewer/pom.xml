@@ -30,7 +30,7 @@
         <java.version>11</java.version>
 
         <franzxaver.version>0.1</franzxaver.version>
-        <javafx.version>11.0.2</javafx.version>
+        <javafx.version>17</javafx.version>
         <slf4j.version>1.7.22</slf4j.version>
         <junit.version>4.13.1</junit.version>
 
@@ -52,21 +52,13 @@
 
     <dependencies>
         <dependency>
-            <groupId>com.github.afester.javafx</groupId>
-            <artifactId>FranzXaver</artifactId>
-            <version>${franzxaver.version}</version>
-            <exclusions>
-                <!-- The Xalan version from FranzXaver does not support http://javax.xml.XMLConstants/property/accessExternalDTD
-                 but JDK internal does -->
-                <exclusion>
-                    <groupId>xalan</groupId>
-                    <artifactId>xalan</artifactId>
-                </exclusion>
-            </exclusions>
+            <groupId>org.openjfx</groupId>
+            <artifactId>javafx-controls</artifactId>
+            <version>${javafx.version}</version>
         </dependency>
         <dependency>
             <groupId>org.openjfx</groupId>
-            <artifactId>javafx-controls</artifactId>
+            <artifactId>javafx-web</artifactId>
             <version>${javafx.version}</version>
         </dependency>
 
