@@ -97,9 +97,9 @@ public class WireHandler {
     }
 
     private void relocateArrow(Polyline polyline, Group arrow, int arrowNum) {
-        ComponentSize arrowSize = metadata.getComponentMetadata(ARROW).getSize();
+        ComponentSize arrowSize = metadata.getComponentMetadata(ARROW_ACTIVE).getSize();
         Point2D center = new Point2D(arrowSize.getWidth() / 2, arrowSize.getHeight() / 2);
-        double distance = metadata.getArrowMetadata(arrow.getId()).getDistance() + arrowNum * arrowSize.getHeight() * 2;
+        double distance = metadata.getFeederInfoMetadata(arrow.getId()).getDistance() + arrowNum * arrowSize.getHeight() * 2;
         relocateArrow(polyline, arrow, center, distance);
     }
 

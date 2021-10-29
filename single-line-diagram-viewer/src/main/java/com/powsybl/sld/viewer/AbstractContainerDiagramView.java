@@ -155,9 +155,9 @@ public abstract class AbstractContainerDiagramView extends BorderPane {
             if (wireMetadata != null) {
                 installWireHandlers(node, metadata, wireMetadata, nodeHandlers, wireHandlers);
             }
-            GraphMetadata.ArrowMetadata arrowMetadata = metadata.getArrowMetadata(node.getId());
+            GraphMetadata.FeederInfoMetadata arrowMetadata = metadata.getFeederInfoMetadata(node.getId());
             if (arrowMetadata != null) {
-                WireHandler wireHandler = wireHandlers.get(arrowMetadata.getWireId());
+                WireHandler wireHandler = wireHandlers.get(arrowMetadata.getFeederNodeId());
                 wireHandler.addArrow((Group) node);
             }
         }
