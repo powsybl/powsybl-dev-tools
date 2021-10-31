@@ -19,13 +19,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.stream.Collectors;
 
-import static com.powsybl.sld.library.ComponentTypeName.BREAKER;
-import static com.powsybl.sld.library.ComponentTypeName.DISCONNECTOR;
-import static com.powsybl.sld.library.ComponentTypeName.LOAD_BREAK_SWITCH;
+import static com.powsybl.sld.library.ComponentTypeName.*;
 
 /**
  * @author Franck Lecuyer <franck.lecuyer at rte-france.com>
@@ -70,11 +68,8 @@ public abstract class AbstractContainerDiagramView extends BorderPane {
 
     private void registerEvents() {
         setOnScroll(event -> {
-            double zoomFactor = 1.05;
             double deltaY = event.getDeltaY();
-            if (deltaY < 0) {
-                zoomFactor = 2.0 - zoomFactor;
-            }
+            double zoomFactor = deltaY < 0 ? 0.9 : 1.05;
             svgImage.setScaleX(svgImage.getScaleX() * zoomFactor);
             svgImage.setScaleY(svgImage.getScaleY() * zoomFactor);
 
@@ -160,9 +155,9 @@ public abstract class AbstractContainerDiagramView extends BorderPane {
             if (wireMetadata != null) {
                 installWireHandlers(node, metadata, wireMetadata, nodeHandlers, wireHandlers);
             }
-            GraphMetadata.ArrowMetadata arrowMetadata = metadata.getArrowMetadata(node.getId());
+            GraphMetadata.FeederInfoMetadata arrowMetadata = metadata.getFeederInfoMetadata(node.getId());
             if (arrowMetadata != null) {
-                WireHandler wireHandler = wireHandlers.get(arrowMetadata.getWireId());
+                WireHandler wireHandler = wireHandlers.get(arrowMetadata.getFeederNodeId());
                 wireHandler.addArrow((Group) node);
             }
         }
@@ -182,7 +177,8 @@ public abstract class AbstractContainerDiagramView extends BorderPane {
         if (nodeHandler2 == null) {
             throw new PowsyblException("Node 2 " + wireMetadata.getNodeId2() + " not found");
         }
-        WireHandler wireHandler = new WireHandler((Polyline) node, nodeHandler1, nodeHandler2, wireMetadata.isStraight(),
+        Polyline polyline = (Polyline) ((Group) node).getChildren().get(0);
+        WireHandler wireHandler = new WireHandler(polyline, nodeHandler1, nodeHandler2, wireMetadata.isStraight(),
                 wireMetadata.isSnakeLine(), metadata);
         LOGGER.trace(" Added handler to wire between {} and {}", wireMetadata.getNodeId1(), wireMetadata.getNodeId2());
         wireHandlers.put(node.getId(), wireHandler);
@@ -207,7 +203,7 @@ public abstract class AbstractContainerDiagramView extends BorderPane {
         }
 
         // resolve voltageLevel handler
-        vlHandlers.values().forEach(v -> v.addNodeHandlers(nodeHandlers.values().stream().collect(Collectors.toList())));
+        vlHandlers.values().forEach(v -> v.addNodeHandlers(new ArrayList<>(nodeHandlers.values())));
     }
 
     protected static Group loadSvgAndMetadata(InputStream svgInputStream,

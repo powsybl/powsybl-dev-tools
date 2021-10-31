@@ -134,6 +134,8 @@ public class SingleLineDiagramViewer extends Application implements DisplayVolta
 
     private final CheckBox hideSubstations = new CheckBox("Hide substations");
 
+    private final CheckBox hideVoltageLevels = new CheckBox("Hide voltage levels");
+
     private final ComboBox<String> diagramNamesComboBox = new ComboBox<>();
 
     private class ContainerDiagramPane extends BorderPane {
@@ -305,7 +307,7 @@ public class SingleLineDiagramViewer extends Application implements DisplayVolta
             Switch sw = null;
             if (c.getContainerType() == ContainerType.VOLTAGE_LEVEL) {
                 VoltageLevel v = (VoltageLevel) c;
-                sw = v.getSubstation().getNetwork().getSwitch(switchId);
+                sw = v.getNetwork().getSwitch(switchId);
             } else if (c.getContainerType() == ContainerType.SUBSTATION) {
                 Substation s = (Substation) c;
                 sw = s.getNetwork().getSwitch(switchId);
@@ -682,13 +684,13 @@ public class SingleLineDiagramViewer extends Application implements DisplayVolta
         voltageLevelLayoutComboBox.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> setDiagramsNamesContent(networkProperty.get(), false));
         rowIndex += 1;
 
-        addSpinner("Horizontal substation padding:", 50, 300, 5, rowIndex, LayoutParameters::getHorizontalSubstationPadding, LayoutParameters::setHorizontalSubstationPadding);
+        addSpinner("Diagram padding top/bottom:", 0, 300, 5, rowIndex, lp -> lp.getDiagramPadding().getTop(), (lp, value) -> lp.setDiagrammPadding(lp.getDiagramPadding().getLeft(), value, lp.getDiagramPadding().getRight(), value));
         rowIndex += 2;
-        addSpinner("Vertical substation padding:", 50, 300, 5, rowIndex, LayoutParameters::getVerticalSubstationPadding, LayoutParameters::setVerticalSubstationPadding);
+        addSpinner("Diagram padding left/right:", 0, 300, 5, rowIndex, lp -> lp.getDiagramPadding().getLeft(), (lp, value) -> lp.setDiagrammPadding(value, lp.getDiagramPadding().getTop(), value, lp.getDiagramPadding().getBottom()));
         rowIndex += 2;
-        addSpinner("Initial busbar X:", 0, 100, 5, rowIndex, LayoutParameters::getInitialXBus, LayoutParameters::setInitialXBus);
+        addSpinner("Voltage padding top/bottom:", 0, 300, 5, rowIndex, lp -> lp.getVoltageLevelPadding().getTop(), (lp, value) -> lp.setVoltageLevelPadding(lp.getVoltageLevelPadding().getLeft(), value, lp.getVoltageLevelPadding().getRight(), value));
         rowIndex += 2;
-        addSpinner("Initial busbar Y:", 0, 500, 5, rowIndex, LayoutParameters::getInitialYBus, LayoutParameters::setInitialYBus);
+        addSpinner("Voltage padding left/right:", 0, 300, 5, rowIndex, lp -> lp.getVoltageLevelPadding().getLeft(), (lp, value) -> lp.setVoltageLevelPadding(value, lp.getVoltageLevelPadding().getTop(), value, lp.getVoltageLevelPadding().getBottom()));
         rowIndex += 2;
         addSpinner("Busbar vertical space:", 10, 100, 5, rowIndex, LayoutParameters::getVerticalSpaceBus, LayoutParameters::setVerticalSpaceBus);
         rowIndex += 2;
@@ -735,6 +737,8 @@ public class SingleLineDiagramViewer extends Application implements DisplayVolta
 
         rowIndex += 2;
         addCheckBox("Center label:", rowIndex, LayoutParameters::isLabelCentered, LayoutParameters::setLabelCentered);
+        rowIndex += 2;
+        addCheckBox("Label diagonal:", rowIndex, LayoutParameters::isLabelDiagonal, LayoutParameters::setLabelDiagonal);
         rowIndex += 2;
         addSpinner("Angle Label:", -360, 360, 1, rowIndex, LayoutParameters::getAngleLabelShift, LayoutParameters::setAngleLabelShift);
 
@@ -813,7 +817,7 @@ public class SingleLineDiagramViewer extends Application implements DisplayVolta
                 @Override
                 public String toString(TreeItem<Container> c) {
                     if (c.getValue() != null) {
-                        return showNames.isSelected() ? c.getValue().getName() : c.getValue().getId();
+                        return getString(c.getValue());
                     } else {
                         return "";
                     }
@@ -827,6 +831,15 @@ public class SingleLineDiagramViewer extends Application implements DisplayVolta
             treeCell.setConverter(strConvert);
             return treeCell;
         });
+    }
+
+    private String getString(Container<?> value) {
+        String cNameOrId = showNames.isSelected() ? value.getNameOrId() : value.getId();
+        if (value instanceof Substation && hideVoltageLevels.isSelected()) {
+            long nbVoltageLevels = ((Substation) value).getVoltageLevelStream().count();
+            return cNameOrId + " [" + nbVoltageLevels + "]";
+        }
+        return cNameOrId;
     }
 
     @Override
@@ -843,6 +856,11 @@ public class SingleLineDiagramViewer extends Application implements DisplayVolta
         });
 
         hideSubstations.selectedProperty().addListener((observable, oldValue, newValue) -> {
+            initSubstationsTree();
+            substationsTree.refresh();
+        });
+
+        hideVoltageLevels.selectedProperty().addListener((observable, oldValue, newValue) -> {
             initSubstationsTree();
             substationsTree.refresh();
         });
@@ -881,8 +899,9 @@ public class SingleLineDiagramViewer extends Application implements DisplayVolta
         voltageLevelToolBar.setPadding(new Insets(5, 5, 5, 5));
         voltageLevelToolBar.add(showNames, 0, 0, 2, 1);
         voltageLevelToolBar.add(hideSubstations, 0, 1, 2, 1);
-        voltageLevelToolBar.add(filterLabel, 0, 2);
-        voltageLevelToolBar.add(filterInput, 1, 2);
+        voltageLevelToolBar.add(hideVoltageLevels, 0, 2, 2, 1);
+        voltageLevelToolBar.add(filterLabel, 0, 3);
+        voltageLevelToolBar.add(filterInput, 1, 3);
         ColumnConstraints c0 = new ColumnConstraints();
         ColumnConstraints c1 = new ColumnConstraints();
         c1.setHgrow(Priority.ALWAYS);
@@ -1002,7 +1021,7 @@ public class SingleLineDiagramViewer extends Application implements DisplayVolta
      */
     private void checkVoltageLevel(VoltageLevel v, Boolean checked) {
         selectableVoltageLevels.stream()
-                .filter(selectableVoltageLevel -> selectableVoltageLevel.getIdOrName().equals(showNames.isSelected() ? v.getName() : v.getId()))
+                .filter(selectableVoltageLevel -> selectableVoltageLevel.getId().equals(v.getId()))
                 .forEach(selectableVoltageLevel -> selectableVoltageLevel.setCheckedProperty(checked));
     }
 
@@ -1011,7 +1030,7 @@ public class SingleLineDiagramViewer extends Application implements DisplayVolta
      */
     private void checkSubstation(Substation s, Boolean checked) {
         selectableSubstations.stream()
-                .filter(selectableSubstation -> selectableSubstation.getIdOrName().equals(showNames.isSelected() ? s.getName() : s.getId()))
+                .filter(selectableSubstation -> selectableSubstation.getId().equals(s.getId()))
                 .forEach(selectableSubstation -> selectableSubstation.setCheckedProperty(checked));
     }
 
@@ -1029,12 +1048,6 @@ public class SingleLineDiagramViewer extends Application implements DisplayVolta
                 continue;
             }
 
-            CheckBoxTreeItem<Container> vItem = new CheckBoxTreeItem<>(v);
-            vItem.setIndependent(true);
-            if (mapVoltageLevels.containsKey(v.getId()) && mapVoltageLevels.get(v.getId()).checkedProperty().get()) {
-                vItem.setSelected(true);
-            }
-
             if (firstVL && !hideSubstations.isSelected()) {
                 sItem = new CheckBoxTreeItem<>(s);
                 sItem.setIndependent(true);
@@ -1050,14 +1063,22 @@ public class SingleLineDiagramViewer extends Application implements DisplayVolta
 
             firstVL = false;
 
-            if (sItem != null) {
-                sItem.getChildren().add(vItem);
-            } else {
-                rootItem.getChildren().add(vItem);
+            if (!hideVoltageLevels.isSelected()) {
+                CheckBoxTreeItem<Container> vItem = new CheckBoxTreeItem<>(v);
+                vItem.setIndependent(true);
+                if (mapVoltageLevels.containsKey(v.getId()) && mapVoltageLevels.get(v.getId()).checkedProperty().get()) {
+                    vItem.setSelected(true);
+                }
+                if (sItem != null) {
+                    sItem.getChildren().add(vItem);
+                } else {
+                    rootItem.getChildren().add(vItem);
+                }
+
+                vItem.selectedProperty().addListener((obs, oldVal, newVal) ->
+                    checkVoltageLevel(v, newVal));
             }
 
-            vItem.selectedProperty().addListener((obs, oldVal, newVal) ->
-                    checkVoltageLevel(v, newVal));
         }
     }
 
