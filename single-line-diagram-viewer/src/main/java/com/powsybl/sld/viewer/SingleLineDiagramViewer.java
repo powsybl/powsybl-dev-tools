@@ -46,6 +46,7 @@ import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.CheckBoxTreeCell;
+import javafx.scene.input.ScrollEvent;
 import javafx.scene.layout.*;
 import javafx.scene.web.WebView;
 import javafx.stage.FileChooser;
@@ -279,11 +280,31 @@ public class SingleLineDiagramViewer extends Application implements DisplayVolta
             }
 
             try (InputStream metadataInputStream = new ByteArrayInputStream(metadataData.getBytes(StandardCharsets.UTF_8))) {
-                ContainerDiagramView.loadSvgAndMetadata(diagramView, svgData, metadataInputStream, switchId -> handleSwitchPositionchange(c, switchId), SingleLineDiagramViewer.this);
+                loadSvgAndMetadata(diagramView, svgData, metadataInputStream, switchId -> handleSwitchPositionchange(c, switchId), SingleLineDiagramViewer.this);
             } catch (IOException e) {
                 throw new UncheckedIOException(e);
             }
             return new ContainerDiagramResult(svgData, metadataData, jsonData);
+        }
+
+        protected void loadSvgAndMetadata(WebView diagramView, String svgInputStream,
+                                                 InputStream metadataInputStream,
+                                                 SwitchPositionChangeListener listener,
+                                                 DisplayVoltageLevel displayVL) {
+            // convert svg file to WebView components
+            try {
+                diagramView.getEngine().loadContent(svgInputStream);
+
+                // load metadata
+                GraphMetadata metadata = GraphMetadata.parseJson(metadataInputStream);
+
+                // install node and wire handlers to allow diagram edition
+                // installHandlers(svgImage, metadata, listener, displayVL);  FIXME: add handlers with js
+            } catch (Exception e) {
+                // to feed the content of the 'SVG' and 'Metadata' tab, even if the
+                // svg diagram cannot be loaded by svg loader, or if the handlers cannot be installed
+                LOGGER.warn("Error in loading svg image or installing handlers : {}", e.getMessage());
+            }
         }
 
         private void handleSwitchPositionchange(Container c, String switchId) {
@@ -307,6 +328,19 @@ public class SingleLineDiagramViewer extends Application implements DisplayVolta
             WebView diagramView = new WebView();
             ContainerDiagramResult result = createContainerDiagramView(diagramView, c);
             flowPane.setContent(diagramView);
+
+            // Add Zoom management
+            diagramView.addEventFilter(ScrollEvent.SCROLL, (ScrollEvent e) -> {
+                double deltaY = e.getDeltaY();
+                if (deltaY > 0) {
+                    diagramView.setZoom(Math.max(0.1, diagramView.getZoom() - 1));
+                    e.consume();
+                } else if (deltaY < 0) {
+                    diagramView.setZoom(Math.min(100, diagramView.getZoom() + 1));
+                    e.consume();
+                }
+            });
+
             svgTextArea.setText(result.getSvgData());
             metadataTextArea.setText(result.getMetadataData());
             jsonTextArea.setText(result.getJsonData());
@@ -593,9 +627,11 @@ public class SingleLineDiagramViewer extends Application implements DisplayVolta
                     pane = (ContainerDiagramPane) selectedDiagramPane.getCenter();
                 }
                 if (pane != null) {
-                    ((ContainerDiagramView) pane.getFlowPane().getContent()).fitToContent(
-                            pane.getFlowPane().getViewportBounds().getWidth(), 20.,
-                            pane.getFlowPane().getViewportBounds().getHeight(), 20.);
+                    // FIXME : fit to content need to be implemented
+                    // ((WebView) pane.getFlowPane().getContent()).getEngine().reload();
+                    //fitToContent(
+                    //        pane.getFlowPane().getViewportBounds().getWidth(), 20.,
+                    //        pane.getFlowPane().getViewportBounds().getHeight(), 20.);
                     pane.getFlowPane().setHvalue(pane.getFlowPane().getHmin());
                     pane.getFlowPane().setVvalue(pane.getFlowPane().getVmin());
                 }
