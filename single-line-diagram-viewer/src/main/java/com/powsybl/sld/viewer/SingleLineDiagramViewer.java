@@ -140,7 +140,6 @@ public class SingleLineDiagramViewer extends Application implements DisplayVolta
 
     private class ContainerDiagramPane extends BorderPane {
         private final String divId = UUID.randomUUID().toString();
-        private final double minZoom = 0.1;
 
         private final ScrollPane flowPane = new ScrollPane();
 
@@ -312,11 +311,6 @@ public class SingleLineDiagramViewer extends Application implements DisplayVolta
 
         public void loadContent(WebView diagramView, String svgInputStream) {
             String b = "<html>" +
-                "<head>" +
-                "<script>" +
-                "function noScroll(){window.scrollTo(0,0);}window.addEventListener('scroll', noScroll);" +
-                "</script>" +
-                "</head>" +
                     String.format("<body><div id='%1$s'>", divId) +
                     svgInputStream +
                     "</div></body></html>";
@@ -343,6 +337,7 @@ public class SingleLineDiagramViewer extends Application implements DisplayVolta
 
         private void loadDiagram(Container c) {
             WebView diagramView = new WebView();
+            diagramView.setZoom(1.0);
             ContainerDiagramResult result = createContainerDiagramView(diagramView, c);
             flowPane.setContent(diagramView);
             // Adjust size to content
@@ -352,13 +347,14 @@ public class SingleLineDiagramViewer extends Application implements DisplayVolta
             // Add Zoom management
             diagramView.addEventFilter(ScrollEvent.SCROLL, (ScrollEvent e) -> {
                 double deltaY = e.getDeltaY();
-                if (deltaY > 0) {
-                    diagramView.setZoom(Math.max(minZoom, diagramView.getZoom() - 1));
-                    e.consume();
-                } else if (deltaY < 0) {
-                    diagramView.setZoom(Math.min(100, diagramView.getZoom() + 1));
-                    e.consume();
+                double zoom = diagramView.getZoom();
+                zoom = (deltaY > 0) ? (zoom - 1) : (zoom + 1);
+                // Avoid to hide SVG when zoom == 0.0
+                if (zoom == 0.0) {
+                    zoom = (deltaY > 0) ? -1 : 1;
                 }
+                diagramView.setZoom(zoom);
+                e.consume();
             });
 
             svgTextArea.setText(result.getSvgData());
@@ -634,6 +630,10 @@ public class SingleLineDiagramViewer extends Application implements DisplayVolta
 
         int rowIndex = 0;
 
+        Button fitToContent = new Button("Fit to content");
+        // FIXME : not implemented
+        fitToContent.setDisable(true);
+
         Button resetZoom = new Button("Reset zoom");
         resetZoom.setOnAction(event -> {
             ContainerDiagramPane pane = null;
@@ -647,12 +647,13 @@ public class SingleLineDiagramViewer extends Application implements DisplayVolta
                     pane = (ContainerDiagramPane) selectedDiagramPane.getCenter();
                 }
                 if (pane != null) {
-                    ((WebView) pane.getFlowPane().getContent()).setZoom(pane.minZoom);
+                    ((WebView) pane.getFlowPane().getContent()).setZoom(1.0); // 100%
                 }
             }
         });
-
-        parametersPane.add(resetZoom, 0, rowIndex++);
+        FlowPane buttonsPane = new FlowPane(fitToContent, resetZoom);
+        buttonsPane.setHgap(10);
+        parametersPane.add(buttonsPane, 0, rowIndex++);
 
         // svg library list
         svgLibraryComboBox.getItems().addAll(svgLibraries.keySet());
