@@ -139,6 +139,9 @@ public class SingleLineDiagramViewer extends Application implements DisplayVolta
     private final ComboBox<String> diagramNamesComboBox = new ComboBox<>();
 
     private class ContainerDiagramPane extends BorderPane {
+        private final String divId = UUID.randomUUID().toString();
+        private final double minZoom = 0.1;
+
         private final ScrollPane flowPane = new ScrollPane();
 
         private final TextArea infoArea = new TextArea();
@@ -293,7 +296,7 @@ public class SingleLineDiagramViewer extends Application implements DisplayVolta
                                                  DisplayVoltageLevel displayVL) {
             // convert svg file to WebView components
             try {
-                diagramView.getEngine().loadContent(svgInputStream);
+                loadContent(diagramView, svgInputStream);
 
                 // load metadata
                 GraphMetadata metadata = GraphMetadata.parseJson(metadataInputStream);
@@ -305,6 +308,20 @@ public class SingleLineDiagramViewer extends Application implements DisplayVolta
                 // svg diagram cannot be loaded by svg loader, or if the handlers cannot be installed
                 LOGGER.warn("Error in loading svg image or installing handlers : {}", e.getMessage());
             }
+        }
+
+        public void loadContent(WebView diagramView, String svgInputStream) {
+            String b = "<html>" +
+                "<head>" +
+                "<script>" +
+                "function noScroll(){window.scrollTo(0,0);}window.addEventListener('scroll', noScroll);" +
+                "</script>" +
+                "</head>" +
+                    String.format("<body><div id='%1$s'>", divId) +
+                    svgInputStream +
+                    "</div></body></html>";
+
+            diagramView.getEngine().loadContent(b);
         }
 
         private void handleSwitchPositionchange(Container c, String switchId) {
@@ -328,12 +345,15 @@ public class SingleLineDiagramViewer extends Application implements DisplayVolta
             WebView diagramView = new WebView();
             ContainerDiagramResult result = createContainerDiagramView(diagramView, c);
             flowPane.setContent(diagramView);
+            // Adjust size to content
+            diagramView.prefHeightProperty().bind(flowPane.heightProperty());
+            diagramView.prefWidthProperty().bind(flowPane.widthProperty());
 
             // Add Zoom management
             diagramView.addEventFilter(ScrollEvent.SCROLL, (ScrollEvent e) -> {
                 double deltaY = e.getDeltaY();
                 if (deltaY > 0) {
-                    diagramView.setZoom(Math.max(0.1, diagramView.getZoom() - 1));
+                    diagramView.setZoom(Math.max(minZoom, diagramView.getZoom() - 1));
                     e.consume();
                 } else if (deltaY < 0) {
                     diagramView.setZoom(Math.min(100, diagramView.getZoom() + 1));
@@ -614,8 +634,8 @@ public class SingleLineDiagramViewer extends Application implements DisplayVolta
 
         int rowIndex = 0;
 
-        Button fitToContent = new Button("Fit to content");
-        fitToContent.setOnAction(event -> {
+        Button resetZoom = new Button("Reset zoom");
+        resetZoom.setOnAction(event -> {
             ContainerDiagramPane pane = null;
             Tab tab = diagramsPane.getSelectionModel().getSelectedItem();
             if (tab != null) {
@@ -627,18 +647,12 @@ public class SingleLineDiagramViewer extends Application implements DisplayVolta
                     pane = (ContainerDiagramPane) selectedDiagramPane.getCenter();
                 }
                 if (pane != null) {
-                    // FIXME : fit to content need to be implemented
-                    // ((WebView) pane.getFlowPane().getContent()).getEngine().reload();
-                    //fitToContent(
-                    //        pane.getFlowPane().getViewportBounds().getWidth(), 20.,
-                    //        pane.getFlowPane().getViewportBounds().getHeight(), 20.);
-                    pane.getFlowPane().setHvalue(pane.getFlowPane().getHmin());
-                    pane.getFlowPane().setVvalue(pane.getFlowPane().getVmin());
+                    ((WebView) pane.getFlowPane().getContent()).setZoom(pane.minZoom);
                 }
             }
         });
 
-        parametersPane.add(fitToContent, 0, rowIndex++);
+        parametersPane.add(resetZoom, 0, rowIndex++);
 
         // svg library list
         svgLibraryComboBox.getItems().addAll(svgLibraries.keySet());
