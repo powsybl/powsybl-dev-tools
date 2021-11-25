@@ -57,7 +57,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.*;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
@@ -86,11 +85,11 @@ public class SingleLineDiagramViewer extends Application implements DisplayVolta
     private static final String SELECTED_SUBSTATION_IDS_PROPERTY = "selectedSubstationIds";
     private static final String CASE_PATH_PROPERTY = "casePath";
 
-    private Map<String, VoltageLevelLayoutFactory> voltageLevelsLayouts = new LinkedHashMap<>();
+    private final Map<String, VoltageLevelLayoutFactory> voltageLevelsLayouts = new LinkedHashMap<>();
 
-    private Map<String, DiagramStyleProvider> styles = new LinkedHashMap<>();
+    private final Map<String, DiagramStyleProvider> styles = new LinkedHashMap<>();
 
-    private Map<String, SubstationLayoutFactory> substationsLayouts = new LinkedHashMap<>();
+    private final Map<String, SubstationLayoutFactory> substationsLayouts = new LinkedHashMap<>();
 
     private final Map<String, ComponentLibrary> svgLibraries
             = ComponentLibrary.findAll().stream().collect(Collectors.toMap(ComponentLibrary::getName, Function.identity()));
@@ -281,57 +280,27 @@ public class SingleLineDiagramViewer extends Application implements DisplayVolta
                 throw new UncheckedIOException(e);
             }
 
-            try (InputStream metadataInputStream = new ByteArrayInputStream(metadataData.getBytes(StandardCharsets.UTF_8))) {
-                loadSvgAndMetadata(diagramView, svgData, metadataInputStream, switchId -> handleSwitchPositionchange(c, switchId), SingleLineDiagramViewer.this);
-            } catch (IOException e) {
-                throw new UncheckedIOException(e);
-            }
+            loadSvg(diagramView, svgData);
+
             return new ContainerDiagramResult(svgData, metadataData, jsonData);
         }
 
-        protected void loadSvgAndMetadata(WebView diagramView, String svgInputStream,
-                                                 InputStream metadataInputStream,
-                                                 SwitchPositionChangeListener listener,
-                                                 DisplayVoltageLevel displayVL) {
+        protected void loadSvg(WebView diagramView, String svgInputStream) {
             // convert svg file to WebView components
             try {
-                loadContent(diagramView, svgInputStream);
+                String b = "<html>" +
+                        String.format("<body><div id='%1$s'>", divId) +
+                        svgInputStream +
+                        "</div></body></html>";
 
-                // load metadata
-                GraphMetadata metadata = GraphMetadata.parseJson(metadataInputStream);
+                diagramView.getEngine().loadContent(b);
 
                 // install node and wire handlers to allow diagram edition
-                // installHandlers(svgImage, metadata, listener, displayVL);  FIXME: add handlers with js
+                // FIXME: add handlers with js
             } catch (Exception e) {
                 // to feed the content of the 'SVG' and 'Metadata' tab, even if the
-                // svg diagram cannot be loaded by svg loader, or if the handlers cannot be installed
-                LOGGER.warn("Error in loading svg image or installing handlers : {}", e.getMessage());
-            }
-        }
-
-        public void loadContent(WebView diagramView, String svgInputStream) {
-            String b = "<html>" +
-                    String.format("<body><div id='%1$s'>", divId) +
-                    svgInputStream +
-                    "</div></body></html>";
-
-            diagramView.getEngine().loadContent(b);
-        }
-
-        private void handleSwitchPositionchange(Container c, String switchId) {
-            Switch sw = null;
-            if (c.getContainerType() == ContainerType.VOLTAGE_LEVEL) {
-                VoltageLevel v = (VoltageLevel) c;
-                sw = v.getNetwork().getSwitch(switchId);
-            } else if (c.getContainerType() == ContainerType.SUBSTATION) {
-                Substation s = (Substation) c;
-                sw = s.getNetwork().getSwitch(switchId);
-            }
-            if (sw != null) {
-                sw.setOpen(!sw.isOpen());
-                DiagramStyleProvider styleProvider = styles.get(styleComboBox.getSelectionModel().getSelectedItem());
-                styleProvider.reset();
-                loadDiagram(c);
+                // svg diagram cannot be loaded by svg loader
+                LOGGER.warn("Error in loading svg image : {}", e.getMessage());
             }
         }
 
