@@ -140,7 +140,7 @@ public class SingleLineDiagramViewer extends Application implements DisplayVolta
     private class ContainerDiagramPane extends BorderPane {
         private final String divId = UUID.randomUUID().toString();
 
-        private final ScrollPane flowPane = new ScrollPane();
+        private final WebView diagramView = new WebView();
 
         private final TextArea infoArea = new TextArea();
 
@@ -165,7 +165,7 @@ public class SingleLineDiagramViewer extends Application implements DisplayVolta
         private final AtomicReference<Integer> jsonSearchStart = new AtomicReference<>(0);
         private final Button jsonSaveButton = new Button("Save");
 
-        private final Tab tab1 = new Tab("Diagram", flowPane);
+        private final Tab tab1 = new Tab("Diagram", diagramView);
 
         private final Tab tab2 = new Tab("SVG", svgArea);
 
@@ -198,6 +198,21 @@ public class SingleLineDiagramViewer extends Application implements DisplayVolta
             listener = (observable, oldValue, newValue) -> loadDiagram(c);
             layoutParameters.addListener(new WeakChangeListener<>(listener));
             loadDiagram(c);
+
+            // Add Zoom management
+            diagramView.addEventFilter(ScrollEvent.SCROLL, (ScrollEvent e) -> {
+                if (e.isControlDown()) {
+                    double deltaY = e.getDeltaY();
+                    double zoom = diagramView.getZoom();
+                    if (deltaY > 0) {
+                        zoom /= 1.1;
+                    } else {
+                        zoom *= 1.1;
+                    }
+                    diagramView.setZoom(zoom);
+                    e.consume();
+                }
+            });
         }
 
         class ContainerDiagramResult {
@@ -227,8 +242,8 @@ public class SingleLineDiagramViewer extends Application implements DisplayVolta
             }
         }
 
-        private ScrollPane getFlowPane() {
-            return flowPane;
+        private WebView getDiagramView() {
+            return diagramView;
         }
 
         private String getSelectedDiagramName() {
@@ -285,12 +300,12 @@ public class SingleLineDiagramViewer extends Application implements DisplayVolta
             return new ContainerDiagramResult(svgData, metadataData, jsonData);
         }
 
-        protected void loadSvg(WebView diagramView, String svgInputStream) {
+        protected void loadSvg(WebView diagramView, String svg) {
             // convert svg file to WebView components
             try {
                 String b = "<html>" +
                         String.format("<body><div id='%1$s'>", divId) +
-                        svgInputStream +
+                        svg +
                         "</div></body></html>";
 
                 diagramView.getEngine().loadContent(b);
@@ -305,26 +320,7 @@ public class SingleLineDiagramViewer extends Application implements DisplayVolta
         }
 
         private void loadDiagram(Container c) {
-            WebView diagramView = new WebView();
-            diagramView.setZoom(1.0);
             ContainerDiagramResult result = createContainerDiagramView(diagramView, c);
-            flowPane.setContent(diagramView);
-            // Adjust size to content
-            diagramView.prefHeightProperty().bind(flowPane.heightProperty());
-            diagramView.prefWidthProperty().bind(flowPane.widthProperty());
-
-            // Add Zoom management
-            diagramView.addEventFilter(ScrollEvent.SCROLL, (ScrollEvent e) -> {
-                double deltaY = e.getDeltaY();
-                double zoom = diagramView.getZoom();
-                zoom = (deltaY > 0) ? (zoom - 1) : (zoom + 1);
-                // Avoid to hide SVG when zoom == 0.0
-                if (zoom == 0.0) {
-                    zoom = (deltaY > 0) ? -1 : 1;
-                }
-                diagramView.setZoom(zoom);
-                e.consume();
-            });
 
             svgTextArea.setText(result.getSvgData());
             metadataTextArea.setText(result.getMetadataData());
@@ -616,7 +612,7 @@ public class SingleLineDiagramViewer extends Application implements DisplayVolta
                     pane = (ContainerDiagramPane) selectedDiagramPane.getCenter();
                 }
                 if (pane != null) {
-                    ((WebView) pane.getFlowPane().getContent()).setZoom(1.0); // 100%
+                    pane.getDiagramView().setZoom(1.0); // 100%
                 }
             }
         });
