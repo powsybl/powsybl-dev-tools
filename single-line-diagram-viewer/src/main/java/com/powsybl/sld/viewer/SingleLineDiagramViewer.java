@@ -138,8 +138,6 @@ public class SingleLineDiagramViewer extends Application implements DisplayVolta
     private final ComboBox<String> diagramNamesComboBox = new ComboBox<>();
 
     private class ContainerDiagramPane extends BorderPane {
-        private final String divId = UUID.randomUUID().toString();
-
         private final WebView diagramView = new WebView();
 
         private final TextArea infoArea = new TextArea();
@@ -204,15 +202,17 @@ public class SingleLineDiagramViewer extends Application implements DisplayVolta
                 if (e.isControlDown()) {
                     double deltaY = e.getDeltaY();
                     double zoom = diagramView.getZoom();
-                    if (deltaY > 0) {
-                        zoom /= 1.1;
-                    } else {
+                    if (deltaY < 0) {
                         zoom *= 1.1;
+                    } else {
+                        zoom /= 1.1;
                     }
                     diagramView.setZoom(zoom);
                     e.consume();
                 }
             });
+            // Avoid the useless right click on the image
+            diagramView.setContextMenuEnabled(false);
         }
 
         class ContainerDiagramResult {
@@ -260,8 +260,9 @@ public class SingleLineDiagramViewer extends Application implements DisplayVolta
                 DiagramStyleProvider styleProvider = styles.get(styleComboBox.getSelectionModel().getSelectedItem());
 
                 String dName = getSelectedDiagramName();
-                LayoutParameters diagramLayoutParameters = new LayoutParameters(layoutParameters.get()).setDiagramName(dName).setCssLocation(LayoutParameters.CssLocation.INSERTED_IN_SVG);
-                diagramLayoutParameters.setComponentsSize(getComponentLibrary().getComponentsSize());
+                LayoutParameters diagramLayoutParameters = new LayoutParameters(layoutParameters.get()).setDiagramName(dName)
+                        .setCssLocation(LayoutParameters.CssLocation.INSERTED_IN_SVG)
+                        .setSvgWidthAndHeightAdded(true);
 
                 DiagramLabelProvider initProvider = new DefaultDiagramLabelProvider(networkProperty.get(), getComponentLibrary(), diagramLayoutParameters);
                 GraphBuilder graphBuilder = new NetworkGraphBuilder(networkProperty.get());
@@ -295,28 +296,18 @@ public class SingleLineDiagramViewer extends Application implements DisplayVolta
                 throw new UncheckedIOException(e);
             }
 
-            loadSvg(diagramView, svgData);
+            loadContent(diagramView, svgData);
 
             return new ContainerDiagramResult(svgData, metadataData, jsonData);
         }
 
-        protected void loadSvg(WebView diagramView, String svg) {
-            // convert svg file to WebView components
-            try {
-                String b = "<html>" +
-                        String.format("<body><div id='%1$s'>", divId) +
-                        svg +
-                        "</div></body></html>";
-
-                diagramView.getEngine().loadContent(b);
-
-                // install node and wire handlers to allow diagram edition
-                // FIXME: add handlers with js
-            } catch (Exception e) {
-                // to feed the content of the 'SVG' and 'Metadata' tab, even if the
-                // svg diagram cannot be loaded by svg loader
-                LOGGER.warn("Error in loading svg image : {}", e.getMessage());
-            }
+        public void loadContent(WebView diagramView, String svg) {
+            // Need to set HTML body margin to 0 to avoid margin around SVG displayed
+            String content = "<html>\n" +
+                    "<body style='margin: 0'>" +
+                    svg +
+                    "</div></body></html>";
+            diagramView.getEngine().loadContent(content);
         }
 
         private void loadDiagram(Container c) {
@@ -596,24 +587,37 @@ public class SingleLineDiagramViewer extends Application implements DisplayVolta
         int rowIndex = 0;
 
         Button fitToContent = new Button("Fit to content");
-        // FIXME : not implemented
-        fitToContent.setDisable(true);
+        fitToContent.setOnAction(event -> {
+            ContainerDiagramPane pane = getContainerDiagramPane();
+            if (pane != null) {
+                String svgData = pane.svgTextArea.getText();
+                Optional<String> svgLine = svgData.lines().filter(l -> l.contains("<svg")).findAny();
+                if (svgLine.isPresent()) {
+                    String valuePattern = "\"([^\"]*)\"";
+                    Pattern pH = Pattern.compile("height=" + valuePattern);
+                    Matcher mH = pH.matcher(svgLine.get());
+                    Pattern pW = Pattern.compile("width=" + valuePattern);
+                    Matcher mW = pW.matcher(svgLine.get());
+                    if (mH.find() && mW.find()) {
+                        double svgHeight = Double.parseDouble(mH.group(1));
+                        double svgWidth = Double.parseDouble(mW.group(1));
+                        double paneHeight = pane.getDiagramView().heightProperty().get();
+                        double paneWidth = pane.getDiagramView().widthProperty().get();
+                        if (paneHeight < svgHeight || paneWidth < svgWidth) {
+                            double zoomH = paneHeight / svgHeight;
+                            double zoomW = paneWidth / svgWidth;
+                            pane.getDiagramView().setZoom(Math.min(zoomH, zoomW));
+                        }
+                    }
+                }
+            }
+        });
 
         Button resetZoom = new Button("Reset zoom");
         resetZoom.setOnAction(event -> {
-            ContainerDiagramPane pane = null;
-            Tab tab = diagramsPane.getSelectionModel().getSelectedItem();
-            if (tab != null) {
-                if (tab == tabChecked) {
-                    if (checkedDiagramsPane.getSelectionModel().getSelectedItem() != null) {
-                        pane = (ContainerDiagramPane) checkedDiagramsPane.getSelectionModel().getSelectedItem().getContent();
-                    }
-                } else {
-                    pane = (ContainerDiagramPane) selectedDiagramPane.getCenter();
-                }
-                if (pane != null) {
-                    pane.getDiagramView().setZoom(1.0); // 100%
-                }
+            ContainerDiagramPane pane = getContainerDiagramPane();
+            if (pane != null) {
+                pane.getDiagramView().setZoom(1.0); // 100%
             }
         });
         FlowPane buttonsPane = new FlowPane(fitToContent, resetZoom);
@@ -720,6 +724,21 @@ public class SingleLineDiagramViewer extends Application implements DisplayVolta
         addCheckBox("Add nodes infos", rowIndex, LayoutParameters::isAddNodesInfos, LayoutParameters::setAddNodesInfos);
         rowIndex += 2;
         addCheckBox("Feeder arrow symmetry", rowIndex, LayoutParameters::isFeederArrowSymmetry, LayoutParameters::setFeederArrowSymmetry);
+    }
+
+    private ContainerDiagramPane getContainerDiagramPane() {
+        ContainerDiagramPane pane = null;
+        Tab tab = diagramsPane.getSelectionModel().getSelectedItem();
+        if (tab != null) {
+            if (tab == tabChecked) {
+                if (checkedDiagramsPane.getSelectionModel().getSelectedItem() != null) {
+                    pane = (ContainerDiagramPane) checkedDiagramsPane.getSelectionModel().getSelectedItem().getContent();
+                }
+            } else {
+                pane = (ContainerDiagramPane) selectedDiagramPane.getCenter();
+            }
+        }
+        return pane;
     }
 
     private void setDiagramsNamesContent(Network network, boolean setValues) {
