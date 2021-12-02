@@ -204,7 +204,7 @@ public class SingleLineDiagramViewer extends Application implements DisplayVolta
                     double zoom = diagramView.getZoom();
                     if (deltaY < 0) {
                         zoom *= 1.1;
-                    } else {
+                    } else if (deltaY > 0) {
                         zoom /= 1.1;
                     }
                     diagramView.setZoom(zoom);
