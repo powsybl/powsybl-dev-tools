@@ -30,11 +30,11 @@ PowSyBl single-line-diagram-viewer Dev Tool is a JavaFX basic viewer used to dis
 
 ### Launching the viewer
 - First install
-  * [JavaFX](https://openjfx.io/)
+  * [JavaFX 17](https://openjfx.io/)
   * [powsybl-single-line-diagram](https://github.com/powsybl/powsybl-single-line-diagram) latest SNAPSHOT version (clone the repo then `mvn clean install` on `main` branch)
 - Then launch the viewer by running `SingleLineDiagramViewer::main`, with the following vm options:
   ```
-  --module-path /path/to/openjfx/lib --add-modules=javafx.controls
+  --module-path /path/to/javafx-17/lib --add-modules=javafx.controls,javafx.web
   ```  
 - Select the file you want to import in the viewer
 - Once the file is imported, select the substation or the voltage level you want to display; you should obtain something similar to the following screenshot:

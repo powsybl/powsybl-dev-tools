@@ -46,9 +46,9 @@ import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.CheckBoxTreeCell;
+import javafx.scene.input.ScrollEvent;
 import javafx.scene.layout.*;
-import javafx.scene.text.Font;
-import javafx.scene.text.Text;
+import javafx.scene.web.WebView;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javafx.util.StringConverter;
@@ -57,7 +57,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.*;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
@@ -86,11 +85,11 @@ public class SingleLineDiagramViewer extends Application implements DisplayVolta
     private static final String SELECTED_SUBSTATION_IDS_PROPERTY = "selectedSubstationIds";
     private static final String CASE_PATH_PROPERTY = "casePath";
 
-    private Map<String, VoltageLevelLayoutFactory> voltageLevelsLayouts = new LinkedHashMap<>();
+    private final Map<String, VoltageLevelLayoutFactory> voltageLevelsLayouts = new LinkedHashMap<>();
 
-    private Map<String, DiagramStyleProvider> styles = new LinkedHashMap<>();
+    private final Map<String, DiagramStyleProvider> styles = new LinkedHashMap<>();
 
-    private Map<String, SubstationLayoutFactory> substationsLayouts = new LinkedHashMap<>();
+    private final Map<String, SubstationLayoutFactory> substationsLayouts = new LinkedHashMap<>();
 
     private final Map<String, ComponentLibrary> svgLibraries
             = ComponentLibrary.findAll().stream().collect(Collectors.toMap(ComponentLibrary::getName, Function.identity()));
@@ -118,7 +117,7 @@ public class SingleLineDiagramViewer extends Application implements DisplayVolta
             .setShowGrid(true)
             .setAdaptCellHeightToContent(true));
 
-    protected final Preferences preferences = Preferences.userNodeForPackage(VoltageLevelDiagramView.class);
+    protected final Preferences preferences = Preferences.userNodeForPackage(SingleLineDiagramViewer.class);
 
     private final ObjectMapper objectMapper = JsonUtil.createObjectMapper();
 
@@ -139,7 +138,7 @@ public class SingleLineDiagramViewer extends Application implements DisplayVolta
     private final ComboBox<String> diagramNamesComboBox = new ComboBox<>();
 
     private class ContainerDiagramPane extends BorderPane {
-        private final ScrollPane flowPane = new ScrollPane();
+        private final WebView diagramView = new WebView();
 
         private final TextArea infoArea = new TextArea();
 
@@ -164,7 +163,7 @@ public class SingleLineDiagramViewer extends Application implements DisplayVolta
         private final AtomicReference<Integer> jsonSearchStart = new AtomicReference<>(0);
         private final Button jsonSaveButton = new Button("Save");
 
-        private final Tab tab1 = new Tab("Diagram", flowPane);
+        private final Tab tab1 = new Tab("Diagram", diagramView);
 
         private final Tab tab2 = new Tab("SVG", svgArea);
 
@@ -197,11 +196,26 @@ public class SingleLineDiagramViewer extends Application implements DisplayVolta
             listener = (observable, oldValue, newValue) -> loadDiagram(c);
             layoutParameters.addListener(new WeakChangeListener<>(listener));
             loadDiagram(c);
+
+            // Add Zoom management
+            diagramView.addEventFilter(ScrollEvent.SCROLL, (ScrollEvent e) -> {
+                if (e.isControlDown()) {
+                    double deltaY = e.getDeltaY();
+                    double zoom = diagramView.getZoom();
+                    if (deltaY < 0) {
+                        zoom /= 1.1;
+                    } else if (deltaY > 0) {
+                        zoom *= 1.1;
+                    }
+                    diagramView.setZoom(zoom);
+                    e.consume();
+                }
+            });
+            // Avoid the useless right click on the image
+            diagramView.setContextMenuEnabled(false);
         }
 
         class ContainerDiagramResult {
-
-            private final AbstractContainerDiagramView view;
 
             private final String svgData;
 
@@ -209,15 +223,10 @@ public class SingleLineDiagramViewer extends Application implements DisplayVolta
 
             private final String jsonData;
 
-            ContainerDiagramResult(AbstractContainerDiagramView view, String svgData, String metadataData, String jsonData) {
-                this.view = view;
+            ContainerDiagramResult(String svgData, String metadataData, String jsonData) {
                 this.svgData = svgData;
                 this.metadataData = metadataData;
                 this.jsonData = jsonData;
-            }
-
-            AbstractContainerDiagramView getView() {
-                return view;
             }
 
             String getSvgData() {
@@ -233,15 +242,15 @@ public class SingleLineDiagramViewer extends Application implements DisplayVolta
             }
         }
 
-        private ScrollPane getFlowPane() {
-            return flowPane;
+        private WebView getDiagramView() {
+            return diagramView;
         }
 
         private String getSelectedDiagramName() {
             return diagramNamesComboBox.getSelectionModel().getSelectedItem();
         }
 
-        private ContainerDiagramResult createContainerDiagramView(Container c) {
+        private ContainerDiagramResult createContainerDiagramView(WebView diagramView, Container c) {
             String svgData;
             String metadataData;
             String jsonData;
@@ -251,8 +260,9 @@ public class SingleLineDiagramViewer extends Application implements DisplayVolta
                 DiagramStyleProvider styleProvider = styles.get(styleComboBox.getSelectionModel().getSelectedItem());
 
                 String dName = getSelectedDiagramName();
-                LayoutParameters diagramLayoutParameters = new LayoutParameters(layoutParameters.get()).setDiagramName(dName).setCssLocation(LayoutParameters.CssLocation.INSERTED_IN_SVG);
-                diagramLayoutParameters.setComponentsSize(getComponentLibrary().getComponentsSize());
+                LayoutParameters diagramLayoutParameters = new LayoutParameters(layoutParameters.get()).setDiagramName(dName)
+                        .setCssLocation(LayoutParameters.CssLocation.INSERTED_IN_SVG)
+                        .setSvgWidthAndHeightAdded(true);
 
                 DiagramLabelProvider initProvider = new DefaultDiagramLabelProvider(networkProperty.get(), getComponentLibrary(), diagramLayoutParameters);
                 GraphBuilder graphBuilder = new NetworkGraphBuilder(networkProperty.get());
@@ -279,81 +289,33 @@ public class SingleLineDiagramViewer extends Application implements DisplayVolta
 
                 svgWriter.flush();
                 metadataWriter.flush();
-                svgData = svgWriter.toString()
-                    .replace("visibility: hidden", "stroke-opacity:0; fill-opacity:0;"); // visibility not supported by afester library
+                svgData = svgWriter.toString();
                 metadataData = metadataWriter.toString();
                 jsonData = jsonWriter.toString();
             } catch (IOException e) {
                 throw new UncheckedIOException(e);
             }
 
-            AbstractContainerDiagramView diagramView = null;
-            try (InputStream svgInputStream = new ByteArrayInputStream(svgData.getBytes(StandardCharsets.UTF_8));
-                 InputStream metadataInputStream = new ByteArrayInputStream(metadataData.getBytes(StandardCharsets.UTF_8))) {
-                if (c.getContainerType() == ContainerType.VOLTAGE_LEVEL) {
-                    diagramView = VoltageLevelDiagramView.load(svgInputStream, metadataInputStream, switchId -> handleSwitchPositionchange(c, switchId), SingleLineDiagramViewer.this);
-                } else if (c.getContainerType() == ContainerType.SUBSTATION) {
-                    diagramView = SubstationDiagramView.load(svgInputStream, metadataInputStream, switchId -> handleSwitchPositionchange(c, switchId), SingleLineDiagramViewer.this);
-                } else {
-                    throw new AssertionError();
-                }
-            } catch (IOException e) {
-                throw new UncheckedIOException(e);
-            }
-            return new ContainerDiagramResult(diagramView, svgData, metadataData, jsonData);
+            loadContent(diagramView, svgData);
+
+            return new ContainerDiagramResult(svgData, metadataData, jsonData);
         }
 
-        private void handleSwitchPositionchange(Container c, String switchId) {
-            Switch sw = null;
-            if (c.getContainerType() == ContainerType.VOLTAGE_LEVEL) {
-                VoltageLevel v = (VoltageLevel) c;
-                sw = v.getNetwork().getSwitch(switchId);
-            } else if (c.getContainerType() == ContainerType.SUBSTATION) {
-                Substation s = (Substation) c;
-                sw = s.getNetwork().getSwitch(switchId);
-            }
-            if (sw != null) {
-                sw.setOpen(!sw.isOpen());
-                DiagramStyleProvider styleProvider = styles.get(styleComboBox.getSelectionModel().getSelectedItem());
-                styleProvider.reset();
-                loadDiagram(c);
-            }
+        public void loadContent(WebView diagramView, String svg) {
+            // Need to set HTML body margin to 0 to avoid margin around SVG displayed
+            String content = "<html>\n" +
+                    "<body style='margin: 0'>" +
+                    svg +
+                    "</div></body></html>";
+            diagramView.getEngine().loadContent(content);
         }
 
         private void loadDiagram(Container c) {
-            Service<ContainerDiagramResult> loader = new Service<ContainerDiagramResult>() {
-                @Override
-                protected Task<ContainerDiagramResult> createTask() {
-                    return new Task<ContainerDiagramResult>() {
-                        @Override
-                        protected ContainerDiagramResult call() {
-                            return createContainerDiagramView(c);
-                        }
-                    };
-                }
-            };
-            loader.setOnScheduled(event -> {
-                Text loading = new Text("Loading...");
-                loading.setFont(Font.font(30));
-                flowPane.setContent(loading);
-                svgTextArea.setText("");
-                metadataTextArea.setText("");
-                jsonTextArea.setText("");
-            });
-            loader.setOnSucceeded(event -> {
-                ContainerDiagramResult result = (ContainerDiagramResult) event.getSource().getValue();
-                if (result.getView() != null) {
-                    flowPane.setContent(result.getView());
-                }
-                svgTextArea.setText(result.getSvgData());
-                metadataTextArea.setText(result.getMetadataData());
-                jsonTextArea.setText(result.getJsonData());
-            });
-            loader.setOnFailed(event -> {
-                Throwable e = event.getSource().getException();
-                LOGGER.error(e.toString(), e);
-            });
-            loader.start();
+            ContainerDiagramResult result = createContainerDiagramView(diagramView, c);
+
+            svgTextArea.setText(result.getSvgData());
+            metadataTextArea.setText(result.getMetadataData());
+            jsonTextArea.setText(result.getJsonData());
         }
 
         private ComponentLibrary getComponentLibrary() {
@@ -626,27 +588,41 @@ public class SingleLineDiagramViewer extends Application implements DisplayVolta
 
         Button fitToContent = new Button("Fit to content");
         fitToContent.setOnAction(event -> {
-            ContainerDiagramPane pane = null;
-            Tab tab = diagramsPane.getSelectionModel().getSelectedItem();
-            if (tab != null) {
-                if (tab == tabChecked) {
-                    if (checkedDiagramsPane.getSelectionModel().getSelectedItem() != null) {
-                        pane = (ContainerDiagramPane) checkedDiagramsPane.getSelectionModel().getSelectedItem().getContent();
+            ContainerDiagramPane pane = getContainerDiagramPane();
+            if (pane != null) {
+                String svgData = pane.svgTextArea.getText();
+                Optional<String> svgLine = svgData.lines().filter(l -> l.contains("<svg")).findAny();
+                if (svgLine.isPresent()) {
+                    String valuePattern = "\"([^\"]*)\"";
+                    Pattern pH = Pattern.compile("height=" + valuePattern);
+                    Matcher mH = pH.matcher(svgLine.get());
+                    Pattern pW = Pattern.compile("width=" + valuePattern);
+                    Matcher mW = pW.matcher(svgLine.get());
+                    if (mH.find() && mW.find()) {
+                        double svgHeight = Double.parseDouble(mH.group(1));
+                        double svgWidth = Double.parseDouble(mW.group(1));
+                        double paneHeight = pane.getDiagramView().heightProperty().get();
+                        double paneWidth = pane.getDiagramView().widthProperty().get();
+                        if (paneHeight < svgHeight || paneWidth < svgWidth) {
+                            double zoomH = paneHeight / svgHeight;
+                            double zoomW = paneWidth / svgWidth;
+                            pane.getDiagramView().setZoom(Math.min(zoomH, zoomW));
+                        }
                     }
-                } else {
-                    pane = (ContainerDiagramPane) selectedDiagramPane.getCenter();
-                }
-                if (pane != null) {
-                    ((AbstractContainerDiagramView) pane.getFlowPane().getContent()).fitToContent(
-                            pane.getFlowPane().getViewportBounds().getWidth(), 20.,
-                            pane.getFlowPane().getViewportBounds().getHeight(), 20.);
-                    pane.getFlowPane().setHvalue(pane.getFlowPane().getHmin());
-                    pane.getFlowPane().setVvalue(pane.getFlowPane().getVmin());
                 }
             }
         });
 
-        parametersPane.add(fitToContent, 0, rowIndex++);
+        Button resetZoom = new Button("Reset zoom");
+        resetZoom.setOnAction(event -> {
+            ContainerDiagramPane pane = getContainerDiagramPane();
+            if (pane != null) {
+                pane.getDiagramView().setZoom(1.0); // 100%
+            }
+        });
+        FlowPane buttonsPane = new FlowPane(fitToContent, resetZoom);
+        buttonsPane.setHgap(10);
+        parametersPane.add(buttonsPane, 0, rowIndex++);
 
         // svg library list
         svgLibraryComboBox.getItems().addAll(svgLibraries.keySet());
@@ -748,6 +724,21 @@ public class SingleLineDiagramViewer extends Application implements DisplayVolta
         addCheckBox("Add nodes infos", rowIndex, LayoutParameters::isAddNodesInfos, LayoutParameters::setAddNodesInfos);
         rowIndex += 2;
         addCheckBox("Feeder arrow symmetry", rowIndex, LayoutParameters::isFeederArrowSymmetry, LayoutParameters::setFeederArrowSymmetry);
+    }
+
+    private ContainerDiagramPane getContainerDiagramPane() {
+        ContainerDiagramPane pane = null;
+        Tab tab = diagramsPane.getSelectionModel().getSelectedItem();
+        if (tab != null) {
+            if (tab == tabChecked) {
+                if (checkedDiagramsPane.getSelectionModel().getSelectedItem() != null) {
+                    pane = (ContainerDiagramPane) checkedDiagramsPane.getSelectionModel().getSelectedItem().getContent();
+                }
+            } else {
+                pane = (ContainerDiagramPane) selectedDiagramPane.getCenter();
+            }
+        }
+        return pane;
     }
 
     private void setDiagramsNamesContent(Network network, boolean setValues) {
