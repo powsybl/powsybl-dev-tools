@@ -84,6 +84,7 @@ public class SingleLineDiagramViewer extends Application implements DisplayVolta
     private static final String SELECTED_VOLTAGE_LEVEL_IDS_PROPERTY = "selectedVoltageLevelIds";
     private static final String SELECTED_SUBSTATION_IDS_PROPERTY = "selectedSubstationIds";
     private static final String CASE_PATH_PROPERTY = "casePath";
+    private static final String CASE_FOLDER_PROPERTY = "caseFolder";
 
     private final Map<String, VoltageLevelLayoutFactory> voltageLevelsLayouts = new LinkedHashMap<>();
 
@@ -965,6 +966,7 @@ public class SingleLineDiagramViewer extends Application implements DisplayVolta
         networkService.setOnRunning(event -> {
             caseLoadingStatus.setStyle("-fx-background-color: yellow");
             casePathTextField.setText(file.toAbsolutePath().toString());
+            preferences.put(CASE_FOLDER_PROPERTY, file.getParent().toString());
         });
         networkService.setOnSucceeded(event -> {
             setNetwork((Network) event.getSource().getValue());
@@ -996,6 +998,10 @@ public class SingleLineDiagramViewer extends Application implements DisplayVolta
         Button caseButton = new Button("...");
         caseButton.setOnAction(event -> {
             FileChooser fileChooser = new FileChooser();
+            String caseFolderPropertyValue = preferences.get(CASE_FOLDER_PROPERTY, null);
+            if (caseFolderPropertyValue != null) {
+                fileChooser.setInitialDirectory(new File(caseFolderPropertyValue));
+            }
             fileChooser.setTitle("Open case File");
             File file = fileChooser.showOpenDialog(primaryStage);
             if (file != null) {
