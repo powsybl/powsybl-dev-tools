@@ -216,10 +216,10 @@ public class SingleLineDiagramViewer extends Application implements DisplayVolta
             // Avoid the useless right click on the image
             diagramView.setContextMenuEnabled(false);
 
-            // set up the listener
+            // Set up the listener on WebView changes
             diagramView.getEngine().getLoadWorker().stateProperty().addListener((observable, oldValue, newValue) -> {
                 if (Worker.State.SUCCEEDED == newValue) {
-                    // set an interface object named 'javaConnector' in the web engine's page
+                    // Set an interface object named 'jsHandler' in the web engine's page
                     JSObject window = (JSObject) diagramView.getEngine().executeScript("window");
                     window.setMember("jsHandler", new JsHandler(c));
                 }
@@ -240,9 +240,11 @@ public class SingleLineDiagramViewer extends Application implements DisplayVolta
              * @param svgId the svg identity of svg element selected
              */
             public void handleSwitchPositionchange(String svgId) {
+                // Get SwitchId from svgId using metadata
                 GraphMetadata metadata = GraphMetadata.parseJson(new ByteArrayInputStream(metadataTextArea.getText().getBytes(StandardCharsets.UTF_8)));
                 GraphMetadata.NodeMetadata node = metadata.getNodeMetadata(svgId);
                 String swId = node.getEquipmentId();
+                // Get Switch to operate
                 Switch sw = null;
                 if (c.getContainerType() == ContainerType.VOLTAGE_LEVEL) {
                     VoltageLevel v = (VoltageLevel) c;
