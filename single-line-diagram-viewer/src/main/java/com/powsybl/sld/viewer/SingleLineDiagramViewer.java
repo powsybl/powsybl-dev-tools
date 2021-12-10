@@ -182,7 +182,7 @@ public class SingleLineDiagramViewer extends Application implements DisplayVolta
         private final ChangeListener<LayoutParameters> listener;
 
         /** For communication from the Javascript engine. */
-        private NodeHandler handler = new NodeHandler();
+        private JsHandler jsHandler = new JsHandler();
 
         ContainerDiagramPane(Container c) {
             createArea(svgSearchField, svgSearchButton, svgSaveButton, "SVG file", "*.svg", svgTextArea, svgArea, svgSearchStart);
@@ -226,12 +226,12 @@ public class SingleLineDiagramViewer extends Application implements DisplayVolta
                 if (Worker.State.SUCCEEDED == newValue) {
                     // set an interface object named 'javaConnector' in the web engine's page
                     JSObject window = (JSObject) diagramView.getEngine().executeScript("window");
-                    window.setMember("handler", handler);
+                    window.setMember("jsHandler", jsHandler);
                 }
             });
         }
 
-        public class NodeHandler {
+        public class JsHandler {
             /**
              * called when the JS side detect selection.
              *
