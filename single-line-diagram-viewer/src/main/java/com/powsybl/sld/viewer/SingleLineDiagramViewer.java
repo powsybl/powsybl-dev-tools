@@ -8,6 +8,7 @@ package com.powsybl.sld.viewer;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.io.ByteStreams;
 import com.powsybl.commons.json.JsonUtil;
 import com.powsybl.computation.local.LocalComputationManager;
 import com.powsybl.iidm.import_.ImportConfig;
@@ -40,6 +41,7 @@ import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.concurrent.Service;
 import javafx.concurrent.Task;
+import javafx.concurrent.Worker;
 import javafx.geometry.Insets;
 import javafx.geometry.Side;
 import javafx.scene.Node;
@@ -52,6 +54,7 @@ import javafx.scene.web.WebView;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javafx.util.StringConverter;
+import netscape.javascript.JSObject;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -178,6 +181,9 @@ public class SingleLineDiagramViewer extends Application implements DisplayVolta
 
         private final ChangeListener<LayoutParameters> listener;
 
+        /** For communication from the Javascript engine. */
+        private NodeHandler handler = new NodeHandler();
+
         ContainerDiagramPane(Container c) {
             createArea(svgSearchField, svgSearchButton, svgSaveButton, "SVG file", "*.svg", svgTextArea, svgArea, svgSearchStart);
             createArea(metadataSearchField, metadataSearchButton, metadataSaveButton, "JSON file", "*.json", metadataTextArea, metadataArea, metadataSearchStart);
@@ -214,6 +220,26 @@ public class SingleLineDiagramViewer extends Application implements DisplayVolta
             });
             // Avoid the useless right click on the image
             diagramView.setContextMenuEnabled(false);
+
+            // set up the listener
+            diagramView.getEngine().getLoadWorker().stateProperty().addListener((observable, oldValue, newValue) -> {
+                if (Worker.State.SUCCEEDED == newValue) {
+                    // set an interface object named 'javaConnector' in the web engine's page
+                    JSObject window = (JSObject) diagramView.getEngine().executeScript("window");
+                    window.setMember("handler", handler);
+                }
+            });
+        }
+
+        public class NodeHandler {
+            /**
+             * called when the JS side detect selection.
+             *
+             * @param id the id of item selected
+             */
+            public void select(String id) {
+                System.err.println("Test : " + id);
+            }
         }
 
         class ContainerDiagramResult {
@@ -305,10 +331,18 @@ public class SingleLineDiagramViewer extends Application implements DisplayVolta
         public void loadContent(WebView diagramView, String svg) {
             // Need to set HTML body margin to 0 to avoid margin around SVG displayed
             String content = "<html>\n" +
-                    "<body style='margin: 0'>" +
-                    svg +
-                    "</div></body></html>";
+                    "<script type=\"text/javascript\">\n" + getJavaScript() + "</script>\n" +
+                    "<body style='margin: 0'>" + svg + "</body>\n" +
+                    "</html>";
             diagramView.getEngine().loadContent(content);
+        }
+
+        private String getJavaScript() {
+            try {
+                return new String(ByteStreams.toByteArray(Objects.requireNonNull(getClass().getResourceAsStream("/svg.js"))));
+            } catch (IOException e) {
+                throw new UncheckedIOException(e);
+            }
         }
 
         private void loadDiagram(Container c) {
