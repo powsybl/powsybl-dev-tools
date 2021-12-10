@@ -179,7 +179,11 @@ public class SingleLineDiagramViewer extends Application implements DisplayVolta
 
         private final ChangeListener<LayoutParameters> listener;
 
+        /** For communication from the Javascript engine. */
+        private final JsHandler jsHandler;
+
         ContainerDiagramPane(Container c) {
+            jsHandler = new JsHandler(c);
             createArea(svgSearchField, svgSearchButton, svgSaveButton, "SVG file", "*.svg", svgTextArea, svgArea, svgSearchStart);
             createArea(metadataSearchField, metadataSearchButton, metadataSaveButton, "JSON file", "*.json", metadataTextArea, metadataArea, metadataSearchStart);
             createArea(jsonSearchField, jsonSearchButton, jsonSaveButton, "JSON file", "*.json", jsonTextArea, jsonArea, jsonSearchStart);
@@ -221,12 +225,11 @@ public class SingleLineDiagramViewer extends Application implements DisplayVolta
                 if (Worker.State.SUCCEEDED == newValue) {
                     // Set an interface object named 'jsHandler' in the web engine's page
                     JSObject window = (JSObject) diagramView.getEngine().executeScript("window");
-                    window.setMember("jsHandler", new JsHandler(c));
+                    window.setMember("jsHandler", jsHandler);
                 }
             });
         }
 
-        /** For communication from the Javascript engine. */
         public class JsHandler {
 
             private final Container c;
@@ -236,10 +239,26 @@ public class SingleLineDiagramViewer extends Application implements DisplayVolta
             }
 
             /**
+             * Called when the JS side detect sld-top-feeder or sld-bottom-feeder selection.
+             * @param svgId the svg identity of svg element selected
+             */
+            public void handleSelectionChange(String svgId) {
+                GraphMetadata metadata = GraphMetadata.parseJson(new ByteArrayInputStream(metadataTextArea.getText().getBytes(StandardCharsets.UTF_8)));
+                GraphMetadata.NodeMetadata node = metadata.getNodeMetadata(svgId);
+                String vlId = node.getVId();
+                substationsTree.getRoot().getChildren().forEach(child -> {
+                    TreeItem<Container> found = findTreeViewItem(child, vlId);
+                    if (found != null) {
+                        substationsTree.getSelectionModel().select(found);
+                    }
+                });
+            }
+
+            /**
              * Called when the JS side detect sld-breaker or sld-disconnector selection.
              * @param svgId the svg identity of svg element selected
              */
-            public void handleSwitchPositionchange(String svgId) {
+            public void handleSwitchPositionChange(String svgId) {
                 // Get SwitchId from svgId using metadata
                 GraphMetadata metadata = GraphMetadata.parseJson(new ByteArrayInputStream(metadataTextArea.getText().getBytes(StandardCharsets.UTF_8)));
                 GraphMetadata.NodeMetadata node = metadata.getNodeMetadata(svgId);
@@ -259,6 +278,21 @@ public class SingleLineDiagramViewer extends Application implements DisplayVolta
                     styleProvider.reset();
                     loadDiagram(c);
                 }
+            }
+
+            private TreeItem<Container> findTreeViewItem(TreeItem<Container> item, String vlId) {
+                if (item != null) {
+                    if (Objects.equals(item.getValue().getId(), vlId)) {
+                        return item;
+                    }
+                    for (TreeItem<Container> child : item.getChildren()) {
+                        TreeItem<Container> s = findTreeViewItem(child, vlId);
+                        if (s != null) {
+                            return s;
+                        }
+                    }
+                }
+                return null;
             }
         }
 
