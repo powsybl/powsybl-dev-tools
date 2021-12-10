@@ -29,10 +29,7 @@ import com.powsybl.sld.svg.*;
 import com.powsybl.sld.util.NominalVoltageDiagramStyleProvider;
 import com.powsybl.sld.util.TopologicalStyleProvider;
 import javafx.application.Application;
-import javafx.beans.property.BooleanProperty;
-import javafx.beans.property.ObjectProperty;
-import javafx.beans.property.SimpleBooleanProperty;
-import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.property.*;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.beans.value.WeakChangeListener;
@@ -60,6 +57,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
@@ -181,9 +179,6 @@ public class SingleLineDiagramViewer extends Application implements DisplayVolta
 
         private final ChangeListener<LayoutParameters> listener;
 
-        /** For communication from the Javascript engine. */
-        private JsHandler jsHandler = new JsHandler();
-
         ContainerDiagramPane(Container c) {
             createArea(svgSearchField, svgSearchButton, svgSaveButton, "SVG file", "*.svg", svgTextArea, svgArea, svgSearchStart);
             createArea(metadataSearchField, metadataSearchButton, metadataSaveButton, "JSON file", "*.json", metadataTextArea, metadataArea, metadataSearchStart);
@@ -226,19 +221,42 @@ public class SingleLineDiagramViewer extends Application implements DisplayVolta
                 if (Worker.State.SUCCEEDED == newValue) {
                     // set an interface object named 'javaConnector' in the web engine's page
                     JSObject window = (JSObject) diagramView.getEngine().executeScript("window");
-                    window.setMember("jsHandler", jsHandler);
+                    window.setMember("jsHandler", new JsHandler(c));
                 }
             });
         }
 
+        /** For communication from the Javascript engine. */
         public class JsHandler {
+
+            private final Container c;
+
+            JsHandler(Container c) {
+                this.c = c;
+            }
+
             /**
-             * called when the JS side detect selection.
-             *
-             * @param id the id of item selected
+             * Called when the JS side detect sld-breaker or sld-disconnector selection.
+             * @param svgId the svg identity of svg element selected
              */
-            public void select(String id) {
-                System.err.println("Test : " + id);
+            public void handleSwitchPositionchange(String svgId) {
+                GraphMetadata metadata = GraphMetadata.parseJson(new ByteArrayInputStream(metadataTextArea.getText().getBytes(StandardCharsets.UTF_8)));
+                GraphMetadata.NodeMetadata node = metadata.getNodeMetadata(svgId);
+                String swId = node.getEquipmentId();
+                Switch sw = null;
+                if (c.getContainerType() == ContainerType.VOLTAGE_LEVEL) {
+                    VoltageLevel v = (VoltageLevel) c;
+                    sw = v.getNetwork().getSwitch(swId);
+                } else if (c.getContainerType() == ContainerType.SUBSTATION) {
+                    Substation s = (Substation) c;
+                    sw = s.getNetwork().getSwitch(swId);
+                }
+                if (sw != null) {
+                    sw.setOpen(!sw.isOpen());
+                    DiagramStyleProvider styleProvider = styles.get(styleComboBox.getSelectionModel().getSelectedItem());
+                    styleProvider.reset();
+                    loadDiagram(c);
+                }
             }
         }
 

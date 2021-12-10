@@ -5,6 +5,6 @@ document.addEventListener('click', function (event) {
 	}
 	if (event.target.closest('.sld-breaker')       ||
         event.target.closest('.sld-disconnector')) {
-            jsHandler.select(event.target.parentElement.id);
+            jsHandler.handleSwitchPositionchange(event.target.parentElement.id);
     }
 }, false);
