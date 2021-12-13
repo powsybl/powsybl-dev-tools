@@ -31,7 +31,6 @@ import com.powsybl.sld.util.TopologicalStyleProvider;
 import javafx.application.Application;
 import javafx.beans.property.*;
 import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
 import javafx.beans.value.WeakChangeListener;
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
@@ -964,15 +963,14 @@ public class SingleLineDiagramViewer extends Application implements DisplayVolta
         });
 
         // Handling selection of a substation or a voltageLevel in the substations tree
-        substationsTree.getSelectionModel().selectedItemProperty().addListener(new ChangeListener<TreeItem<Container>>() {
-            @Override
-            public void changed(ObservableValue<? extends TreeItem<Container>> observable, TreeItem<Container> oldValue, TreeItem<Container> newValue) {
-                if (newValue == null) {
-                    return;
-                }
-                Container c = newValue.getValue();
-                selectedDiagramPane.setCenter(new ContainerDiagramPane(c));
+        substationsTree.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
+            if (newValue == null) {
+                return;
             }
+            Container c = newValue.getValue();
+            selectedDiagramPane.setCenter(new ContainerDiagramPane(c));
+
+            diagramsPane.getSelectionModel().select(tabSelected);
         });
 
         // case reloading
