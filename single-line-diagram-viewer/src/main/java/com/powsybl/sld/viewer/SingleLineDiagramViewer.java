@@ -57,15 +57,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.*;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.function.BiFunction;
-import java.util.function.Function;
-import java.util.function.Predicate;
-import java.util.function.ToDoubleFunction;
+import java.util.function.*;
 import java.util.prefs.Preferences;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -183,7 +179,22 @@ public class SingleLineDiagramViewer extends Application implements DisplayVolta
         private final JsHandler jsHandler;
 
         ContainerDiagramPane(Container c) {
-            jsHandler = new JsHandler(c);
+            jsHandler = new JsHandler(substationsTree, swId -> {
+                Switch sw = null;
+                if (c.getContainerType() == ContainerType.VOLTAGE_LEVEL) {
+                    VoltageLevel v = (VoltageLevel) c;
+                    sw = v.getNetwork().getSwitch(swId);
+                } else if (c.getContainerType() == ContainerType.SUBSTATION) {
+                    Substation s = (Substation) c;
+                    sw = s.getNetwork().getSwitch(swId);
+                }
+                if (sw != null) {
+                    sw.setOpen(!sw.isOpen());
+                    DiagramStyleProvider styleProvider = styles.get(styleComboBox.getSelectionModel().getSelectedItem());
+                    styleProvider.reset();
+                    loadDiagram(c);
+                }
+            });
             createArea(svgSearchField, svgSearchButton, svgSaveButton, "SVG file", "*.svg", svgTextArea, svgArea, svgSearchStart);
             createArea(metadataSearchField, metadataSearchButton, metadataSaveButton, "JSON file", "*.json", metadataTextArea, metadataArea, metadataSearchStart);
             createArea(jsonSearchField, jsonSearchButton, jsonSaveButton, "JSON file", "*.json", jsonTextArea, jsonArea, jsonSearchStart);
@@ -228,72 +239,6 @@ public class SingleLineDiagramViewer extends Application implements DisplayVolta
                     window.setMember("jsHandler", jsHandler);
                 }
             });
-        }
-
-        public class JsHandler {
-
-            private final Container c;
-
-            JsHandler(Container c) {
-                this.c = c;
-            }
-
-            /**
-             * Called when the JS side detect sld-top-feeder or sld-bottom-feeder selection.
-             * @param svgId the svg identity of svg element selected
-             */
-            public void handleSelectionChange(String svgId) {
-                GraphMetadata metadata = GraphMetadata.parseJson(new ByteArrayInputStream(metadataTextArea.getText().getBytes(StandardCharsets.UTF_8)));
-                GraphMetadata.NodeMetadata node = metadata.getNodeMetadata(svgId);
-                String vlId = node.getVId();
-                substationsTree.getRoot().getChildren().forEach(child -> {
-                    TreeItem<Container> found = findTreeViewItem(child, vlId);
-                    if (found != null) {
-                        substationsTree.getSelectionModel().select(found);
-                    }
-                });
-            }
-
-            /**
-             * Called when the JS side detect sld-breaker or sld-disconnector selection.
-             * @param svgId the svg identity of svg element selected
-             */
-            public void handleSwitchPositionChange(String svgId) {
-                // Get SwitchId from svgId using metadata
-                GraphMetadata metadata = GraphMetadata.parseJson(new ByteArrayInputStream(metadataTextArea.getText().getBytes(StandardCharsets.UTF_8)));
-                GraphMetadata.NodeMetadata node = metadata.getNodeMetadata(svgId);
-                String swId = node.getEquipmentId();
-                // Get Switch to operate
-                Switch sw = null;
-                if (c.getContainerType() == ContainerType.VOLTAGE_LEVEL) {
-                    VoltageLevel v = (VoltageLevel) c;
-                    sw = v.getNetwork().getSwitch(swId);
-                } else if (c.getContainerType() == ContainerType.SUBSTATION) {
-                    Substation s = (Substation) c;
-                    sw = s.getNetwork().getSwitch(swId);
-                }
-                if (sw != null) {
-                    sw.setOpen(!sw.isOpen());
-                    DiagramStyleProvider styleProvider = styles.get(styleComboBox.getSelectionModel().getSelectedItem());
-                    styleProvider.reset();
-                    loadDiagram(c);
-                }
-            }
-
-            private TreeItem<Container> findTreeViewItem(TreeItem<Container> item, String vlId) {
-                if (item != null) {
-                    if (Objects.equals(item.getValue().getId(), vlId)) {
-                        return item;
-                    }
-                    for (TreeItem<Container> child : item.getChildren()) {
-                        TreeItem<Container> s = findTreeViewItem(child, vlId);
-                        if (s != null) {
-                            return s;
-                        }
-                    }
-                }
-                return null;
-            }
         }
 
         class ContainerDiagramResult {
@@ -405,6 +350,8 @@ public class SingleLineDiagramViewer extends Application implements DisplayVolta
             svgTextArea.setText(result.getSvgData());
             metadataTextArea.setText(result.getMetadataData());
             jsonTextArea.setText(result.getJsonData());
+
+            jsHandler.setMetadata(result.getMetadataData());
         }
 
         private ComponentLibrary getComponentLibrary() {
