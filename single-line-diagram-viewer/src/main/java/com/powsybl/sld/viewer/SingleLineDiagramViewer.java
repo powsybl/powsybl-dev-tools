@@ -327,17 +327,12 @@ public class SingleLineDiagramViewer extends Application implements DisplayVolta
         }
 
         public void loadContent(WebView diagramView, String svg) {
-            // Need to set HTML body margin to 0 to avoid margin around SVG displayed
-            String content = "<html>\n" +
-                    "<script type=\"text/javascript\">\n" + getJavaScript() + "</script>\n" +
-                    "<body style='margin: 0'>" + svg + "</body>\n" +
-                    "</html>";
-            diagramView.getEngine().loadContent(content);
-        }
-
-        private String getJavaScript() {
             try {
-                return new String(ByteStreams.toByteArray(Objects.requireNonNull(getClass().getResourceAsStream("/svg.js"))));
+                String html = new String(ByteStreams.toByteArray(Objects.requireNonNull(getClass().getResourceAsStream("/svg.html"))));
+                String js = new String(ByteStreams.toByteArray(Objects.requireNonNull(getClass().getResourceAsStream("/svg.js"))));
+                // Need to set HTML body margin to 0 to avoid margin around SVG displayed
+                String content = html.replace("%__JS__%", js).replace("%__SVG__%", svg);
+                diagramView.getEngine().loadContent(content);
             } catch (IOException e) {
                 throw new UncheckedIOException(e);
             }
