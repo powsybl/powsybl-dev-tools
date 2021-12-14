@@ -12,13 +12,13 @@ import java.util.function.Consumer;
 
 public class JsHandler {
 
-    private final TreeView<Container> substationsTree;
+    private final TreeView<Container<?>> substationsTree;
 
     private final Consumer<String> operateSwitch;
 
     private String metadata;
 
-    JsHandler(TreeView<Container> substationsTree, Consumer<String> operateSwitch) {
+    JsHandler(TreeView<Container<?>> substationsTree, Consumer<String> operateSwitch) {
         this.substationsTree = substationsTree;
         this.operateSwitch = operateSwitch;
     }
@@ -45,7 +45,7 @@ public class JsHandler {
         GraphMetadata.NodeMetadata node = graphMetadata.getNodeMetadata(svgId);
         if (Objects.nonNull(node)) {
             this.substationsTree.getRoot().getChildren().forEach(child -> {
-                TreeItem<Container> found = findTreeViewItem(child, node.getVId());
+                TreeItem<Container<?>> found = findTreeViewItem(child, node.getNextVId());
                 if (found != null) {
                     this.substationsTree.getSelectionModel().select(found);
                 }
@@ -58,13 +58,13 @@ public class JsHandler {
      * @param item tree item
      * @param vlId voltageLevel id
      */
-    private TreeItem<Container> findTreeViewItem(TreeItem<Container> item, String vlId) {
+    private TreeItem<Container<?>> findTreeViewItem(TreeItem<Container<?>> item, String vlId) {
         if (item != null) {
             if (Objects.equals(item.getValue().getId(), vlId)) {
                 return item;
             }
-            for (TreeItem<Container> child : item.getChildren()) {
-                TreeItem<Container> s = findTreeViewItem(child, vlId);
+            for (TreeItem<Container<?>> child : item.getChildren()) {
+                TreeItem<Container<?>> s = findTreeViewItem(child, vlId);
                 if (s != null) {
                     return s;
                 }
