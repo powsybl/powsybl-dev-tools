@@ -48,6 +48,7 @@ public class JsHandler {
                 TreeItem<Container<?>> found = findTreeViewItem(child, node.getNextVId());
                 if (found != null) {
                     this.substationsTree.getSelectionModel().select(found);
+                    this.substationsTree.scrollTo(this.substationsTree.getSelectionModel().getSelectedIndex());
                 }
             });
         }
