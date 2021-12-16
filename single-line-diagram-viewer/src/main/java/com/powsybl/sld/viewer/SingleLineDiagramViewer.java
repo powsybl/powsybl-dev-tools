@@ -8,6 +8,7 @@ package com.powsybl.sld.viewer;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.io.ByteStreams;
 import com.powsybl.commons.json.JsonUtil;
 import com.powsybl.computation.local.LocalComputationManager;
 import com.powsybl.iidm.import_.ImportConfig;
@@ -28,18 +29,15 @@ import com.powsybl.sld.svg.*;
 import com.powsybl.sld.util.NominalVoltageDiagramStyleProvider;
 import com.powsybl.sld.util.TopologicalStyleProvider;
 import javafx.application.Application;
-import javafx.beans.property.BooleanProperty;
-import javafx.beans.property.ObjectProperty;
-import javafx.beans.property.SimpleBooleanProperty;
-import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.property.*;
 import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
 import javafx.beans.value.WeakChangeListener;
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.concurrent.Service;
 import javafx.concurrent.Task;
+import javafx.concurrent.Worker;
 import javafx.geometry.Insets;
 import javafx.geometry.Side;
 import javafx.scene.Node;
@@ -52,6 +50,7 @@ import javafx.scene.web.WebView;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javafx.util.StringConverter;
+import netscape.javascript.JSObject;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -61,10 +60,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.function.BiFunction;
-import java.util.function.Function;
-import java.util.function.Predicate;
-import java.util.function.ToDoubleFunction;
+import java.util.function.*;
 import java.util.prefs.Preferences;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -101,7 +97,7 @@ public class SingleLineDiagramViewer extends Application implements DisplayVolta
 
     private final TextField filterInput = new TextField();
 
-    private final TreeView<Container> substationsTree = new TreeView<>();
+    private final TreeView<Container<?>> substationsTree = new TreeView<>();
 
     private final TabPane diagramsPane = new TabPane();
     private Tab tabSelected;
@@ -178,7 +174,19 @@ public class SingleLineDiagramViewer extends Application implements DisplayVolta
 
         private final ChangeListener<LayoutParameters> listener;
 
-        ContainerDiagramPane(Container c) {
+        /** For communication from the Javascript engine. */
+        private final JsHandler jsHandler;
+
+        ContainerDiagramPane(Container<?> c) {
+            jsHandler = new JsHandler(substationsTree, swId -> {
+                Switch sw = c.getNetwork().getSwitch(swId);
+                if (sw != null) {
+                    sw.setOpen(!sw.isOpen());
+                    DiagramStyleProvider styleProvider = styles.get(styleComboBox.getSelectionModel().getSelectedItem());
+                    styleProvider.reset();
+                    loadDiagram(c);
+                }
+            });
             createArea(svgSearchField, svgSearchButton, svgSaveButton, "SVG file", "*.svg", svgTextArea, svgArea, svgSearchStart);
             createArea(metadataSearchField, metadataSearchButton, metadataSaveButton, "JSON file", "*.json", metadataTextArea, metadataArea, metadataSearchStart);
             createArea(jsonSearchField, jsonSearchButton, jsonSaveButton, "JSON file", "*.json", jsonTextArea, jsonArea, jsonSearchStart);
@@ -214,6 +222,15 @@ public class SingleLineDiagramViewer extends Application implements DisplayVolta
             });
             // Avoid the useless right click on the image
             diagramView.setContextMenuEnabled(false);
+
+            // Set up the listener on WebView changes
+            diagramView.getEngine().getLoadWorker().stateProperty().addListener((observable, oldValue, newValue) -> {
+                if (Worker.State.SUCCEEDED == newValue) {
+                    // Set an interface object named 'jsHandler' in the web engine's page
+                    JSObject window = (JSObject) diagramView.getEngine().executeScript("window");
+                    window.setMember("jsHandler", jsHandler);
+                }
+            });
         }
 
         class ContainerDiagramResult {
@@ -251,7 +268,7 @@ public class SingleLineDiagramViewer extends Application implements DisplayVolta
             return diagramNamesComboBox.getSelectionModel().getSelectedItem();
         }
 
-        private ContainerDiagramResult createContainerDiagramView(WebView diagramView, Container c) {
+        private ContainerDiagramResult createContainerDiagramView(WebView diagramView, Container<?> c) {
             String svgData;
             String metadataData;
             String jsonData;
@@ -303,20 +320,25 @@ public class SingleLineDiagramViewer extends Application implements DisplayVolta
         }
 
         public void loadContent(WebView diagramView, String svg) {
-            // Need to set HTML body margin to 0 to avoid margin around SVG displayed
-            String content = "<html>\n" +
-                    "<body style='margin: 0'>" +
-                    svg +
-                    "</div></body></html>";
-            diagramView.getEngine().loadContent(content);
+            try {
+                String html = new String(ByteStreams.toByteArray(Objects.requireNonNull(getClass().getResourceAsStream("/svg.html"))));
+                String js = new String(ByteStreams.toByteArray(Objects.requireNonNull(getClass().getResourceAsStream("/svg.js"))));
+                // Need to set HTML body margin to 0 to avoid margin around SVG displayed
+                String content = html.replace("%__JS__%", js).replace("%__SVG__%", svg);
+                diagramView.getEngine().loadContent(content);
+            } catch (IOException e) {
+                throw new UncheckedIOException(e);
+            }
         }
 
-        private void loadDiagram(Container c) {
+        private void loadDiagram(Container<?> c) {
             ContainerDiagramResult result = createContainerDiagramView(diagramView, c);
 
             svgTextArea.setText(result.getSvgData());
             metadataTextArea.setText(result.getMetadataData());
             jsonTextArea.setText(result.getJsonData());
+
+            jsHandler.setMetadata(result.getMetadataData());
         }
 
         private ComponentLibrary getComponentLibrary() {
@@ -804,10 +826,10 @@ public class SingleLineDiagramViewer extends Application implements DisplayVolta
      */
     private void initTreeCellFactory() {
         substationsTree.setCellFactory(param -> {
-            CheckBoxTreeCell<Container> treeCell = new CheckBoxTreeCell<>();
-            StringConverter<TreeItem<Container>> strConvert = new StringConverter<TreeItem<Container>>() {
+            CheckBoxTreeCell<Container<?>> treeCell = new CheckBoxTreeCell<>();
+            StringConverter<TreeItem<Container<?>>> strConvert = new StringConverter<TreeItem<Container<?>>>() {
                 @Override
-                public String toString(TreeItem<Container> c) {
+                public String toString(TreeItem<Container<?>> c) {
                     if (c.getValue() != null) {
                         return getString(c.getValue());
                     } else {
@@ -816,7 +838,7 @@ public class SingleLineDiagramViewer extends Application implements DisplayVolta
                 }
 
                 @Override
-                public TreeItem<Container> fromString(String string) {
+                public TreeItem<Container<?>> fromString(String string) {
                     return null;
                 }
             };
@@ -929,15 +951,14 @@ public class SingleLineDiagramViewer extends Application implements DisplayVolta
         });
 
         // Handling selection of a substation or a voltageLevel in the substations tree
-        substationsTree.getSelectionModel().selectedItemProperty().addListener(new ChangeListener<TreeItem<Container>>() {
-            @Override
-            public void changed(ObservableValue<? extends TreeItem<Container>> observable, TreeItem<Container> oldValue, TreeItem<Container> newValue) {
-                if (newValue == null) {
-                    return;
-                }
-                Container c = newValue.getValue();
-                selectedDiagramPane.setCenter(new ContainerDiagramPane(c));
+        substationsTree.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
+            if (newValue == null) {
+                return;
             }
+            Container<?> c = newValue.getValue();
+            selectedDiagramPane.setCenter(new ContainerDiagramPane(c));
+
+            diagramsPane.getSelectionModel().select(tabSelected);
         });
 
         // case reloading
@@ -1031,12 +1052,12 @@ public class SingleLineDiagramViewer extends Application implements DisplayVolta
                 .forEach(selectableSubstation -> selectableSubstation.setCheckedProperty(checked));
     }
 
-    private void initVoltageLevelsTree(TreeItem<Container> rootItem,
+    private void initVoltageLevelsTree(TreeItem<Container<?>> rootItem,
                                        Substation s, String filter, boolean emptyFilter,
                                        Map<String, SelectableSubstation> mapSubstations,
                                        Map<String, SelectableVoltageLevel> mapVoltageLevels) {
         boolean firstVL = true;
-        CheckBoxTreeItem<Container> sItem = null;
+        CheckBoxTreeItem<Container<?>> sItem = null;
 
         for (VoltageLevel v : s.getVoltageLevels()) {
             boolean vlOk = showNames.isSelected() ? v.getName().contains(filter) : v.getId().contains(filter);
@@ -1061,7 +1082,7 @@ public class SingleLineDiagramViewer extends Application implements DisplayVolta
             firstVL = false;
 
             if (!hideVoltageLevels.isSelected()) {
-                CheckBoxTreeItem<Container> vItem = new CheckBoxTreeItem<>(v);
+                CheckBoxTreeItem<Container<?>> vItem = new CheckBoxTreeItem<>(v);
                 vItem.setIndependent(true);
                 if (mapVoltageLevels.containsKey(v.getId()) && mapVoltageLevels.get(v.getId()).checkedProperty().get()) {
                     vItem.setSelected(true);
@@ -1084,7 +1105,7 @@ public class SingleLineDiagramViewer extends Application implements DisplayVolta
         boolean emptyFilter = StringUtils.isEmpty(filter);
 
         Network n = networkProperty.get();
-        TreeItem<Container> rootItem = new TreeItem<>();
+        TreeItem<Container<?>> rootItem = new TreeItem<>();
         rootItem.setExpanded(true);
 
         Map<String, SelectableSubstation> mapSubstations = selectableSubstations.stream()
