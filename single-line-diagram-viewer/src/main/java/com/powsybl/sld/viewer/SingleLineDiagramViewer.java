@@ -14,10 +14,7 @@ import com.powsybl.computation.local.LocalComputationManager;
 import com.powsybl.iidm.import_.ImportConfig;
 import com.powsybl.iidm.import_.Importers;
 import com.powsybl.iidm.network.*;
-import com.powsybl.sld.GraphBuilder;
-import com.powsybl.sld.NetworkGraphBuilder;
-import com.powsybl.sld.SubstationDiagram;
-import com.powsybl.sld.VoltageLevelDiagram;
+import com.powsybl.sld.SingleLineDiagram;
 import com.powsybl.sld.cgmes.dl.iidm.extensions.NetworkDiagramData;
 import com.powsybl.sld.cgmes.layout.CgmesSubstationLayoutFactory;
 import com.powsybl.sld.cgmes.layout.CgmesVoltageLevelLayoutFactory;
@@ -278,32 +275,23 @@ public class SingleLineDiagramViewer extends Application implements DisplayVolta
                 DiagramStyleProvider styleProvider = styles.get(styleComboBox.getSelectionModel().getSelectedItem());
 
                 String dName = getSelectedDiagramName();
-                LayoutParameters diagramLayoutParameters = new LayoutParameters(layoutParameters.get()).setDiagramName(dName)
+                LayoutParameters diagramLayoutParameters = new LayoutParameters(layoutParameters.get())
+                        .setDiagramName(dName)
                         .setCssLocation(LayoutParameters.CssLocation.INSERTED_IN_SVG)
                         .setSvgWidthAndHeightAdded(true);
 
                 DiagramLabelProvider initProvider = new DefaultDiagramLabelProvider(networkProperty.get(), getComponentLibrary(), diagramLayoutParameters);
-                GraphBuilder graphBuilder = new NetworkGraphBuilder(networkProperty.get());
 
-                if (c.getContainerType() == ContainerType.VOLTAGE_LEVEL) {
-                    VoltageLevelDiagram diagram = VoltageLevelDiagram.build(graphBuilder, c.getId(), getVoltageLevelLayoutFactory(), showNames.isSelected());
-                    diagram.writeSvg("",
-                            new DefaultSVGWriter(getComponentLibrary(), diagramLayoutParameters),
-                            initProvider,
-                            styleProvider,
-                            svgWriter,
-                            metadataWriter);
-                    diagram.getGraph().writeJson(jsonWriter);
-                } else if (c.getContainerType() == ContainerType.SUBSTATION) {
-                    SubstationDiagram diagram = SubstationDiagram.build(graphBuilder, c.getId(), getSubstationLayoutFactory(), getVoltageLevelLayoutFactory(), showNames.isSelected());
-                    diagram.writeSvg("",
-                            new DefaultSVGWriter(getComponentLibrary(), diagramLayoutParameters),
-                            initProvider,
-                            styleProvider,
-                            svgWriter,
-                            metadataWriter);
-                    diagram.getSubGraph().writeJson(jsonWriter);
-                }
+                SingleLineDiagram.draw(networkProperty.get(), c.getId(),
+                        svgWriter,
+                        metadataWriter,
+                        diagramLayoutParameters,
+                        getComponentLibrary(),
+                        getSubstationLayoutFactory(),
+                        getVoltageLevelLayoutFactory(),
+                        initProvider,
+                        styleProvider,
+                        "");
 
                 svgWriter.flush();
                 metadataWriter.flush();
@@ -1206,7 +1194,7 @@ public class SingleLineDiagramViewer extends Application implements DisplayVolta
     }
 
     private void initStylesProvider() {
-        styles.put("Default", new DefaultDiagramStyleProvider());
+        styles.put("Default", new BasicStyleProvider());
         styles.put("Nominal voltage", null);
         styles.put("Topology", null);
     }
