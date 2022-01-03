@@ -276,6 +276,7 @@ public class SingleLineDiagramViewer extends Application implements DisplayVolta
 
                 String dName = getSelectedDiagramName();
                 LayoutParameters diagramLayoutParameters = new LayoutParameters(layoutParameters.get())
+                        .setUseName(showNames.isSelected())
                         .setDiagramName(dName)
                         .setCssLocation(LayoutParameters.CssLocation.INSERTED_IN_SVG)
                         .setSvgWidthAndHeightAdded(true);
