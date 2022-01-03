@@ -644,7 +644,7 @@ public class SingleLineDiagramViewer extends Application implements DisplayVolta
         parametersPane.add(svgLibraryComboBox, 0, rowIndex++);
 
         styleComboBox.getItems().addAll(styles.keySet());
-        styleComboBox.getSelectionModel().select(1);
+        styleComboBox.getSelectionModel().select(0);
         styleComboBox.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> refreshDiagram());
         parametersPane.add(new Label("Style:"), 0, rowIndex++);
         parametersPane.add(styleComboBox, 0, rowIndex++);
@@ -1195,7 +1195,7 @@ public class SingleLineDiagramViewer extends Application implements DisplayVolta
     }
 
     private void initStylesProvider() {
-        styles.put("Default", new BasicStyleProvider());
+        styles.put("Basic (default)", new BasicStyleProvider());
         styles.put("Nominal voltage", null);
         styles.put("Topology", null);
     }
