@@ -14,10 +14,7 @@ import com.powsybl.computation.local.LocalComputationManager;
 import com.powsybl.iidm.import_.ImportConfig;
 import com.powsybl.iidm.import_.Importers;
 import com.powsybl.iidm.network.*;
-import com.powsybl.sld.GraphBuilder;
-import com.powsybl.sld.NetworkGraphBuilder;
-import com.powsybl.sld.SubstationDiagram;
-import com.powsybl.sld.VoltageLevelDiagram;
+import com.powsybl.sld.SingleLineDiagram;
 import com.powsybl.sld.cgmes.dl.iidm.extensions.NetworkDiagramData;
 import com.powsybl.sld.cgmes.layout.CgmesSubstationLayoutFactory;
 import com.powsybl.sld.cgmes.layout.CgmesVoltageLevelLayoutFactory;
@@ -278,32 +275,24 @@ public class SingleLineDiagramViewer extends Application implements DisplayVolta
                 DiagramStyleProvider styleProvider = styles.get(styleComboBox.getSelectionModel().getSelectedItem());
 
                 String dName = getSelectedDiagramName();
-                LayoutParameters diagramLayoutParameters = new LayoutParameters(layoutParameters.get()).setDiagramName(dName)
+                LayoutParameters diagramLayoutParameters = new LayoutParameters(layoutParameters.get())
+                        .setUseName(showNames.isSelected())
+                        .setDiagramName(dName)
                         .setCssLocation(LayoutParameters.CssLocation.INSERTED_IN_SVG)
                         .setSvgWidthAndHeightAdded(true);
 
                 DiagramLabelProvider initProvider = new DefaultDiagramLabelProvider(networkProperty.get(), getComponentLibrary(), diagramLayoutParameters);
-                GraphBuilder graphBuilder = new NetworkGraphBuilder(networkProperty.get());
 
-                if (c.getContainerType() == ContainerType.VOLTAGE_LEVEL) {
-                    VoltageLevelDiagram diagram = VoltageLevelDiagram.build(graphBuilder, c.getId(), getVoltageLevelLayoutFactory(), showNames.isSelected());
-                    diagram.writeSvg("",
-                            new DefaultSVGWriter(getComponentLibrary(), diagramLayoutParameters),
-                            initProvider,
-                            styleProvider,
-                            svgWriter,
-                            metadataWriter);
-                    diagram.getGraph().writeJson(jsonWriter);
-                } else if (c.getContainerType() == ContainerType.SUBSTATION) {
-                    SubstationDiagram diagram = SubstationDiagram.build(graphBuilder, c.getId(), getSubstationLayoutFactory(), getVoltageLevelLayoutFactory(), showNames.isSelected());
-                    diagram.writeSvg("",
-                            new DefaultSVGWriter(getComponentLibrary(), diagramLayoutParameters),
-                            initProvider,
-                            styleProvider,
-                            svgWriter,
-                            metadataWriter);
-                    diagram.getSubGraph().writeJson(jsonWriter);
-                }
+                SingleLineDiagram.draw(networkProperty.get(), c.getId(),
+                        svgWriter,
+                        metadataWriter,
+                        diagramLayoutParameters,
+                        getComponentLibrary(),
+                        getSubstationLayoutFactory(),
+                        getVoltageLevelLayoutFactory(),
+                        initProvider,
+                        styleProvider,
+                        "");
 
                 svgWriter.flush();
                 metadataWriter.flush();
@@ -655,7 +644,7 @@ public class SingleLineDiagramViewer extends Application implements DisplayVolta
         parametersPane.add(svgLibraryComboBox, 0, rowIndex++);
 
         styleComboBox.getItems().addAll(styles.keySet());
-        styleComboBox.getSelectionModel().select(1);
+        styleComboBox.getSelectionModel().select(2);
         styleComboBox.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> refreshDiagram());
         parametersPane.add(new Label("Style:"), 0, rowIndex++);
         parametersPane.add(styleComboBox, 0, rowIndex++);
@@ -1206,14 +1195,14 @@ public class SingleLineDiagramViewer extends Application implements DisplayVolta
     }
 
     private void initStylesProvider() {
-        styles.put("Default", new DefaultDiagramStyleProvider());
+        styles.put("Basic", new BasicStyleProvider());
         styles.put("Nominal voltage", null);
-        styles.put("Topology", null);
+        styles.put("Topology (default)", null);
     }
 
     private void updateStylesProvider(Network network) {
         styles.put("Nominal voltage", new NominalVoltageDiagramStyleProvider(network));
-        styles.put("Topology", new TopologicalStyleProvider(network));
+        styles.put("Topology (default)", new TopologicalStyleProvider(network));
     }
 
     public static void main(String[] args) {
