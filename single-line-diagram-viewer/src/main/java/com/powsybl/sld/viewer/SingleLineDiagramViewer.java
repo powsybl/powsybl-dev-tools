@@ -632,7 +632,9 @@ public class SingleLineDiagramViewer extends Application implements DisplayVolta
                 pane.getDiagramView().setZoom(1.0); // 100%
             }
         });
-        FlowPane buttonsPane = new FlowPane(fitToContent, resetZoom);
+        GridPane buttonsPane = new GridPane();
+        buttonsPane.add(fitToContent, 0, 0);
+        buttonsPane.add(resetZoom, 1, 0);
         buttonsPane.setHgap(10);
         parametersPane.add(buttonsPane, 0, rowIndex++);
 
@@ -712,8 +714,6 @@ public class SingleLineDiagramViewer extends Application implements DisplayVolta
         rowIndex += 2;
         addSpinner("Scale factor:", 1, 20, 1, rowIndex, LayoutParameters::getScaleFactor, LayoutParameters::setScaleFactor);
         rowIndex += 2;
-        addSpinner("Arrows distance:", 0, 200, 1, rowIndex, LayoutParameters::getArrowDistance, LayoutParameters::setArrowDistance);
-        rowIndex += 2;
         addCheckBox("Avoid SVG components duplication", rowIndex, LayoutParameters::isAvoidSVGComponentsDuplication, LayoutParameters::setAvoidSVGComponentsDuplication);
 
         rowIndex += 1;
@@ -734,8 +734,15 @@ public class SingleLineDiagramViewer extends Application implements DisplayVolta
         addCheckBox("HighLight line state", rowIndex, LayoutParameters::isHighlightLineState, LayoutParameters::setHighlightLineState);
         rowIndex += 2;
         addCheckBox("Add nodes infos", rowIndex, LayoutParameters::isAddNodesInfos, LayoutParameters::setAddNodesInfos);
+
         rowIndex += 2;
-        addCheckBox("Feeder arrow symmetry", rowIndex, LayoutParameters::isFeederArrowSymmetry, LayoutParameters::setFeederArrowSymmetry);
+        addCheckBox("Feeder info symmetry", rowIndex, LayoutParameters::isFeederInfoSymmetry, LayoutParameters::setFeederInfoSymmetry);
+        rowIndex += 2;
+        addSpinner("Space for feeder infos", 0, 200, 1, rowIndex, LayoutParameters::getSpaceForFeederInfos, LayoutParameters::setSpaceForFeederInfos);
+        rowIndex += 2;
+        addSpinner("Feeder Infos outer margin:", 0, 200, 1, rowIndex, LayoutParameters::getFeederInfosOuterMargin, LayoutParameters::setFeederInfosOuterMargin);
+        rowIndex += 2;
+        addSpinner("Feeder infos intra margin", 0, 200, 1, rowIndex, LayoutParameters::getFeederInfosIntraMargin, LayoutParameters::setFeederInfosIntraMargin);
     }
 
     private ContainerDiagramPane getContainerDiagramPane() {
