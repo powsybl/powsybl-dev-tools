@@ -24,18 +24,27 @@
     <version>1.0.0-SNAPSHOT</version>
     <description>A JavaFX application for single line diagrams visualization and debugging</description>
 
+    <developers>
+        <developer>
+            <name>Florian DUPUY</name>
+            <email>florian.dupuy@rte-france.com</email>
+            <organization>RTE</organization>
+            <organizationUrl>http://www.rte-france.com</organizationUrl>
+        </developer>
+    </developers>
+
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
         <java.version>11</java.version>
 
         <franzxaver.version>0.1</franzxaver.version>
-        <javafx.version>11.0.2</javafx.version>
+        <javafx.version>17</javafx.version>
         <slf4j.version>1.7.22</slf4j.version>
         <junit.version>4.13.1</junit.version>
 
-        <powsybl-single-line-diagram.version>2.5.0-SNAPSHOT</powsybl-single-line-diagram.version>
-        <powsybl-core.version>4.4.0</powsybl-core.version>
+        <powsybl-single-line-diagram.version>2.8.0-SNAPSHOT</powsybl-single-line-diagram.version>
+        <powsybl-core.version>4.6.0</powsybl-core.version>
     </properties>
 
     <dependencyManagement>
@@ -52,21 +61,13 @@
 
     <dependencies>
         <dependency>
-            <groupId>com.github.afester.javafx</groupId>
-            <artifactId>FranzXaver</artifactId>
-            <version>${franzxaver.version}</version>
-            <exclusions>
-                <!-- The Xalan version from FranzXaver does not support http://javax.xml.XMLConstants/property/accessExternalDTD
-                 but JDK internal does -->
-                <exclusion>
-                    <groupId>xalan</groupId>
-                    <artifactId>xalan</artifactId>
-                </exclusion>
-            </exclusions>
+            <groupId>org.openjfx</groupId>
+            <artifactId>javafx-controls</artifactId>
+            <version>${javafx.version}</version>
         </dependency>
         <dependency>
             <groupId>org.openjfx</groupId>
-            <artifactId>javafx-controls</artifactId>
+            <artifactId>javafx-web</artifactId>
             <version>${javafx.version}</version>
         </dependency>
 
