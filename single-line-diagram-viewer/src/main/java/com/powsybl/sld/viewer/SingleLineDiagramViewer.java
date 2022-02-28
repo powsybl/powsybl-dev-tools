@@ -1189,9 +1189,6 @@ public class SingleLineDiagramViewer extends Application implements DisplayVolta
         substationsLayouts.put("Horizontal", new HorizontalSubstationLayoutFactory());
         substationsLayouts.put("Vertical", new VerticalSubstationLayoutFactory());
         substationsLayouts.put("Cgmes", null);
-        substationsLayouts.put("Smart", new ForceSubstationLayoutFactory(ForceSubstationLayoutFactory.CompactionType.NONE));
-        substationsLayouts.put("Smart with horizontal compaction", new ForceSubstationLayoutFactory(ForceSubstationLayoutFactory.CompactionType.HORIZONTAL));
-        substationsLayouts.put("Smart with vertical compaction", new ForceSubstationLayoutFactory(ForceSubstationLayoutFactory.CompactionType.VERTICAL));
     }
 
     private void updateLayoutsFactory(Network network) {
