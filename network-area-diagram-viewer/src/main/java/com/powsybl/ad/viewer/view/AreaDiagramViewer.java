@@ -1,10 +1,16 @@
+/**
+ * Copyright (c) 2022, RTE (http://www.rte-france.com)
+ * This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ */
+
 package com.powsybl.ad.viewer.view;
 
 import com.powsybl.ad.viewer.controller.ControllerImport;
 import com.powsybl.ad.viewer.controller.ControllerOptions;
 import com.powsybl.ad.viewer.controller.ControllerParameters;
 import com.powsybl.ad.viewer.controller.ControllerDiagram;
-import com.powsybl.ad.viewer.main.Main;
 import com.powsybl.ad.viewer.util.Util;
 import com.powsybl.ad.viewer.view.diagram.DiagramPane;
 import javafx.application.Application;
@@ -13,9 +19,12 @@ import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.layout.BorderPane;
 import javafx.stage.Stage;
-
 import java.net.URL;
 
+
+/**
+ * @author Louis Lhotte <louis.lhotte@student-cs.fr>
+ */
 public class AreaDiagramViewer extends Application
 {
     private static Stage primaryStage;
@@ -34,19 +43,25 @@ public class AreaDiagramViewer extends Application
 
     public void start(Stage stage) throws Exception
     {
-        ImportBar importBar = createImportBar();
-
-        OptionsPane optionsPane = createOptionsPane();
+        primaryStage = new Stage();
+        cParameters  = new ControllerParameters(primaryStage);
+        cOptions  = new ControllerOptions(primaryStage);
+        cDiagram  = new ControllerDiagram(primaryStage);
+        cImport  = new ControllerImport(primaryStage);
 
         ParamPane paramPane = createParamPane();
 
         DiagramPane diagramPane = createDiagramPane();
 
+        OptionsPane optionsPane = createOptionsPane();
+
+        ImportBar importBar = createImportBar();
+
         SplitPane splitPane = createSplitPane(optionsPane, diagramPane, paramPane);
 
         BorderPane mainPane = createMainPane(splitPane, importBar);
         primaryScene = new Scene(mainPane, 1000, 800);
-        primaryStage = new Stage();
+
 
         URL imageURL = getClass().getResource("images/logo.png");
         primaryStage.getIcons().add(new Image(imageURL.toExternalForm()));
@@ -57,17 +72,15 @@ public class AreaDiagramViewer extends Application
 
     private ParamPane createParamPane()
     {
-        ControllerParameters cParam  = new ControllerParameters(primaryStage);
-        cParam.createParamPane();
-        cParam.setParamPane();
+        cParameters.createParamPane();
+        cParameters.setParamPane();
 
         Util.logger.info("Param pane correctly created.");
-        return cParam.getParamPane();
+        return cParameters.getParamPane();
     }
 
     private OptionsPane createOptionsPane()
     {
-        ControllerOptions cOptions  = new ControllerOptions(primaryStage);
         cOptions.createOptionsPane();
         cOptions.setParamPane();
 
@@ -77,14 +90,7 @@ public class AreaDiagramViewer extends Application
 
     private DiagramPane createDiagramPane()
     {
-        if (cDiagram == null)
-            cDiagram  = new ControllerDiagram(primaryStage);
-
         cDiagram.createDiagramPane();
-        cDiagram.setDiagramPane();
-
-        cDiagram.createInfoDiagramPane();
-        cDiagram.setInfoDiagramPane();
 
         Util.logger.info("Diagram pane correctly created.");
         return cDiagram.getDiagramPane();
@@ -92,9 +98,8 @@ public class AreaDiagramViewer extends Application
 
     private ImportBar createImportBar()
     {
-        ControllerImport cImport  = new ControllerImport(primaryStage);
         cImport.createImportBar(3);
-        cImport.setImportBar();
+        cImport.setImportBar(cOptions);
 
         Util.logger.info("Import bar correctly created.");
         return cImport.getImportBar();

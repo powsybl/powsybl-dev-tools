@@ -1,3 +1,9 @@
+/**
+ * Copyright (c) 2022, RTE (http://www.rte-france.com)
+ * This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ */
 package com.powsybl.ad.viewer.view;
 
 import javafx.geometry.Insets;
@@ -6,6 +12,9 @@ import javafx.scene.layout.GridPane;
 import javafx.scene.text.Text;
 import com.powsybl.nad.layout.LayoutParameters;
 
+/**
+ * @author Louis Lhotte <louis.lhotte@student-cs.fr>
+ */
 public class ParamPane extends ScrollPane
 {
     private GridPane buttonsPane;

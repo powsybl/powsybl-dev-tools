@@ -1,4 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+
+    Copyright (c) 2022, RTE (http://www.rte-france.com)
+    This Source Code Form is subject to the terms of the Mozilla Public
+    License, v. 2.0. If a copy of the MPL was not distributed with this
+    file, You can obtain one at http://mozilla.org/MPL/2.0/.
+
+-->
+
 <project xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
@@ -8,25 +18,23 @@
         <groupId>com.powsybl</groupId>
         <artifactId>powsybl-parent</artifactId>
         <version>4</version>
-        <relativePath/>
     </parent>
 
-    <groupId>org.example</groupId>
     <artifactId>powsybl-network-area-diagram-viewer</artifactId>
-    <version>1.0-SNAPSHOT</version>
+    <version>0.1.0-SNAPSHOT</version>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <java.version>11</java.version>
         <franzxaver.version>0.1</franzxaver.version>
-        <javafx.version>17</javafx.version>
+        <javafx.version>17.0.1</javafx.version>
         <slf4j.version>1.7.22</slf4j.version>
         <junit.version>4.13.1</junit.version>
         <maven.compiler.source>17</maven.compiler.source>
         <maven.compiler.target>17</maven.compiler.target>
         <powsybl.nad.version>0.4.0-SNAPSHOT</powsybl.nad.version>
-        <powsybl.core.version>4.8.0-SNAPSHOT</powsybl.core.version>
-        <powsybl.open.loadflow.version>0.18.0-SNAPSHOT</powsybl.open.loadflow.version>
+        <powsybl.core.version>4.7.0</powsybl.core.version>
+        <powsybl.open.loadflow.version>0.17.0</powsybl.open.loadflow.version>
     </properties>
 
     <dependencies>
@@ -78,7 +86,12 @@
         <dependency>
             <groupId>org.openjfx</groupId>
             <artifactId>javafx-controls</artifactId>
-            <version>17.0.1</version>
+            <version>${javafx.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.openjfx</groupId>
+            <artifactId>javafx-web</artifactId>
+            <version>${javafx.version}</version>
         </dependency>
     </dependencies>
 

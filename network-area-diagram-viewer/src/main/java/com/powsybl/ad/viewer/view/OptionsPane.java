@@ -1,11 +1,24 @@
+/**
+ * Copyright (c) 2022, RTE (http://www.rte-france.com)
+ * This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ */
 package com.powsybl.ad.viewer.view;
 
 import javafx.geometry.Insets;
+import javafx.geometry.Orientation;
 import javafx.scene.control.*;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
+import javafx.scene.layout.VBox;
 
-public class OptionsPane extends BorderPane
+import java.util.ArrayList;
+
+/**
+ * @author Louis Lhotte <louis.lhotte@student-cs.fr>
+ */
+public class OptionsPane extends SplitPane
 {
     private GridPane toolBar;
 
@@ -15,26 +28,24 @@ public class OptionsPane extends BorderPane
     private Button runLoadFlowButton;
     private TextField filtersField;
 
-    private TreeView substationsTree;
-
+    private VBox nodesPane;
+    private ArrayList <CheckBox> nodeCheckBoxes = new ArrayList<CheckBox> ();
 
     public OptionsPane()
     {
         this.setPadding(new Insets(5, 5, 5, 5));
 
         createOptionsToolBar();
-        createSubstationsTree();
-
-        this.setTop(toolBar);
-        this.setCenter(substationsTree);
+        createNodePane();
+        this.getItems().addAll(toolBar, nodesPane);
+        this.setOrientation(Orientation.VERTICAL);
     }
 
     public void createOptionsToolBar()
     {
         toolBar = new GridPane();
 
-        fullNetworkCheck  = new CheckBox();
-        Label fullNetworkLabel = new Label("Full network");
+        fullNetworkCheck  = new CheckBox("Full network");
 
         depthSpinner = new Spinner();
         Label spinnerLabel = new Label("Depth");
@@ -46,7 +57,6 @@ public class OptionsPane extends BorderPane
 
         toolBar.setPadding(new Insets(5, 5, 5, 5));
         toolBar.add(fullNetworkCheck, 1, 0);
-        toolBar.add(fullNetworkLabel, 0, 0);
         toolBar.add(depthSpinner, 1, 1);
         toolBar.add(spinnerLabel, 0, 1);
         toolBar.add(runLoadFlowButton, 0, 2);
@@ -54,9 +64,22 @@ public class OptionsPane extends BorderPane
         toolBar.add(filtersLabel, 0, 3);
     }
 
-    public void createSubstationsTree()
+    public void createNodePane()
     {
-        substationsTree = new TreeView();
+        nodesPane = new VBox();
+        nodesPane.setPadding(new Insets(5, 5, 5, 5));
+    }
+
+    public void createNodes(ArrayList <String> nodesName)
+    {
+        for (String name : nodesName)
+            nodeCheckBoxes.add(new CheckBox(name));
+    }
+
+    public void displayNodes()
+    {
+        for (CheckBox checkBox : nodeCheckBoxes)
+            nodesPane.getChildren().add(checkBox);
     }
 
     public CheckBox getFullNetworkCheck()
@@ -78,4 +101,5 @@ public class OptionsPane extends BorderPane
     {
         return filtersField;
     }
+    public ArrayList <CheckBox> getNodesCheckBoxes() { return nodeCheckBoxes; }
 }

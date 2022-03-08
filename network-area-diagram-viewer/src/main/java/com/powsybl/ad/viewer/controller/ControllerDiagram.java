@@ -1,14 +1,25 @@
+/**
+ * Copyright (c) 2022, RTE (http://www.rte-france.com)
+ * This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ */
 package com.powsybl.ad.viewer.controller;
 
 import com.powsybl.ad.viewer.view.diagram.DiagramPane;
 import com.powsybl.ad.viewer.view.diagram.ContainerDiagramPane;
 import javafx.stage.Stage;
 
-public class ControllerDiagram {
+import java.io.StringWriter;
+
+/**
+ * @author Louis Lhotte <louis.lhotte@student-cs.fr>
+ */
+public class ControllerDiagram
+{
     private Stage primaryStage;
 
-    private DiagramPane diagramPane;
-    private ContainerDiagramPane infoDiagramPane;
+    private static DiagramPane diagramPane;
 
     public ControllerDiagram(Stage primaryStage)
     {
@@ -20,23 +31,9 @@ public class ControllerDiagram {
         diagramPane = new DiagramPane();
     }
 
-    public void setDiagramPane()
+    public static void loadNewSVG(StringWriter newSvg)
     {
-    }
-
-    public void createInfoDiagramPane()
-    {
-        infoDiagramPane = new ContainerDiagramPane();
-    }
-
-    public void setInfoDiagramPane()
-    {
-    }
-
-
-    public ContainerDiagramPane getInfoDiagramPane()
-    {
-        return infoDiagramPane;
+        diagramPane.addSVG(newSvg);
     }
 
     public DiagramPane getDiagramPane()
