@@ -567,6 +567,22 @@ public class SingleLineDiagramViewer extends Application implements DisplayVolta
         parametersPane.add(cb, 0, row);
     }
 
+    private <E> void addComboBox(String label, int row,
+                                 E[] initializer,
+                                 StringConverter<E> converter,
+                                 BiFunction<LayoutParameters, E, LayoutParameters> updater) {
+
+        ComboBox<E> cb = new ComboBox<>();
+        cb.getItems().setAll(initializer);
+        cb.getSelectionModel().select(initializer[0]);
+        cb.setConverter(converter);
+        cb.setEditable(true);
+        cb.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> setParameters(updater.apply(layoutParameters.get(), newValue)));
+        cb.valueProperty().addListener((observable, oldValue, newValue) -> setParameters(updater.apply(layoutParameters.get(), newValue)));
+        parametersPane.add(new Label(label), 0, row);
+        parametersPane.add(cb, 0, row + 1);
+    }
+
     private void initPositionLayoutCheckBox(Predicate<PositionVoltageLevelLayoutFactory> initializer, CheckBox stackCb) {
         VoltageLevelLayoutFactory layoutFactory = getVoltageLevelLayoutFactory();
         stackCb.setSelected(layoutFactory instanceof PositionVoltageLevelLayoutFactory && initializer.test((PositionVoltageLevelLayoutFactory) layoutFactory));
@@ -722,6 +738,19 @@ public class SingleLineDiagramViewer extends Application implements DisplayVolta
         addSpinner("Min space between components:", 8, 60, 1, rowIndex, LayoutParameters::getMinSpaceBetweenComponents, LayoutParameters::setMinSpaceBetweenComponents);
         rowIndex += 2;
         addSpinner("Minimum extern cell height:", 80, 300, 10, rowIndex, LayoutParameters::getMinExternCellHeight, LayoutParameters::setMinExternCellHeight);
+
+        rowIndex += 2;
+        StringConverter<LayoutParameters.Alignment> converter = new StringConverter<>() {
+            @Override
+            public String toString(LayoutParameters.Alignment object) {
+                 return object.name();
+            }
+            @Override
+            public LayoutParameters.Alignment fromString(String string) {
+                return LayoutParameters.Alignment.valueOf(string);
+            }
+        };
+        addComboBox("BusBar alignment:", rowIndex, LayoutParameters.Alignment.values(), converter, LayoutParameters::setBusbarsAlignment);
 
         rowIndex += 2;
         addCheckBox("Center label:", rowIndex, LayoutParameters::isLabelCentered, LayoutParameters::setLabelCentered);
