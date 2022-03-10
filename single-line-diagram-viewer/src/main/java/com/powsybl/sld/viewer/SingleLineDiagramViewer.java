@@ -576,7 +576,6 @@ public class SingleLineDiagramViewer extends Application implements DisplayVolta
         cb.getItems().setAll(initializer);
         cb.getSelectionModel().select(initializer[0]);
         cb.setConverter(converter);
-        cb.setEditable(true);
         cb.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> setParameters(updater.apply(layoutParameters.get(), newValue)));
         cb.valueProperty().addListener((observable, oldValue, newValue) -> setParameters(updater.apply(layoutParameters.get(), newValue)));
         parametersPane.add(new Label(label), 0, row);
