@@ -696,8 +696,6 @@ public class SingleLineDiagramViewer extends Application implements DisplayVolta
         rowIndex += 2;
         addCheckBox("Show grid", rowIndex, LayoutParameters::isShowGrid, LayoutParameters::setShowGrid);
         rowIndex += 1;
-        addCheckBox("Add svg tooltip", rowIndex, LayoutParameters::isTooltipEnabled, LayoutParameters::setTooltipEnabled);
-        rowIndex += 1;
         addCheckBox("Show internal nodes", rowIndex, LayoutParameters::isShowInternalNodes, LayoutParameters::setShowInternalNodes);
         rowIndex += 1;
         addCheckBox("Draw straight wires", rowIndex, LayoutParameters::isDrawStraightWires, LayoutParameters::setDrawStraightWires);
