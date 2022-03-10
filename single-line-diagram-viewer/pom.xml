@@ -43,7 +43,7 @@
         <slf4j.version>1.7.22</slf4j.version>
         <junit.version>4.13.1</junit.version>
 
-        <powsybl-single-line-diagram.version>2.9.0-SNAPSHOT</powsybl-single-line-diagram.version>
+        <powsybl-single-line-diagram.version>2.10.0-SNAPSHOT</powsybl-single-line-diagram.version>
         <powsybl-core.version>4.7.0</powsybl-core.version>
     </properties>
 
