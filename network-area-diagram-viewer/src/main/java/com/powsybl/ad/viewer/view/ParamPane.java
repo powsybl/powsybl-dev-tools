@@ -6,6 +6,9 @@
  */
 package com.powsybl.ad.viewer.view;
 
+import com.powsybl.ad.viewer.controller.ControllerParameters;
+import com.powsybl.ad.viewer.model.NadCalls;
+import com.powsybl.nad.svg.StyleProvider;
 import javafx.geometry.Insets;
 import javafx.scene.control.*;
 import javafx.scene.layout.GridPane;
@@ -76,20 +79,20 @@ public class ParamPane extends ScrollPane
     public void createChoiceBoxesPane()
     {
         layoutChoice = new ChoiceBox();
-        layoutChoice.getItems().add("Horizontal");
-        layoutChoice.getItems().add("Vertical");
-        layoutChoice.getItems().add("Cgmes");
-        layoutChoice.getItems().add("Smart");
-        layoutChoice.getItems().add("Smart with horizontal compaction");
-        layoutChoice.getItems().add("Smart with vertical compaction");
+        layoutChoice.getItems().add("Basic");
+        layoutChoice.getSelectionModel().selectFirst();
         Label layoutLabel = new Label("Layout");
 
         labelProviderChoice = new ChoiceBox();
         labelProviderChoice.getItems().add("Default");
+        labelProviderChoice.getSelectionModel().selectFirst();
         Label labelProviderLabel     = new Label("LabelProvider");
 
         styleProviderChoice = new ChoiceBox();
-        styleProviderChoice.getItems().add("Default");
+        styleProviderChoice.getItems().add("Topological");
+        styleProviderChoice.getItems().add("Nominal");
+        styleProviderChoice.getSelectionModel().selectFirst();  // make ChoiceBox styleProviderChoice
+                                                                // select its first element
         Label styleProviderLabel = new Label("StyleProvider");
 
         choicePane = new GridPane();
@@ -175,8 +178,18 @@ public class ParamPane extends ScrollPane
         return labelProviderChoice;
     }
 
-    public ChoiceBox getStyleProviderChoice() {
-        return styleProviderChoice;
+    public ChoiceBox getStyleProviderChoice() { return styleProviderChoice; }
+
+    public void setLayoutChoice(ChoiceBox layoutChoice) {
+        this.layoutChoice = layoutChoice;
+    }
+
+    public void setLabelProviderChoice(ChoiceBox labelProviderChoice) {
+        this.labelProviderChoice = labelProviderChoice;
+    }
+
+    public void setStyleProviderChoice(ChoiceBox styleProviderChoice) {
+        this.styleProviderChoice = styleProviderChoice;
     }
 
     public GridPane getLayoutParametersPane() {

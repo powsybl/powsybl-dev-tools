@@ -314,6 +314,7 @@ public class SingleLineDiagramViewer extends Application implements DisplayVolta
                 String js = new String(ByteStreams.toByteArray(Objects.requireNonNull(getClass().getResourceAsStream("/svg.js"))));
                 // Need to set HTML body margin to 0 to avoid margin around SVG displayed
                 String content = html.replace("%__JS__%", js).replace("%__SVG__%", svg);
+                System.out.println(content);
                 diagramView.getEngine().loadContent(content);
             } catch (IOException e) {
                 throw new UncheckedIOException(e);

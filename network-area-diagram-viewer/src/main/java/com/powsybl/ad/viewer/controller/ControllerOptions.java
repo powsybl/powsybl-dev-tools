@@ -8,13 +8,12 @@ package com.powsybl.ad.viewer.controller;
 
 import com.powsybl.ad.viewer.model.NadCalls;
 import com.powsybl.ad.viewer.view.OptionsPane;
+import com.powsybl.ad.viewer.view.diagram.DiagramPane;
 import javafx.scene.control.*;
-import javafx.scene.layout.GridPane;
-import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
-import java.io.StringWriter;
 import java.util.ArrayList;
+
 
 /**
  * @author Louis Lhotte <louis.lhotte@student-cs.fr>
@@ -37,7 +36,7 @@ public class ControllerOptions
     public void setParamPane()
     {
         // Full Network Check
-        addListenerOnNetworkCheck(optionsPane.getFullNetworkCheck());
+        addListenerOnFullNetworkCheck(optionsPane.getFullNetworkCheck());
 
         // Depth Spinner
         SpinnerValueFactory<Integer> valueFactory = new SpinnerValueFactory.IntegerSpinnerValueFactory(1, 5, 1);
@@ -58,15 +57,13 @@ public class ControllerOptions
         // Filters pane
         addListenerOnNodesPane(optionsPane.getNodesCheckBoxes(), primaryStage);
     }
-    private void addListenerOnNetworkCheck(CheckBox check)
+    private void addListenerOnFullNetworkCheck(CheckBox check)
     {
         check.setOnAction(event ->
         {
             if (check.isSelected() && NadCalls.svgWriter != null)
             {
-                System.out.println("Network Check Selected OK");
-                //ControllerDiagram.loadNewSVG(NadCalls.svgWriter);
-                ControllerDiagram.loadNewSVG(new StringWriter());
+                ControllerDiagram.loadNewSVG(NadCalls.svgWriter);  // calls addSVG which actually displays the svg
             }
             else
                 System.out.println("Network Check Unselected OK");

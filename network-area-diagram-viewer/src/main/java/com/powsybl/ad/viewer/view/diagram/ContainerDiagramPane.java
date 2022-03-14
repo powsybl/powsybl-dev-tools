@@ -6,9 +6,20 @@
  */
 package com.powsybl.ad.viewer.view.diagram;
 
+import com.google.common.io.ByteStreams;
+import com.powsybl.ad.viewer.util.JsHandler;
+import com.powsybl.iidm.network.Switch;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
+import javafx.concurrent.Worker;
 import javafx.scene.control.*;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.web.WebEngine;
 import javafx.scene.web.WebView;
+import netscape.javascript.JSObject;
+
+import java.io.IOException;
+import java.util.Objects;
 
 
 /**
@@ -17,8 +28,12 @@ import javafx.scene.web.WebView;
 public class ContainerDiagramPane extends BorderPane
 {
     // Components for diagramPane
-    /* private final WebView diagramView = new WebView();
-    private final TextField svgSearchField = new TextField();
+    final WebView diagramView = new WebView();
+    final WebEngine webEngine = diagramView.getEngine();
+    // For communication from the Javascript engine.
+//    private final JsHandler jsHandler;
+
+    /* private final TextField svgSearchField = new TextField();
     private final Button svgSearchButton = new Button("Search");
     private final TextArea svgTextArea = new TextArea();
     private AtomicReference <Integer> svgSearchStart = new AtomicReference<>(0);
@@ -29,10 +44,10 @@ public class ContainerDiagramPane extends BorderPane
 
     private TabPane diagramTabPane;
     private Tab diagramTab;
+    private ScrollPane scrollPane = new ScrollPane();
 
     private Tab svgTab;
     private TextArea svgTextArea;
-
 
     //private final ChangeListener<LayoutParameters> listener;
 
@@ -43,7 +58,6 @@ public class ContainerDiagramPane extends BorderPane
 
         this.setCenter(diagramTabPane);
         this.setBottom(infoPane);
-
     }
 
     private void createDiagramPane() {
@@ -57,6 +71,7 @@ public class ContainerDiagramPane extends BorderPane
     private void createSVGTab()
     {
         svgTextArea = new TextArea("");
+        svgTextArea.setEditable(false);
         svgTab = new Tab("SVG", svgTextArea);
         svgTab.setClosable(false);
     }
@@ -64,6 +79,8 @@ public class ContainerDiagramPane extends BorderPane
     private void createDiagramTab()
     {
         diagramTab = new Tab("Diagram");
+        scrollPane.setContent(diagramView);
+        diagramTab.setContent(scrollPane);
         diagramTab.setClosable(false);
     }
 
@@ -81,5 +98,4 @@ public class ContainerDiagramPane extends BorderPane
     public void setSVGText(String newSvgText) { svgTextArea.setText(newSvgText); }
 
     public void setSVGInfo(String newSvgInfo) { infoArea.setText(newSvgInfo); }
-
 }

@@ -6,6 +6,7 @@
  */
 package com.powsybl.ad.viewer.controller;
 
+import com.powsybl.ad.viewer.model.DisplaySVG;
 import com.powsybl.ad.viewer.view.diagram.DiagramPane;
 import com.powsybl.ad.viewer.view.diagram.ContainerDiagramPane;
 import javafx.stage.Stage;
@@ -33,7 +34,7 @@ public class ControllerDiagram
 
     public static void loadNewSVG(StringWriter newSvg)
     {
-        diagramPane.addSVG(newSvg);
+        diagramPane.addSVG(DisplaySVG.getContentSVG(), newSvg);
     }
 
     public DiagramPane getDiagramPane()
