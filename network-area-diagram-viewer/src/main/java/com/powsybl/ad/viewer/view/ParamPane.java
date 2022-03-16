@@ -5,15 +5,10 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 package com.powsybl.ad.viewer.view;
-
-import com.powsybl.ad.viewer.controller.ControllerParameters;
-import com.powsybl.ad.viewer.model.NadCalls;
-import com.powsybl.nad.svg.StyleProvider;
 import javafx.geometry.Insets;
 import javafx.scene.control.*;
 import javafx.scene.layout.GridPane;
 import javafx.scene.text.Text;
-import com.powsybl.nad.layout.LayoutParameters;
 
 /**
  * @author Louis Lhotte <louis.lhotte@student-cs.fr>

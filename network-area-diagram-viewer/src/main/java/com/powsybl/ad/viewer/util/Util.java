@@ -18,6 +18,9 @@ public class Util
 {
     //Creating the Logger object
     public static final Logger logger = LoggerFactory.getLogger("AreaDiagramViewerLogger");
+    public static final Logger loggerclasse1 = LoggerFactory.getLogger("Classe1Logger");
+    public static final Logger loggerclasse2 = LoggerFactory.getLogger("Classe2Logger");
+
 
     public static final Preferences preferences = Preferences.userNodeForPackage(Util.class);
     public static final String CASE_PATH_PROPERTY = "casePath";

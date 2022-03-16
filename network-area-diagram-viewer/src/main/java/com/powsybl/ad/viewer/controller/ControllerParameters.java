@@ -8,16 +8,14 @@ package com.powsybl.ad.viewer.controller;
 
 import com.powsybl.ad.viewer.model.NadCalls;
 import com.powsybl.ad.viewer.view.ParamPane;
+import com.powsybl.ad.viewer.view.diagram.DiagramPane;
 import com.powsybl.nad.svg.StyleProvider;
 import com.powsybl.nad.svg.iidm.NominalVoltageStyleProvider;
 import com.powsybl.nad.svg.iidm.TopologicalStyleProvider;
 import javafx.scene.control.*;
 import javafx.stage.Stage;
-
+import static com.powsybl.ad.viewer.model.NadCalls.networkProperty;
 import java.io.IOException;
-
-import static com.powsybl.ad.viewer.controller.ControllerDiagram.loadNewSVG;
-import static com.powsybl.ad.viewer.model.DisplaySVG.loadContent;
 import static com.powsybl.ad.viewer.model.NadCalls.*;
 import static com.powsybl.ad.viewer.view.diagram.DiagramPane.cleanSVG;
 
@@ -31,7 +29,8 @@ public class ControllerParameters
 
     public static StyleProvider styleProvider;  // inside it will be stored the dropdown list's selected value
 
-    public static void reselectDefaultChoiceBoxes() {
+    public static void reselectDefaultChoiceBoxes()
+    {
         ChoiceBox layoutChoice = paramPane.getLayoutChoice();
         layoutChoice.getSelectionModel().selectFirst();  // make ChoiceBox layoutChoice select its first element
         paramPane.setLayoutChoice(layoutChoice);
@@ -45,7 +44,6 @@ public class ControllerParameters
         styleProviderChoice.getSelectionModel().selectFirst();  // make ChoiceBox styleProviderChoice
                                                                 // select its first element
         paramPane.setStyleProviderChoice(layoutChoice);
-        ControllerParameters.styleProvider = new TopologicalStyleProvider(network);  // set variable styleProvider
     }
 
     public ControllerParameters(Stage primaryStage)
@@ -128,24 +126,22 @@ public class ControllerParameters
         styleProviderChoice.setOnAction(event ->
         {
             if (styleProviderChoice.getValue() == "Nominal") {
-                styleProvider = new NominalVoltageStyleProvider(NadCalls.network);
+                styleProvider = new NominalVoltageStyleProvider(networkProperty.get());
                 try {
                     cleanSVG();  // clean the window and the variables
                     drawNetwork();  // changes the variable svgWriter
-                    loadContent(svgWriter.toString());  // changes the variable contentSVG
-                    loadNewSVG(svgWriter);  // calls addSVG which actually displays the svg
+                    DiagramPane.addSVG(svgWriter);  // draws nad's svg
                     System.out.println("styleProvider variable successfully changed to 'NominalVoltageStyleProvider'");
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
             }
             else if (styleProviderChoice.getValue() == "Topological") {
-                styleProvider = new TopologicalStyleProvider(NadCalls.network);
+                styleProvider = new TopologicalStyleProvider(NadCalls.networkProperty.get());
                 try {
                     cleanSVG();  // clean the window and the variables
                     drawNetwork();  // changes the variable svgWriter
-                    loadContent(svgWriter.toString());  // changes the variable contentSVG
-                    loadNewSVG(svgWriter);  // calls addSVG which actually displays the svg
+                    DiagramPane.addSVG(svgWriter);  // draws nad's svg
                     System.out.println("styleProvider variable successfully changed to 'TopologicalStyleProvider'");
                 } catch (IOException e) {
                     e.printStackTrace();

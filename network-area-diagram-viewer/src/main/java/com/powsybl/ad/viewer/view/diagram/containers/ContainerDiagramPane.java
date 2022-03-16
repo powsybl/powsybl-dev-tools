@@ -4,22 +4,12 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
-package com.powsybl.ad.viewer.view.diagram;
+package com.powsybl.ad.viewer.view.diagram.containers;
 
-import com.google.common.io.ByteStreams;
-import com.powsybl.ad.viewer.util.JsHandler;
-import com.powsybl.iidm.network.Switch;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
-import javafx.concurrent.Worker;
 import javafx.scene.control.*;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.web.WebEngine;
 import javafx.scene.web.WebView;
-import netscape.javascript.JSObject;
-
-import java.io.IOException;
-import java.util.Objects;
 
 
 /**
@@ -27,9 +17,10 @@ import java.util.Objects;
  */
 public class ContainerDiagramPane extends BorderPane
 {
+
     // Components for diagramPane
-    final WebView diagramView = new WebView();
-    final WebEngine webEngine = diagramView.getEngine();
+    private final WebView diagramView = new WebView();
+    private final WebEngine webEngine = diagramView.getEngine();
     // For communication from the Javascript engine.
 //    private final JsHandler jsHandler;
 
@@ -44,7 +35,6 @@ public class ContainerDiagramPane extends BorderPane
 
     private TabPane diagramTabPane;
     private Tab diagramTab;
-    private ScrollPane scrollPane = new ScrollPane();
 
     private Tab svgTab;
     private TextArea svgTextArea;
@@ -78,9 +68,7 @@ public class ContainerDiagramPane extends BorderPane
 
     private void createDiagramTab()
     {
-        diagramTab = new Tab("Diagram");
-        scrollPane.setContent(diagramView);
-        diagramTab.setContent(scrollPane);
+        diagramTab = new Tab("Diagram", diagramView);
         diagramTab.setClosable(false);
     }
 
@@ -98,4 +86,13 @@ public class ContainerDiagramPane extends BorderPane
     public void setSVGText(String newSvgText) { svgTextArea.setText(newSvgText); }
 
     public void setSVGInfo(String newSvgInfo) { infoArea.setText(newSvgInfo); }
+
+    public WebView getDiagramView() {
+        return diagramView;
+    }
+
+    public WebEngine getWebEngine() {
+        return webEngine;
+    }
+
 }

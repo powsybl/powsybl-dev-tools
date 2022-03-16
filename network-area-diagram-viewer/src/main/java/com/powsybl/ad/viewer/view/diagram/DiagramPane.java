@@ -7,19 +7,19 @@
 
 package com.powsybl.ad.viewer.view.diagram;
 
+import com.google.common.io.ByteStreams;
 import com.powsybl.ad.viewer.model.NadCalls;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
 import javafx.concurrent.Worker;
+import com.powsybl.ad.viewer.view.diagram.containers.ContainerDiagramPane;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
 import javafx.scene.input.ScrollEvent;
-import javafx.scene.web.WebView;
 import netscape.javascript.JSObject;
-
+import java.io.IOException;
 import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * @author Louis Lhotte <louis.lhotte@student-cs.fr>
@@ -28,6 +28,8 @@ public class DiagramPane extends TabPane
 {
     private static ContainerDiagramPane selectedTabContainer;
     private static ContainerDiagramPane checkedTabContainer;
+
+    private static String contentSVG;
 
     private ArrayList<String> svgList = new ArrayList<String> ();
 
@@ -56,43 +58,10 @@ public class DiagramPane extends TabPane
     }
 
     public static void cleanSVG() {
-//        List<ContainerDiagramPane> ListContainerDiagramPane = new ArrayList<ContainerDiagramPane>();
-//        ListContainerDiagramPane.add(checkedTabContainer);
-//        ListContainerDiagramPane.add(selectedTabContainer);
-
         NadCalls.svgWriter = new StringWriter();
-
-//        for (int i = 0; i < ListContainerDiagramPane.size(); i++) {
-//            //
-//            // SVG image
-//            //
-//            ListContainerDiagramPane.get(i).webEngine.loadContent("");
-//            // Set up the listener on WebView changes
-//            // A listener has to be added as loading takes time - execute once the content is successfully loaded
-//            int finalI = i;
-//            ListContainerDiagramPane.get(i).webEngine.getLoadWorker().stateProperty().addListener((observable, oldValue, newValue) -> {
-//                if (Worker.State.SUCCEEDED == newValue) {
-//                    // Set an interface object named 'jsHandler' in the web engine's page
-//                    JSObject window = (JSObject) ListContainerDiagramPane.get(finalI).diagramView.getEngine().executeScript("window");
-//                }
-//            });
-//            // Avoid the useless right click on the image
-//            ListContainerDiagramPane.get(i).diagramView.setContextMenuEnabled(false);
-//
-//            //
-//            // SVG string
-//            //
-//            ListContainerDiagramPane.get(i).setSVGText("");
-//
-//            //
-//            // SVG info
-//            //
-//            ListContainerDiagramPane.get(i).setSVGInfo("");
-//        }
     }
 
-    public void addSVG(String content, StringWriter svg)
-    {
+    public static void addSVG(StringWriter svg) throws IOException {
         if (svg != null) {
             List<ContainerDiagramPane> ListContainerDiagramPane = new ArrayList<ContainerDiagramPane>();
             ListContainerDiagramPane.add(checkedTabContainer);
@@ -105,31 +74,35 @@ public class DiagramPane extends TabPane
                 //
                 // SVG image
                 //
-                ListContainerDiagramPane.get(finalI).webEngine.loadContent(content);
+                String html = new String(
+                        ByteStreams.toByteArray(Objects.requireNonNull(DiagramPane.class.getResourceAsStream("/svg.html")))
+                );
+                contentSVG = html.replace("%__JS__%", "").replace("%__SVG__%", svg.toString());
+                ListContainerDiagramPane.get(finalI).getWebEngine().loadContent(contentSVG);
 
                 // Add Zoom management
-                ListContainerDiagramPane.get(finalI).diagramView.addEventFilter(ScrollEvent.SCROLL, (ScrollEvent e) -> {
+                ListContainerDiagramPane.get(finalI).getDiagramView().addEventFilter(ScrollEvent.SCROLL, (ScrollEvent e) -> {
                     if (e.isControlDown()) {
                         double deltaY = e.getDeltaY();
-                        double zoom = ListContainerDiagramPane.get(finalI).diagramView.getZoom();
+                        double zoom = ListContainerDiagramPane.get(finalI).getDiagramView().getZoom();
                         if (deltaY < 0) {
                             zoom /= 1.1;
                         } else if (deltaY > 0) {
                             zoom *= 1.1;
                         }
-                        ListContainerDiagramPane.get(finalI).diagramView.setZoom(zoom);
+                        ListContainerDiagramPane.get(finalI).getDiagramView().setZoom(zoom);
                         e.consume();
                     }
                 });
 
                 // Avoid the useless right click on the image
-                ListContainerDiagramPane.get(finalI).diagramView.setContextMenuEnabled(false);
+                ListContainerDiagramPane.get(finalI).getDiagramView().setContextMenuEnabled(false);
 
                 // Set up the listener on WebView changes
                 // A listener has to be added as loading takes time - execute once the content is successfully loaded
-                ListContainerDiagramPane.get(finalI).webEngine.getLoadWorker().stateProperty().addListener((observable, oldValue, newValue) -> {
+                ListContainerDiagramPane.get(finalI).getWebEngine().getLoadWorker().stateProperty().addListener((observable, oldValue, newValue) -> {
                     if (Worker.State.SUCCEEDED == newValue) {
-                        JSObject window = (JSObject) ListContainerDiagramPane.get(finalI).diagramView.getEngine().executeScript("window");
+                        JSObject window = (JSObject) ListContainerDiagramPane.get(finalI).getDiagramView().getEngine().executeScript("window");
                     }
                 });
                 //

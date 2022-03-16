@@ -6,21 +6,14 @@
  */
 
 package com.powsybl.ad.viewer.controller;
-
-import com.powsybl.ad.viewer.model.DisplaySVG;
 import com.powsybl.ad.viewer.util.Util;
 import com.powsybl.ad.viewer.view.ImportBar;
-import com.powsybl.nad.svg.iidm.TopologicalStyleProvider;
+import com.powsybl.iidm.network.Network;
 import javafx.scene.control.Button;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
-
 import java.io.File;
-import java.io.IOException;
-import java.util.ArrayList;
-
 import static com.powsybl.ad.viewer.model.NadCalls.*;
-import static com.powsybl.ad.viewer.view.diagram.DiagramPane.cleanSVG;
 
 
 /**
@@ -30,6 +23,11 @@ public class ControllerImport
 {
     private Stage primaryStage;
     private ImportBar importBar;
+    private static File file;
+
+    public static File getFile() {
+        return file;
+    }
 
     public ControllerImport(Stage stage)
     {
@@ -58,26 +56,50 @@ public class ControllerImport
                 fileChooser.setInitialDirectory(new File(caseFolderPropertyValue));
             }
             fileChooser.setTitle("Open case File");
-            File file = fileChooser.showOpenDialog(primaryStage);
+            file = fileChooser.showOpenDialog(primaryStage);
             if (file != null)
             {
+                // load the network corresponding to zip
                 loadNetwork(file.toPath());
-                ControllerParameters.reselectDefaultChoiceBoxes();  // select first element of parameters when we import something new
-                try {
-                    cleanSVG();  // clean the window and the variables
-                    drawNetwork();  // changes the variable svgWriter
-                    DisplaySVG.loadContent(svgWriter.toString());  // changes the variable contentSVG
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-                ArrayList<String> fakeTestList = new ArrayList<String>();
-                fakeTestList.add("Ex1");
-                fakeTestList.add("Ex2");
-                fakeTestList.add("OK");
-                ControllerOptions.setNodesList(fakeTestList);
-                // Filters pane
+                // Construct StringWriter (diagram) object
+
+                // Update loading bar
+                handleLoadingResult(file);
+                // select first element of parameters when we import something new
+                ControllerParameters.reselectDefaultChoiceBoxes();
             }
         });
+    }
+
+    private void handleLoadingResult(File file)
+    {
+        networkService.setOnRunning(event -> {
+            importBar.getLoadingStatusButton().setStyle("-fx-background-color: yellow");
+            importBar.getPathTextField().setText(file.getAbsolutePath());
+            Util.preferences.put(Util.CASE_FOLDER_PROPERTY, file.getParent());
+        });
+
+        networkService.setOnSucceeded(event -> {
+            setNetwork((Network) event.getSource().getValue());
+            importBar.getLoadingStatusButton().setStyle("-fx-background-color: green");
+            Util.preferences.put(Util.CASE_PATH_PROPERTY, file.getAbsolutePath());
+        });
+
+        networkService.setOnFailed(event -> {
+            Throwable exception = event.getSource().getException();
+            Util.logger.error(exception.toString(), exception);
+            importBar.getPathTextField().setText("");
+            importBar.getLoadingStatusButton().setStyle("-fx-background-color: red");
+        });
+        networkService.start();
+    }
+    protected void setNetwork(Network network) {
+        //closeAllTabs();
+        //updateLayoutsFactory(network);
+        //updateStylesProvider(network);
+        networkProperty.set(network);
+        ControllerOptions.setNodesList();
+        //setDiagramsNamesContent(network, true);
     }
 
     public ImportBar getImportBar()

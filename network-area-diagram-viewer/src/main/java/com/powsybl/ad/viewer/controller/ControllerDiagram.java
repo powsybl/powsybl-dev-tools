@@ -6,12 +6,8 @@
  */
 package com.powsybl.ad.viewer.controller;
 
-import com.powsybl.ad.viewer.model.DisplaySVG;
 import com.powsybl.ad.viewer.view.diagram.DiagramPane;
-import com.powsybl.ad.viewer.view.diagram.ContainerDiagramPane;
 import javafx.stage.Stage;
-
-import java.io.StringWriter;
 
 /**
  * @author Louis Lhotte <louis.lhotte@student-cs.fr>
@@ -30,11 +26,6 @@ public class ControllerDiagram
     public void createDiagramPane()
     {
         diagramPane = new DiagramPane();
-    }
-
-    public static void loadNewSVG(StringWriter newSvg)
-    {
-        diagramPane.addSVG(DisplaySVG.getContentSVG(), newSvg);
     }
 
     public DiagramPane getDiagramPane()

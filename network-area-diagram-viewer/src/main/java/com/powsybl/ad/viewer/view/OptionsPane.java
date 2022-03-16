@@ -6,14 +6,12 @@
  */
 package com.powsybl.ad.viewer.view;
 
+import com.powsybl.iidm.network.Container;
 import javafx.geometry.Insets;
 import javafx.geometry.Orientation;
 import javafx.scene.control.*;
-import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.VBox;
-
-import java.util.ArrayList;
 
 /**
  * @author Louis Lhotte <louis.lhotte@student-cs.fr>
@@ -29,7 +27,7 @@ public class OptionsPane extends SplitPane
     private TextField filtersField;
 
     private VBox nodesPane;
-    private ArrayList <CheckBox> nodeCheckBoxes = new ArrayList<CheckBox> ();
+    private final TreeView<Container <?>> substationsTree = new TreeView<> ();
 
     public OptionsPane()
     {
@@ -70,16 +68,15 @@ public class OptionsPane extends SplitPane
         nodesPane.setPadding(new Insets(5, 5, 5, 5));
     }
 
-    public void createNodes(ArrayList <String> nodesName)
-    {
-        for (String name : nodesName)
-            nodeCheckBoxes.add(new CheckBox(name));
+    public void cleanNodes(){
+        // TO-DO
     }
 
-    public void displayNodes()
+    public void displayNodes(TreeView <?> treeView)
     {
-        for (CheckBox checkBox : nodeCheckBoxes)
-            nodesPane.getChildren().add(checkBox);
+        cleanNodes(); // each time a new file is imported, previous Nodes should be deleted, otherwise
+        // it could produce an exception duplicate children added or just add way too many node
+        nodesPane.getChildren().add(treeView);
     }
 
     public CheckBox getFullNetworkCheck()
@@ -101,5 +98,9 @@ public class OptionsPane extends SplitPane
     {
         return filtersField;
     }
-    public ArrayList <CheckBox> getNodesCheckBoxes() { return nodeCheckBoxes; }
+
+    public TreeView getSubstationTree()
+    {
+        return substationsTree;
+    }
 }
