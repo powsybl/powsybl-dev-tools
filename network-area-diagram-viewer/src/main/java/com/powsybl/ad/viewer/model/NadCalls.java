@@ -32,7 +32,9 @@ public final class NadCalls {
 
     public static final ObjectProperty <Network> networkProperty = new SimpleObjectProperty<>();
     public static Service <Network> networkService;
-    public static StringWriter svgWriter;
+
+    private static StringWriter svgWriter;
+
 
     public static void loadNetwork(Path file) {
         networkService = new Service () {
@@ -54,11 +56,17 @@ public final class NadCalls {
         };
     }
 
-    public static void drawNetwork() {
+
+    public static void setDefaultStyleProvider() {
         if (ControllerParameters.styleProvider == null) {
             // set variable styleProvider to its default value if the dropdown menu's never been clicked on
             ControllerParameters.styleProvider = new TopologicalStyleProvider(networkProperty.get());
         }
+    }
+
+
+    public static void drawNetwork() {
+        setDefaultStyleProvider();
         new NetworkAreaDiagram(networkProperty.get()).draw(svgWriter,
                                              new SvgParameters().setSvgWidthAndHeightAdded(true),
                                              new LayoutParameters(),
@@ -68,6 +76,7 @@ public final class NadCalls {
 
     public static void loadUniqueSubstation(List<String> voltageLevelIds, int depth){
         // draw when clicking on a substation, with the list of voltage levels within the substation
+        setDefaultStyleProvider();
         new NetworkAreaDiagram(networkProperty.get(), voltageLevelIds, depth).draw(svgWriter,
                                                                      new SvgParameters().setSvgWidthAndHeightAdded(true),
                                                                      new LayoutParameters(),
@@ -76,7 +85,7 @@ public final class NadCalls {
 
 
     public static void loadSubgraph(String voltageLevelId, int depth) {
-        svgWriter = new StringWriter();
+        setDefaultStyleProvider();
         new NetworkAreaDiagram(networkProperty.get(), voltageLevelId, depth).draw(svgWriter,
                                                                     new SvgParameters().setSvgWidthAndHeightAdded(true),
                                                                     new LayoutParameters(),
@@ -88,10 +97,19 @@ public final class NadCalls {
         // A button "Run loadflow" should be added, as often the power flow values in the input file are missing.
         // Requires a maven clean install of powsybl-open-loadflow
         LoadFlow.run(networkProperty.get());
-//        System.out.println(svgWriter);
+        setDefaultStyleProvider();
         new NetworkAreaDiagram(networkProperty.get()).draw(svgWriter,
                                              new SvgParameters().setSvgWidthAndHeightAdded(true),
                                              new LayoutParameters(),
                                              ControllerParameters.styleProvider);
     }
+
+    public static StringWriter getSvgWriter() {
+        return svgWriter;
+    }
+
+    public static void setSvgWriter(StringWriter svgWriter) {
+        NadCalls.svgWriter = svgWriter;
+    }
+
 }

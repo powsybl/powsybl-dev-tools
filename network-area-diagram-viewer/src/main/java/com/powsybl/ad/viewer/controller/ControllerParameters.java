@@ -130,7 +130,7 @@ public class ControllerParameters
                 try {
                     cleanSVG();  // clean the window and the variables
                     drawNetwork();  // changes the variable svgWriter
-                    DiagramPane.addSVG(svgWriter);  // draws nad's svg
+                    DiagramPane.addSVG(getSvgWriter());  // draws nad's svg
                     System.out.println("styleProvider variable successfully changed to 'NominalVoltageStyleProvider'");
                 } catch (IOException e) {
                     e.printStackTrace();
@@ -141,7 +141,7 @@ public class ControllerParameters
                 try {
                     cleanSVG();  // clean the window and the variables
                     drawNetwork();  // changes the variable svgWriter
-                    DiagramPane.addSVG(svgWriter);  // draws nad's svg
+                    DiagramPane.addSVG(getSvgWriter());  // draws nad's svg
                     System.out.println("styleProvider variable successfully changed to 'TopologicalStyleProvider'");
                 } catch (IOException e) {
                     e.printStackTrace();

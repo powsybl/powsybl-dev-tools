@@ -58,7 +58,7 @@ public class DiagramPane extends TabPane
     }
 
     public static void cleanSVG() {
-        NadCalls.svgWriter = new StringWriter();
+        NadCalls.setSvgWriter(new StringWriter());
     }
 
     public static void addSVG(StringWriter svg) throws IOException {

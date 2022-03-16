@@ -245,7 +245,7 @@ public class ControllerOptions
                     loadNetwork(ControllerImport.getFile().toPath());  // load network
                     cleanSVG();  // clean svgWriter
                     drawNetwork();  // changes the variable svgWriter
-                    addSVG(NadCalls.svgWriter);  // calls addSVG which actually displays the svg
+                    addSVG(getSvgWriter());  // calls addSVG which actually displays the svg
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
