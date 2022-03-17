@@ -152,7 +152,7 @@ public class ControllerOptions
                 rootItem.getChildren().add(sItem);
                 sItem.selectedProperty().addListener((obs, oldVal, newVal) ->
                         // checkSubstation(s, newVal)
-                        System.out.println("SELECTED ITEM")
+                        Util.loggerControllerOptions.info("SELECTED ITEM")
                 );
             }
 
@@ -186,7 +186,8 @@ public class ControllerOptions
                 }
 
                 vItem.selectedProperty().addListener((obs, oldVal, newVal) ->
-                        System.out.println("VOLTAGE LEVEL SELECTED"));// checkVoltageLevel(voltageLevel, newVal));
+                        Util.loggerControllerOptions.info("VOLTAGE LEVEL SELECTED")
+                        );// checkVoltageLevel(voltageLevel, newVal));
             }
         }
     }
@@ -239,7 +240,7 @@ public class ControllerOptions
         {
             if (check.isSelected())
             {
-                Util.logger.info("Network Check Selected OK");
+                Util.loggerControllerOptions.info("Network Check Selected OK");
 
                 try {
                     loadNetwork(ControllerImport.getFile().toPath());  // load network
@@ -251,7 +252,7 @@ public class ControllerOptions
                 }
             }
             else
-                Util.logger.info("Network Check Unselected OK");
+                Util.loggerControllerOptions.info("Network Check Unselected OK");
         });
     }
 
@@ -259,7 +260,7 @@ public class ControllerOptions
     {
         spinner.valueProperty().addListener((obs, oldValue, newValue) ->
         {
-            Util.logger.info("Depth Spinner value :  " + oldValue + " transformed into : " + newValue);
+            Util.loggerControllerOptions.info("Depth Spinner value :  " + oldValue + " transformed into : " + newValue);
         });
     }
 
@@ -268,7 +269,7 @@ public class ControllerOptions
         button.setOnAction(event ->
         {
             NadCalls.runLoadFlow();
-            Util.logger.info("Run Loadflow OK");
+            Util.loggerControllerOptions.info("Run Loadflow OK");
         });
     }
 
@@ -276,7 +277,7 @@ public class ControllerOptions
     {
         field.setOnAction(event ->
         {
-            Util.logger.info("Filter field OK");
+            Util.loggerControllerOptions.info("Filter field OK");
         });
     }
 
@@ -288,11 +289,11 @@ public class ControllerOptions
             {
                 if (checkBox.isSelected())
                 {
-                    Util.logger.info("Node Selected OK" + checkBox.getText());
+                    Util.loggerControllerOptions.info("Node Selected OK" + checkBox.getText());
                 }
                 else
                 {
-                    Util.logger.info("Node Unselected OK" + checkBox.getText());
+                    Util.loggerControllerOptions.info("Node Unselected OK" + checkBox.getText());
                 }
             });
         }

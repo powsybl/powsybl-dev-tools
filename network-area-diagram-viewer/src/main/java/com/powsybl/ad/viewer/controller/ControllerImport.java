@@ -48,7 +48,7 @@ public class ControllerImport
     {
         button.setOnAction(event ->
         {
-            System.out.print("Import Button OK");
+            Util.loggerControllerImport.info("Import Button OK");
             FileChooser fileChooser = new FileChooser();
             String caseFolderPropertyValue = Util.preferences.get(Util.CASE_FOLDER_PROPERTY, null);
             if (caseFolderPropertyValue != null)
@@ -87,12 +87,13 @@ public class ControllerImport
 
         networkService.setOnFailed(event -> {
             Throwable exception = event.getSource().getException();
-            Util.logger.error(exception.toString(), exception);
+            Util.loggerControllerImport.error(exception.toString(), exception);
             importBar.getPathTextField().setText("");
             importBar.getLoadingStatusButton().setStyle("-fx-background-color: red");
         });
         networkService.start();
     }
+
     protected void setNetwork(Network network) {
         //closeAllTabs();
         //updateLayoutsFactory(network);

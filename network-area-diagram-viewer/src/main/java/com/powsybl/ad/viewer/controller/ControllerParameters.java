@@ -7,6 +7,7 @@
 package com.powsybl.ad.viewer.controller;
 
 import com.powsybl.ad.viewer.model.NadCalls;
+import com.powsybl.ad.viewer.util.Util;
 import com.powsybl.ad.viewer.view.ParamPane;
 import com.powsybl.ad.viewer.view.diagram.DiagramPane;
 import com.powsybl.nad.svg.StyleProvider;
@@ -92,7 +93,7 @@ public class ControllerParameters
     {
         fitContentButton.setOnAction(event ->
         {
-            System.out.println("Fit to content OK");
+            Util.loggerControllerParameters.info("Fit to content OK");
         });
     }
 
@@ -100,7 +101,7 @@ public class ControllerParameters
     {
         resetZoomButton.setOnAction(event ->
         {
-            System.out.println("Fit to content OK");
+            Util.loggerControllerParameters.info("Reset Zoom OK");
         });
     }
 
@@ -108,7 +109,7 @@ public class ControllerParameters
     {
         layoutChoice.setOnAction(event ->
         {
-            System.out.println("Layout choice : " + layoutChoice.getValue());
+            Util.loggerControllerParameters.info("Layout choice : " + layoutChoice.getValue());
 //            NadCalls.setLayoutParameters(toString(layoutChoice.getValue()));
         });
     }
@@ -117,7 +118,7 @@ public class ControllerParameters
     {
         labelProviderChoice.setOnAction(event ->
         {
-            System.out.println("Label Provider : " + labelProviderChoice.getValue());
+            Util.loggerControllerParameters.info("Label Provider : " + labelProviderChoice.getValue());
         });
     }
 
@@ -131,7 +132,7 @@ public class ControllerParameters
                     cleanSVG();  // clean the window and the variables
                     drawNetwork();  // changes the variable svgWriter
                     DiagramPane.addSVG(getSvgWriter());  // draws nad's svg
-                    System.out.println("styleProvider variable successfully changed to 'NominalVoltageStyleProvider'");
+                    Util.loggerControllerParameters.info("styleProvider variable successfully changed to 'NominalVoltageStyleProvider'");
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
@@ -142,7 +143,7 @@ public class ControllerParameters
                     cleanSVG();  // clean the window and the variables
                     drawNetwork();  // changes the variable svgWriter
                     DiagramPane.addSVG(getSvgWriter());  // draws nad's svg
-                    System.out.println("styleProvider variable successfully changed to 'TopologicalStyleProvider'");
+                    Util.loggerControllerParameters.info("styleProvider variable successfully changed to 'TopologicalStyleProvider'");
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
@@ -154,7 +155,7 @@ public class ControllerParameters
     {
         layoutXSpinner.valueProperty().addListener((obs, oldValue, newValue) ->
         {
-            System.out.println("Layout X Spinner value :  " + oldValue + " transformed into : " + newValue);
+            Util.loggerControllerParameters.info("Layout X Spinner value :  " + oldValue + " transformed into : " + newValue);
         });
     }
 
@@ -162,7 +163,7 @@ public class ControllerParameters
     {
         layoutYSpinner.valueProperty().addListener((obs, oldValue, newValue) ->
         {
-            System.out.println("Layout Y Spinner value :  " + oldValue + " transformed into : " + newValue);
+            Util.loggerControllerParameters.info("Layout Y Spinner value :  " + oldValue + " transformed into : " + newValue);
         });
     }
 
@@ -170,7 +171,7 @@ public class ControllerParameters
     {
         svgXSpinner.valueProperty().addListener((obs, oldValue, newValue) ->
         {
-            System.out.println("SVG X Spinner value :  " + oldValue + " transformed into : " + newValue);
+            Util.loggerControllerParameters.info("SVG X Spinner value :  " + oldValue + " transformed into : " + newValue);
         });
     }
 
@@ -178,7 +179,7 @@ public class ControllerParameters
     {
         svgYSpinner.valueProperty().addListener((obs, oldValue, newValue) ->
         {
-            System.out.println("SVG Y Spinner value :  " + oldValue + " transformed into : " + newValue);
+            Util.loggerControllerParameters.info("SVG Y Spinner value :  " + oldValue + " transformed into : " + newValue);
         });
     }
 
@@ -187,9 +188,9 @@ public class ControllerParameters
         svgZCheck.setOnAction(event ->
         {
             if (svgZCheck.isSelected())
-                System.out.println("SVG Z Selected OK");
+                Util.loggerControllerParameters.info("SVG Z Selected OK");
             else
-                System.out.println("SVG Z Unselected OK");
+                Util.loggerControllerParameters.info("SVG Z Unselected OK");
         });
     }
 
