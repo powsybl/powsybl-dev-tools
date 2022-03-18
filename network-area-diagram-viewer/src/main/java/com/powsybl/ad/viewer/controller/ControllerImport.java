@@ -65,8 +65,6 @@ public class ControllerImport
 
                 // Update loading bar
                 handleLoadingResult(file);
-                // select first element of parameters when we import something new
-                ControllerParameters.reselectDefaultChoiceBoxes();
             }
         });
     }

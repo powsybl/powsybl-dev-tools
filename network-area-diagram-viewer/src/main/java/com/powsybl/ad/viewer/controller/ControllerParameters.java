@@ -30,23 +30,6 @@ public class ControllerParameters
 
     public static StyleProvider styleProvider;  // inside it will be stored the dropdown list's selected value
 
-    public static void reselectDefaultChoiceBoxes()
-    {
-        ChoiceBox layoutChoice = paramPane.getLayoutChoice();
-        layoutChoice.getSelectionModel().selectFirst();  // make ChoiceBox layoutChoice select its first element
-        paramPane.setLayoutChoice(layoutChoice);
-
-        ChoiceBox labelProviderChoice = paramPane.getLabelProviderChoice();
-        labelProviderChoice.getSelectionModel().selectFirst();  // make ChoiceBox labelProviderChoice select
-                                                                // its first element
-        paramPane.setLabelProviderChoice(layoutChoice);
-
-        ChoiceBox styleProviderChoice = paramPane.getStyleProviderChoice();
-        styleProviderChoice.getSelectionModel().selectFirst();  // make ChoiceBox styleProviderChoice
-                                                                // select its first element
-        paramPane.setStyleProviderChoice(layoutChoice);
-    }
-
     public ControllerParameters(Stage primaryStage)
     {
         this.primaryStage = primaryStage;

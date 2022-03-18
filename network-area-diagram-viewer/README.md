@@ -6,7 +6,6 @@ The area diagram viewer uses these three repositories which versions should be c
 ```
 powsybl.nad.version: 0.4.0-SNAPSHOT
 powsybl.core.version: 4.7.0
-powsybl.open.loadflow.version: 0.17.0
 ```
 
 ### Launching with IntelliJ
