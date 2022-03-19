@@ -44,7 +44,7 @@ public class DiagramPane extends TabPane
     public Tab createSelectedTab()
     {
         selectedTabContainer = new ContainerDiagramPane(true);
-        Tab selectedTab = new Tab("Selected", selectedTabContainer);
+        Tab selectedTab = new Tab("Selected", selectedTabContainer);  // Upcasting ContainerDiagramPane into Node
         selectedTab.setClosable(false);
         return selectedTab;
     }
@@ -52,7 +52,7 @@ public class DiagramPane extends TabPane
     public Tab createCheckedTab()
     {
         checkedTabContainer = new ContainerDiagramPane(true);
-        Tab checkedTab = new Tab("Checked", checkedTabContainer);
+        Tab checkedTab = new Tab("Checked", checkedTabContainer);  // Upcasting ContainerDiagramPane into Node
         checkedTab.setClosable(false);
         return checkedTab;
     }
@@ -120,14 +120,17 @@ public class DiagramPane extends TabPane
 
     }
 
-    public ContainerDiagramPane getCheckedTab()
+    public static ContainerDiagramPane getCheckedTab()
     {
         return checkedTabContainer;
     }
 
-    public ContainerDiagramPane getSelectedTab()
+    public static ContainerDiagramPane getSelectedTab()
     {
         return selectedTabContainer;
     }
 
+    public Tab getTabSelectedByUser() {
+        return this.getSelectionModel().getSelectedItem();
+    }
 }

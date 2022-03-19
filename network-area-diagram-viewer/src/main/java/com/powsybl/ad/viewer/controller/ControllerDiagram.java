@@ -28,7 +28,7 @@ public class ControllerDiagram
         diagramPane = new DiagramPane();
     }
 
-    public DiagramPane getDiagramPane()
+    public static DiagramPane getDiagramPane()
     {
         return diagramPane;
     }

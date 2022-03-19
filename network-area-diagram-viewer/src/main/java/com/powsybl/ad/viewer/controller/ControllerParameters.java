@@ -10,9 +10,11 @@ import com.powsybl.ad.viewer.model.NadCalls;
 import com.powsybl.ad.viewer.util.Util;
 import com.powsybl.ad.viewer.view.ParamPane;
 import com.powsybl.ad.viewer.view.diagram.DiagramPane;
+import com.powsybl.ad.viewer.view.diagram.containers.ContainerDiagramPane;
 import com.powsybl.nad.svg.StyleProvider;
 import com.powsybl.nad.svg.iidm.NominalVoltageStyleProvider;
 import com.powsybl.nad.svg.iidm.TopologicalStyleProvider;
+import javafx.scene.Node;
 import javafx.scene.control.*;
 import javafx.stage.Stage;
 import static com.powsybl.ad.viewer.model.NadCalls.networkProperty;
@@ -82,8 +84,17 @@ public class ControllerParameters
 
     private void addListenerOnResetZoom(Button resetZoomButton)
     {
-        resetZoomButton.setOnAction(event ->
-        {
+        resetZoomButton.setOnAction(event -> {
+
+            // only the currently selected tab's zoom should be reset
+            Tab tabSelectedbyUser = ControllerDiagram.getDiagramPane().getTabSelectedByUser();
+            Node node = tabSelectedbyUser.getContent();
+            if (node != null) {
+                if (node instanceof ContainerDiagramPane) {  // We need to downcast Node into ContainerDiagramPane
+                    ContainerDiagramPane pane = (ContainerDiagramPane) node;
+                    pane.getDiagramView().setZoom(1.0); // 100
+                }
+            }
             Util.loggerControllerParameters.info("Reset Zoom OK");
         });
     }

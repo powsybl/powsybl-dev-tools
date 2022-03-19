@@ -15,14 +15,12 @@ import javafx.scene.web.WebView;
 /**
  * @author Louis Lhotte <louis.lhotte@student-cs.fr>
  */
-public class ContainerDiagramPane extends BorderPane
+public class ContainerDiagramPane extends BorderPane  // ContainerDiagramPane <- BorderPane <- Pane <- Region <- Node
 {
 
     // Components for diagramPane
     private final WebView diagramView = new WebView();
     private final WebEngine webEngine = diagramView.getEngine();
-    // For communication from the Javascript engine.
-//    private final JsHandler jsHandler;
 
     /* private final TextField svgSearchField = new TextField();
     private final Button svgSearchButton = new Button("Search");
