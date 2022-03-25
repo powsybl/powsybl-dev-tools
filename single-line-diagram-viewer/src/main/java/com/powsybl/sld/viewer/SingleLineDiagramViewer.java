@@ -1074,34 +1074,10 @@ public class SingleLineDiagramViewer extends Application implements DisplayVolta
                 .forEach(selectableSubstation -> selectableSubstation.setCheckedProperty(checked));
     }
 
-    private void initVoltageLevelsTree(TreeItem<Container<?>> rootItem,
-                                       Substation s, String filter, boolean emptyFilter,
-                                       Map<String, SelectableSubstation> mapSubstations,
-                                       Map<String, SelectableVoltageLevel> mapVoltageLevels) {
-        boolean firstVL = true;
-        CheckBoxTreeItem<Container<?>> sItem = null;
+    private void initVoltageLevelsTree(TreeItem<Container<?>> rootItem, CheckBoxTreeItem<Container<?>> sItem,
+                                       Collection<VoltageLevel> voltageLevels, Map<String, SelectableVoltageLevel> mapVoltageLevels) {
 
-        for (VoltageLevel v : s.getVoltageLevels()) {
-            boolean vlOk = showNames.isSelected() ? v.getName().contains(filter) : v.getId().contains(filter);
-
-            if (!emptyFilter && !vlOk) {
-                continue;
-            }
-
-            if (firstVL && !hideSubstations.isSelected()) {
-                sItem = new CheckBoxTreeItem<>(s);
-                sItem.setIndependent(true);
-                sItem.setExpanded(true);
-                if (mapSubstations.containsKey(s.getId()) && mapSubstations.get(s.getId()).checkedProperty().get()) {
-                    sItem.setSelected(true);
-                }
-                rootItem.getChildren().add(sItem);
-                sItem.selectedProperty().addListener((obs, oldVal, newVal) ->
-                        checkSubstation(s, newVal)
-                );
-            }
-
-            firstVL = false;
+        for (VoltageLevel v : voltageLevels) {
 
             if (!hideVoltageLevels.isSelected()) {
                 CheckBoxTreeItem<Container<?>> vItem = new CheckBoxTreeItem<>(v);
@@ -1136,8 +1112,27 @@ public class SingleLineDiagramViewer extends Application implements DisplayVolta
                 .collect(Collectors.toMap(SelectableVoltageLevel::getId, Function.identity()));
 
         for (Substation s : n.getSubstations()) {
-            initVoltageLevelsTree(rootItem, s, filter, emptyFilter, mapSubstations, mapVoltageLevels);
+            CheckBoxTreeItem<Container<?>> sItem = null;
+            boolean sFilterOk = emptyFilter || (showNames.isSelected() ? s.getNameOrId().contains(filter) : s.getId().contains(filter));
+            List<VoltageLevel> voltageLevels = s.getVoltageLevelStream()
+                    .filter(v -> sFilterOk || (showNames.isSelected() ? v.getNameOrId().contains(filter) : v.getId().contains(filter)))
+                    .collect(Collectors.toList());
+            if ((sFilterOk || !voltageLevels.isEmpty()) && !hideSubstations.isSelected()) {
+                sItem = new CheckBoxTreeItem<>(s);
+                sItem.setIndependent(true);
+                sItem.setExpanded(true);
+                if (mapSubstations.containsKey(s.getId()) && mapSubstations.get(s.getId()).checkedProperty().get()) {
+                    sItem.setSelected(true);
+                }
+                rootItem.getChildren().add(sItem);
+                sItem.selectedProperty().addListener((obs, oldVal, newVal) -> checkSubstation(s, newVal));
+            }
+
+            initVoltageLevelsTree(rootItem, sItem, voltageLevels, mapVoltageLevels);
         }
+
+        List<VoltageLevel> emptySubstationVoltageLevels = n.getVoltageLevelStream().filter(v -> v.getSubstation().isEmpty()).collect(Collectors.toList());
+        initVoltageLevelsTree(rootItem, null, emptySubstationVoltageLevels, mapVoltageLevels);
 
         if (substationsTree.getRoot() != null) {
             substationsTree.getRoot().getChildren().clear();
