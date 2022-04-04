@@ -7,23 +7,22 @@
 
 package com.powsybl.ad.viewer.model;
 import com.powsybl.ad.viewer.controller.ControllerParameters;
-import com.powsybl.computation.local.LocalComputationManager;
-import com.powsybl.iidm.import_.ImportConfig;
 import com.powsybl.iidm.network.*;
 import com.powsybl.loadflow.LoadFlow;
 import com.powsybl.nad.NetworkAreaDiagram;
 import com.powsybl.iidm.import_.Importers;
 import com.powsybl.nad.layout.LayoutParameters;
+import com.powsybl.nad.svg.Padding;
 import com.powsybl.nad.svg.SvgParameters;
 import com.powsybl.nad.svg.iidm.TopologicalStyleProvider;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.value.ChangeListener;
 import javafx.concurrent.Service;
 import javafx.concurrent.Task;
 import java.io.StringWriter;
 import java.nio.file.Path;
 import java.util.List;
-import java.util.Properties;
 
 /**
 * @author Louis Lhotte <louis.lhotte@student-cs.fr>
@@ -31,9 +30,11 @@ import java.util.Properties;
 public final class NadCalls {
 
     public static final ObjectProperty <Network> networkProperty = new SimpleObjectProperty<>();
+    public static final ObjectProperty<LayoutParameters> layoutParametersProperty = new SimpleObjectProperty<>(new LayoutParameters());
+    public static final ObjectProperty<SvgParameters> svgParametersProperty = new SimpleObjectProperty<>(new SvgParameters().setSvgWidthAndHeightAdded(true));
     public static Service <Network> networkService;
 
-    private static StringWriter svgWriter;
+    private static StringWriter svgWriter = new StringWriter();
 
 
     public static void loadNetwork(Path file) {
@@ -46,10 +47,7 @@ public final class NadCalls {
                     @Override
                     protected Network call()
                     {
-                        Properties properties = new Properties();
-                        properties.put("iidm.import.cgmes.post-processors", "cgmesDLImport");
-                        return Importers.loadNetwork(file, LocalComputationManager.getDefault(),
-                                new ImportConfig(), properties);
+                        return Importers.loadNetwork(file);
                     }
                 };
             }
@@ -64,12 +62,16 @@ public final class NadCalls {
         }
     }
 
+    private static void cleanSVG() {
+        svgWriter = new StringWriter();
+    }
 
     public static void drawNetwork() {
+        cleanSVG();
         setDefaultStyleProvider();
         new NetworkAreaDiagram(networkProperty.get()).draw(svgWriter,
-                                             new SvgParameters().setSvgWidthAndHeightAdded(true),
-                                             new LayoutParameters(),
+                                             svgParametersProperty.get(),
+                                             layoutParametersProperty.get(),
                                              ControllerParameters.styleProvider);
     }
 
@@ -78,8 +80,8 @@ public final class NadCalls {
         // draw when clicking on a substation, with the list of voltage levels within the substation
         setDefaultStyleProvider();
         new NetworkAreaDiagram(networkProperty.get(), voltageLevelIds, depth).draw(svgWriter,
-                                                                     new SvgParameters().setSvgWidthAndHeightAdded(true),
-                                                                     new LayoutParameters(),
+                                                                     svgParametersProperty.get(),
+                                                                     layoutParametersProperty.get(),
                                                                      ControllerParameters.styleProvider);
     }
 
@@ -87,8 +89,8 @@ public final class NadCalls {
     public static void loadSubgraph(String voltageLevelId, int depth) {
         setDefaultStyleProvider();
         new NetworkAreaDiagram(networkProperty.get(), voltageLevelId, depth).draw(svgWriter,
-                                                                    new SvgParameters().setSvgWidthAndHeightAdded(true),
-                                                                    new LayoutParameters(),
+                                                                    svgParametersProperty.get(),
+                                                                    layoutParametersProperty.get(),
                                                                     ControllerParameters.styleProvider);
     }
 
@@ -99,8 +101,8 @@ public final class NadCalls {
         LoadFlow.run(networkProperty.get());
         setDefaultStyleProvider();
         new NetworkAreaDiagram(networkProperty.get()).draw(svgWriter,
-                                             new SvgParameters().setSvgWidthAndHeightAdded(true),
-                                             new LayoutParameters(),
+                                             svgParametersProperty.get(),
+                                             layoutParametersProperty.get(),
                                              ControllerParameters.styleProvider);
     }
 

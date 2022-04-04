@@ -57,10 +57,6 @@ public class DiagramPane extends TabPane
         return checkedTab;
     }
 
-    public static void cleanSVG() {
-        NadCalls.setSvgWriter(new StringWriter());
-    }
-
     public static void addSVG(StringWriter svg) throws IOException {
         if (svg != null) {
             List<ContainerDiagramPane> ListContainerDiagramPane = new ArrayList<ContainerDiagramPane>();

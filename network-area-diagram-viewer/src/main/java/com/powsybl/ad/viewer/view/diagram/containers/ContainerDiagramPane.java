@@ -6,10 +6,19 @@
  */
 package com.powsybl.ad.viewer.view.diagram.containers;
 
+import com.powsybl.ad.viewer.model.NadCalls;
+import com.powsybl.ad.viewer.view.diagram.DiagramPane;
+import com.powsybl.nad.svg.SvgParameters;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.WeakChangeListener;
 import javafx.scene.control.*;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.web.WebEngine;
 import javafx.scene.web.WebView;
+
+import java.io.IOException;
+
+import static com.powsybl.ad.viewer.model.NadCalls.getSvgWriter;
 
 
 /**
@@ -36,8 +45,6 @@ public class ContainerDiagramPane extends BorderPane  // ContainerDiagramPane <-
 
     private Tab svgTab;
     private TextArea svgTextArea;
-
-    //private final ChangeListener<LayoutParameters> listener;
 
     public ContainerDiagramPane(boolean selected) {
         createInfoPane();

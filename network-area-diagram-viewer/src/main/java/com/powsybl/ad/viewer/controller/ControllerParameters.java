@@ -11,16 +11,25 @@ import com.powsybl.ad.viewer.util.Util;
 import com.powsybl.ad.viewer.view.ParamPane;
 import com.powsybl.ad.viewer.view.diagram.DiagramPane;
 import com.powsybl.ad.viewer.view.diagram.containers.ContainerDiagramPane;
+import com.powsybl.nad.layout.LayoutParameters;
+import com.powsybl.nad.svg.Padding;
 import com.powsybl.nad.svg.StyleProvider;
+import com.powsybl.nad.svg.SvgParameters;
 import com.powsybl.nad.svg.iidm.NominalVoltageStyleProvider;
 import com.powsybl.nad.svg.iidm.TopologicalStyleProvider;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.WeakChangeListener;
 import javafx.scene.Node;
 import javafx.scene.control.*;
+import javafx.scene.layout.GridPane;
 import javafx.stage.Stage;
 import static com.powsybl.ad.viewer.model.NadCalls.networkProperty;
 import java.io.IOException;
+import java.io.StringWriter;
+import java.util.function.BiFunction;
+import java.util.function.ToDoubleFunction;
+
 import static com.powsybl.ad.viewer.model.NadCalls.*;
-import static com.powsybl.ad.viewer.view.diagram.DiagramPane.cleanSVG;
 
 /**
  * @author Louis Lhotte <louis.lhotte@student-cs.fr>
@@ -29,6 +38,8 @@ public class ControllerParameters
 {
     private Stage primaryStage;
     private static ParamPane paramPane;
+
+    private ChangeListener<SvgParameters> listener;
 
     public static StyleProvider styleProvider;  // inside it will be stored the dropdown list's selected value
 
@@ -63,15 +74,37 @@ public class ControllerParameters
         addListenerOnLayoutYSpinner(paramPane.getLayoutYSpinner());
 
         // SVG parameters spinners and checkbox
-        SpinnerValueFactory<Integer> svgXSpinnerFactory = new SpinnerValueFactory.IntegerSpinnerValueFactory(20, 200, 20, 20);
-        paramPane.getSvgXSpinner().setValueFactory(svgXSpinnerFactory);
-        addListenerOnSVGXSpinner(paramPane.getSvgXSpinner());
-
-        SpinnerValueFactory<Integer> svgYSpinnerFactory = new SpinnerValueFactory.IntegerSpinnerValueFactory(20, 200, 20, 20);
-        paramPane.getSvgYSpinner().setValueFactory(svgYSpinnerFactory);
-        addListenerOnSVGYSpinner(paramPane.getSvgYSpinner());
+        paramPane.setSvgXSpinner(addSpinner(paramPane.getSvgParametersPane(), "Horizontal Padding",
+                0, 300, 5,
+                0, 0, "X",
+                 svgp -> svgp.getLeft(),
+                 (svgp, value) -> svgp.setDiagramPadding(
+                         new Padding(value, svgp.getDiagramPadding().getTop(),
+                                 value, svgp.getDiagramPadding().getBottom()))
+                )
+        );
+        paramPane.setSvgYSpinner(addSpinner(paramPane.getSvgParametersPane(), "Vertical Padding",
+                0, 300, 5,
+                0, 2, "Y",
+                svgp -> svgp.getBottom(),
+                (svgp, value) -> svgp.setDiagramPadding(
+                        new Padding(svgp.getDiagramPadding().getLeft(), value,
+                                svgp.getDiagramPadding().getRight(), value))
+                )
+        );
 
         addListenerOnSVGZCheck(paramPane.getSvgZCheck());
+
+        // Add listener on svgParametersProperty
+        listener = (observable, oldValue, newValue) -> {
+            try {
+                NadCalls.drawNetwork();
+                DiagramPane.addSVG(getSvgWriter());
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        };
+        NadCalls.svgParametersProperty.addListener(listener);
     }
 
     private void addListenerOnFitToContent(Button fitContentButton)
@@ -123,7 +156,6 @@ public class ControllerParameters
             if (styleProviderChoice.getValue() == "Nominal") {
                 styleProvider = new NominalVoltageStyleProvider(networkProperty.get());
                 try {
-                    cleanSVG();  // clean the window and the variables
                     drawNetwork();  // changes the variable svgWriter
                     DiagramPane.addSVG(getSvgWriter());  // draws nad's svg
                     Util.loggerControllerParameters.info("styleProvider variable successfully changed to 'NominalVoltageStyleProvider'");
@@ -134,7 +166,6 @@ public class ControllerParameters
             else if (styleProviderChoice.getValue() == "Topological") {
                 styleProvider = new TopologicalStyleProvider(NadCalls.networkProperty.get());
                 try {
-                    cleanSVG();  // clean the window and the variables
                     drawNetwork();  // changes the variable svgWriter
                     DiagramPane.addSVG(getSvgWriter());  // draws nad's svg
                     Util.loggerControllerParameters.info("styleProvider variable successfully changed to 'TopologicalStyleProvider'");
@@ -144,6 +175,41 @@ public class ControllerParameters
             }
         });
     }
+
+    private void setParameters(SvgParameters svgParameters){
+        NadCalls.svgParametersProperty.set(new SvgParameters(svgParametersProperty.get()));
+    }
+
+    private Spinner addSpinner(GridPane paneToAddSpinnerOn,
+                               String label, double min, double max, double amountToStepBy,
+                               int column, int row, String direction,
+                               ToDoubleFunction<Padding> initializer,
+                               BiFunction<SvgParameters, Double, SvgParameters> updater) {
+        Spinner<Double> spinner = new Spinner<>(
+                min, max,
+                initializer.applyAsDouble(svgParametersProperty.get().getDiagramPadding()), amountToStepBy
+        );
+        spinner.valueProperty().addListener(
+                (observable, oldValue, newValue) -> {
+                    if (!(getSvgWriter().toString().equals(new StringWriter().toString()))) {
+                        SvgParameters oldSvgParametersProperty = svgParametersProperty.get();
+                        setParameters(updater.apply(oldSvgParametersProperty, newValue));
+                        Util.loggerControllerParameters.info(
+                                "Layout " + direction + " Spinner value :  " +
+                                        oldValue + " transformed into : " + newValue
+                        );
+                    }
+                }
+        );
+
+        spinner.setEditable(true);
+        spinner.setDisable(true);
+        paneToAddSpinnerOn.add(new Label(label), column, row);
+        paneToAddSpinnerOn.add(spinner, column, row + 1);
+
+        return spinner;
+    }
+
 
     private void addListenerOnLayoutXSpinner(Spinner layoutXSpinner)
     {
@@ -161,22 +227,6 @@ public class ControllerParameters
         });
     }
 
-    private void addListenerOnSVGXSpinner(Spinner svgXSpinner)
-    {
-        svgXSpinner.valueProperty().addListener((obs, oldValue, newValue) ->
-        {
-            Util.loggerControllerParameters.info("SVG X Spinner value :  " + oldValue + " transformed into : " + newValue);
-        });
-    }
-
-    private void addListenerOnSVGYSpinner(Spinner svgYSpinner)
-    {
-        svgYSpinner.valueProperty().addListener((obs, oldValue, newValue) ->
-        {
-            Util.loggerControllerParameters.info("SVG Y Spinner value :  " + oldValue + " transformed into : " + newValue);
-        });
-    }
-
     private void addListenerOnSVGZCheck(CheckBox svgZCheck)
     {
         svgZCheck.setOnAction(event ->
@@ -188,7 +238,7 @@ public class ControllerParameters
         });
     }
 
-    public ParamPane getParamPane()
+    public static ParamPane getParamPane()
     {
         return paramPane;
     }

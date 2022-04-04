@@ -5,6 +5,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 package com.powsybl.ad.viewer.view;
+import com.powsybl.ad.viewer.controller.ControllerParameters;
 import javafx.geometry.Insets;
 import javafx.scene.control.*;
 import javafx.scene.layout.GridPane;
@@ -29,6 +30,7 @@ public class ParamPane extends ScrollPane
     private Spinner layoutYSpinner;
 
     private GridPane svgParametersPane;
+
     private Spinner svgXSpinner;
     private Spinner svgYSpinner;
     private CheckBox svgZCheck;
@@ -122,23 +124,14 @@ public class ParamPane extends ScrollPane
 
     public void createSVGParametersPane()
     {
-        svgXSpinner = new Spinner();
-        Label svgXLabel = new Label("Xxx");
-
-        svgYSpinner = new Spinner();
-        Label svgYLabel = new Label("Yyy");
-
         svgZCheck = new CheckBox();
         Label svgZLabel = new Label("Zzz");
 
 
         svgParametersPane = new GridPane();
         svgParametersPane.setPadding(new Insets(5, 5, 5, 5));
-        svgParametersPane.add(svgXSpinner, 0, 1);
-        svgParametersPane.add(svgXLabel, 0, 0);
-        svgParametersPane.add(svgYSpinner, 0, 3);
-        svgParametersPane.add(svgYLabel, 0, 2);
-        svgParametersPane.add(svgZCheck, 1, 4);
+
+        svgParametersPane.add(svgZCheck, 0, 5);
         svgParametersPane.add(svgZLabel, 0, 4);
 
         contentPane.add(svgParametersPane, 0, rowIndex++);
@@ -207,8 +200,16 @@ public class ParamPane extends ScrollPane
         return svgXSpinner;
     }
 
+    public void setSvgXSpinner(Spinner svgXSpinner) {
+        this.svgXSpinner = svgXSpinner;
+    }
+
     public Spinner getSvgYSpinner() {
         return svgYSpinner;
+    }
+
+    public void setSvgYSpinner(Spinner svgYSpinner) {
+        this.svgYSpinner = svgYSpinner;
     }
 
     public CheckBox getSvgZCheck() {

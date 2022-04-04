@@ -27,7 +27,6 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import static com.powsybl.ad.viewer.model.NadCalls.*;
 import static com.powsybl.ad.viewer.view.diagram.DiagramPane.addSVG;
-import static com.powsybl.ad.viewer.view.diagram.DiagramPane.cleanSVG;
 
 
 /**
@@ -244,8 +243,9 @@ public class ControllerOptions
 
                 try {
                     loadNetwork(ControllerImport.getFile().toPath());  // load network
-                    cleanSVG();  // clean svgWriter
                     drawNetwork();  // changes the variable svgWriter
+                    ControllerParameters.getParamPane().getSvgXSpinner().setDisable(false);
+                    ControllerParameters.getParamPane().getSvgYSpinner().setDisable(false);
                     addSVG(getSvgWriter());  // calls addSVG which actually displays the svg
                 } catch (IOException e) {
                     e.printStackTrace();
