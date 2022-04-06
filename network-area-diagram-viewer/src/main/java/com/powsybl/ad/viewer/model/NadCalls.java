@@ -12,16 +12,15 @@ import com.powsybl.loadflow.LoadFlow;
 import com.powsybl.nad.NetworkAreaDiagram;
 import com.powsybl.iidm.import_.Importers;
 import com.powsybl.nad.layout.LayoutParameters;
-import com.powsybl.nad.svg.Padding;
 import com.powsybl.nad.svg.SvgParameters;
 import com.powsybl.nad.svg.iidm.TopologicalStyleProvider;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
-import javafx.beans.value.ChangeListener;
 import javafx.concurrent.Service;
 import javafx.concurrent.Task;
 import java.io.StringWriter;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
 
 /**
@@ -30,8 +29,8 @@ import java.util.List;
 public final class NadCalls {
 
     public static final ObjectProperty <Network> networkProperty = new SimpleObjectProperty<>();
-    public static final ObjectProperty<LayoutParameters> layoutParametersProperty = new SimpleObjectProperty<>(new LayoutParameters());
-    public static final ObjectProperty<SvgParameters> svgParametersProperty = new SimpleObjectProperty<>(new SvgParameters().setSvgWidthAndHeightAdded(true));
+    public static final ObjectProperty <LayoutParameters> layoutParametersProperty = new SimpleObjectProperty<>(new LayoutParameters());
+    public static final ObjectProperty <SvgParameters> svgParametersProperty = new SimpleObjectProperty<>(new SvgParameters().setSvgWidthAndHeightAdded(true));
     public static Service <Network> networkService;
 
     private static StringWriter svgWriter = new StringWriter();
@@ -55,43 +54,46 @@ public final class NadCalls {
     }
 
 
-    public static void setDefaultStyleProvider() {
-        if (ControllerParameters.styleProvider == null) {
+    public static void setDefaultStyleProviderIfNull() {
+        if (ControllerParameters.getStyleProvider() == null) {
             // set variable styleProvider to its default value if the dropdown menu's never been clicked on
-            ControllerParameters.styleProvider = new TopologicalStyleProvider(networkProperty.get());
+            ControllerParameters.setStyleProvider(new TopologicalStyleProvider(networkProperty.get()));
         }
     }
 
-    private static void cleanSVG() {
-        svgWriter = new StringWriter();
-    }
-
     public static void drawNetwork() {
-        cleanSVG();
-        setDefaultStyleProvider();
-        new NetworkAreaDiagram(networkProperty.get()).draw(svgWriter,
-                                             svgParametersProperty.get(),
-                                             layoutParametersProperty.get(),
-                                             ControllerParameters.styleProvider);
+        cleanSvgWriter();
+        setDefaultStyleProviderIfNull();
+        new NetworkAreaDiagram(networkProperty.get()).draw(
+                svgWriter,
+                svgParametersProperty.get(),
+                layoutParametersProperty.get(),
+                ControllerParameters.getStyleProvider()
+        );
     }
 
 
     public static void loadUniqueSubstation(List<String> voltageLevelIds, int depth){
-        // draw when clicking on a substation, with the list of voltage levels within the substation
-        setDefaultStyleProvider();
-        new NetworkAreaDiagram(networkProperty.get(), voltageLevelIds, depth).draw(svgWriter,
-                                                                     svgParametersProperty.get(),
-                                                                     layoutParametersProperty.get(),
-                                                                     ControllerParameters.styleProvider);
+        // draw when clicking on a substation,
+        // with voltageLevelIds the list of voltage levels within the substation
+        setDefaultStyleProviderIfNull();
+        new NetworkAreaDiagram(networkProperty.get(), voltageLevelIds, depth).draw(
+                svgWriter,
+                svgParametersProperty.get(),
+                layoutParametersProperty.get(),
+                ControllerParameters.getStyleProvider()
+        );
     }
 
 
     public static void loadSubgraph(String voltageLevelId, int depth) {
-        setDefaultStyleProvider();
-        new NetworkAreaDiagram(networkProperty.get(), voltageLevelId, depth).draw(svgWriter,
-                                                                    svgParametersProperty.get(),
-                                                                    layoutParametersProperty.get(),
-                                                                    ControllerParameters.styleProvider);
+        setDefaultStyleProviderIfNull();
+        new NetworkAreaDiagram(networkProperty.get(), voltageLevelId, depth).draw(
+                svgWriter,
+                svgParametersProperty.get(),
+                layoutParametersProperty.get(),
+                ControllerParameters.getStyleProvider()
+        );
     }
 
 
@@ -99,19 +101,24 @@ public final class NadCalls {
         // A button "Run loadflow" should be added, as often the power flow values in the input file are missing.
         // Requires a maven clean install of powsybl-open-loadflow
         LoadFlow.run(networkProperty.get());
-        setDefaultStyleProvider();
-        new NetworkAreaDiagram(networkProperty.get()).draw(svgWriter,
-                                             svgParametersProperty.get(),
-                                             layoutParametersProperty.get(),
-                                             ControllerParameters.styleProvider);
+        setDefaultStyleProviderIfNull();
+        new NetworkAreaDiagram(networkProperty.get()).draw(
+                svgWriter,
+                svgParametersProperty.get(),
+                layoutParametersProperty.get(),
+                ControllerParameters.getStyleProvider()
+        );
     }
 
     public static StringWriter getSvgWriter() {
         return svgWriter;
     }
 
+    public static void cleanSvgWriter() {
+        svgWriter = new StringWriter();
+    }
+
     public static void setSvgWriter(StringWriter svgWriter) {
         NadCalls.svgWriter = svgWriter;
     }
-
 }

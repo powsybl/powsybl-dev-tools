@@ -36,6 +36,7 @@ public class ImportBar extends HBox
     private void createLoadingStatusButton(String style)
     {
         loadingStatus = new Button();
+        loadingStatus.setMinWidth(28);
         loadingStatus.setStyle(style);
     }
 

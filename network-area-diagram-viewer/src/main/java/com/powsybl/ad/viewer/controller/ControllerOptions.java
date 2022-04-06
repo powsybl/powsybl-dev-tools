@@ -26,7 +26,6 @@ import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import static com.powsybl.ad.viewer.model.NadCalls.*;
-import static com.powsybl.ad.viewer.view.diagram.DiagramPane.addSVG;
 
 
 /**
@@ -36,6 +35,7 @@ public class ControllerOptions
 {
     private static Stage primaryStage;
     private static OptionsPane optionsPane;
+    private static int depthSpinnerValue = 1;
 
     private static final ObservableList <SelectableSubstation> selectableSubstations = FXCollections.observableArrayList();
     private static final ObservableList <SelectableVoltageLevel> selectableVoltageLevels = FXCollections.observableArrayList();
@@ -61,13 +61,13 @@ public class ControllerOptions
         // Depth Spinner
         SpinnerValueFactory<Integer> valueFactory = new SpinnerValueFactory.IntegerSpinnerValueFactory(1, 5, 1);
         optionsPane.getDepthSpinner().setValueFactory(valueFactory);
-        addListenerOnDepthSpinner(optionsPane.getDepthSpinner(), primaryStage);
+        addListenerOnDepthSpinner(optionsPane.getDepthSpinner());
 
         // Run loadflow button
-        addListenerOnRunFlowButton(optionsPane.getRunLoadFlowButton(), primaryStage);
+        addListenerOnRunFlowButton(optionsPane.getRunLoadFlowButton());
 
         // Filters field
-        addListenerOnFilterField(optionsPane.getFiltersField(), primaryStage);
+        addListenerOnFilterField(optionsPane.getFiltersField());
     }
 
     public static void setNodesList()
@@ -93,6 +93,7 @@ public class ControllerOptions
             initVoltageLevelsTree(rootItem, substation, "",
                     true, mapSubstations, mapVoltageLevels);
         }
+
         TreeView substationsTree = optionsPane.getSubstationTree();
         if (optionsPane.getSubstationTree().getRoot() != null)
         {
@@ -104,12 +105,12 @@ public class ControllerOptions
         return substationsTree;
     }
 
-    private static void initVoltageLevelsTree(TreeItem<Container<?>> rootItem,
+    private static void initVoltageLevelsTree(TreeItem<Container<?>> substationTree,
                                               Substation substation, String filter, boolean emptyFilter,
                                               Map<String, SelectableSubstation> mapSubstations,
                                               Map<String, SelectableVoltageLevel> mapVoltageLevels) {
         boolean firstVoltageLevel = true;
-        CheckBoxTreeItem <Container<?>> sItem = null;
+        CheckBoxTreeItem <Container<?>> substationItem = null;
 
         // Replace by check box showName.isSelected
         boolean showNames = true;
@@ -124,8 +125,8 @@ public class ControllerOptions
 
         // mapSubstations.containsKey(substation.getId()) ?? don't understand the purpose of this condition
         boolean mapContainsSubstation = true;
-        // mapSubstations.get(substation.getId()).checkedProperty().get() if parent is selected ,select child
-        boolean substationIsChecked = true;
+        // mapSubstations.get(substation.getId()).checkedProperty().get()
+        boolean substationIsChecked = false;
 
         for (VoltageLevel voltageLevel : substation.getVoltageLevels())
         {
@@ -139,57 +140,83 @@ public class ControllerOptions
             // If it is the first voltage level, we set it as root and perform other actions
             if (firstVoltageLevel && !hideSubstations)
             {
-                sItem = new CheckBoxTreeItem <> ();
-                sItem.setValue(substation);
-                sItem.setIndependent(true);
-                sItem.setExpanded(true);
+                substationItem = new CheckBoxTreeItem <> ();
+                substationItem.setValue(substation);
+                substationItem.setIndependent(true);
+                substationItem.setExpanded(true);
 
                 if (mapContainsSubstation && substationIsChecked)
                 {
-                    sItem.setSelected(true);
+                    substationItem.setSelected(true);
                 }
-                rootItem.getChildren().add(sItem);
-                sItem.selectedProperty().addListener((obs, oldVal, newVal) ->
-                        // checkSubstation(s, newVal)
-                        Util.loggerControllerOptions.info("SELECTED ITEM")
-                );
+                substationTree.getChildren().add(substationItem);
+                addListenerOnSubstationItem(substationItem);
             }
-
-            rootItem.getChildren().add(sItem);
-            /*
-            sItem.selectedProperty().addListener((obs, oldVal, newVal) ->
-                    checkSubstation(substation, newVal)
-            ); */
-
             firstVoltageLevel = false;
 
             if (!hideSubstations)
             {
-                CheckBoxTreeItem<Container<?>> vItem = new CheckBoxTreeItem<>(voltageLevel);
+                CheckBoxTreeItem <Container <?>> voltageItem = new CheckBoxTreeItem (voltageLevel);
 
-                vItem.setIndependent(true);
+                voltageItem.setIndependent(true);
 
                 if (mapVoltageLevels.containsKey(voltageLevel.getId()) &&
                         true)//mapVoltageLevels.get(voltageLevel.getId()).checkedProperty().get())
                 {
-                    vItem.setSelected(true);
+                    voltageItem.setSelected(true);
                 }
 
-                if (sItem != null)
+                if (substationItem != null)
                 {
-                    sItem.getChildren().add(vItem);
+                    substationItem.getChildren().add(voltageItem);
                 }
                 else
                 {
-                    rootItem.getChildren().add(vItem);
+                    substationTree.getChildren().add(voltageItem);
                 }
+                addListenerOnVoltageItem(voltageItem);
 
-                vItem.selectedProperty().addListener((obs, oldVal, newVal) ->
-                        Util.loggerControllerOptions.info("VOLTAGE LEVEL SELECTED")
-                        );// checkVoltageLevel(voltageLevel, newVal));
             }
         }
     }
+
+    private static void addListenerOnSubstationItem(CheckBoxTreeItem<Container<?>> substationItem)
+    {
+        ArrayList <String> voltageIds = new ArrayList ();
+        substationItem.addEventHandler(CheckBoxTreeItem.checkBoxSelectionChangedEvent(), objectTreeModificationEvent ->
+        {
+            if (substationItem.isSelected())
+            {
+                Util.loggerControllerOptions.info("Substation \"" + substationItem.getValue().toString() + "\" selected.");
+                voltageIds.clear();
+                for (TreeItem <Container<?>> voltageId : substationItem.getChildren())
+                    voltageIds.add(voltageId.getValue().toString());
+                NadCalls.loadUniqueSubstation(voltageIds, depthSpinnerValue);
+                //ControllerDiagram.addSvgToCheckedTab();
+            } else {
+                Util.loggerControllerOptions.info("Substation \"" + substationItem.getValue().toString() + "\" unselected.");
+            }
+        });
+    }
+
+    private static void addListenerOnVoltageItem(CheckBoxTreeItem<Container<?>> voltageItem)
+    {
+        voltageItem.addEventHandler(CheckBoxTreeItem.checkBoxSelectionChangedEvent(), objectTreeModificationEvent ->
+        {
+            if (voltageItem.isSelected()) {
+                Util.loggerControllerOptions.info("Voltage level \"" + voltageItem.getValue().toString() + "\" selected.");
+                NadCalls.loadSubgraph(voltageItem.getValue().toString(), depthSpinnerValue);
+                try {
+                    ControllerDiagram.addSvgToCheckedTab();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            } else {
+                Util.loggerControllerOptions.info("Voltage level \"" + voltageItem.getValue().toString() + "\" unselected.");
+            }
+        });
+    }
+
 
     /*
     Handling the display of names/id in the substations tree
@@ -240,40 +267,75 @@ public class ControllerOptions
             if (check.isSelected())
             {
                 Util.loggerControllerOptions.info("Network Check Selected OK");
+                if (ControllerImport.getFile() == null)
+                {
+                    Util.loggerControllerOptions.info("No file set. Please import a network first.");
+                    return;
+                }
 
                 try {
                     loadNetwork(ControllerImport.getFile().toPath());  // load network
                     drawNetwork();  // changes the variable svgWriter
                     ControllerParameters.getParamPane().getSvgXSpinner().setDisable(false);
                     ControllerParameters.getParamPane().getSvgYSpinner().setDisable(false);
-                    addSVG(getSvgWriter());  // calls addSVG which actually displays the svg
+
+                    ControllerDiagram.addSvgToSelectedTab();
+                    ControllerDiagram.addSvgToCheckedTab();
+
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
             }
             else
-                Util.loggerControllerOptions.info("Network Check Unselected OK");
+            {
+                Util.loggerControllerOptions.info("Network Check unselected. Cleaning diagram containers..");
+                NadCalls.cleanSvgWriter();
+                ControllerDiagram.getDiagramPane().resetTabContainers();
+                ControllerParameters.getParamPane().getSvgXSpinner().setDisable(true);
+                ControllerParameters.getParamPane().getSvgYSpinner().setDisable(true);
+            }
         });
     }
 
-    private void addListenerOnDepthSpinner(Spinner spinner, Stage primaryStage)
+    private void addListenerOnDepthSpinner(Spinner <Integer> spinner)
     {
         spinner.valueProperty().addListener((obs, oldValue, newValue) ->
         {
-            Util.loggerControllerOptions.info("Depth Spinner value :  " + oldValue + " transformed into : " + newValue);
+
+            if (oldValue < newValue)
+            {
+                // Handle max depth ?
+                Util.loggerControllerOptions.info("Depth Spinner value :  " + oldValue + " incremented to : " + newValue);
+                depthSpinnerValue++;
+            }
+            else
+            {
+                if (depthSpinnerValue == 1)
+                {
+                    Util.loggerControllerOptions.error("Depth can not be less than 1.");
+                    return;
+                }
+                Util.loggerControllerOptions.info("Depth Spinner value :  " + oldValue + " decremented to : " + newValue);
+                depthSpinnerValue--;
+            }
         });
     }
 
-    private void addListenerOnRunFlowButton(Button button, Stage primaryStage)
+    private void addListenerOnRunFlowButton(Button button)
     {
         button.setOnAction(event ->
         {
+            if (ControllerImport.getFile() == null)
+            {
+                Util.loggerControllerOptions.info("No file set. Please import a network first.");
+                return;
+            }
             NadCalls.runLoadFlow();
             Util.loggerControllerOptions.info("Run Loadflow OK");
         });
     }
 
-    private void addListenerOnFilterField(TextField field, Stage primaryStage)
+    private void addListenerOnFilterField(TextField field)
     {
         field.setOnAction(event ->
         {
@@ -281,22 +343,17 @@ public class ControllerOptions
         });
     }
 
-    private static void addListenerOnNodesPane(Stage primaryStage)
+    public static void resetOptions()
     {
-        for (CheckBox checkBox : new ArrayList<CheckBox>())
-        {
-            checkBox.setOnAction(event ->
-            {
-                if (checkBox.isSelected())
-                {
-                    Util.loggerControllerOptions.info("Node Selected OK" + checkBox.getText());
-                }
-                else
-                {
-                    Util.loggerControllerOptions.info("Node Unselected OK" + checkBox.getText());
-                }
-            });
-        }
+        while (depthSpinnerValue != 1)
+            optionsPane.getDepthSpinner().decrement();
+        optionsPane.getFullNetworkCheck().setSelected(false);
+        optionsPane.getFiltersField().clear();
+    }
+
+    public static void cleanSubstations()
+    {
+        optionsPane.cleanNodes();
     }
 
     public OptionsPane getOptionsPane()

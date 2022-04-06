@@ -6,13 +6,17 @@
  */
 
 package com.powsybl.ad.viewer.controller;
+import com.powsybl.ad.viewer.model.NadCalls;
 import com.powsybl.ad.viewer.util.Util;
 import com.powsybl.ad.viewer.view.ImportBar;
+import com.powsybl.ad.viewer.view.diagram.DiagramPane;
 import com.powsybl.iidm.network.Network;
 import javafx.scene.control.Button;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import java.io.File;
+import java.io.IOException;
+
 import static com.powsybl.ad.viewer.model.NadCalls.*;
 
 
@@ -34,12 +38,12 @@ public class ControllerImport
         this.primaryStage = stage;
     }
 
-    public void createImportBar(int size)
+    public void createImportBar()
     {
         importBar = new ImportBar();
     }
 
-    public void setImportBar(ControllerOptions controllerOptions)
+    public void setImportBar()
     {
         addListenerOnImportButton(importBar.getLoadButton(), primaryStage);
     }
@@ -61,10 +65,11 @@ public class ControllerImport
             {
                 // load the network corresponding to zip
                 loadNetwork(file.toPath());
-                // Construct StringWriter (diagram) object
 
                 // Update loading bar
                 handleLoadingResult(file);
+
+                ControllerOptions.resetOptions();
             }
         });
     }
@@ -75,12 +80,15 @@ public class ControllerImport
             importBar.getLoadingStatusButton().setStyle("-fx-background-color: yellow");
             importBar.getPathTextField().setText(file.getAbsolutePath());
             Util.preferences.put(Util.CASE_FOLDER_PROPERTY, file.getParent());
+            Util.loggerControllerImport.info("Please wait while we try to import the network...");
         });
 
         networkService.setOnSucceeded(event -> {
+            cleanNetwork();
             setNetwork((Network) event.getSource().getValue());
             importBar.getLoadingStatusButton().setStyle("-fx-background-color: green");
             Util.preferences.put(Util.CASE_PATH_PROPERTY, file.getAbsolutePath());
+            Util.loggerControllerImport.info("Network imported successfully.");
         });
 
         networkService.setOnFailed(event -> {
@@ -88,8 +96,21 @@ public class ControllerImport
             Util.loggerControllerImport.error(exception.toString(), exception);
             importBar.getPathTextField().setText("");
             importBar.getLoadingStatusButton().setStyle("-fx-background-color: red");
+            Util.loggerControllerImport.error("Error when importing network. ");
         });
         networkService.start();
+    }
+
+
+    // Cleans all variables to prepare a new import (substations, SVG..)
+    public static void cleanNetwork()
+    {
+        ControllerDiagram.getDiagramPane().resetTabContainers();
+        ControllerOptions.cleanSubstations();
+        NadCalls.cleanSvgWriter();
+        ControllerParameters.getParamPane().getSvgXSpinner().setDisable(true);
+        ControllerParameters.getParamPane().getSvgYSpinner().setDisable(true);
+        Util.loggerControllerImport.info("Cleaning diagram tabs and substations...");
     }
 
     protected void setNetwork(Network network) {

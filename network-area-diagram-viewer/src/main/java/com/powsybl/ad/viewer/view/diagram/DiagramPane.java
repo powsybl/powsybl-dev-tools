@@ -6,127 +6,93 @@
  */
 
 package com.powsybl.ad.viewer.view.diagram;
-
-import com.google.common.io.ByteStreams;
-import com.powsybl.ad.viewer.model.NadCalls;
-import javafx.concurrent.Worker;
+import com.powsybl.ad.viewer.controller.ControllerDiagram;
 import com.powsybl.ad.viewer.view.diagram.containers.ContainerDiagramPane;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
-import javafx.scene.input.ScrollEvent;
-import netscape.javascript.JSObject;
+import javafx.scene.layout.BorderPane;
 import java.io.IOException;
-import java.io.StringWriter;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
+import static com.powsybl.ad.viewer.model.NadCalls.getSvgWriter;
 
 /**
  * @author Louis Lhotte <louis.lhotte@student-cs.fr>
  */
 public class DiagramPane extends TabPane
 {
-    private static ContainerDiagramPane selectedTabContainer;
-    private static ContainerDiagramPane checkedTabContainer;
+    private Tab selectedTab;
+    private Tab checkedTab;
+
+    private BorderPane selectedDiagramPane;
+    private static ContainerDiagramPane selectedContainer;
+
+    private TabPane checkedDiagramPane;
 
     private static String contentSVG;
 
-    private ArrayList<String> svgList = new ArrayList<String> ();
-
     public DiagramPane()
     {
-        Tab selectedTab = createSelectedTab();
-        Tab checkedTab = createCheckedTab();
+        createSelectedTab();
+        createCheckedTab();
 
         this.getTabs().setAll(selectedTab, checkedTab);
     }
 
-    public Tab createSelectedTab()
+    private void createSelectedTab()
     {
-        selectedTabContainer = new ContainerDiagramPane(true);
-        Tab selectedTab = new Tab("Selected", selectedTabContainer);  // Upcasting ContainerDiagramPane into Node
+        selectedContainer = new ContainerDiagramPane();
+        selectedDiagramPane = new BorderPane(selectedContainer);
+        selectedTab = new Tab("Selected", selectedDiagramPane);
         selectedTab.setClosable(false);
-        return selectedTab;
     }
 
-    public Tab createCheckedTab()
+    private void createCheckedTab()
     {
-        checkedTabContainer = new ContainerDiagramPane(true);
-        Tab checkedTab = new Tab("Checked", checkedTabContainer);  // Upcasting ContainerDiagramPane into Node
+        checkedDiagramPane = new TabPane();
+        checkedTab = new Tab("Checked", checkedDiagramPane);
         checkedTab.setClosable(false);
-        return checkedTab;
     }
 
-    public static void addSVG(StringWriter svg) throws IOException {
-        if (svg != null) {
-            List<ContainerDiagramPane> ListContainerDiagramPane = new ArrayList<ContainerDiagramPane>();
-            ListContainerDiagramPane.add(checkedTabContainer);
-            ListContainerDiagramPane.add(selectedTabContainer);
-
-            for (int i = 0; i < ListContainerDiagramPane.size(); i++) {
-
-                int finalI = i;
-
-                //
-                // SVG image
-                //
-                String html = new String(
-                        ByteStreams.toByteArray(Objects.requireNonNull(DiagramPane.class.getResourceAsStream("/svg.html")))
-                );
-                contentSVG = html.replace("%__JS__%", "").replace("%__SVG__%", svg.toString());
-                ListContainerDiagramPane.get(finalI).getWebEngine().loadContent(contentSVG);
-
-                // Add Zoom management
-                ListContainerDiagramPane.get(finalI).getDiagramView().addEventFilter(ScrollEvent.SCROLL, (ScrollEvent e) -> {
-                    if (e.isControlDown()) {
-                        double deltaY = e.getDeltaY();
-                        double zoom = ListContainerDiagramPane.get(finalI).getDiagramView().getZoom();
-                        if (deltaY < 0) {
-                            zoom /= 1.1;
-                        } else if (deltaY > 0) {
-                            zoom *= 1.1;
-                        }
-                        ListContainerDiagramPane.get(finalI).getDiagramView().setZoom(zoom);
-                        e.consume();
-                    }
-                });
-
-                // Avoid the useless right click on the image
-                ListContainerDiagramPane.get(finalI).getDiagramView().setContextMenuEnabled(false);
-
-                // Set up the listener on WebView changes
-                // A listener has to be added as loading takes time - execute once the content is successfully loaded
-                ListContainerDiagramPane.get(finalI).getWebEngine().getLoadWorker().stateProperty().addListener((observable, oldValue, newValue) -> {
-                    if (Worker.State.SUCCEEDED == newValue) {
-                        JSObject window = (JSObject) ListContainerDiagramPane.get(finalI).getDiagramView().getEngine().executeScript("window");
-                    }
-                });
-                //
-                // SVG string
-                //
-                ListContainerDiagramPane.get(finalI).setSVGText(svg.toString());
-
-                //
-                // SVG info
-                //
-                ListContainerDiagramPane.get(finalI).setSVGInfo("Test selected container svg info");
-            }
-
-    }
-
-    }
-
-    public static ContainerDiagramPane getCheckedTab()
+    public void resetTabContainers()
     {
-        return checkedTabContainer;
+    // resetCheckedTabs();
+    // resetSelectedTabs();
     }
 
-    public static ContainerDiagramPane getSelectedTab()
+    public void resetSelectedTabs()
     {
-        return selectedTabContainer;
+        createSelectedTab();
+        //contentSVG = "";
+        //selectedTabContainer.getWebEngine().loadContent(contentSVG);
+    }
+
+    public void resetCheckedTabs()
+    {
+        createCheckedTab();
+        //contentSVG = "";
+        //checkedTabContainer.getWebEngine().loadContent(contentSVG);
+    }
+
+    public TabPane getCheckedDiagramPane()
+    {
+        return checkedDiagramPane;
+    }
+
+    public BorderPane getSelectedDiagramPane()
+    {
+        return selectedDiagramPane;
     }
 
     public Tab getTabSelectedByUser() {
         return this.getSelectionModel().getSelectedItem();
     }
+
+    public String getContentSVG()
+    {
+        return contentSVG;
+    }
+
+    public static void setContentSVG(String contentSVG) {
+        DiagramPane.contentSVG = contentSVG;
+    }
+
 }

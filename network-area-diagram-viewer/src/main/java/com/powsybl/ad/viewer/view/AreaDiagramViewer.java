@@ -98,8 +98,8 @@ public class AreaDiagramViewer extends Application
 
     private ImportBar createImportBar()
     {
-        cImport.createImportBar(3);
-        cImport.setImportBar(cOptions);
+        cImport.createImportBar();
+        cImport.setImportBar();
 
         Util.logger.info("Import bar correctly created.");
         return cImport.getImportBar();

@@ -9,25 +9,26 @@ package com.powsybl.ad.viewer.controller;
 import com.powsybl.ad.viewer.model.NadCalls;
 import com.powsybl.ad.viewer.util.Util;
 import com.powsybl.ad.viewer.view.ParamPane;
-import com.powsybl.ad.viewer.view.diagram.DiagramPane;
 import com.powsybl.ad.viewer.view.diagram.containers.ContainerDiagramPane;
-import com.powsybl.nad.layout.LayoutParameters;
 import com.powsybl.nad.svg.Padding;
 import com.powsybl.nad.svg.StyleProvider;
 import com.powsybl.nad.svg.SvgParameters;
 import com.powsybl.nad.svg.iidm.NominalVoltageStyleProvider;
 import com.powsybl.nad.svg.iidm.TopologicalStyleProvider;
 import javafx.beans.value.ChangeListener;
-import javafx.beans.value.WeakChangeListener;
 import javafx.scene.Node;
 import javafx.scene.control.*;
+import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
 import javafx.stage.Stage;
 import static com.powsybl.ad.viewer.model.NadCalls.networkProperty;
 import java.io.IOException;
 import java.io.StringWriter;
+import java.util.Optional;
 import java.util.function.BiFunction;
 import java.util.function.ToDoubleFunction;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import static com.powsybl.ad.viewer.model.NadCalls.*;
 
@@ -41,7 +42,7 @@ public class ControllerParameters
 
     private ChangeListener<SvgParameters> listener;
 
-    public static StyleProvider styleProvider;  // inside it will be stored the dropdown list's selected value
+    private static StyleProvider styleProvider;  // inside it will be stored the dropdown list's selected value
 
     public ControllerParameters(Stage primaryStage)
     {
@@ -99,7 +100,9 @@ public class ControllerParameters
         listener = (observable, oldValue, newValue) -> {
             try {
                 NadCalls.drawNetwork();
-                DiagramPane.addSVG(getSvgWriter());
+
+                ControllerDiagram.addSvgToCheckedTab();
+                ControllerDiagram.addSvgToSelectedTab();
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -111,7 +114,68 @@ public class ControllerParameters
     {
         fitContentButton.setOnAction(event ->
         {
-            Util.loggerControllerParameters.info("Fit to content OK");
+            // Only the currently selected tab's zoom should changed to fit to content
+            Tab tabSelectedByUser = ControllerDiagram.getDiagramPane().getTabSelectedByUser();
+            Node tabSelectedByUserNode = tabSelectedByUser.getContent();
+
+            Node borderPaneNode = null;
+            Tab selectedSubTabByUser = null;
+
+            if (tabSelectedByUserNode != null) {
+                if (tabSelectedByUserNode instanceof BorderPane) {  // that's if we in Selected (cf. createSelectedTab)
+                    Util.loggerControllerParameters.info("Fit to content clicked (logger 1/2) whilst in Selected");
+                    // We need to downcast tabSelectedByUserNode into a BorderPane
+                    BorderPane borderPaneDowncast = (BorderPane) tabSelectedByUserNode;
+                    borderPaneNode = borderPaneDowncast.getCenter();
+                }
+                if (tabSelectedByUserNode instanceof TabPane) {  // that's if we in Checked (cf. createCheckedTab)
+                    Util.loggerControllerParameters.info("Fit to content clicked (logger 1/2) whilst in Checked");
+                    // We need to downcast tabSelectedByUserNode into a TabPane
+                    TabPane tabPaneDowncast = (TabPane) tabSelectedByUserNode;
+                    selectedSubTabByUser = tabPaneDowncast.getSelectionModel().getSelectedItem();
+                }
+            }
+
+            ContainerDiagramPane pane = null;
+
+            if (borderPaneNode != null) {  //  that's if we in Selected
+                if (borderPaneNode instanceof ContainerDiagramPane) {
+                    Util.loggerControllerParameters.info("Fit to content clicked (logger 2/2) whilst in Selected");
+                    // We need to downcast borderPaneNode into a ContainerDiagramPane
+                    pane = (ContainerDiagramPane) borderPaneNode;
+                }
+            }
+            if (selectedSubTabByUser != null) { // that's if we in Checked
+                Node selectedSubTabByUserNode = selectedSubTabByUser.getContent();
+                if (selectedSubTabByUserNode instanceof ContainerDiagramPane) {
+                    Util.loggerControllerParameters.info("Fit to content clicked (logger 2/2) whilst in Checked");
+                    // We need to downcast selectedSubTabByUserNode into a ContainerDiagramPane
+                    pane = (ContainerDiagramPane) selectedSubTabByUserNode;
+                }
+            }
+
+            // Now we fit to content
+            if (pane != null) {
+                String svgData = pane.getSvgTextArea().getText();
+                Optional<String> svgLine = svgData.lines().filter(l -> l.contains("<svg")).findAny();
+                if (svgLine.isPresent()) {
+                    String valuePattern = "\"([^\"]*)\"";
+                    Pattern pW = Pattern.compile("width=" + valuePattern);
+                    Matcher mW = pW.matcher(svgLine.get());
+                    Pattern pH = Pattern.compile("height=" + valuePattern);
+                    Matcher mH = pH.matcher(svgLine.get());
+                    if (mH.find() && mW.find()) {
+                        double svgWidth = Double.parseDouble(mW.group(1));
+                        double svgHeight = Double.parseDouble(mH.group(1));
+                        double paneWidth = pane.getDiagramView().widthProperty().get();
+                        double paneHeight = pane.getDiagramView().heightProperty().get();
+                        double zoomH = paneHeight / svgHeight;
+                        double zoomW = paneWidth / svgWidth;
+                        pane.getDiagramView().setZoom(Math.min(zoomH, zoomW));
+                    }
+                }
+                Util.loggerControllerParameters.info("Fit to content OK");
+            }
         });
     }
 
@@ -119,15 +183,50 @@ public class ControllerParameters
     {
         resetZoomButton.setOnAction(event -> {
 
-            // only the currently selected tab's zoom should be reset
-            Tab tabSelectedbyUser = ControllerDiagram.getDiagramPane().getTabSelectedByUser();
-            Node node = tabSelectedbyUser.getContent();
-            if (node != null) {
-                if (node instanceof ContainerDiagramPane) {  // We need to downcast Node into ContainerDiagramPane
-                    ContainerDiagramPane pane = (ContainerDiagramPane) node;
-                    pane.getDiagramView().setZoom(1.0); // 100
+            // Only the currently selected tab's zoom should be reset
+            Tab tabSelectedByUser = ControllerDiagram.getDiagramPane().getTabSelectedByUser();
+            Node tabSelectedByUserNode = tabSelectedByUser.getContent();
+
+            Node borderPaneNode = null;
+            Tab selectedSubTabByUser = null;
+
+            if (tabSelectedByUserNode != null) {
+                if (tabSelectedByUserNode instanceof BorderPane) {  // that's if we in Selected (cf. createSelectedTab)
+                    Util.loggerControllerParameters.info("Reset Zoom clicked (logger 1/2) whilst in Selected");
+                    // We need to downcast tabSelectedByUserNode into a BorderPane
+                    BorderPane borderPaneDowncast = (BorderPane) tabSelectedByUserNode;
+                    borderPaneNode = borderPaneDowncast.getCenter();
+                }
+                if (tabSelectedByUserNode instanceof TabPane) {  // that's if we in Checked (cf. createCheckedTab)
+                    Util.loggerControllerParameters.info("Reset Zoom clicked (logger 1/2) whilst in Checked");
+                    // We need to downcast tabSelectedByUserNode into a TabPane
+                    TabPane tabPaneDowncast = (TabPane) tabSelectedByUserNode;
+                    selectedSubTabByUser = tabPaneDowncast.getSelectionModel().getSelectedItem();
                 }
             }
+
+            ContainerDiagramPane pane = null;
+
+            if (borderPaneNode != null) {  //  that's if we in Selected
+                if (borderPaneNode instanceof ContainerDiagramPane) {
+                    Util.loggerControllerParameters.info("Reset Zoom clicked (logger 2/2) whilst in Selected");
+                    // We need to downcast borderPaneNode into a ContainerDiagramPane
+                    pane = (ContainerDiagramPane) borderPaneNode;
+                }
+            }
+            if (selectedSubTabByUser != null) { // that's if we in Checked
+                Node selectedSubTabByUserNode = selectedSubTabByUser.getContent();
+                if (selectedSubTabByUserNode instanceof ContainerDiagramPane) {
+                    Util.loggerControllerParameters.info("Reset Zoom clicked (logger 2/2) whilst in Checked");
+                    // We need to downcast selectedSubTabByUserNode into a ContainerDiagramPane
+                    pane = (ContainerDiagramPane) selectedSubTabByUserNode;
+                }
+            }
+
+            if (pane != null) {
+                pane.getDiagramView().setZoom(1.0);
+            }
+
             Util.loggerControllerParameters.info("Reset Zoom OK");
         });
     }
@@ -155,23 +254,29 @@ public class ControllerParameters
         {
             if (styleProviderChoice.getValue() == "Nominal") {
                 styleProvider = new NominalVoltageStyleProvider(networkProperty.get());
-                try {
-                    drawNetwork();  // changes the variable svgWriter
-                    DiagramPane.addSVG(getSvgWriter());  // draws nad's svg
-                    Util.loggerControllerParameters.info("styleProvider variable successfully changed to 'NominalVoltageStyleProvider'");
-                } catch (IOException e) {
-                    e.printStackTrace();
+                if (!(getSvgWriter().toString().equals(new StringWriter().toString()))) {
+                    try {
+                        drawNetwork();  // changes the variable svgWriter
+                        ControllerDiagram.addSvgToSelectedTab();
+                        ControllerDiagram.addSvgToSelectedTab();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
                 }
+                Util.loggerControllerParameters.info("styleProvider variable successfully changed to 'NominalVoltageStyleProvider'");
             }
             else if (styleProviderChoice.getValue() == "Topological") {
                 styleProvider = new TopologicalStyleProvider(NadCalls.networkProperty.get());
-                try {
-                    drawNetwork();  // changes the variable svgWriter
-                    DiagramPane.addSVG(getSvgWriter());  // draws nad's svg
-                    Util.loggerControllerParameters.info("styleProvider variable successfully changed to 'TopologicalStyleProvider'");
-                } catch (IOException e) {
-                    e.printStackTrace();
+                if (!(getSvgWriter().toString().equals(new StringWriter().toString()))) {
+                    try {
+                        drawNetwork();  // changes the variable svgWriter
+                        ControllerDiagram.addSvgToSelectedTab();
+                        ControllerDiagram.addSvgToSelectedTab();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
                 }
+                Util.loggerControllerParameters.info("styleProvider variable successfully changed to 'TopologicalStyleProvider'");
             }
         });
     }
@@ -242,4 +347,13 @@ public class ControllerParameters
     {
         return paramPane;
     }
+
+    public static StyleProvider getStyleProvider() {
+        return styleProvider;
+    }
+
+    public static void setStyleProvider(StyleProvider styleProvider) {
+        ControllerParameters.styleProvider = styleProvider;
+    }
+
 }

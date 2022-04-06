@@ -10,7 +10,9 @@ import com.powsybl.iidm.network.Container;
 import javafx.geometry.Insets;
 import javafx.geometry.Orientation;
 import javafx.scene.control.*;
+import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.layout.GridPane;
+import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 
 /**
@@ -18,10 +20,10 @@ import javafx.scene.layout.VBox;
  */
 public class OptionsPane extends SplitPane
 {
-    private GridPane toolBar;
+    private GridPane voltageLevelToolbar;
 
     private CheckBox fullNetworkCheck;
-    private Spinner depthSpinner;
+    private Spinner <Integer> depthSpinner;
 
     private Button runLoadFlowButton;
     private TextField filtersField;
@@ -35,13 +37,13 @@ public class OptionsPane extends SplitPane
 
         createOptionsToolBar();
         createNodePane();
-        this.getItems().addAll(toolBar, nodesPane);
+        this.getItems().addAll(voltageLevelToolbar, nodesPane);
         this.setOrientation(Orientation.VERTICAL);
     }
 
     public void createOptionsToolBar()
     {
-        toolBar = new GridPane();
+        voltageLevelToolbar = new GridPane();
 
         fullNetworkCheck  = new CheckBox("Full network");
 
@@ -52,31 +54,42 @@ public class OptionsPane extends SplitPane
 
         filtersField = new TextField();
         Label filtersLabel = new Label("Filter :");
+        filtersLabel.setMinWidth(40);
 
-        toolBar.setPadding(new Insets(5, 5, 5, 5));
-        toolBar.add(fullNetworkCheck, 1, 0);
-        toolBar.add(depthSpinner, 1, 1);
-        toolBar.add(spinnerLabel, 0, 1);
-        toolBar.add(runLoadFlowButton, 0, 2);
-        toolBar.add(filtersField, 1, 3);
-        toolBar.add(filtersLabel, 0, 3);
+        voltageLevelToolbar.setHgap(5);
+        voltageLevelToolbar.setVgap(5);
+        voltageLevelToolbar.setPadding(new Insets(5, 5, 5, 5));
+        voltageLevelToolbar.add(fullNetworkCheck, 0, 0, 2, 1);
+
+        voltageLevelToolbar.add(spinnerLabel, 0, 1, 2, 1);
+        voltageLevelToolbar.add(depthSpinner, 0, 3, 2, 1);
+
+        voltageLevelToolbar.add(runLoadFlowButton, 0, 6, 3, 1);
+        voltageLevelToolbar.add(filtersLabel, 0, 9, 2, 1);
+        voltageLevelToolbar.add(filtersField, 1, 10, 1, 1);
+
+        ColumnConstraints c0 = new ColumnConstraints();
+        ColumnConstraints c1 = new ColumnConstraints();
+        c1.setHgrow(Priority.ALWAYS);
+        voltageLevelToolbar.getColumnConstraints().addAll(c0, c1);
     }
 
     public void createNodePane()
     {
         nodesPane = new VBox();
         nodesPane.setPadding(new Insets(5, 5, 5, 5));
+        nodesPane.setMinHeight(600);
     }
 
-    public void cleanNodes(){
-        // TO-DO
+    public void cleanNodes()
+    {
+        nodesPane.getChildren().clear();
     }
 
     public void displayNodes(TreeView <?> treeView)
     {
-        cleanNodes(); // each time a new file is imported, previous Nodes should be deleted, otherwise
-        // it could produce an exception duplicate children added or just add way too many node
         nodesPane.getChildren().add(treeView);
+        nodesPane.setVgrow(treeView, Priority.ALWAYS);
     }
 
     public CheckBox getFullNetworkCheck()
@@ -103,4 +116,5 @@ public class OptionsPane extends SplitPane
     {
         return substationsTree;
     }
+
 }

@@ -11,6 +11,7 @@ import com.powsybl.ad.viewer.view.diagram.DiagramPane;
 import com.powsybl.nad.svg.SvgParameters;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.WeakChangeListener;
+import javafx.geometry.Side;
 import javafx.scene.control.*;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.web.WebEngine;
@@ -24,43 +25,39 @@ import static com.powsybl.ad.viewer.model.NadCalls.getSvgWriter;
 /**
  * @author Louis Lhotte <louis.lhotte@student-cs.fr>
  */
-public class ContainerDiagramPane extends BorderPane  // ContainerDiagramPane <- BorderPane <- Pane <- Region <- Node
+public class ContainerDiagramPane extends BorderPane
 {
-
-    // Components for diagramPane
-    private final WebView diagramView = new WebView();
-    private final WebEngine webEngine = diagramView.getEngine();
-
-    /* private final TextField svgSearchField = new TextField();
-    private final Button svgSearchButton = new Button("Search");
-    private final TextArea svgTextArea = new TextArea();
-    private AtomicReference <Integer> svgSearchStart = new AtomicReference<>(0);
-    private final Button svgSaveButton = new Button("Save"); */
-
+    // Info text area
     private TitledPane infoPane;
     private TextArea infoArea;
 
-    private TabPane diagramTabPane;
-    private Tab diagramTab;
+    private TabPane tabPane;
 
+    // Diagram tab with webview
+    private Tab diagramTab;
+    private final WebView diagramView = new WebView();
+    private final WebEngine webEngine = diagramView.getEngine();
+    // SVG source code
     private Tab svgTab;
+
     private TextArea svgTextArea;
 
-    public ContainerDiagramPane(boolean selected) {
+    public ContainerDiagramPane()
+    {
         createInfoPane();
 
-        createDiagramPane();
+        createTabPane();
 
-        this.setCenter(diagramTabPane);
+        this.setCenter(tabPane);
         this.setBottom(infoPane);
     }
 
-    private void createDiagramPane() {
+    private void createTabPane()
+    {
         createDiagramTab();
         createSVGTab();
-
-        diagramTabPane = new TabPane();
-        diagramTabPane.getTabs().addAll(diagramTab, svgTab);
+        tabPane = new TabPane(diagramTab, svgTab);
+        tabPane.setSide(Side.BOTTOM);
     }
 
     private void createSVGTab()
@@ -77,15 +74,20 @@ public class ContainerDiagramPane extends BorderPane  // ContainerDiagramPane <-
         diagramTab.setClosable(false);
     }
 
-    private void createInfoPane() {
+    private void createInfoPane()
+    {
         infoArea = new TextArea();
         infoArea.setEditable(false);
-
         infoPane = new TitledPane("Voltage Level Infos", infoArea);
     }
 
     public TextArea getInfoArea() {
         return infoArea;
+    }
+
+
+    public TextArea getSvgTextArea() {
+        return svgTextArea;
     }
 
     public void setSVGText(String newSvgText) { svgTextArea.setText(newSvgText); }
