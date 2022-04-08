@@ -567,6 +567,21 @@ public class SingleLineDiagramViewer extends Application implements DisplayVolta
         parametersPane.add(cb, 0, row);
     }
 
+    private <E> void addComboBox(String label, int row,
+                                 E[] initializer,
+                                 StringConverter<E> converter,
+                                 BiFunction<LayoutParameters, E, LayoutParameters> updater) {
+
+        ComboBox<E> cb = new ComboBox<>();
+        cb.getItems().setAll(initializer);
+        cb.getSelectionModel().select(initializer[0]);
+        cb.setConverter(converter);
+        cb.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> setParameters(updater.apply(layoutParameters.get(), newValue)));
+        cb.valueProperty().addListener((observable, oldValue, newValue) -> setParameters(updater.apply(layoutParameters.get(), newValue)));
+        parametersPane.add(new Label(label), 0, row);
+        parametersPane.add(cb, 0, row + 1);
+    }
+
     private void initPositionLayoutCheckBox(Predicate<PositionVoltageLevelLayoutFactory> initializer, CheckBox stackCb) {
         VoltageLevelLayoutFactory layoutFactory = getVoltageLevelLayoutFactory();
         stackCb.setSelected(layoutFactory instanceof PositionVoltageLevelLayoutFactory && initializer.test((PositionVoltageLevelLayoutFactory) layoutFactory));
@@ -696,8 +711,6 @@ public class SingleLineDiagramViewer extends Application implements DisplayVolta
         rowIndex += 2;
         addCheckBox("Show grid", rowIndex, LayoutParameters::isShowGrid, LayoutParameters::setShowGrid);
         rowIndex += 1;
-        addCheckBox("Add svg tooltip", rowIndex, LayoutParameters::isTooltipEnabled, LayoutParameters::setTooltipEnabled);
-        rowIndex += 1;
         addCheckBox("Show internal nodes", rowIndex, LayoutParameters::isShowInternalNodes, LayoutParameters::setShowInternalNodes);
         rowIndex += 1;
         addCheckBox("Draw straight wires", rowIndex, LayoutParameters::isDrawStraightWires, LayoutParameters::setDrawStraightWires);
@@ -722,6 +735,19 @@ public class SingleLineDiagramViewer extends Application implements DisplayVolta
         addSpinner("Min space between components:", 8, 60, 1, rowIndex, LayoutParameters::getMinSpaceBetweenComponents, LayoutParameters::setMinSpaceBetweenComponents);
         rowIndex += 2;
         addSpinner("Minimum extern cell height:", 80, 300, 10, rowIndex, LayoutParameters::getMinExternCellHeight, LayoutParameters::setMinExternCellHeight);
+
+        rowIndex += 2;
+        StringConverter<LayoutParameters.Alignment> converter = new StringConverter<>() {
+            @Override
+            public String toString(LayoutParameters.Alignment object) {
+                 return object.name();
+            }
+            @Override
+            public LayoutParameters.Alignment fromString(String string) {
+                return LayoutParameters.Alignment.valueOf(string);
+            }
+        };
+        addComboBox("BusBar alignment:", rowIndex, LayoutParameters.Alignment.values(), converter, LayoutParameters::setBusbarsAlignment);
 
         rowIndex += 2;
         addCheckBox("Center label:", rowIndex, LayoutParameters::isLabelCentered, LayoutParameters::setLabelCentered);
@@ -1048,34 +1074,10 @@ public class SingleLineDiagramViewer extends Application implements DisplayVolta
                 .forEach(selectableSubstation -> selectableSubstation.setCheckedProperty(checked));
     }
 
-    private void initVoltageLevelsTree(TreeItem<Container<?>> rootItem,
-                                       Substation s, String filter, boolean emptyFilter,
-                                       Map<String, SelectableSubstation> mapSubstations,
-                                       Map<String, SelectableVoltageLevel> mapVoltageLevels) {
-        boolean firstVL = true;
-        CheckBoxTreeItem<Container<?>> sItem = null;
+    private void initVoltageLevelsTree(TreeItem<Container<?>> rootItem, CheckBoxTreeItem<Container<?>> sItem,
+                                       Collection<VoltageLevel> voltageLevels, Map<String, SelectableVoltageLevel> mapVoltageLevels) {
 
-        for (VoltageLevel v : s.getVoltageLevels()) {
-            boolean vlOk = showNames.isSelected() ? v.getName().contains(filter) : v.getId().contains(filter);
-
-            if (!emptyFilter && !vlOk) {
-                continue;
-            }
-
-            if (firstVL && !hideSubstations.isSelected()) {
-                sItem = new CheckBoxTreeItem<>(s);
-                sItem.setIndependent(true);
-                sItem.setExpanded(true);
-                if (mapSubstations.containsKey(s.getId()) && mapSubstations.get(s.getId()).checkedProperty().get()) {
-                    sItem.setSelected(true);
-                }
-                rootItem.getChildren().add(sItem);
-                sItem.selectedProperty().addListener((obs, oldVal, newVal) ->
-                        checkSubstation(s, newVal)
-                );
-            }
-
-            firstVL = false;
+        for (VoltageLevel v : voltageLevels) {
 
             if (!hideVoltageLevels.isSelected()) {
                 CheckBoxTreeItem<Container<?>> vItem = new CheckBoxTreeItem<>(v);
@@ -1110,8 +1112,27 @@ public class SingleLineDiagramViewer extends Application implements DisplayVolta
                 .collect(Collectors.toMap(SelectableVoltageLevel::getId, Function.identity()));
 
         for (Substation s : n.getSubstations()) {
-            initVoltageLevelsTree(rootItem, s, filter, emptyFilter, mapSubstations, mapVoltageLevels);
+            CheckBoxTreeItem<Container<?>> sItem = null;
+            boolean sFilterOk = emptyFilter || (showNames.isSelected() ? s.getNameOrId().contains(filter) : s.getId().contains(filter));
+            List<VoltageLevel> voltageLevels = s.getVoltageLevelStream()
+                    .filter(v -> sFilterOk || (showNames.isSelected() ? v.getNameOrId().contains(filter) : v.getId().contains(filter)))
+                    .collect(Collectors.toList());
+            if ((sFilterOk || !voltageLevels.isEmpty()) && !hideSubstations.isSelected()) {
+                sItem = new CheckBoxTreeItem<>(s);
+                sItem.setIndependent(true);
+                sItem.setExpanded(true);
+                if (mapSubstations.containsKey(s.getId()) && mapSubstations.get(s.getId()).checkedProperty().get()) {
+                    sItem.setSelected(true);
+                }
+                rootItem.getChildren().add(sItem);
+                sItem.selectedProperty().addListener((obs, oldVal, newVal) -> checkSubstation(s, newVal));
+            }
+
+            initVoltageLevelsTree(rootItem, sItem, voltageLevels, mapVoltageLevels);
         }
+
+        List<VoltageLevel> emptySubstationVoltageLevels = n.getVoltageLevelStream().filter(v -> v.getSubstation().isEmpty()).collect(Collectors.toList());
+        initVoltageLevelsTree(rootItem, null, emptySubstationVoltageLevels, mapVoltageLevels);
 
         if (substationsTree.getRoot() != null) {
             substationsTree.getRoot().getChildren().clear();
@@ -1189,9 +1210,6 @@ public class SingleLineDiagramViewer extends Application implements DisplayVolta
         substationsLayouts.put("Horizontal", new HorizontalSubstationLayoutFactory());
         substationsLayouts.put("Vertical", new VerticalSubstationLayoutFactory());
         substationsLayouts.put("Cgmes", null);
-        substationsLayouts.put("Smart", new ForceSubstationLayoutFactory(ForceSubstationLayoutFactory.CompactionType.NONE));
-        substationsLayouts.put("Smart with horizontal compaction", new ForceSubstationLayoutFactory(ForceSubstationLayoutFactory.CompactionType.HORIZONTAL));
-        substationsLayouts.put("Smart with vertical compaction", new ForceSubstationLayoutFactory(ForceSubstationLayoutFactory.CompactionType.VERTICAL));
     }
 
     private void updateLayoutsFactory(Network network) {
