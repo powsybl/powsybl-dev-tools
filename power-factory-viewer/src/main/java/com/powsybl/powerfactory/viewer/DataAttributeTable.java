@@ -55,7 +55,7 @@ public class DataAttributeTable extends BorderPane {
             Object value = getAttributeValue(param.getValue());
             return value != null ? new SimpleObjectProperty<>(value) : null;
         });
-        attrValueCol.setCellFactory(param -> new TableCell<DataAttribute, Object>() {
+        attrValueCol.setCellFactory(param -> new TableCell<>() {
 
             private Hyperlink createHyperlink(DataObject dataObject) {
                 Hyperlink hyperlink = new Hyperlink(dataObject.toString());

@@ -6,8 +6,8 @@
  */
 package com.powsybl.powerfactory.viewer;
 
+import com.powsybl.powerfactory.model.PowerFactoryDataLoader;
 import com.powsybl.powerfactory.model.Project;
-import com.powsybl.powerfactory.model.ProjectLoader;
 import javafx.application.Application;
 import javafx.concurrent.Service;
 import javafx.concurrent.Task;
@@ -29,10 +29,8 @@ import java.io.File;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
-import java.util.ServiceLoader;
 import java.util.prefs.Preferences;
 import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
 
 /**
  * @author Geoffroy Jamgotchian <geoffroy.jamgotchian at rte-france.com>
@@ -79,13 +77,14 @@ public class PowerFactoryViewer extends Application {
     }
 
     private void loadFile(Path file) {
-        service = new Service<Project>() {
+        service = new Service<>() {
             @Override
             protected Task<Project> createTask() {
-                return new Task<Project>() {
+                return new Task<>() {
                     @Override
                     protected Project call() {
-                        return ProjectLoader.load(file).orElse(null);
+                        return PowerFactoryDataLoader.load(file, Project.class)
+                                .orElseThrow();
                     }
                 };
             }
@@ -114,7 +113,7 @@ public class PowerFactoryViewer extends Application {
         dataObjectTree.selectedDataObjectProperty().addListener((observable, oldValue, newValue) -> dataAttributeTable.setDataObject(newValue));
 
         fileChooser.setTitle("Open PowerFactory file");
-        List<String> extensions = StreamSupport.stream(ServiceLoader.load(ProjectLoader.class).spliterator(), false)
+        List<String> extensions = PowerFactoryDataLoader.find(Project.class).stream()
                 .map(l -> "*." + l.getExtension())
                 .collect(Collectors.toList());
         String filterDescr = "PowerFactory files (" + String.join(", ", extensions) + ")";

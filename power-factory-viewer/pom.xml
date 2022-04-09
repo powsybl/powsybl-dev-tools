@@ -31,7 +31,8 @@
         <javafx.version>11.0.2</javafx.version>
         <slf4j.version>1.7.28</slf4j.version>
 
-        <powsybl-core.version>4.5.0-SNAPSHOT</powsybl-core.version>
+        <powsybl-core.version>4.9.0-SNAPSHOT</powsybl-core.version>
+        <powsybl-powerfactory-db-native.version>1.0.0-SNAPSHOT</powsybl-powerfactory-db-native.version>
     </properties>
 
     <build>
@@ -67,13 +68,23 @@
 
         <dependency>
             <groupId>com.powsybl</groupId>
+            <artifactId>powsybl-config-classic</artifactId>
+            <version>${powsybl-core.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.powsybl</groupId>
             <artifactId>powsybl-powerfactory-model</artifactId>
             <version>${powsybl-core.version}</version>
         </dependency>
         <dependency>
             <groupId>com.powsybl</groupId>
-            <artifactId>powsybl-powerfactory-dgs</artifactId>
+            <artifactId>powsybl-powerfactory-db</artifactId>
             <version>${powsybl-core.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.powsybl</groupId>
+            <artifactId>powsybl-powerfactory-db-native</artifactId>
+            <version>${powsybl-powerfactory-db-native.version}</version>
         </dependency>
     </dependencies>
 </project>

@@ -48,17 +48,17 @@ public class DataObjectTree extends BorderPane {
         classNameCol.setPrefWidth(100);
         TreeTableColumn<DataObject, Long> idCol = new TreeTableColumn<>("ID");
 
-        locNameCol.setCellFactory(new Callback<TreeTableColumn<DataObject, DataObject>, TreeTableCell<DataObject, DataObject>>() {
+        locNameCol.setCellFactory(new Callback<>() {
             @Override
             public TreeTableCell<DataObject, DataObject> call(TreeTableColumn<DataObject, DataObject> param) {
-                return new TextFieldTreeTableCell<DataObject, DataObject>() {
+                return new TextFieldTreeTableCell<>() {
                     @Override
                     public void updateItem(DataObject item, boolean empty) {
                         super.updateItem(item, empty);
                         if (empty) {
                             setText(null);
                         } else {
-                            setText(item.getName());
+                            setText(item.getLocName());
                             setContextMenu(menu);
                         }
                     }
@@ -80,7 +80,7 @@ public class DataObjectTree extends BorderPane {
 
                 // update backward links menu
                 backwardLinksMenuItem.getItems().clear();
-                List<DataObject> backwardLinks = project.getBackwardLinks(dataObject.getId());
+                List<DataObject> backwardLinks = project.getIndex().getBackwardLinks(dataObject.getId());
                 if (backwardLinks.isEmpty()) {
                     backwardLinksMenuItem.setDisable(true);
                 } else {
@@ -125,7 +125,7 @@ public class DataObjectTree extends BorderPane {
             treeItemPath.add(currentTreeItem);
             DataObject lastElem = path.pop();
             currentTreeItem = currentTreeItem.getChildren().stream()
-                    .filter(child -> child.getValue().getName().equals(lastElem.getName()))
+                    .filter(child -> child.getValue().getLocName().equals(lastElem.getLocName()))
                     .findFirst()
                     .orElse(null);
             if (currentTreeItem == null) {
