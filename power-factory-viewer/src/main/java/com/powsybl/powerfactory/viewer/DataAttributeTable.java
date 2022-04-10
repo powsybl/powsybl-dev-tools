@@ -23,6 +23,7 @@ import javafx.scene.text.Text;
 import org.apache.commons.math3.linear.RealMatrix;
 import org.apache.commons.math3.linear.RealMatrixFormat;
 
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -118,8 +119,14 @@ public class DataAttributeTable extends BorderPane {
                             setGraphic(null);
                             setText(MATRIX_FORMAT.format((RealMatrix) item));
                         } else {
+                            String text = item.toString();
+                            // hack to display dates
+                            if (item instanceof Long
+                                    && ((Long) item) > 946684800L && ((Long) item) < 2208988800L) { // epoch between 2000 and 2040
+                                text += " (" + Instant.ofEpochSecond((Long) item) + ")";
+                            }
                             setGraphic(null);
-                            setText(item.toString());
+                            setText(text);
                         }
                     } else {
                         setGraphic(null);
