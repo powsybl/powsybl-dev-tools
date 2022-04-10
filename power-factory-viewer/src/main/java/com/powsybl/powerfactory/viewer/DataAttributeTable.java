@@ -8,6 +8,7 @@ package com.powsybl.powerfactory.viewer;
 
 import com.powsybl.powerfactory.model.DataAttribute;
 import com.powsybl.powerfactory.model.DataObject;
+import com.powsybl.powerfactory.model.DataObjectRef;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.event.ActionEvent;
@@ -57,24 +58,29 @@ public class DataAttributeTable extends BorderPane {
         });
         attrValueCol.setCellFactory(param -> new TableCell<>() {
 
-            private Hyperlink createHyperlink(DataObject dataObject) {
-                Hyperlink hyperlink = new Hyperlink(dataObject.toString());
-                hyperlink.setTooltip(new Tooltip(dataObject.toString()));
-                hyperlink.setOnAction((ActionEvent event) -> {
-                    dataObjectTree.search(dataObject);
-                    tableView.requestFocus();
-                });
-                return hyperlink;
+            private Node createHyperlink(DataObjectRef dataObjectRef) {
+                DataObject otherDataObject = dataObjectRef.resolve().orElse(null);
+                if (otherDataObject != null) {
+                    Hyperlink hyperlink = new Hyperlink(otherDataObject.toString());
+                    hyperlink.setTooltip(new Tooltip(otherDataObject.toString()));
+                    hyperlink.setOnAction((ActionEvent event) -> {
+                        dataObjectTree.search(otherDataObject);
+                        tableView.requestFocus();
+                    });
+                    return hyperlink;
+                } else {
+                    return new Label(Long.toString(dataObjectRef.getId()));
+                }
             }
 
-            private Node createHyperlinkList(List<DataObject> dataObjects) {
+            private Node createHyperlinkList(List<DataObjectRef> dataObjectRefs) {
                 VBox vBox = new VBox();
-                Iterator<DataObject> it = dataObjects.iterator();
+                Iterator<DataObjectRef> it = dataObjectRefs.iterator();
                 List<Node> nodes = new ArrayList<>();
                 nodes.add(new Text("["));
                 while (it.hasNext()) {
-                    DataObject dataObject = it.next();
-                    Hyperlink hyperlink = createHyperlink(dataObject);
+                    DataObjectRef dataObjectRef = it.next();
+                    Node hyperlink = createHyperlink(dataObjectRef);
                     nodes.add(hyperlink);
                     if (it.hasNext()) {
                         nodes.add(new Text(","));
@@ -97,12 +103,12 @@ public class DataAttributeTable extends BorderPane {
                     setText(null);
                 } else {
                     if (item != null) {
-                        if (item instanceof DataObject) {
-                            Hyperlink hyperlink = createHyperlink((DataObject) item);
+                        if (item instanceof DataObjectRef) {
+                            Node hyperlink = createHyperlink((DataObjectRef) item);
                             setGraphic(hyperlink);
                             setText(null);
-                        } else if (item instanceof List && !((List<?>) item).isEmpty() && ((List<?>) item).get(0) instanceof DataObject) {
-                            Node hyperlinks = createHyperlinkList((List<DataObject>) item);
+                        } else if (item instanceof List && !((List<?>) item).isEmpty() && ((List<?>) item).get(0) instanceof DataObjectRef) {
+                            Node hyperlinks = createHyperlinkList((List<DataObjectRef>) item);
                             setGraphic(hyperlinks);
                             setText(null);
                         } else if (item instanceof RealMatrix) {
