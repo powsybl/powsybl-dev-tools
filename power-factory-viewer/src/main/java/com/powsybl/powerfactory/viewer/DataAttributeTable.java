@@ -18,6 +18,7 @@ import javafx.scene.control.*;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
+import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
 import org.apache.commons.math3.linear.RealMatrix;
 import org.apache.commons.math3.linear.RealMatrixFormat;
@@ -69,7 +70,9 @@ public class DataAttributeTable extends BorderPane {
                     });
                     return hyperlink;
                 } else {
-                    return new Label(Long.toString(dataObjectRef.getId()));
+                    var label = new Label(Long.toString(dataObjectRef.getId()));
+                    label.setTextFill(Color.RED);
+                    return label;
                 }
             }
 
