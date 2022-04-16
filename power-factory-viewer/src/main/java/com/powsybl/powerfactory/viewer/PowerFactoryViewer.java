@@ -7,6 +7,7 @@
 package com.powsybl.powerfactory.viewer;
 
 import com.powsybl.powerfactory.model.PowerFactoryDataLoader;
+import com.powsybl.powerfactory.model.PowerFactoryException;
 import com.powsybl.powerfactory.model.Project;
 import javafx.application.Application;
 import javafx.concurrent.Service;
@@ -84,7 +85,7 @@ public class PowerFactoryViewer extends Application {
                     @Override
                     protected Project call() {
                         return PowerFactoryDataLoader.load(file, Project.class)
-                                .orElseThrow();
+                                .orElseThrow(() -> new PowerFactoryException("Cannot load file '" + file + "'"));
                     }
                 };
             }
@@ -101,7 +102,11 @@ public class PowerFactoryViewer extends Application {
             hideLoader();
         });
 
-        service.setOnFailed(event -> LOGGER.error(event.getSource().getException().toString(), event.getSource().getException()));
+        service.setOnFailed(event -> {
+            LOGGER.error(event.getSource().getException().toString(), event.getSource().getException());
+            dataObjectTree.setProject(null);
+            hideLoader();
+        });
 
         service.start();
 
