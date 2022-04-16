@@ -76,6 +76,7 @@ public final class NadCalls {
     public static void loadUniqueSubstation(List<String> voltageLevelIds, int depth){
         // draw when clicking on a substation,
         // with voltageLevelIds the list of voltage levels within the substation
+        cleanSvgWriter();
         setDefaultStyleProviderIfNull();
         new NetworkAreaDiagram(networkProperty.get(), voltageLevelIds, depth).draw(
                 svgWriter,
@@ -87,6 +88,7 @@ public final class NadCalls {
 
 
     public static void loadSubgraph(String voltageLevelId, int depth) {
+        cleanSvgWriter();
         setDefaultStyleProviderIfNull();
         new NetworkAreaDiagram(networkProperty.get(), voltageLevelId, depth).draw(
                 svgWriter,

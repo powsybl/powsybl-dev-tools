@@ -95,7 +95,10 @@ public class ControllerOptions
         }
 
         TreeView substationsTree = optionsPane.getSubstationTree();
-        if (optionsPane.getSubstationTree().getRoot() != null)
+
+        addListenerOnSelectingSubstationOrVoltageItem(substationsTree);
+
+        if (substationsTree.getRoot() != null)
         {
             substationsTree.getRoot().getChildren().clear();
         }
@@ -114,7 +117,7 @@ public class ControllerOptions
 
         // Replace by check box showName.isSelected
         boolean showNames = true;
-        // v.getName().contains(filter
+        // v.getName().contains(filter)
         boolean nameContainsFilter = true;
         // v.getId().contains(filter)
         boolean idContainsFilter = true;
@@ -182,29 +185,31 @@ public class ControllerOptions
 
     private static void addListenerOnSubstationItem(CheckBoxTreeItem<Container<?>> substationItem)
     {
+        // Handling checking Substations
         ArrayList <String> voltageIds = new ArrayList ();
         substationItem.addEventHandler(CheckBoxTreeItem.checkBoxSelectionChangedEvent(), objectTreeModificationEvent ->
         {
             if (substationItem.isSelected())
             {
-                Util.loggerControllerOptions.info("Substation \"" + substationItem.getValue().toString() + "\" selected.");
+                Util.loggerControllerOptions.info("Substation \"" + substationItem.getValue().toString() + "\" checked.");
                 voltageIds.clear();
                 for (TreeItem <Container<?>> voltageId : substationItem.getChildren())
                     voltageIds.add(voltageId.getValue().toString());
                 NadCalls.loadUniqueSubstation(voltageIds, depthSpinnerValue);
                 //ControllerDiagram.addSvgToCheckedTab();
             } else {
-                Util.loggerControllerOptions.info("Substation \"" + substationItem.getValue().toString() + "\" unselected.");
+                Util.loggerControllerOptions.info("Substation \"" + substationItem.getValue().toString() + "\" unchecked.");
             }
         });
     }
 
     private static void addListenerOnVoltageItem(CheckBoxTreeItem<Container<?>> voltageItem)
     {
+        // Handling checking Voltages
         voltageItem.addEventHandler(CheckBoxTreeItem.checkBoxSelectionChangedEvent(), objectTreeModificationEvent ->
         {
             if (voltageItem.isSelected()) {
-                Util.loggerControllerOptions.info("Voltage level \"" + voltageItem.getValue().toString() + "\" selected.");
+                Util.loggerControllerOptions.info("Voltage level \"" + voltageItem.getValue().toString() + "\" checked.");
                 NadCalls.loadSubgraph(voltageItem.getValue().toString(), depthSpinnerValue);
                 try {
                     ControllerDiagram.addSvgToCheckedTab();
@@ -212,15 +217,53 @@ public class ControllerOptions
                     e.printStackTrace();
                 }
             } else {
-                Util.loggerControllerOptions.info("Voltage level \"" + voltageItem.getValue().toString() + "\" unselected.");
+                Util.loggerControllerOptions.info("Voltage level \"" + voltageItem.getValue().toString() + "\" unchecked.");
             }
         });
     }
 
+    private static void addListenerOnSelectingSubstationOrVoltageItem(TreeView<Container<?>> substationsTree) {
+        // Handling what happens when selecting one Substation or one VoltageLevel
+        substationsTree.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
+            if (newValue == null) {
+                return;
+            }
+
+            Container<?> c = newValue.getValue();
+            if (c instanceof Substation) {
+                Util.loggerControllerOptions.info("Substation \"" + getString(c) + "\" selected.");
+
+                ArrayList <String> voltageIds = new ArrayList ();
+                voltageIds.clear();
+                for (TreeItem <Container<?>> voltageId : newValue.getChildren())
+                    voltageIds.add(voltageId.getValue().toString());
+                System.out.println(voltageIds);
+                NadCalls.loadUniqueSubstation(voltageIds, depthSpinnerValue);
+                try {
+                    ControllerDiagram.addSvgToSelectedTab();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+            else if (c instanceof VoltageLevel) {
+                Util.loggerControllerOptions.info("Voltage \"" + getString(c) + "\" selected.");
+
+                NadCalls.loadSubgraph(c.toString(), depthSpinnerValue);
+                try {
+                    ControllerDiagram.addSvgToSelectedTab();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+
+    }
+
+
 
     /*
     Handling the display of names/id in the substations tree
- */
+    */
     private static void initTreeCellFactory()
     {
         TreeView substationsTree = optionsPane.getSubstationTree();
