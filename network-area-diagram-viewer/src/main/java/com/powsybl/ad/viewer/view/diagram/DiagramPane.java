@@ -8,11 +8,17 @@
 package com.powsybl.ad.viewer.view.diagram;
 import com.powsybl.ad.viewer.controller.ControllerDiagram;
 import com.powsybl.ad.viewer.view.diagram.containers.ContainerDiagramPane;
+import com.powsybl.iidm.network.Container;
+import javafx.scene.control.CheckBoxTreeItem;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
 import javafx.scene.layout.BorderPane;
 import java.io.IOException;
+import java.util.List;
+
+import static com.powsybl.ad.viewer.controller.ControllerDiagram.getDiagramPane;
 import static com.powsybl.ad.viewer.model.NadCalls.getSvgWriter;
+import static javax.swing.UIManager.getString;
 
 /**
  * @author Louis Lhotte <louis.lhotte@student-cs.fr>
@@ -70,6 +76,16 @@ public class DiagramPane extends TabPane
         createCheckedTab();
         //contentSVG = "";
         //checkedTabContainer.getWebEngine().loadContent(contentSVG);
+    }
+
+    public void closeTabInCheckedDiagramPane(CheckBoxTreeItem<Container<?>> item) {
+        List<Tab> tabList = checkedDiagramPane.getTabs();
+        for (Tab checkedTab : tabList) {
+            if (checkedTab.getText() == item.getValue().getName()) {
+                checkedDiagramPane.getTabs().remove(checkedTab);
+                break;
+            }
+        }
     }
 
     public TabPane getCheckedDiagramPane()

@@ -29,6 +29,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
+import static com.powsybl.ad.viewer.controller.ControllerOptions.getOptionsPane;
 import static com.powsybl.ad.viewer.model.NadCalls.getSvgWriter;
 
 /**
@@ -131,8 +132,14 @@ public class ControllerDiagram
             public void handle(Event arg0)
             {
                 Util.loggerControllerDiagram.info("Tab " + tab.getText() + " closed.");
-                ControllerOptions.checkvItemTree(tab.getText(), false);
-                ControllerOptions.checksItemTree(tab.getText(), false);
+                // The checkbox to uncheck can either be 'Full Network', or a 'Substation' or a 'VoltageLevel'
+                if (tab.getText() == "Full Network") {
+                    getOptionsPane().getFullNetworkCheck().setSelected(false);
+                }
+                else {
+                    ControllerOptions.checkvItemTree(tab.getText(), false);
+                    ControllerOptions.checksItemTree(tab.getText(), false);
+                }
             }
         });
     }
