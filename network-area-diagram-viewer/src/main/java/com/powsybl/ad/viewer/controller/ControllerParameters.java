@@ -101,7 +101,7 @@ public class ControllerParameters
             try {
                 NadCalls.drawNetwork();
 
-                ControllerDiagram.addSvgToCheckedTab();
+//                ControllerDiagram.addSvgToCheckedTab();
                 ControllerDiagram.addSvgToSelectedTab();
             } catch (IOException e) {
                 e.printStackTrace();

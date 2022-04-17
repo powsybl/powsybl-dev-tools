@@ -21,6 +21,7 @@ public class Util
     public static final Logger loggerControllerImport = LoggerFactory.getLogger("ControllerImportLogger");
     public static final Logger loggerControllerOptions = LoggerFactory.getLogger("ControllerOptionsLogger");
     public static final Logger loggerControllerParameters = LoggerFactory.getLogger("ControllerParametersLogger");
+    public static final Logger loggerControllerDiagram = LoggerFactory.getLogger("ControllerDiagramLogger");
 
 
     public static final Preferences preferences = Preferences.userNodeForPackage(Util.class);
