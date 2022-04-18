@@ -1022,6 +1022,9 @@ public class SingleLineDiagramViewer extends Application implements DisplayVolta
         networkService.setOnFailed(event -> {
             Throwable exception = event.getSource().getException();
             LOGGER.error(exception.toString(), exception);
+            if (exception instanceof com.powsybl.commons.PowsyblException) {
+                LOGGER.info("The last loaded file is likely to have been deleted from the computer. You may proceed.");
+            }
             casePathTextField.setText("");
             caseLoadingStatus.setStyle("-fx-background-color: red");
         });
@@ -1044,12 +1047,24 @@ public class SingleLineDiagramViewer extends Application implements DisplayVolta
         Button caseButton = new Button("...");
         caseButton.setOnAction(event -> {
             FileChooser fileChooser = new FileChooser();
-            String caseFolderPropertyValue = preferences.get(CASE_FOLDER_PROPERTY, null);
-            if (caseFolderPropertyValue != null) {
-                fileChooser.setInitialDirectory(new File(caseFolderPropertyValue));
-            }
             fileChooser.setTitle("Open case File");
-            File file = fileChooser.showOpenDialog(primaryStage);
+
+            File file;
+
+            try {
+                String caseFolderPropertyValue = preferences.get(CASE_FOLDER_PROPERTY, null);
+                if (caseFolderPropertyValue != null) {
+                    fileChooser.setInitialDirectory(new File(caseFolderPropertyValue));
+                }
+                file = fileChooser.showOpenDialog(primaryStage);
+            }
+
+            catch (IllegalArgumentException e) {
+                fileChooser = new FileChooser();
+                fileChooser.setTitle("Open case File");
+                file = fileChooser.showOpenDialog(primaryStage);
+            }
+
             if (file != null) {
                 loadNetwork(file.toPath());
             }
