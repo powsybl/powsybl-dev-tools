@@ -9,6 +9,8 @@ package com.powsybl.ad.viewer.view.diagram;
 import com.powsybl.ad.viewer.controller.ControllerDiagram;
 import com.powsybl.ad.viewer.view.diagram.containers.ContainerDiagramPane;
 import com.powsybl.iidm.network.Container;
+import javafx.event.Event;
+import javafx.event.EventHandler;
 import javafx.scene.control.CheckBoxTreeItem;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;

@@ -75,34 +75,37 @@ public class ControllerParameters
         addListenerOnLayoutYSpinner(paramPane.getLayoutYSpinner());
 
         // SVG parameters spinners and checkbox
-        paramPane.setSvgXSpinner(addSpinner(paramPane.getSvgParametersPane(), "Horizontal Padding",
-                0, 300, 5,
-                0, 0, "X",
-                 svgp -> svgp.getLeft(),
-                 (svgp, value) -> svgp.setDiagramPadding(
-                         new Padding(value, svgp.getDiagramPadding().getTop(),
-                                 value, svgp.getDiagramPadding().getBottom()))
+        paramPane.setSvgXSpinner(
+                addSpinner(
+                        paramPane.getSvgParametersPane(), "Horizontal Padding",
+                        0, 300, 5,
+                        0, 0, "X",
+                        svgp -> svgp.getLeft(),
+                        (svgp, value) -> svgp.setDiagramPadding(
+                                new Padding(value, svgp.getDiagramPadding().getTop(),
+                                        value, svgp.getDiagramPadding().getBottom()))
                 )
         );
-        paramPane.setSvgYSpinner(addSpinner(paramPane.getSvgParametersPane(), "Vertical Padding",
-                0, 300, 5,
-                0, 2, "Y",
-                svgp -> svgp.getBottom(),
-                (svgp, value) -> svgp.setDiagramPadding(
-                        new Padding(svgp.getDiagramPadding().getLeft(), value,
-                                svgp.getDiagramPadding().getRight(), value))
+        paramPane.setSvgYSpinner(
+                addSpinner(
+                        paramPane.getSvgParametersPane(), "Vertical Padding",
+                        0, 300, 5,
+                        0, 2, "Y",
+                        svgp -> svgp.getBottom(),
+                        (svgp, value) -> svgp.setDiagramPadding(
+                                new Padding(svgp.getDiagramPadding().getLeft(), value,
+                                        svgp.getDiagramPadding().getRight(), value))
                 )
         );
 
-        addListenerOnSVGZCheck(paramPane.getSvgZCheck());
+        setSvgEdgeInfoCheckbox(paramPane.getSvgEdgeInfoCheckbox());
 
         // Add listener on svgParametersProperty
         listener = (observable, oldValue, newValue) -> {
             try {
                 NadCalls.drawNetwork();
-
-//                ControllerDiagram.addSvgToCheckedTab();
                 ControllerDiagram.addSvgToSelectedTab();
+                Util.loggerControllerParameters.info("svgParametersProperty changed succesfully.");
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -332,14 +335,18 @@ public class ControllerParameters
         });
     }
 
-    private void addListenerOnSVGZCheck(CheckBox svgZCheck)
+    private void setSvgEdgeInfoCheckbox(CheckBox svgEdgeInfoCheckbox)
     {
-        svgZCheck.setOnAction(event ->
+        svgEdgeInfoCheckbox.setOnAction(event ->
         {
-            if (svgZCheck.isSelected())
-                Util.loggerControllerParameters.info("SVG Z Selected OK");
-            else
-                Util.loggerControllerParameters.info("SVG Z Unselected OK");
+            if (svgEdgeInfoCheckbox.isSelected()) {
+                Util.loggerControllerParameters.info("SVG Edge Info Checked OK");
+                setParameters(svgParametersProperty.get().setEdgeInfoAlongEdge(true));
+            }
+            else {
+                Util.loggerControllerParameters.info("SVG Edge Info Unchecked OK");
+                setParameters(svgParametersProperty.get().setEdgeInfoAlongEdge(false));
+            }
         });
     }
 

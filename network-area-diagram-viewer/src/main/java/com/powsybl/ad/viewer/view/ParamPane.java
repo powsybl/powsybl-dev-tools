@@ -5,7 +5,6 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 package com.powsybl.ad.viewer.view;
-import com.powsybl.ad.viewer.controller.ControllerParameters;
 import javafx.geometry.Insets;
 import javafx.scene.control.*;
 import javafx.scene.layout.GridPane;
@@ -33,7 +32,7 @@ public class ParamPane extends ScrollPane
 
     private Spinner svgXSpinner;
     private Spinner svgYSpinner;
-    private CheckBox svgZCheck;
+    private CheckBox svgEdgeInfoCheckbox;
 
     private int rowIndex = 0;
 
@@ -124,15 +123,14 @@ public class ParamPane extends ScrollPane
 
     public void createSVGParametersPane()
     {
-        svgZCheck = new CheckBox();
-        Label svgZLabel = new Label("Zzz");
-
+        svgEdgeInfoCheckbox = new CheckBox();
+        Label setEdgeInfo = new Label("Set Edge Info");
 
         svgParametersPane = new GridPane();
         svgParametersPane.setPadding(new Insets(5, 5, 5, 5));
 
-        svgParametersPane.add(svgZCheck, 0, 5);
-        svgParametersPane.add(svgZLabel, 0, 4);
+        svgParametersPane.add(svgEdgeInfoCheckbox, 0, 5);
+        svgParametersPane.add(setEdgeInfo, 0, 4);
 
         contentPane.add(svgParametersPane, 0, rowIndex++);
 
@@ -212,8 +210,8 @@ public class ParamPane extends ScrollPane
         this.svgYSpinner = svgYSpinner;
     }
 
-    public CheckBox getSvgZCheck() {
-        return svgZCheck;
+    public CheckBox getSvgEdgeInfoCheckbox() {
+        return svgEdgeInfoCheckbox;
     }
 
 }
