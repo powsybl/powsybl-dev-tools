@@ -21,7 +21,19 @@
     </parent>
 
     <artifactId>powsybl-network-area-diagram-viewer</artifactId>
+    <name>Network area diagram JavaFX viewer</name>
     <version>0.1.0-SNAPSHOT</version>
+    <description>A JavaFX application for network area diagrams visualization and debugging</description>
+
+
+    <developers>
+        <developer>
+            <name>Florian DUPUY</name>
+            <email>florian.dupuy@rte-france.com</email>
+            <organization>RTE</organization>
+            <organizationUrl>http://www.rte-france.com</organizationUrl>
+        </developer>
+    </developers>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
