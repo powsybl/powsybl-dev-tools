@@ -31,9 +31,9 @@
         <junit.version>4.13.1</junit.version>
         <maven.compiler.source>17</maven.compiler.source>
         <maven.compiler.target>17</maven.compiler.target>
-        <powsybl.nad.version>0.4.0-SNAPSHOT</powsybl.nad.version>
-        <powsybl.core.version>4.7.0</powsybl.core.version>
-        <powsybl.open.loadflow.version>0.17.0</powsybl.open.loadflow.version>
+        <powsybl.nad.version>0.5.0-SNAPSHOT</powsybl.nad.version>
+        <powsybl.core.version>4.8.0</powsybl.core.version>
+        <powsybl.open.loadflow.version>0.20.0</powsybl.open.loadflow.version>
     </properties>
 
     <dependencies>
