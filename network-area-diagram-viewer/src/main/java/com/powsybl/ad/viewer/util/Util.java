@@ -27,4 +27,8 @@ public class Util
     public static final Preferences preferences = Preferences.userNodeForPackage(Util.class);
     public static final String CASE_PATH_PROPERTY = "casePath";
     public static final String CASE_FOLDER_PROPERTY = "caseFolder";
+
+    public Util()
+    {
+    }
 }

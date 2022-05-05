@@ -5,6 +5,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 package com.powsybl.ad.viewer.view;
+import com.powsybl.ad.viewer.controller.ControllerParameters;
 import javafx.geometry.Insets;
 import javafx.scene.control.*;
 import javafx.scene.layout.GridPane;
@@ -208,6 +209,11 @@ public class ParamPane extends ScrollPane
 
     public void setSvgYSpinner(Spinner svgYSpinner) {
         this.svgYSpinner = svgYSpinner;
+    }
+
+    public void setDisabledSvgSpinners(boolean enableOrDisable) {
+        ControllerParameters.getParamPane().getSvgXSpinner().setDisable(enableOrDisable);
+        ControllerParameters.getParamPane().getSvgYSpinner().setDisable(enableOrDisable);
     }
 
     public CheckBox getSvgEdgeInfoCheckbox() {

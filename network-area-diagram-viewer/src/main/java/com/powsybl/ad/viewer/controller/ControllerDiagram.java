@@ -10,21 +10,15 @@ import com.google.common.io.ByteStreams;
 import com.powsybl.ad.viewer.util.Util;
 import com.powsybl.ad.viewer.view.diagram.DiagramPane;
 import com.powsybl.ad.viewer.view.diagram.containers.ContainerDiagramPane;
-import com.powsybl.iidm.network.Container;
-import javafx.collections.ObservableList;
 import javafx.event.Event;
 import javafx.event.EventHandler;
-import javafx.scene.control.CheckBoxTreeItem;
-import javafx.scene.control.Tab;
+import javafx.scene.control.*;
 import javafx.concurrent.Worker;
-import javafx.scene.control.Tooltip;
-import javafx.scene.control.TreeItem;
 import javafx.scene.input.ScrollEvent;
 import javafx.stage.Stage;
 import netscape.javascript.JSObject;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -126,7 +120,7 @@ public class ControllerDiagram
     }
 
     private static void addListenerOnClosingTab(Tab tab) {
-        tab.setOnCloseRequest(new EventHandler<Event>()
+        tab.setOnClosed(new EventHandler<Event>()
         {
             @Override
             public void handle(Event arg0)

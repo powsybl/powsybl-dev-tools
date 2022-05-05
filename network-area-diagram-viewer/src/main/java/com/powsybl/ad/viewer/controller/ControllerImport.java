@@ -9,6 +9,7 @@ package com.powsybl.ad.viewer.controller;
 import com.powsybl.ad.viewer.model.NadCalls;
 import com.powsybl.ad.viewer.util.Util;
 import com.powsybl.ad.viewer.view.ImportBar;
+import com.powsybl.ad.viewer.view.ParamPane;
 import com.powsybl.ad.viewer.view.diagram.DiagramPane;
 import com.powsybl.iidm.network.Network;
 import javafx.scene.control.Button;
@@ -17,6 +18,7 @@ import javafx.stage.Stage;
 import java.io.File;
 import java.io.IOException;
 
+import static com.powsybl.ad.viewer.controller.ControllerParameters.getParamPane;
 import static com.powsybl.ad.viewer.model.NadCalls.*;
 
 
@@ -108,8 +110,7 @@ public class ControllerImport
         ControllerDiagram.getDiagramPane().resetTabContainers();
         ControllerOptions.cleanSubstations();
         NadCalls.cleanSvgWriter();
-        ControllerParameters.getParamPane().getSvgXSpinner().setDisable(true);
-        ControllerParameters.getParamPane().getSvgYSpinner().setDisable(true);
+        getParamPane().setDisabledSvgSpinners(true);
         Util.loggerControllerImport.info("Cleaning diagram tabs and substations...");
     }
 

@@ -41,7 +41,7 @@ public class AreaDiagramViewer extends Application
         super.init();
     }
 
-    public void start(Stage stage) throws Exception
+    public void start(Stage stage)
     {
         primaryStage = new Stage();
         cParameters  = new ControllerParameters(primaryStage);
@@ -75,7 +75,7 @@ public class AreaDiagramViewer extends Application
         cParameters.createParamPane();
         cParameters.setParamPane();
 
-        Util.logger.info("Param pane correctly created.");
+        Util.logger.trace("Param pane correctly created.");
         return cParameters.getParamPane();
     }
 
@@ -84,7 +84,7 @@ public class AreaDiagramViewer extends Application
         cOptions.createOptionsPane();
         cOptions.setParamPane();
 
-        Util.logger.info("Options pane correctly created.");
+        Util.logger.trace("Options pane correctly created.");
         return cOptions.getOptionsPane();
     }
 
@@ -92,7 +92,7 @@ public class AreaDiagramViewer extends Application
     {
         cDiagram.createDiagramPane();
 
-        Util.logger.info("Diagram pane correctly created.");
+        Util.logger.trace("Diagram pane correctly created.");
         return cDiagram.getDiagramPane();
     }
 
@@ -101,7 +101,7 @@ public class AreaDiagramViewer extends Application
         cImport.createImportBar();
         cImport.setImportBar();
 
-        Util.logger.info("Import bar correctly created.");
+        Util.logger.trace("Import bar correctly created.");
         return cImport.getImportBar();
     }
 
@@ -119,10 +119,4 @@ public class AreaDiagramViewer extends Application
         mainPane.setTop(importBar);
         return mainPane;
     }
-
-    public static Stage getPrimaryStage()
-    {
-        return primaryStage;
-    }
-
 }

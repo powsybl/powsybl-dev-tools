@@ -84,6 +84,10 @@ public class DiagramPane extends TabPane
         List<Tab> tabList = checkedDiagramPane.getTabs();
         for (Tab checkedTab : tabList) {
             if (checkedTab.getText() == item.getValue().getName()) {
+                // .getTabs().remove(chckedTab) will not call the listener, so we need to call it
+                EventHandler<Event> handler = checkedTab.getOnClosed();
+                handler.handle(null);
+                // listener called, we can remove the tab
                 checkedDiagramPane.getTabs().remove(checkedTab);
                 break;
             }

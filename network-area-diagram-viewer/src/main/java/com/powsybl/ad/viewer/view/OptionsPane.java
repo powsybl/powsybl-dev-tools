@@ -6,6 +6,7 @@
  */
 package com.powsybl.ad.viewer.view;
 
+import com.powsybl.ad.viewer.util.Util;
 import com.powsybl.iidm.network.Container;
 import javafx.geometry.Insets;
 import javafx.geometry.Orientation;
@@ -22,13 +23,13 @@ public class OptionsPane extends SplitPane
 {
     private GridPane voltageLevelToolbar;
 
-    private CheckBox fullNetworkCheck;
+    private CheckBoxTreeItem fullNetworkCheck;
     private Spinner <Integer> depthSpinner;
 
     private Button runLoadFlowButton;
     private TextField filtersField;
 
-    private VBox nodesPane;
+    private VBox substationsPane;
     private final TreeView<Container <?>> substationsTree = new TreeView<> ();
 
     public OptionsPane()
@@ -36,8 +37,8 @@ public class OptionsPane extends SplitPane
         this.setPadding(new Insets(5, 5, 5, 5));
 
         createOptionsToolBar();
-        createNodePane();
-        this.getItems().addAll(voltageLevelToolbar, nodesPane);
+        createSubstationPane();
+        this.getItems().addAll(voltageLevelToolbar, substationsPane);
         this.setOrientation(Orientation.VERTICAL);
     }
 
@@ -45,7 +46,7 @@ public class OptionsPane extends SplitPane
     {
         voltageLevelToolbar = new GridPane();
 
-        fullNetworkCheck  = new CheckBox("Full network");
+        fullNetworkCheck = new CheckBoxTreeItem("Full network");
 
         depthSpinner = new Spinner();
         Label spinnerLabel = new Label("Depth");
@@ -59,14 +60,13 @@ public class OptionsPane extends SplitPane
         voltageLevelToolbar.setHgap(5);
         voltageLevelToolbar.setVgap(5);
         voltageLevelToolbar.setPadding(new Insets(5, 5, 5, 5));
-        voltageLevelToolbar.add(fullNetworkCheck, 0, 0, 2, 1);
 
-        voltageLevelToolbar.add(spinnerLabel, 0, 1, 2, 1);
-        voltageLevelToolbar.add(depthSpinner, 0, 3, 2, 1);
+        voltageLevelToolbar.add(spinnerLabel, 0, 0, 2, 1);
+        voltageLevelToolbar.add(depthSpinner, 0, 2, 2, 1);
 
-        voltageLevelToolbar.add(runLoadFlowButton, 0, 6, 3, 1);
-        voltageLevelToolbar.add(filtersLabel, 0, 9, 2, 1);
-        voltageLevelToolbar.add(filtersField, 1, 10, 1, 1);
+        voltageLevelToolbar.add(runLoadFlowButton, 0, 4, 3, 1);
+        voltageLevelToolbar.add(filtersLabel, 0, 7, 2, 1);
+        voltageLevelToolbar.add(filtersField, 1, 8, 1, 1);
 
         ColumnConstraints c0 = new ColumnConstraints();
         ColumnConstraints c1 = new ColumnConstraints();
@@ -74,25 +74,30 @@ public class OptionsPane extends SplitPane
         voltageLevelToolbar.getColumnConstraints().addAll(c0, c1);
     }
 
-    public void createNodePane()
+    public void createSubstationPane()
     {
-        nodesPane = new VBox();
-        nodesPane.setPadding(new Insets(5, 5, 5, 5));
-        nodesPane.setMinHeight(600);
+        substationsPane = new VBox();
+        substationsPane.setPadding(new Insets(5, 5, 5, 5));
+        substationsPane.setMinHeight(600);
     }
 
-    public void cleanNodes()
+    public void clearSubstations()
     {
-        nodesPane.getChildren().clear();
+        Util.logger.debug("Cleaning substations : " + substationsPane.getChildren().toString() +
+                " and substation tree : " + substationsTree);
+        substationsPane.getChildren().clear();
+
+        fullNetworkCheck = new CheckBoxTreeItem<>("Full Network");
+        substationsTree.setRoot(null);
     }
 
-    public void displayNodes(TreeView <?> treeView)
+    public void displaySubstations()
     {
-        nodesPane.getChildren().add(treeView);
-        nodesPane.setVgrow(treeView, Priority.ALWAYS);
+        substationsPane.getChildren().add(substationsTree);
+        substationsPane.setVgrow(substationsTree, Priority.ALWAYS);
     }
 
-    public CheckBox getFullNetworkCheck()
+    public CheckBoxTreeItem getFullNetworkCheck()
     {
         return fullNetworkCheck;
     }
@@ -116,5 +121,4 @@ public class OptionsPane extends SplitPane
     {
         return substationsTree;
     }
-
 }
