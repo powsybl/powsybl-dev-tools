@@ -81,10 +81,10 @@
             <artifactId>powsybl-powerfactory-db</artifactId>
             <version>${powsybl-core.version}</version>
         </dependency>
-        <dependency>
-            <groupId>com.powsybl</groupId>
-            <artifactId>powsybl-powerfactory-db-native</artifactId>
-            <version>${powsybl-powerfactory-db-native.version}</version>
-        </dependency>
+<!--        <dependency>-->
+<!--            <groupId>com.powsybl</groupId>-->
+<!--            <artifactId>powsybl-powerfactory-db-native</artifactId>-->
+<!--            <version>${powsybl-powerfactory-db-native.version}</version>-->
+<!--        </dependency>-->
     </dependencies>
 </project>

@@ -46,6 +46,8 @@ public class DataObjectTree extends BorderPane {
         locNameCol.setPrefWidth(300);
         TreeTableColumn<DataObject, String> classNameCol = new TreeTableColumn<>("Class");
         classNameCol.setPrefWidth(100);
+        TreeTableColumn<DataObject, Long> idCol = new TreeTableColumn<>("ID");
+        locNameCol.setPrefWidth(100);
 
         locNameCol.setCellFactory(new Callback<>() {
             @Override
@@ -66,7 +68,8 @@ public class DataObjectTree extends BorderPane {
         });
         locNameCol.setCellValueFactory(param -> new SimpleObjectProperty<>(param.getValue().getValue()));
         classNameCol.setCellValueFactory(param -> new SimpleStringProperty(param.getValue().getValue().getDataClass().getName()));
-        treeTableView.getColumns().addAll(locNameCol, classNameCol);
+        idCol.setCellValueFactory(param -> new SimpleObjectProperty<>(param.getValue().getValue().getId()));
+        treeTableView.getColumns().addAll(locNameCol, classNameCol, idCol);
         treeTableView.getSelectionModel().setSelectionMode(SelectionMode.SINGLE);
         treeTableView.getSelectionModel().getSelectedItems().addListener((ListChangeListener<TreeItem<DataObject>>) c -> {
             ObservableList<? extends TreeItem<DataObject>> list = c.getList();
