@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    Copyright (c) 2021, RTE (http://www.rte-france.com)
+    This Source Code Form is subject to the terms of the Mozilla Public
+    License, v. 2.0. If a copy of the MPL was not distributed with this
+    file, You can obtain one at http://mozilla.org/MPL/2.0/.
+
+-->
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>com.powsybl</groupId>
+        <artifactId>powsybl-parent</artifactId>
+        <version>4</version>
+        <relativePath/>
+    </parent>
+
+    <artifactId>powsybl-powerfactory-viewer</artifactId>
+    <name>PowerFactory Viewer</name>
+    <version>1.0.0-SNAPSHOT</version>
+
+    <properties>
+        <java.version>11</java.version>
+
+        <javafx-maven-plugin.version>0.0.5</javafx-maven-plugin.version>
+
+        <javafx.version>11.0.2</javafx.version>
+        <slf4j.version>1.7.28</slf4j.version>
+
+        <powsybl-core.version>4.9.0-SNAPSHOT</powsybl-core.version>
+        <powsybl-powerfactory-db-native.version>1.0.0-SNAPSHOT</powsybl-powerfactory-db-native.version>
+    </properties>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.openjfx</groupId>
+                <artifactId>javafx-maven-plugin</artifactId>
+                <version>${javafx-maven-plugin.version}</version>
+                <configuration>
+                    <mainClass>com.powsybl.powerfactory.viewer.PowerFactoryViewer</mainClass>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.openjfx</groupId>
+            <artifactId>javafx-controls</artifactId>
+            <version>${javafx.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+            <version>${slf4j.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-simple</artifactId>
+            <version>${slf4j.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.powsybl</groupId>
+            <artifactId>powsybl-config-classic</artifactId>
+            <version>${powsybl-core.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.powsybl</groupId>
+            <artifactId>powsybl-powerfactory-model</artifactId>
+            <version>${powsybl-core.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.powsybl</groupId>
+            <artifactId>powsybl-powerfactory-db</artifactId>
+            <version>${powsybl-core.version}</version>
+        </dependency>
+<!--        <dependency>-->
+<!--            <groupId>com.powsybl</groupId>-->
+<!--            <artifactId>powsybl-powerfactory-db-native</artifactId>-->
+<!--            <version>${powsybl-powerfactory-db-native.version}</version>-->
+<!--        </dependency>-->
+    </dependencies>
+</project>
