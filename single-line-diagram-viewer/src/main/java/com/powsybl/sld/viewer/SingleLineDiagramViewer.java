@@ -630,11 +630,9 @@ public class SingleLineDiagramViewer extends Application implements DisplayVolta
                         double svgWidth = Double.parseDouble(mW.group(1));
                         double paneHeight = pane.getDiagramView().heightProperty().get();
                         double paneWidth = pane.getDiagramView().widthProperty().get();
-                        if (paneHeight < svgHeight || paneWidth < svgWidth) {
-                            double zoomH = paneHeight / svgHeight;
-                            double zoomW = paneWidth / svgWidth;
-                            pane.getDiagramView().setZoom(Math.min(zoomH, zoomW));
-                        }
+                        double zoomH = paneHeight / svgHeight;
+                        double zoomW = paneWidth / svgWidth;
+                        pane.getDiagramView().setZoom(Math.min(zoomH, zoomW));
                     }
                 }
             }
