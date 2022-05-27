@@ -11,6 +11,7 @@ import com.powsybl.ad.viewer.controller.ControllerImport;
 import com.powsybl.ad.viewer.controller.ControllerOptions;
 import com.powsybl.ad.viewer.controller.ControllerParameters;
 import com.powsybl.ad.viewer.controller.ControllerDiagram;
+import com.powsybl.ad.viewer.model.NadCalls;
 import com.powsybl.ad.viewer.util.Util;
 import com.powsybl.ad.viewer.view.diagram.DiagramPane;
 import javafx.application.Application;
@@ -19,7 +20,14 @@ import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.layout.BorderPane;
 import javafx.stage.Stage;
+
+import java.io.File;
 import java.net.URL;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+
+import static com.powsybl.ad.viewer.util.Util.CASE_PATH_PROPERTY;
+import static com.powsybl.ad.viewer.util.Util.preferences;
 
 
 /**
@@ -44,9 +52,9 @@ public class AreaDiagramViewer extends Application
     public void start(Stage stage)
     {
         primaryStage = new Stage();
-        cParameters  = new ControllerParameters(primaryStage);
-        cOptions  = new ControllerOptions(primaryStage);
-        cDiagram  = new ControllerDiagram(primaryStage);
+        cParameters  = new ControllerParameters();
+        cOptions  = new ControllerOptions();
+        cDiagram  = new ControllerDiagram();
         cImport  = new ControllerImport(primaryStage);
 
         ParamPane paramPane = createParamPane();
@@ -67,7 +75,22 @@ public class AreaDiagramViewer extends Application
         primaryStage.getIcons().add(new Image(imageURL.toExternalForm()));
         primaryStage.setTitle("Area Diagram Viewers");
         primaryStage.setScene(primaryScene);
+        loadNetworkFromPreferences();
         primaryStage.show();
+    }
+
+    public static boolean loadNetworkFromPreferences()
+    {
+        Util.logger.debug("Trying to load network from preferences...");
+        String casePathPropertyValue = preferences.get(CASE_PATH_PROPERTY, null);
+        if (casePathPropertyValue != null)
+        {
+            Util.logger.debug("Network preferences loaded : " + casePathPropertyValue);
+            ControllerImport.setFile(new File(casePathPropertyValue));
+            ControllerImport.loadFile();
+            return true;
+        }
+        return false;
     }
 
     private ParamPane createParamPane()

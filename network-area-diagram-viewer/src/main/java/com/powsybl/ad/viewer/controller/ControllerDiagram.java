@@ -10,14 +10,10 @@ import com.google.common.io.ByteStreams;
 import com.powsybl.ad.viewer.util.Util;
 import com.powsybl.ad.viewer.view.diagram.DiagramPane;
 import com.powsybl.ad.viewer.view.diagram.containers.ContainerDiagramPane;
-import javafx.event.Event;
-import javafx.event.EventHandler;
 import javafx.scene.control.*;
 import javafx.concurrent.Worker;
 import javafx.scene.input.ScrollEvent;
-import javafx.stage.Stage;
 import netscape.javascript.JSObject;
-
 import java.io.IOException;
 import java.util.List;
 import java.util.Objects;
@@ -31,14 +27,7 @@ import static com.powsybl.ad.viewer.model.NadCalls.getSvgWriter;
  */
 public class ControllerDiagram
 {
-    private Stage primaryStage;
-
     private static DiagramPane diagramPane;
-
-    public ControllerDiagram(Stage primaryStage)
-    {
-        this.primaryStage = primaryStage;
-    }
 
     public static void addSvgToSelectedTab() throws IOException
     {
@@ -50,7 +39,7 @@ public class ControllerDiagram
     public static void addSvgToCheckedTab(String tabName, String whatIsGonnaBeDisplayedWhenHoveringOnTabName)  throws IOException
     {
         List<Tab> tabList = diagramPane.getCheckedDiagramPane().getTabs();
-        if (tabList.stream().map(tab -> tab.getText()).collect(Collectors.toList()).contains(tabName)) {
+        if (tabList.stream().map(Tab::getText).collect(Collectors.toList()).contains(tabName)) {
             Util.loggerControllerDiagram.error(tabName + " already in list of opened Tabs.");
         }
         else {
@@ -120,20 +109,15 @@ public class ControllerDiagram
     }
 
     private static void addListenerOnClosingTab(Tab tab) {
-        tab.setOnClosed(new EventHandler<Event>()
-        {
-            @Override
-            public void handle(Event arg0)
-            {
-                Util.loggerControllerDiagram.info("Tab " + tab.getText() + " closed.");
-                // The checkbox to uncheck can either be 'Full Network', or a 'Substation' or a 'VoltageLevel'
-                if (tab.getText() == "Full Network") {
-                    getOptionsPane().getFullNetworkCheck().setSelected(false);
-                }
-                else {
-                    ControllerOptions.checkvItemTree(tab.getText(), false);
-                    ControllerOptions.checksItemTree(tab.getText(), false);
-                }
+        tab.setOnClosed(arg0 -> {
+            Util.loggerControllerDiagram.info("Tab " + tab.getText() + " closed.");
+            // The checkbox to uncheck can either be 'Full Network', or a 'Substation' or a 'VoltageLevel'
+            if (tab.getText().equals("Full Network")) {
+                getOptionsPane().getFullNetworkCheck().setSelected(false);
+            }
+            else {
+                ControllerOptions.checkvItemTree(tab.getText(), false);
+                ControllerOptions.checksItemTree(tab.getText(), false);
             }
         });
     }

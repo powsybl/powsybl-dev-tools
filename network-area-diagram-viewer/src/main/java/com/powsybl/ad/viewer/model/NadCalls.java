@@ -20,7 +20,6 @@ import javafx.concurrent.Service;
 import javafx.concurrent.Task;
 import java.io.StringWriter;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.List;
 
 /**
@@ -28,13 +27,12 @@ import java.util.List;
 */
 public final class NadCalls {
 
-    public static final ObjectProperty <Network> networkProperty = new SimpleObjectProperty<>();
+    public static ObjectProperty <Network> networkProperty = new SimpleObjectProperty<>();
     public static final ObjectProperty <LayoutParameters> layoutParametersProperty = new SimpleObjectProperty<>(new LayoutParameters());
     public static final ObjectProperty <SvgParameters> svgParametersProperty = new SimpleObjectProperty<>(new SvgParameters().setSvgWidthAndHeightAdded(true));
     public static Service <Network> networkService;
 
     private static StringWriter svgWriter = new StringWriter();
-
 
     public static void loadNetwork(Path file) {
         networkService = new Service () {
@@ -96,6 +94,7 @@ public final class NadCalls {
                 layoutParametersProperty.get(),
                 ControllerParameters.getStyleProvider()
         );
+        System.out.println(networkProperty.get());
     }
 
 
@@ -116,11 +115,13 @@ public final class NadCalls {
         return svgWriter;
     }
 
-    public static void cleanSvgWriter() {
+    public static void cleanSvgWriter()
+    {
         svgWriter = new StringWriter();
     }
 
-    public static void setSvgWriter(StringWriter svgWriter) {
-        NadCalls.svgWriter = svgWriter;
+    public static void cleanNetwork()
+    {
+        networkProperty = new SimpleObjectProperty<>();
     }
 }

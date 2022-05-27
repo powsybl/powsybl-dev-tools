@@ -37,17 +37,11 @@ import static com.powsybl.ad.viewer.model.NadCalls.*;
  */
 public class ControllerParameters
 {
-    private Stage primaryStage;
     private static ParamPane paramPane;
 
     private ChangeListener<SvgParameters> listener;
 
     private static StyleProvider styleProvider;  // inside it will be stored the dropdown list's selected value
-
-    public ControllerParameters(Stage primaryStage)
-    {
-        this.primaryStage = primaryStage;
-    }
 
     public void createParamPane()
     {
@@ -80,7 +74,7 @@ public class ControllerParameters
                         paramPane.getSvgParametersPane(), "Horizontal Padding",
                         0, 300, 5,
                         0, 0, "X",
-                        svgp -> svgp.getLeft(),
+                        Padding::getLeft,
                         (svgp, value) -> svgp.setDiagramPadding(
                                 new Padding(value, svgp.getDiagramPadding().getTop(),
                                         value, svgp.getDiagramPadding().getBottom()))
@@ -246,9 +240,7 @@ public class ControllerParameters
     private void addListenerOnLabelProviderChoice(ChoiceBox labelProviderChoice)
     {
         labelProviderChoice.setOnAction(event ->
-        {
-            Util.loggerControllerParameters.info("Label Provider : " + labelProviderChoice.getValue());
-        });
+                Util.loggerControllerParameters.info("Label Provider : " + labelProviderChoice.getValue()));
     }
 
     private void addListenerOnStyleProviderChoice(ChoiceBox styleProviderChoice)
@@ -322,17 +314,13 @@ public class ControllerParameters
     private void addListenerOnLayoutXSpinner(Spinner layoutXSpinner)
     {
         layoutXSpinner.valueProperty().addListener((obs, oldValue, newValue) ->
-        {
-            Util.loggerControllerParameters.info("Layout X Spinner value :  " + oldValue + " transformed into : " + newValue);
-        });
+                Util.loggerControllerParameters.info("Layout X Spinner value :  " + oldValue + " transformed into : " + newValue));
     }
 
     private void addListenerOnLayoutYSpinner(Spinner layoutYSpinner)
     {
         layoutYSpinner.valueProperty().addListener((obs, oldValue, newValue) ->
-        {
-            Util.loggerControllerParameters.info("Layout Y Spinner value :  " + oldValue + " transformed into : " + newValue);
-        });
+                Util.loggerControllerParameters.info("Layout Y Spinner value :  " + oldValue + " transformed into : " + newValue));
     }
 
     private void setSvgEdgeInfoCheckbox(CheckBox svgEdgeInfoCheckbox)

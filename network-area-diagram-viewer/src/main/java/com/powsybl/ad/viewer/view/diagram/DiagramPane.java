@@ -6,7 +6,6 @@
  */
 
 package com.powsybl.ad.viewer.view.diagram;
-import com.powsybl.ad.viewer.controller.ControllerDiagram;
 import com.powsybl.ad.viewer.view.diagram.containers.ContainerDiagramPane;
 import com.powsybl.iidm.network.Container;
 import javafx.event.Event;
@@ -15,12 +14,7 @@ import javafx.scene.control.CheckBoxTreeItem;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
 import javafx.scene.layout.BorderPane;
-import java.io.IOException;
 import java.util.List;
-
-import static com.powsybl.ad.viewer.controller.ControllerDiagram.getDiagramPane;
-import static com.powsybl.ad.viewer.model.NadCalls.getSvgWriter;
-import static javax.swing.UIManager.getString;
 
 /**
  * @author Louis Lhotte <louis.lhotte@student-cs.fr>
@@ -62,32 +56,34 @@ public class DiagramPane extends TabPane
 
     public void resetTabContainers()
     {
-    // resetCheckedTabs();
-    // resetSelectedTabs();
+        resetCheckedTabs();
+        resetSelectedTabs();
     }
 
     public void resetSelectedTabs()
     {
-        createSelectedTab();
-        //contentSVG = "";
-        //selectedTabContainer.getWebEngine().loadContent(contentSVG);
+        selectedDiagramPane.getChildren().clear();
     }
 
     public void resetCheckedTabs()
     {
-        createCheckedTab();
-        //contentSVG = "";
-        //checkedTabContainer.getWebEngine().loadContent(contentSVG);
+        while (!checkedDiagramPane.getTabs().isEmpty())
+        {
+            // we call the listener to remove the tab
+            EventHandler<Event> handler = checkedDiagramPane.getTabs().get(0).getOnClosed();
+            handler.handle(null);
+        }
     }
 
     public void closeTabInCheckedDiagramPane(CheckBoxTreeItem<Container<?>> item) {
         List<Tab> tabList = checkedDiagramPane.getTabs();
         for (Tab checkedTab : tabList) {
-            if (checkedTab.getText() == item.getValue().getName()) {
-                // .getTabs().remove(chckedTab) will not call the listener, so we need to call it
+            if (checkedTab.getText().compareTo(item.getValue().getName()) == 0)
+            {
+                // we call the listener to remove the tab
                 EventHandler<Event> handler = checkedTab.getOnClosed();
                 handler.handle(null);
-                // listener called, we can remove the tab
+                // we need to remove the tab because the listener will not
                 checkedDiagramPane.getTabs().remove(checkedTab);
                 break;
             }

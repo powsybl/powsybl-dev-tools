@@ -85,10 +85,11 @@ public class OptionsPane extends SplitPane
     {
         Util.logger.debug("Cleaning substations : " + substationsPane.getChildren().toString() +
                 " and substation tree : " + substationsTree);
-        substationsPane.getChildren().clear();
 
-        fullNetworkCheck = new CheckBoxTreeItem<>("Full Network");
+        substationsPane.getChildren().clear();
         substationsTree.setRoot(null);
+
+        fullNetworkCheck.getChildren().clear();
     }
 
     public void displaySubstations()

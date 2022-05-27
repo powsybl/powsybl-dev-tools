@@ -18,10 +18,11 @@ public class Util
 {
     //Creating the Logger object
     public static final Logger logger = LoggerFactory.getLogger("AreaDiagramViewerLogger");
-    public static final Logger loggerControllerImport = LoggerFactory.getLogger("ControllerImportLogger");
-    public static final Logger loggerControllerOptions = LoggerFactory.getLogger("ControllerOptionsLogger");
+    public static final Logger loggerControllerImport     = LoggerFactory.getLogger("ControllerImportLogger");
+    public static final Logger loggerControllerOptions    = LoggerFactory.getLogger("ControllerOptionsLogger");
     public static final Logger loggerControllerParameters = LoggerFactory.getLogger("ControllerParametersLogger");
-    public static final Logger loggerControllerDiagram = LoggerFactory.getLogger("ControllerDiagramLogger");
+    public static final Logger loggerControllerDiagram    = LoggerFactory.getLogger("ControllerDiagramLogger");
+    public static final Logger loggerNadCalls             = LoggerFactory.getLogger("NadCalls");
 
 
     public static final Preferences preferences = Preferences.userNodeForPackage(Util.class);

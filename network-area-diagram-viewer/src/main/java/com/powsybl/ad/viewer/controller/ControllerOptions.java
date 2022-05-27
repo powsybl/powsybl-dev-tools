@@ -38,18 +38,11 @@ import static com.powsybl.ad.viewer.model.NadCalls.*;
  */
 public class ControllerOptions
 {
-    private static Stage primaryStage;
     private static OptionsPane optionsPane;
     private static int depthSpinnerValue = 1;
 
     private static final ObservableList <SelectableSubstation> selectableSubstations = FXCollections.observableArrayList();
     private static final ObservableList <SelectableVoltageLevel> selectableVoltageLevels = FXCollections.observableArrayList();
-
-
-    public ControllerOptions(Stage primaryStage)
-    {
-        this.primaryStage = primaryStage;
-    }
 
     public void createOptionsPane()
     {
@@ -451,7 +444,6 @@ public class ControllerOptions
     public static void cleanSubstations()
     {
         optionsPane.clearSubstations();
-        addListenerOnFullNetworkCheck(optionsPane.getFullNetworkCheck());
     }
 
     public static OptionsPane getOptionsPane()

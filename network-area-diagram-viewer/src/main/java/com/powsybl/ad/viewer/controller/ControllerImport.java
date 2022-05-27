@@ -9,16 +9,11 @@ package com.powsybl.ad.viewer.controller;
 import com.powsybl.ad.viewer.model.NadCalls;
 import com.powsybl.ad.viewer.util.Util;
 import com.powsybl.ad.viewer.view.ImportBar;
-import com.powsybl.ad.viewer.view.ParamPane;
-import com.powsybl.ad.viewer.view.diagram.DiagramPane;
 import com.powsybl.iidm.network.Network;
 import javafx.scene.control.Button;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import java.io.File;
-import java.io.IOException;
-
-import static com.powsybl.ad.viewer.controller.ControllerParameters.getParamPane;
 import static com.powsybl.ad.viewer.model.NadCalls.*;
 
 
@@ -27,13 +22,9 @@ import static com.powsybl.ad.viewer.model.NadCalls.*;
  */
 public class ControllerImport
 {
-    private Stage primaryStage;
-    private ImportBar importBar;
+    private final Stage primaryStage;
+    private static ImportBar importBar;
     private static File file;
-
-    public static File getFile() {
-        return file;
-    }
 
     public ControllerImport(Stage stage)
     {
@@ -65,18 +56,23 @@ public class ControllerImport
             file = fileChooser.showOpenDialog(primaryStage);
             if (file != null)
             {
-                // load the network corresponding to zip
-                loadNetwork(file.toPath());
-
-                // Update loading bar
-                handleLoadingResult(file);
+                loadFile();
 
                 ControllerOptions.resetOptions();
             }
         });
     }
 
-    private void handleLoadingResult(File file)
+    public static void loadFile()
+    {
+        // load the network corresponding to zip
+        loadNetwork(file.toPath());
+
+        // Update loading bar
+        handleLoadingResult(file);
+    }
+
+    private static void handleLoadingResult(File file)
     {
         networkService.setOnRunning(event -> {
             importBar.getLoadingStatusButton().setStyle("-fx-background-color: yellow");
@@ -107,14 +103,24 @@ public class ControllerImport
     // Cleans all variables to prepare a new import (substations, SVG..)
     public static void cleanNetwork()
     {
+        // Clean Controller Diagram
         ControllerDiagram.getDiagramPane().resetTabContainers();
+
+        // Clean Controller Options
         ControllerOptions.cleanSubstations();
+
+        // Clean Controller Parameters
+        ControllerParameters.setStyleProvider(null);
+        ControllerParameters.getParamPane().setDisabledSvgSpinners(true);
+
+        // Clean NadCalls
         NadCalls.cleanSvgWriter();
-        getParamPane().setDisabledSvgSpinners(true);
+        NadCalls.cleanNetwork();
+
         Util.loggerControllerImport.info("Cleaning diagram tabs and substations...");
     }
 
-    protected void setNetwork(Network network) {
+    protected static void setNetwork(Network network) {
         //closeAllTabs();
         //updateLayoutsFactory(network);
         //updateStylesProvider(network);
@@ -126,5 +132,15 @@ public class ControllerImport
     public ImportBar getImportBar()
     {
         return importBar;
+    }
+
+    public static void setFile(File file)
+    {
+        ControllerImport.file = file;
+    }
+
+    public static File getFile()
+    {
+        return file;
     }
 }
