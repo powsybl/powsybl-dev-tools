@@ -19,7 +19,6 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.CheckBoxTreeCell;
-import javafx.stage.Stage;
 import javafx.util.StringConverter;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -215,11 +214,14 @@ public class ControllerOptions
                 voltageIds.clear();
                 for (TreeItem <Container<?>> voltageId : substationItem.getChildren())
                     voltageIds.add(voltageId.getValue().toString());
-                NadCalls.loadUniqueSubstation(voltageIds, depthSpinnerValue);
+                NadCalls.drawUniqueSubstation(voltageIds, depthSpinnerValue);
                 try {
                     ControllerDiagram.addSvgToCheckedTab(
                             substationItem.getValue().getName(),  // Name
-                            substationItem.getValue().toString()  // ID
+                            substationItem.getValue().toString(),  // ID
+                            voltageIds,  // List of voltageLevelIds
+                            depthSpinnerValue,  // Depth
+                            (getDiagramPane().getCheckedDiagramPane().getTabs().size() == 0 ? 0:getDiagramPane().getCheckedDiagramPane().getTabs().size())
                     );
                 } catch (IOException e) {
                     e.printStackTrace();
@@ -242,11 +244,14 @@ public class ControllerOptions
                 Util.loggerControllerOptions.debug("Voltage level \"" + voltageItem.getValue().getName() + "\" checked.");
 
                 getParamPane().setDisabledSvgSpinners(false);
-                NadCalls.loadSubgraph(voltageItem.getValue().toString(), depthSpinnerValue);
+                NadCalls.drawSubgraph(voltageItem.getValue().toString(), depthSpinnerValue);
                 try {
                     ControllerDiagram.addSvgToCheckedTab(
                             voltageItem.getValue().getName(),  // Name
-                            voltageItem.getValue().toString()  // ID
+                            voltageItem.getValue().toString(),  // Voltage Level (= subgraph) ID
+                            voltageItem.getValue().toString(),  // Voltage Level (= subgraph) ID
+                            depthSpinnerValue,  // Depth
+                            (getDiagramPane().getCheckedDiagramPane().getTabs().size() == 0 ? 0:getDiagramPane().getCheckedDiagramPane().getTabs().size())
                     );
                 } catch (IOException e) {
                     e.printStackTrace();
@@ -254,7 +259,7 @@ public class ControllerOptions
             } else {
                 Util.loggerControllerOptions.debug("Voltage level \"" + voltageItem.getValue().getName() + "\" unchecked.");
 
-                // if event is unchecking the checkbox, close tab and
+                // if event is unchecking the checkbox, close tab
                 getDiagramPane().closeTabInCheckedDiagramPane(voltageItem);
             }
         });
@@ -277,9 +282,9 @@ public class ControllerOptions
                 voltageIds.clear();
                 for (TreeItem <Container<?>> voltageId : newValue.getChildren())
                     voltageIds.add(voltageId.getValue().toString());
-                NadCalls.loadUniqueSubstation(voltageIds, depthSpinnerValue);
+                NadCalls.drawUniqueSubstation(voltageIds, depthSpinnerValue);
                 try {
-                    ControllerDiagram.addSvgToSelectedTab();
+                    ControllerDiagram.addSvgToSelectedTab(voltageIds, depthSpinnerValue);
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
@@ -287,9 +292,9 @@ public class ControllerOptions
             else if (c instanceof VoltageLevel) {
                 Util.loggerControllerOptions.info("Voltage \"" + c.getName() + "\" selected.");
 
-                NadCalls.loadSubgraph(c.toString(), depthSpinnerValue);
+                NadCalls.drawSubgraph(c.toString(), depthSpinnerValue);
                 try {
-                    ControllerDiagram.addSvgToSelectedTab();
+                    ControllerDiagram.addSvgToSelectedTab(c.toString(), depthSpinnerValue);
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
@@ -361,7 +366,9 @@ public class ControllerOptions
                     drawNetwork();  // changes the variable svgWriter
 
                     ControllerDiagram.addSvgToCheckedTab(
-                            "Full Network", "Full Network"
+                            "Full Network",
+                            "Full Network",
+                            (getDiagramPane().getCheckedDiagramPane().getTabs().size() == 0 ? 0:getDiagramPane().getCheckedDiagramPane().getTabs().size())
                     );
 
                 } catch (IOException e) {
@@ -370,10 +377,6 @@ public class ControllerOptions
             }
             else
             {
-                Util.loggerControllerOptions.debug("Full Network Check unselected. Cleaning diagram containers..");
-                NadCalls.cleanSvgWriter();
-                getDiagramPane().resetTabContainers();
-
                 // if event is unchecking the FullNetwork checkbox, close tab
                 Util.loggerControllerOptions.debug("Full Network Check unselected. Closing checked subtab..");
                 List<Tab> tabList = getDiagramPane().getCheckedDiagramPane().getTabs();

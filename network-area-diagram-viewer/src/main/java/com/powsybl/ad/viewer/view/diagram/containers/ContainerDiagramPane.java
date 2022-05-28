@@ -25,7 +25,7 @@ import static com.powsybl.ad.viewer.model.NadCalls.getSvgWriter;
 /**
  * @author Louis Lhotte <louis.lhotte@student-cs.fr>
  */
-public class ContainerDiagramPane extends BorderPane
+public abstract class ContainerDiagramPane extends BorderPane
 {
     // Info text area
     private TitledPane infoPane;

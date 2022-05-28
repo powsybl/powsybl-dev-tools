@@ -9,21 +9,27 @@ package com.powsybl.ad.viewer.controller;
 import com.powsybl.ad.viewer.model.NadCalls;
 import com.powsybl.ad.viewer.util.Util;
 import com.powsybl.ad.viewer.view.ParamPane;
+import com.powsybl.ad.viewer.view.diagram.DiagramPane;
 import com.powsybl.ad.viewer.view.diagram.containers.ContainerDiagramPane;
+import com.powsybl.ad.viewer.view.diagram.containers.ContainerFullNetworkDiagramPane;
+import com.powsybl.ad.viewer.view.diagram.containers.ContainerSubstationDiagramPane;
+import com.powsybl.ad.viewer.view.diagram.containers.ContainerVoltageDiagramPane;
 import com.powsybl.nad.svg.Padding;
 import com.powsybl.nad.svg.StyleProvider;
 import com.powsybl.nad.svg.SvgParameters;
 import com.powsybl.nad.svg.iidm.NominalVoltageStyleProvider;
 import com.powsybl.nad.svg.iidm.TopologicalStyleProvider;
 import javafx.beans.value.ChangeListener;
+import javafx.collections.ObservableList;
 import javafx.scene.Node;
 import javafx.scene.control.*;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
-import javafx.stage.Stage;
+
 import static com.powsybl.ad.viewer.model.NadCalls.networkProperty;
 import java.io.IOException;
 import java.io.StringWriter;
+import java.util.List;
 import java.util.Optional;
 import java.util.function.BiFunction;
 import java.util.function.ToDoubleFunction;
@@ -92,19 +98,7 @@ public class ControllerParameters
                 )
         );
 
-        setSvgEdgeInfoCheckbox(paramPane.getSvgEdgeInfoCheckbox());
-
-        // Add listener on svgParametersProperty
-        listener = (observable, oldValue, newValue) -> {
-            try {
-                NadCalls.drawNetwork();
-                ControllerDiagram.addSvgToSelectedTab();
-                Util.loggerControllerParameters.info("svgParametersProperty changed succesfully.");
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        };
-        NadCalls.svgParametersProperty.addListener(listener);
+        addListenerOnSvgEdgeInfoCheckbox(paramPane.getSvgEdgeInfoCheckbox());
     }
 
     private void addListenerOnFitToContent(Button fitContentButton)
@@ -266,7 +260,6 @@ public class ControllerParameters
                     try {
                         drawNetwork();  // changes the variable svgWriter
                         ControllerDiagram.addSvgToSelectedTab();
-                        ControllerDiagram.addSvgToSelectedTab();
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
@@ -277,7 +270,94 @@ public class ControllerParameters
     }
 
     private void setParameters(SvgParameters svgParameters){
+        // Full Network - Selected Tab
         NadCalls.svgParametersProperty.set(new SvgParameters(svgParametersProperty.get()));
+        try {
+            NadCalls.drawNetwork();
+            ControllerDiagram.addSvgToSelectedTab();
+            Util.loggerControllerParameters.info("svgParametersProperty changed succesfully (Selected Tab - Full Network).");
+        } catch (IOException e) {
+            e.printStackTrace();
+        };
+    }
+
+    private void setParameters(SvgParameters svgParameters,
+                               String tabName, String whatIsGonnaBeDisplayedWhenHoveringOnTabName, int index){
+        // Full Network - Checked Tab
+        NadCalls.svgParametersProperty.set(new SvgParameters(svgParametersProperty.get()));
+        try {
+            NadCalls.drawNetwork();
+            ControllerDiagram.addSvgToCheckedTab(
+                    tabName,
+                    whatIsGonnaBeDisplayedWhenHoveringOnTabName,
+                    index
+            );
+            Util.loggerControllerParameters.info("svgParametersProperty changed succesfully (Selected Tab - Full Network).");
+        } catch (IOException e) {
+            e.printStackTrace();
+        };
+    }
+
+    private void setParameters(SvgParameters svgParameters, List<String> voltageLevelIds, int depth){
+        // Substation - Selected Tab
+        NadCalls.svgParametersProperty.set(new SvgParameters(svgParametersProperty.get()));
+        try {
+            NadCalls.drawUniqueSubstation(voltageLevelIds, depth);
+            ControllerDiagram.addSvgToSelectedTab(voltageLevelIds, depth);
+            Util.loggerControllerParameters.info("svgParametersProperty changed succesfully (Selected Tab - Substation).");
+        } catch (IOException e) {
+            e.printStackTrace();
+        };
+    }
+
+    private void setParameters(SvgParameters svgParameters, List<String> voltageLevelIds, int depth,
+                               String tabName, String whatIsGonnaBeDisplayedWhenHoveringOnTabName, int index){
+        // Substation - Checked Tab
+        NadCalls.svgParametersProperty.set(new SvgParameters(svgParametersProperty.get()));
+        try {
+            NadCalls.drawUniqueSubstation(voltageLevelIds, depth);
+            ControllerDiagram.addSvgToCheckedTab(
+                    tabName,
+                    whatIsGonnaBeDisplayedWhenHoveringOnTabName,
+                    voltageLevelIds,
+                    depth,
+                    index
+            );
+            Util.loggerControllerParameters.info("svgParametersProperty changed succesfully (Selected Tab - Substation).");
+        } catch (IOException e) {
+            e.printStackTrace();
+        };
+    }
+
+    private void setParameters(SvgParameters svgParameters, String voltageLevelId, int depth){
+        // Voltage (= Subgraph) - Selected Tab
+        NadCalls.svgParametersProperty.set(new SvgParameters(svgParametersProperty.get()));
+        try {
+            NadCalls.drawSubgraph(voltageLevelId, depth);
+            ControllerDiagram.addSvgToSelectedTab(voltageLevelId, depth);
+            Util.loggerControllerParameters.info("svgParametersProperty changed succesfully (Selected Tab - Subgraph).");
+        } catch (IOException e) {
+            e.printStackTrace();
+        };
+    }
+
+    private void setParameters(SvgParameters svgParameters, String voltageLevelId, int depth,
+                               String tabName, String whatIsGonnaBeDisplayedWhenHoveringOnTabName, int index){
+        // Voltage (= Subgraph) - Checked Tab
+        NadCalls.svgParametersProperty.set(new SvgParameters(svgParametersProperty.get()));
+        try {
+            NadCalls.drawSubgraph(voltageLevelId, depth);
+            ControllerDiagram.addSvgToCheckedTab(
+                    tabName,
+                    whatIsGonnaBeDisplayedWhenHoveringOnTabName,
+                    voltageLevelId,
+                    depth,
+                    index
+            );
+            Util.loggerControllerParameters.info("svgParametersProperty changed succesfully (Selected Tab - Subgraph).");
+        } catch (IOException e) {
+            e.printStackTrace();
+        };
     }
 
     private Spinner addSpinner(GridPane paneToAddSpinnerOn,
@@ -323,18 +403,91 @@ public class ControllerParameters
                 Util.loggerControllerParameters.info("Layout Y Spinner value :  " + oldValue + " transformed into : " + newValue));
     }
 
-    private void setSvgEdgeInfoCheckbox(CheckBox svgEdgeInfoCheckbox)
+    private void addListenerOnSvgEdgeInfoCheckbox(CheckBox svgEdgeInfoCheckbox)
     {
         svgEdgeInfoCheckbox.setOnAction(event ->
         {
-            if (svgEdgeInfoCheckbox.isSelected()) {
-                Util.loggerControllerParameters.info("SVG Edge Info Checked OK");
-                setParameters(svgParametersProperty.get().setEdgeInfoAlongEdge(true));
+            //// CheckBox State
+            Boolean isCheckBoxSelected = svgEdgeInfoCheckbox.isSelected();
+
+            //// Storing displayed CheckedTab (index to restore it, the pointer of the object will change so we need to remember the index)
+            DiagramPane diagramPane = ControllerDiagram.getDiagramPane();
+            ObservableList<Tab> listCheckedTabs = diagramPane.getCheckedDiagramPane().getTabs();
+            int indexCheckedTabSelectedByUser = listCheckedTabs.indexOf(diagramPane.getCheckedTabSelectedByUser());
+
+            //// If the checkbox is checked / unchecked, it has got to affect all SVGs //
+
+            // 1- The SVGs in the subtabs of CheckedPane
+            for (int i = 0; i < listCheckedTabs.size(); i++) {
+                Tab tab = listCheckedTabs.get(i);
+                if (tab.getContent() instanceof ContainerFullNetworkDiagramPane) {
+                    listCheckedTabs.remove(tab);
+                    setParameters(
+                            svgParametersProperty.get().setEdgeInfoAlongEdge(isCheckBoxSelected),
+                            tab.getText(),
+                            tab.getTooltip().getText(),
+                            i
+                    );
+                }
+                else if (tab.getContent() instanceof ContainerSubstationDiagramPane) {
+                    listCheckedTabs.remove(tab);
+                    setParameters(
+                            svgParametersProperty.get().setEdgeInfoAlongEdge(isCheckBoxSelected),
+                            ((ContainerSubstationDiagramPane) tab.getContent()).getVoltageLevelIds(),
+                            ((ContainerSubstationDiagramPane) tab.getContent()).getDepth(),
+                            tab.getText(),
+                            tab.getTooltip().getText(),
+                            i
+                    );
+                }
+                else if (tab.getContent() instanceof ContainerVoltageDiagramPane) {
+                    listCheckedTabs.remove(tab);
+                    setParameters(
+                            svgParametersProperty.get().setEdgeInfoAlongEdge(isCheckBoxSelected),
+                            ((ContainerVoltageDiagramPane) tab.getContent()).getVoltageLevelId(),
+                            ((ContainerVoltageDiagramPane) tab.getContent()).getDepth(),
+                            tab.getText(),
+                            tab.getTooltip().getText(),
+                            i
+                    );
+                }
+                else {
+                    Util.loggerControllerParameters.error("Fatal Error, unknown checkedDiagramPane.get(i).getContent() type");
+                }
+            }
+
+            // 2- The SVG in the SelectedPane
+
+            BorderPane selectedDiagramPane = ControllerDiagram.getDiagramPane().getSelectedDiagramPane();
+
+            if (selectedDiagramPane.getCenter() instanceof ContainerFullNetworkDiagramPane) {
+                setParameters(
+                        svgParametersProperty.get().setEdgeInfoAlongEdge(isCheckBoxSelected)
+                );
+            }
+            else if (selectedDiagramPane.getCenter() instanceof ContainerSubstationDiagramPane) {
+                setParameters(
+                        svgParametersProperty.get().setEdgeInfoAlongEdge(isCheckBoxSelected),
+                        ((ContainerSubstationDiagramPane) selectedDiagramPane.getCenter()).getVoltageLevelIds(),
+                        ((ContainerSubstationDiagramPane) selectedDiagramPane.getCenter()).getDepth()
+                );
+            }
+            else if (selectedDiagramPane.getCenter() instanceof ContainerVoltageDiagramPane) {
+                setParameters(
+                        svgParametersProperty.get().setEdgeInfoAlongEdge(isCheckBoxSelected),
+                        ((ContainerVoltageDiagramPane) selectedDiagramPane.getCenter()).getVoltageLevelId(),
+                        ((ContainerVoltageDiagramPane) selectedDiagramPane.getCenter()).getDepth()
+                );
             }
             else {
-                Util.loggerControllerParameters.info("SVG Edge Info Unchecked OK");
-                setParameters(svgParametersProperty.get().setEdgeInfoAlongEdge(false));
+                Util.loggerControllerParameters.error("Unknown selectedDiagramPane.getCenter() type");
             }
+
+            //// Restore the former displayed tab
+            ControllerDiagram.getDiagramPane().setCheckedTabSelectedByUser(indexCheckedTabSelectedByUser);
+
+            //// Logger
+            Util.loggerControllerParameters.info("SVG Edge Info Checked (" + svgEdgeInfoCheckbox.isSelected() + ") OK");
         });
     }
 

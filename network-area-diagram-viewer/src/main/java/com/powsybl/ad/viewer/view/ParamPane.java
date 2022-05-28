@@ -125,7 +125,8 @@ public class ParamPane extends ScrollPane
     public void createSVGParametersPane()
     {
         svgEdgeInfoCheckbox = new CheckBox();
-        Label setEdgeInfo = new Label("Set Edge Info");
+        svgEdgeInfoCheckbox.setSelected(true);
+        Label setEdgeInfo = new Label("Set Info Along Edge");
 
         svgParametersPane = new GridPane();
         svgParametersPane.setPadding(new Insets(5, 5, 5, 5));

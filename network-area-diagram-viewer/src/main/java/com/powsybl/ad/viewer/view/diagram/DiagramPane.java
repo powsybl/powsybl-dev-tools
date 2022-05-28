@@ -7,6 +7,7 @@
 
 package com.powsybl.ad.viewer.view.diagram;
 import com.powsybl.ad.viewer.view.diagram.containers.ContainerDiagramPane;
+import com.powsybl.ad.viewer.view.diagram.containers.ContainerFullNetworkDiagramPane;
 import com.powsybl.iidm.network.Container;
 import javafx.event.Event;
 import javafx.event.EventHandler;
@@ -41,7 +42,7 @@ public class DiagramPane extends TabPane
 
     private void createSelectedTab()
     {
-        selectedContainer = new ContainerDiagramPane();
+        selectedContainer = new ContainerFullNetworkDiagramPane();  // will be overwritten with selectedDiagramPane.setCenter()
         selectedDiagramPane = new BorderPane(selectedContainer);
         selectedTab = new Tab("Selected", selectedDiagramPane);
         selectedTab.setClosable(false);
@@ -102,6 +103,14 @@ public class DiagramPane extends TabPane
 
     public Tab getTabSelectedByUser() {
         return this.getSelectionModel().getSelectedItem();
+    }
+
+    public Tab getCheckedTabSelectedByUser() {
+        return checkedDiagramPane.getSelectionModel().getSelectedItem();
+    }
+
+    public void setCheckedTabSelectedByUser(int indexOfTabToSelect) {
+        checkedDiagramPane.getSelectionModel().select(indexOfTabToSelect);
     }
 
     public String getContentSVG()
