@@ -32,7 +32,11 @@ PowSyBl single-line-diagram-viewer Dev Tool is a JavaFX basic viewer used to dis
 - First install
   * [JavaFX 17](https://openjfx.io/)
   * [powsybl-single-line-diagram](https://github.com/powsybl/powsybl-single-line-diagram) latest SNAPSHOT version (clone the repo then `mvn clean install` on `main` branch)
-- Then launch the viewer by running `SingleLineDiagramViewer::main`, with the following vm options:
+- Then launch the viewer by running 
+  ```
+  mvn javafx:run
+  ```  
+  **Note**: alternatively, you can launch the viewer by running `SingleLineDiagramViewer::main` with your favorite IDE. Then you would need to add the following vm options in the launch configuration:
   ```
   --module-path /path/to/javafx-17/lib --add-modules=javafx.controls,javafx.web
   ```  

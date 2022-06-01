@@ -738,8 +738,9 @@ public class SingleLineDiagramViewer extends Application implements DisplayVolta
         StringConverter<LayoutParameters.Alignment> converter = new StringConverter<>() {
             @Override
             public String toString(LayoutParameters.Alignment object) {
-                 return object.name();
+                return object.name();
             }
+
             @Override
             public LayoutParameters.Alignment fromString(String string) {
                 return LayoutParameters.Alignment.valueOf(string);
