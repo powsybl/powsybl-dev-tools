@@ -39,12 +39,12 @@
         <java.version>11</java.version>
 
         <franzxaver.version>0.1</franzxaver.version>
-        <javafx.version>17</javafx.version>
+        <javafx.version>17.0.1</javafx.version>
         <slf4j.version>1.7.22</slf4j.version>
         <junit.version>4.13.1</junit.version>
 
-        <powsybl-single-line-diagram.version>2.10.0-SNAPSHOT</powsybl-single-line-diagram.version>
-        <powsybl-core.version>4.7.0</powsybl-core.version>
+        <powsybl-single-line-diagram.version>2.11.0-SNAPSHOT</powsybl-single-line-diagram.version>
+        <powsybl-core.version>4.8.0</powsybl-core.version>
     </properties>
 
     <dependencyManagement>
