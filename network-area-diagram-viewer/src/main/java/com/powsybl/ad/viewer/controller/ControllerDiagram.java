@@ -13,6 +13,7 @@ import com.powsybl.ad.viewer.view.diagram.containers.ContainerDiagramPane;
 import com.powsybl.ad.viewer.view.diagram.containers.ContainerFullNetworkDiagramPane;
 import com.powsybl.ad.viewer.view.diagram.containers.ContainerSubstationDiagramPane;
 import com.powsybl.ad.viewer.view.diagram.containers.ContainerVoltageDiagramPane;
+import javafx.collections.ObservableList;
 import javafx.scene.control.*;
 import javafx.concurrent.Worker;
 import javafx.scene.input.ScrollEvent;
@@ -177,6 +178,21 @@ public class ControllerDiagram
     public static DiagramPane getDiagramPane()
     {
         return diagramPane;
+    }
+
+    public static ObservableList<Tab> getListCheckedTabs(){
+        DiagramPane diagramPane = ControllerDiagram.getDiagramPane();
+        ObservableList<Tab> listCheckedTabs = diagramPane.getCheckedDiagramPane().getTabs();
+
+        return listCheckedTabs;
+    }
+
+
+    public static int getIndexCheckedTabSelectedByUser() {
+        ObservableList<Tab> listCheckedTabs = getListCheckedTabs();
+        int indexCheckedTabSelectedByUser = listCheckedTabs.indexOf(diagramPane.getCheckedTabSelectedByUser());
+
+        return indexCheckedTabSelectedByUser;
     }
 
     private static void addListenerOnClosingTab(Tab tab) {
