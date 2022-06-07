@@ -13,7 +13,7 @@ powsybl.core.version: 4.7.0
 ![img.png](readme_resources/launch_nad_viewer_with_intelliJ.png)
 
 ### Common problems encountered
-- On Windows 11, do not use `Extract All` windows feature to extract the .zip of the other repositories. Despite allowing large file paths with the regestry editor, Windows 11 will not extract the zip file correctly (`Error 0x80010135`).
+- On Windows 11, do not use `Extract All` windows feature to extract the .zip of the other powsybl repositories. Despite allowing large file paths with the regestry editor, Windows 11 will not extract the zip file correctly (`Error 0x80010135`).
 
 <img src="readme_resources/windows_extract_all.png" alt="drawing" width="200"/>
 
