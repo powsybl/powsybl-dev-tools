@@ -35,6 +35,7 @@ public final class NadCalls {
 
     private static StringWriter svgWriter = new StringWriter();
 
+
     public static void loadNetwork(Path file) {
         networkService = new Service () {
             @Override
@@ -69,7 +70,7 @@ public final class NadCalls {
                 layoutParametersProperty.get(),
                 ControllerParameters.getStyleProvider()
         );
-        Util.loggerNadCalls.info("NAD drawn");
+        Util.loggerNadCalls.info("NAD SVG assigned to svgWriter");
     }
 
 
@@ -84,7 +85,7 @@ public final class NadCalls {
                 layoutParametersProperty.get(),
                 ControllerParameters.getStyleProvider()
         );
-        Util.loggerNadCalls.info("NAD (Substation) drawn");
+        Util.loggerNadCalls.info("NAD (Substation) SVG assigned to svgWriter");
     }
 
 
@@ -99,7 +100,7 @@ public final class NadCalls {
                 layoutParametersProperty.get(),
                 ControllerParameters.getStyleProvider()
         );
-        Util.loggerNadCalls.info("NAD (Subgraph) drawn");
+        Util.loggerNadCalls.info("NAD (Subgraph) SVG assigned to svgWriter");
     }
 
 
@@ -108,25 +109,20 @@ public final class NadCalls {
         // Requires a maven clean install of powsybl-open-loadflow
         LoadFlow.run(networkProperty.get());
         Util.loggerNadCalls.info("LoadFlow calculations run");
-        setDefaultStyleProviderIfNull();
-        new NetworkAreaDiagram(networkProperty.get()).draw(
-                svgWriter,
-                svgParametersProperty.get(),
-                layoutParametersProperty.get(),
-                ControllerParameters.getStyleProvider()
-        );
-        Util.loggerNadCalls.info("NAD (after LoadFlow calculations) drawn");
     }
+
 
     public static StringWriter getSvgWriter() {
         return svgWriter;
     }
+
 
     public static void cleanSvgWriter()
     {
         svgWriter = new StringWriter();
         Util.loggerNadCalls.info("svgWriter static variable cleaned");
     }
+
 
     public static void cleanNetwork()
     {

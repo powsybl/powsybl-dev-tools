@@ -1,6 +1,5 @@
 package com.powsybl.ad.viewer.view.diagram.containers;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class ContainerSubstationDiagramPane extends ContainerDiagramPane {

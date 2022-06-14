@@ -6,16 +6,24 @@
  */
 
 package com.powsybl.ad.viewer.view.diagram;
+import com.powsybl.ad.viewer.controller.ControllerDiagram;
+import com.powsybl.ad.viewer.model.NadCalls;
+import com.powsybl.ad.viewer.util.Util;
 import com.powsybl.ad.viewer.view.diagram.containers.ContainerDiagramPane;
 import com.powsybl.ad.viewer.view.diagram.containers.ContainerFullNetworkDiagramPane;
 import com.powsybl.iidm.network.Container;
+import com.powsybl.nad.svg.SvgParameters;
 import javafx.event.Event;
 import javafx.event.EventHandler;
 import javafx.scene.control.CheckBoxTreeItem;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
 import javafx.scene.layout.BorderPane;
+
+import java.io.IOException;
 import java.util.List;
+
+import static com.powsybl.ad.viewer.model.NadCalls.svgParametersProperty;
 
 /**
  * @author Louis Lhotte <louis.lhotte@student-cs.fr>
@@ -89,6 +97,90 @@ public class DiagramPane extends TabPane
                 break;
             }
         }
+    }
+
+    public void redrawSelectedTabSVG() {
+        // Full Network - Selected Tab
+        try {
+            NadCalls.drawNetwork();
+            ControllerDiagram.addSvgToSelectedTab();
+            Util.loggerControllerParameters.info("Selected Tab - Full Network re-displayed succesfully.");
+        } catch (IOException e) {
+            e.printStackTrace();
+        };
+    }
+
+    public void redrawCheckedTabSVG(String tabName, String whatIsGonnaBeDisplayedWhenHoveringOnTabName, int index) {
+        // Full Network - Checked Tab
+        try {
+            NadCalls.drawNetwork();
+            ControllerDiagram.addSvgToCheckedTab(
+                    tabName,
+                    whatIsGonnaBeDisplayedWhenHoveringOnTabName,
+                    index
+            );
+            Util.loggerControllerParameters.info("Checked Tab - Full Network re-displayed succesfully.");
+        } catch (IOException e) {
+            e.printStackTrace();
+        };
+    }
+
+    public void redrawSelectedTabSVG(List<String> voltageLevelIds, int depth) {
+        // Substation - Selected Tab
+        try {
+            NadCalls.drawUniqueSubstation(voltageLevelIds, depth);
+            ControllerDiagram.addSvgToSelectedTab(voltageLevelIds, depth);
+            Util.loggerControllerParameters.info("Selected Tab - Substation re-displayed successfully.");
+        } catch (IOException e) {
+            e.printStackTrace();
+        };
+    }
+
+    public void redrawCheckedTabSVG(List<String> voltageLevelIds, int depth,
+                                    String tabName, String whatIsGonnaBeDisplayedWhenHoveringOnTabName, int index) {
+        // Substation - Checked Tab
+        try {
+            NadCalls.drawUniqueSubstation(voltageLevelIds, depth);
+            ControllerDiagram.addSvgToCheckedTab(
+                    tabName,
+                    whatIsGonnaBeDisplayedWhenHoveringOnTabName,
+                    voltageLevelIds,
+                    depth,
+                    index
+            );
+            Util.loggerControllerParameters.info("Checked Tab - Substation re-displayed successfully.");
+        } catch (IOException e) {
+            e.printStackTrace();
+        };
+    }
+
+    public void redrawSelectedTabSVG(String voltageLevelId, int depth) {
+        // Voltage (= Subgraph) - Selected Tab
+        try {
+            NadCalls.drawSubgraph(voltageLevelId, depth);
+            ControllerDiagram.addSvgToSelectedTab(voltageLevelId, depth);
+            Util.loggerControllerParameters.info("Selected Tab - Subgraph re-displayed successfully.");
+        } catch (IOException e) {
+            e.printStackTrace();
+        };
+    }
+
+    public void redrawCheckedTabSVG(String voltageLevelId, int depth,
+                                    String tabName, String whatIsGonnaBeDisplayedWhenHoveringOnTabName, int index) {
+        // Voltage (= Subgraph) - Checked Tab
+        try {
+            NadCalls.drawSubgraph(voltageLevelId, depth);
+            ControllerDiagram.addSvgToCheckedTab(
+                    tabName,
+                    whatIsGonnaBeDisplayedWhenHoveringOnTabName,
+                    voltageLevelId,
+                    depth,
+                    index
+            );
+            Util.loggerControllerParameters.info("Checked Tab - Subgraph re-displayed successfully.");
+        } catch (IOException e) {
+            e.printStackTrace();
+        };
     }
 
     public TabPane getCheckedDiagramPane()

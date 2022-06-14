@@ -9,8 +9,8 @@ package com.powsybl.ad.viewer.controller;
 import com.powsybl.ad.viewer.model.NadCalls;
 import com.powsybl.ad.viewer.util.Util;
 import com.powsybl.ad.viewer.view.OptionsPane;
-import com.powsybl.ad.viewer.view.diagram.containers.SelectableSubstation;
-import com.powsybl.ad.viewer.view.diagram.containers.SelectableVoltageLevel;
+import com.powsybl.ad.viewer.view.diagram.DiagramPane;
+import com.powsybl.ad.viewer.view.diagram.containers.*;
 import com.powsybl.iidm.network.Container;
 import com.powsybl.iidm.network.Network;
 import com.powsybl.iidm.network.Substation;
@@ -19,15 +19,16 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.CheckBoxTreeCell;
+import javafx.scene.layout.BorderPane;
 import javafx.util.StringConverter;
 import java.io.IOException;
+import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import static com.powsybl.ad.viewer.controller.ControllerDiagram.getDiagramPane;
 import static com.powsybl.ad.viewer.controller.ControllerParameters.getParamPane;
 import static com.powsybl.ad.viewer.model.NadCalls.*;
 
@@ -221,7 +222,7 @@ public class ControllerOptions
                             substationItem.getValue().toString(),  // ID
                             voltageIds,  // List of voltageLevelIds
                             depthSpinnerValue,  // Depth
-                            (getDiagramPane().getCheckedDiagramPane().getTabs().size() == 0 ? 0:getDiagramPane().getCheckedDiagramPane().getTabs().size())
+                            (ControllerDiagram.getDiagramPane().getCheckedDiagramPane().getTabs().size() == 0 ? 0:ControllerDiagram.getDiagramPane().getCheckedDiagramPane().getTabs().size())
                     );
                 } catch (IOException e) {
                     e.printStackTrace();
@@ -230,7 +231,7 @@ public class ControllerOptions
                 Util.loggerControllerOptions.debug("Substation \"" + substationItem.getValue().getName() + "\" unchecked.");
 
                 // if event is unchecking the checkbox, close tab
-                getDiagramPane().closeTabInCheckedDiagramPane(substationItem);
+                ControllerDiagram.getDiagramPane().closeTabInCheckedDiagramPane(substationItem);
             }
         });
     }
@@ -251,7 +252,7 @@ public class ControllerOptions
                             voltageItem.getValue().toString(),  // Voltage Level (= subgraph) ID
                             voltageItem.getValue().toString(),  // Voltage Level (= subgraph) ID
                             depthSpinnerValue,  // Depth
-                            (getDiagramPane().getCheckedDiagramPane().getTabs().size() == 0 ? 0:getDiagramPane().getCheckedDiagramPane().getTabs().size())
+                            (ControllerDiagram.getDiagramPane().getCheckedDiagramPane().getTabs().size() == 0 ? 0:ControllerDiagram.getDiagramPane().getCheckedDiagramPane().getTabs().size())
                     );
                 } catch (IOException e) {
                     e.printStackTrace();
@@ -260,7 +261,7 @@ public class ControllerOptions
                 Util.loggerControllerOptions.debug("Voltage level \"" + voltageItem.getValue().getName() + "\" unchecked.");
 
                 // if event is unchecking the checkbox, close tab
-                getDiagramPane().closeTabInCheckedDiagramPane(voltageItem);
+                ControllerDiagram.getDiagramPane().closeTabInCheckedDiagramPane(voltageItem);
             }
         });
     }
@@ -368,7 +369,7 @@ public class ControllerOptions
                     ControllerDiagram.addSvgToCheckedTab(
                             "Full Network",
                             "Full Network",
-                            (getDiagramPane().getCheckedDiagramPane().getTabs().size() == 0 ? 0:getDiagramPane().getCheckedDiagramPane().getTabs().size())
+                            (ControllerDiagram.getDiagramPane().getCheckedDiagramPane().getTabs().size() == 0 ? 0:ControllerDiagram.getDiagramPane().getCheckedDiagramPane().getTabs().size())
                     );
 
                 } catch (IOException e) {
@@ -379,10 +380,10 @@ public class ControllerOptions
             {
                 // if event is unchecking the FullNetwork checkbox, close tab
                 Util.loggerControllerOptions.debug("Full Network Check unselected. Closing checked subtab..");
-                List<Tab> tabList = getDiagramPane().getCheckedDiagramPane().getTabs();
+                List<Tab> tabList = ControllerDiagram.getDiagramPane().getCheckedDiagramPane().getTabs();
                 for (Tab checkedTab : tabList) {
                     if (checkedTab.getText() == "Full Network") {
-                        getDiagramPane().getCheckedDiagramPane().getTabs().remove(checkedTab);
+                        ControllerDiagram.getDiagramPane().getCheckedDiagramPane().getTabs().remove(checkedTab);
                         break;
                     }
                 }
@@ -411,6 +412,7 @@ public class ControllerOptions
                 Util.loggerControllerOptions.debug("Depth Spinner value : " + oldValue + " decremented to : " + newValue);
                 depthSpinnerValue--;
             }
+            redisplayAll();
         });
     }
 
@@ -424,8 +426,101 @@ public class ControllerOptions
                 return;
             }
             NadCalls.runLoadFlow();
+
+            // All SVGs need to be re-displayed (SVGs in the subtabs of CheckedPane and SVG in the SelectedPane)
+
+            redisplayAll();
+
             Util.loggerControllerOptions.info("Run Loadflow OK");
         });
+    }
+
+    private void redisplayAll() {
+        if (!(getSvgWriter().toString().equals(new StringWriter().toString()))) {
+            // this if statement just checks whether or not the SvgWriter variable has been cleared before (or has
+            // never been written). If "empty", there are no SVG to change, so there is not much to do.
+
+            //// Storing displayed CheckedTabs (and the index to restore the checked tab selected by the user, the
+            // pointer of the object will change so we need to remember the index)
+            ObservableList<Tab> listCheckedTabs = ControllerDiagram.getListCheckedTabs();
+            int indexCheckedTabSelectedByUser = ControllerDiagram.getIndexCheckedTabSelectedByUser();
+
+            // Let's get the diagramPane object
+            DiagramPane diagramPane = ControllerDiagram.getDiagramPane();
+
+            // 1- The SVGs in the subtabs of CheckedPane
+            for (int i = 0; i < listCheckedTabs.size(); i++) {
+                Tab tab = listCheckedTabs.get(i);
+                if (tab.getContent() instanceof ContainerFullNetworkDiagramPane) {
+                    listCheckedTabs.remove(tab);
+                    diagramPane.redrawCheckedTabSVG(
+                            tab.getText(),
+                            tab.getTooltip().getText(),
+                            i
+                    );
+                }
+                else if (tab.getContent() instanceof ContainerSubstationDiagramPane) {
+                    listCheckedTabs.remove(tab);
+                    diagramPane.redrawCheckedTabSVG(
+                            ((ContainerSubstationDiagramPane) tab.getContent()).getVoltageLevelIds(),
+                            depthSpinnerValue,
+                            tab.getText(),
+                            tab.getTooltip().getText(),
+                            i
+                    );
+                }
+                else if (tab.getContent() instanceof ContainerVoltageDiagramPane) {
+                    listCheckedTabs.remove(tab);
+                    diagramPane.redrawCheckedTabSVG(
+                            ((ContainerVoltageDiagramPane) tab.getContent()).getVoltageLevelId(),
+                            depthSpinnerValue,
+                            tab.getText(),
+                            tab.getTooltip().getText(),
+                            i
+                    );
+                }
+                else {
+                    Util.loggerControllerParameters.error(
+                            "Fatal Error, unknown checkedDiagramPane.get(i).getContent() type"
+                    );
+                }
+            }
+
+            // 2- The SVG in the SelectedPane
+
+            BorderPane selectedDiagramPane = ControllerDiagram.getDiagramPane().getSelectedDiagramPane();
+
+            if (selectedDiagramPane.getCenter() instanceof ContainerFullNetworkDiagramPane) {
+                diagramPane.redrawSelectedTabSVG();
+            }
+            else if (selectedDiagramPane.getCenter() instanceof ContainerSubstationDiagramPane) {
+                diagramPane.redrawSelectedTabSVG(
+                        ((ContainerSubstationDiagramPane) selectedDiagramPane.getCenter()).getVoltageLevelIds(),
+                        depthSpinnerValue
+                );
+            }
+            else if (selectedDiagramPane.getCenter() instanceof ContainerVoltageDiagramPane) {
+                diagramPane.redrawSelectedTabSVG(
+                        ((ContainerVoltageDiagramPane) selectedDiagramPane.getCenter()).getVoltageLevelId(),
+                        depthSpinnerValue
+                );
+            }
+            else {
+                Util.loggerControllerParameters.error("Unknown selectedDiagramPane.getCenter() type");
+            }
+
+            //// Restore the former displayed tab
+            ControllerDiagram.getDiagramPane().setCheckedTabSelectedByUser(indexCheckedTabSelectedByUser);
+
+            Util.loggerControllerParameters.info(
+                    "Diagrams displayed with selected StyleProvider OK."
+            );
+        }
+        else {
+            Util.loggerControllerParameters.info(
+                    "No SVGs to change."
+            );
+        }
     }
 
     private void addListenerOnFilterField(TextField field)

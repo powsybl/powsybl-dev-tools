@@ -125,7 +125,7 @@ public class ControllerParameters
                     whatIsGonnaBeDisplayedWhenHoveringOnTabName,
                     index
             );
-            Util.loggerControllerParameters.info("svgParametersProperty changed succesfully (Selected Tab - Full Network).");
+            Util.loggerControllerParameters.info("svgParametersProperty changed succesfully (Checked Tab - Full Network).");
         } catch (IOException e) {
             e.printStackTrace();
         };
@@ -156,7 +156,7 @@ public class ControllerParameters
                     depth,
                     index
             );
-            Util.loggerControllerParameters.info("svgParametersProperty changed succesfully (Selected Tab - Substation).");
+            Util.loggerControllerParameters.info("svgParametersProperty changed succesfully (Checked Tab - Substation).");
         } catch (IOException e) {
             e.printStackTrace();
         };
@@ -187,7 +187,7 @@ public class ControllerParameters
                     depth,
                     index
             );
-            Util.loggerControllerParameters.info("svgParametersProperty changed succesfully (Selected Tab - Subgraph).");
+            Util.loggerControllerParameters.info("svgParametersProperty changed succesfully (Checked Tab - Subgraph).");
         } catch (IOException e) {
             e.printStackTrace();
         };
@@ -430,7 +430,7 @@ public class ControllerParameters
                 ControllerDiagram.getDiagramPane().setCheckedTabSelectedByUser(indexCheckedTabSelectedByUser);
 
                 Util.loggerControllerParameters.info(
-                        "Diagrams drawn with selected StyleProvider OK."
+                        "Diagrams displayed with selected StyleProvider OK."
                 );
             }
             else {
@@ -539,7 +539,7 @@ public class ControllerParameters
                         ControllerDiagram.getDiagramPane().setCheckedTabSelectedByUser(indexCheckedTabSelectedByUser);
 
                         Util.loggerControllerParameters.info(
-                                "Diagrams drawn with selected StyleProvider OK."
+                                "Diagrams displayed with selected StyleProvider OK."
                         );
                     }
                     else {
