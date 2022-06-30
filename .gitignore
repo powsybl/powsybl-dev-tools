@@ -2,7 +2,7 @@
 target/
 
 # IntelliJ
-/.idea
+**/.idea
 *.iml
 
 # Eclipse projects
