@@ -539,7 +539,7 @@ public class ControllerParameters
                         ControllerDiagram.getDiagramPane().setCheckedTabSelectedByUser(indexCheckedTabSelectedByUser);
 
                         Util.loggerControllerParameters.info(
-                                "Diagrams displayed with selected StyleProvider OK."
+                                "Diagrams displayed with selected Padding OK."
                         );
                     }
                     else {

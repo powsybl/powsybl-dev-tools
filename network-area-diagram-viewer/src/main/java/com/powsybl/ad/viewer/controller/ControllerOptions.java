@@ -382,7 +382,7 @@ public class ControllerOptions
                 Util.loggerControllerOptions.debug("Full Network Check unselected. Closing checked subtab..");
                 List<Tab> tabList = ControllerDiagram.getDiagramPane().getCheckedDiagramPane().getTabs();
                 for (Tab checkedTab : tabList) {
-                    if (checkedTab.getText() == "Full Network") {
+                    if (checkedTab.getText().equals("Full Network")) {
                         ControllerDiagram.getDiagramPane().getCheckedDiagramPane().getTabs().remove(checkedTab);
                         break;
                     }
@@ -412,7 +412,7 @@ public class ControllerOptions
                 Util.loggerControllerOptions.debug("Depth Spinner value : " + oldValue + " decremented to : " + newValue);
                 depthSpinnerValue--;
             }
-            redisplayAll();
+            redisplayAll("Depth");
         });
     }
 
@@ -429,19 +429,19 @@ public class ControllerOptions
 
             // All SVGs need to be re-displayed (SVGs in the subtabs of CheckedPane and SVG in the SelectedPane)
 
-            redisplayAll();
+            redisplayAll("Loadflow");
 
             Util.loggerControllerOptions.info("Run Loadflow OK");
         });
     }
 
-    private void redisplayAll() {
+    private void redisplayAll(String infoMessage) {
         if (!(getSvgWriter().toString().equals(new StringWriter().toString()))) {
             // this if statement just checks whether or not the SvgWriter variable has been cleared before (or has
             // never been written). If "empty", there are no SVG to change, so there is not much to do.
 
             //// Storing displayed CheckedTabs (and the index to restore the checked tab selected by the user, the
-            // pointer of the object will change so we need to remember the index)
+            // pointer of the object will change, so we need to remember the index)
             ObservableList<Tab> listCheckedTabs = ControllerDiagram.getListCheckedTabs();
             int indexCheckedTabSelectedByUser = ControllerDiagram.getIndexCheckedTabSelectedByUser();
 
@@ -506,14 +506,16 @@ public class ControllerOptions
                 );
             }
             else {
-                Util.loggerControllerParameters.error("Unknown selectedDiagramPane.getCenter() type");
+                Util.loggerControllerParameters.info(
+                        "Unknown selectedDiagramPane.getCenter() type. Means that no Network Area Diagram was selected."
+                );
             }
 
             //// Restore the former displayed tab
             ControllerDiagram.getDiagramPane().setCheckedTabSelectedByUser(indexCheckedTabSelectedByUser);
 
             Util.loggerControllerParameters.info(
-                    "Diagrams displayed with selected StyleProvider OK."
+                    "Diagrams displayed with selected " + infoMessage + " OK."
             );
         }
         else {
