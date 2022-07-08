@@ -21,6 +21,7 @@ import javafx.scene.control.*;
 import javafx.scene.control.cell.CheckBoxTreeCell;
 import javafx.scene.layout.BorderPane;
 import javafx.util.StringConverter;
+
 import java.io.IOException;
 import java.io.StringWriter;
 import java.util.ArrayList;
@@ -32,26 +33,22 @@ import java.util.stream.Collectors;
 import static com.powsybl.ad.viewer.controller.ControllerParameters.getParamPane;
 import static com.powsybl.ad.viewer.model.NadCalls.*;
 
-
 /**
  * @author Louis Lhotte <louis.lhotte@student-cs.fr>
  */
-public class ControllerOptions
-{
+public class ControllerOptions {
     private static OptionsPane optionsPane;
     private static int depthSpinnerValue = 1;
 
-    private static final ObservableList <SelectableSubstation> selectableSubstations = FXCollections.observableArrayList();
-    private static final ObservableList <SelectableVoltageLevel> selectableVoltageLevels = FXCollections.observableArrayList();
+    private static final ObservableList<SelectableSubstation> selectableSubstations = FXCollections.observableArrayList();
+    private static final ObservableList<SelectableVoltageLevel> selectableVoltageLevels = FXCollections.observableArrayList();
 
-    public void createOptionsPane()
-    {
+    public void createOptionsPane() {
         optionsPane = new OptionsPane();
         initTreeCellFactory();
     }
 
-    public void setParamPane()
-    {
+    public void setParamPane() {
         // Full Network Check
         addListenerOnFullNetworkCheck(optionsPane.getFullNetworkCheck());
 
@@ -67,38 +64,31 @@ public class ControllerOptions
         addListenerOnFilterField(optionsPane.getFiltersField());
     }
 
-    public static void setNodesList()
-    {
+    public static void setNodesList() {
         initSubstationsTree();
         optionsPane.displaySubstations();
         // Filters pane
     }
 
-    public static void initSubstationsTree()
-    {
+    public static void initSubstationsTree() {
         CheckBoxTreeItem rootItem = optionsPane.getFullNetworkCheck();
         rootItem.setValue(networkProperty.get());
         rootItem.setIndependent(true);
         rootItem.setExpanded(true);
 
-        Map <String, SelectableSubstation> mapSubstations = selectableSubstations.stream()
-                .collect(Collectors.toMap(SelectableSubstation::getName, Function.identity()));
+        Map<String, SelectableSubstation> mapSubstations = selectableSubstations.stream().collect(Collectors.toMap(SelectableSubstation::getName, Function.identity()));
 
-        Map<String, SelectableVoltageLevel> mapVoltageLevels = selectableVoltageLevels.stream()
-                .collect(Collectors.toMap(SelectableVoltageLevel::getName, Function.identity()));
+        Map<String, SelectableVoltageLevel> mapVoltageLevels = selectableVoltageLevels.stream().collect(Collectors.toMap(SelectableVoltageLevel::getName, Function.identity()));
 
-        for (Substation substation : NadCalls.networkProperty.get().getSubstations())
-        {
-            initVoltageLevelsTree(rootItem, substation, "",
-                    true, mapSubstations, mapVoltageLevels);
+        for (Substation substation : NadCalls.networkProperty.get().getSubstations()) {
+            initVoltageLevelsTree(rootItem, substation, "", true, mapSubstations, mapVoltageLevels);
         }
 
         TreeView substationsTree = optionsPane.getSubstationTree();
 
         addListenerOnSelectingSubstationOrVoltageItem(substationsTree);
 
-        if (substationsTree.getRoot() != null)
-        {
+        if (substationsTree.getRoot() != null) {
             substationsTree.getRoot().getChildren().clear();
         }
 
@@ -106,10 +96,7 @@ public class ControllerOptions
         substationsTree.setShowRoot(true);
     }
 
-    private static void initVoltageLevelsTree(TreeItem substationTree,
-                                              Substation substation, String filter, boolean emptyFilter,
-                                              Map<String, SelectableSubstation> mapSubstations,
-                                              Map<String, SelectableVoltageLevel> mapVoltageLevels) {
+    private static void initVoltageLevelsTree(TreeItem substationTree, Substation substation, String filter, boolean emptyFilter, Map<String, SelectableSubstation> mapSubstations, Map<String, SelectableVoltageLevel> mapVoltageLevels) {
         boolean firstVoltageLevel = true;
         CheckBoxTreeItem substationItem = null;
 
@@ -129,25 +116,21 @@ public class ControllerOptions
         // mapSubstations.get(substation.getId()).checkedProperty().get()
         boolean substationIsChecked = false;
 
-        for (VoltageLevel voltageLevel : substation.getVoltageLevels())
-        {
+        for (VoltageLevel voltageLevel : substation.getVoltageLevels()) {
             voltageLevelOK = showNames && nameContainsFilter && idContainsFilter;
 
             // If filtered, we don't display
-            if (!emptyFilter && !voltageLevelOK)
-            {
+            if (!emptyFilter && !voltageLevelOK) {
                 continue;
             }
             // If it is the first voltage level, we set it as root and perform other actions
-            if (firstVoltageLevel && !hideSubstations)
-            {
-                substationItem = new CheckBoxTreeItem <> ();
+            if (firstVoltageLevel && !hideSubstations) {
+                substationItem = new CheckBoxTreeItem<>();
                 substationItem.setValue(substation);
                 substationItem.setIndependent(true);
                 substationItem.setExpanded(true);
 
-                if (mapContainsSubstation && substationIsChecked)
-                {
+                if (mapContainsSubstation && substationIsChecked) {
                     substationItem.setSelected(true);
                 }
                 substationTree.getChildren().add(substationItem);
@@ -155,24 +138,18 @@ public class ControllerOptions
             }
             firstVoltageLevel = false;
 
-            if (!hideSubstations)
-            {
-                CheckBoxTreeItem <Container <?>> voltageItem = new CheckBoxTreeItem (voltageLevel);
+            if (!hideSubstations) {
+                CheckBoxTreeItem<Container<?>> voltageItem = new CheckBoxTreeItem(voltageLevel);
 
                 voltageItem.setIndependent(true);
 
-                if (mapVoltageLevels.containsKey(voltageLevel.getId()) &&
-                        true)//mapVoltageLevels.get(voltageLevel.getId()).checkedProperty().get())
-                {
+                if (mapVoltageLevels.containsKey(voltageLevel.getId()) && true) {
                     voltageItem.setSelected(true);
                 }
 
-                if (substationItem != null)
-                {
+                if (substationItem != null) {
                     substationItem.getChildren().add(voltageItem);
-                }
-                else
-                {
+                } else {
                     substationTree.getChildren().add(voltageItem);
                 }
                 addListenerOnVoltageItem(voltageItem);
@@ -183,13 +160,11 @@ public class ControllerOptions
 
     public static void checkvItemTree(String voltageName, boolean selected) {
         TreeView<Container<?>> substationsTree = optionsPane.getSubstationTree();
-        substationsTree.getRoot().getChildren().stream().forEach(childS ->
-                childS.getChildren().stream().forEach(childV -> {
-                    if (childV.getValue().getName().equals(voltageName)) {
-                        ((CheckBoxTreeItem) childV).setSelected(selected);
-                    }
-                })
-        );
+        substationsTree.getRoot().getChildren().stream().forEach(childS -> childS.getChildren().stream().forEach(childV -> {
+            if (childV.getValue().getName().equals(voltageName)) {
+                ((CheckBoxTreeItem) childV).setSelected(selected);
+            }
+        }));
     }
 
     public static void checksItemTree(String substationName, boolean selected) {
@@ -201,29 +176,24 @@ public class ControllerOptions
         });
     }
 
-    private static void addListenerOnSubstationItem(CheckBoxTreeItem<Container<?>> substationItem)
-    {
+    private static void addListenerOnSubstationItem(CheckBoxTreeItem<Container<?>> substationItem) {
         // Handling checking Substations
-        ArrayList <String> voltageIds = new ArrayList<>();
-        substationItem.selectedProperty().addListener((obs, oldVal, newVal) ->
-        {
-            if (substationItem.isSelected())
-            {
+        ArrayList<String> voltageIds = new ArrayList<>();
+        substationItem.selectedProperty().addListener((obs, oldVal, newVal) -> {
+            if (substationItem.isSelected()) {
                 Util.loggerControllerOptions.debug("Substation \"" + substationItem.getValue().getName() + "\" checked.");
 
                 getParamPane().setDisabledSvgSpinners(false);
                 voltageIds.clear();
-                for (TreeItem <Container<?>> voltageId : substationItem.getChildren())
+                for (TreeItem<Container<?>> voltageId : substationItem.getChildren())
                     voltageIds.add(voltageId.getValue().toString());
                 NadCalls.drawUniqueSubstation(voltageIds, depthSpinnerValue);
                 try {
-                    ControllerDiagram.addSvgToCheckedTab(
-                            substationItem.getValue().getName(),  // Name
+                    ControllerDiagram.addSvgToCheckedTab(substationItem.getValue().getName(),  // Name
                             substationItem.getValue().toString(),  // ID
                             voltageIds,  // List of voltageLevelIds
                             depthSpinnerValue,  // Depth
-                            (ControllerDiagram.getDiagramPane().getCheckedDiagramPane().getTabs().size() == 0 ? 0:ControllerDiagram.getDiagramPane().getCheckedDiagramPane().getTabs().size())
-                    );
+                            (ControllerDiagram.getDiagramPane().getCheckedDiagramPane().getTabs().size() == 0 ? 0 : ControllerDiagram.getDiagramPane().getCheckedDiagramPane().getTabs().size()));
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
@@ -236,24 +206,20 @@ public class ControllerOptions
         });
     }
 
-    private static void addListenerOnVoltageItem(CheckBoxTreeItem<Container<?>> voltageItem)
-    {
+    private static void addListenerOnVoltageItem(CheckBoxTreeItem<Container<?>> voltageItem) {
         // Handling checking Voltages
-        voltageItem.selectedProperty().addListener((obs, oldVal, newVal) ->
-        {
+        voltageItem.selectedProperty().addListener((obs, oldVal, newVal) -> {
             if (voltageItem.isSelected()) {
                 Util.loggerControllerOptions.debug("Voltage level \"" + voltageItem.getValue().getName() + "\" checked.");
 
                 getParamPane().setDisabledSvgSpinners(false);
                 NadCalls.drawSubgraph(voltageItem.getValue().toString(), depthSpinnerValue);
                 try {
-                    ControllerDiagram.addSvgToCheckedTab(
-                            voltageItem.getValue().getName(),  // Name
+                    ControllerDiagram.addSvgToCheckedTab(voltageItem.getValue().getName(),  // Name
                             voltageItem.getValue().toString(),  // Voltage Level (= subgraph) ID
                             voltageItem.getValue().toString(),  // Voltage Level (= subgraph) ID
                             depthSpinnerValue,  // Depth
-                            (ControllerDiagram.getDiagramPane().getCheckedDiagramPane().getTabs().size() == 0 ? 0:ControllerDiagram.getDiagramPane().getCheckedDiagramPane().getTabs().size())
-                    );
+                            (ControllerDiagram.getDiagramPane().getCheckedDiagramPane().getTabs().size() == 0 ? 0 : ControllerDiagram.getDiagramPane().getCheckedDiagramPane().getTabs().size()));
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
@@ -279,9 +245,9 @@ public class ControllerOptions
             if (c instanceof Substation) {
                 Util.loggerControllerOptions.debug("Substation \"" + c.getName() + "\" selected.");
 
-                ArrayList <String> voltageIds = new ArrayList<>();
+                ArrayList<String> voltageIds = new ArrayList<>();
                 voltageIds.clear();
-                for (TreeItem <Container<?>> voltageId : newValue.getChildren())
+                for (TreeItem<Container<?>> voltageId : newValue.getChildren())
                     voltageIds.add(voltageId.getValue().toString());
                 NadCalls.drawUniqueSubstation(voltageIds, depthSpinnerValue);
                 try {
@@ -289,8 +255,7 @@ public class ControllerOptions
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
-            }
-            else if (c instanceof VoltageLevel) {
+            } else if (c instanceof VoltageLevel) {
                 Util.loggerControllerOptions.info("Voltage \"" + c.getName() + "\" selected.");
 
                 NadCalls.drawSubgraph(c.toString(), depthSpinnerValue);
@@ -299,8 +264,7 @@ public class ControllerOptions
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
-            }
-            else if (c instanceof Network) {
+            } else if (c instanceof Network) {
                 Util.loggerControllerOptions.info("Full Network \"" + c.getName() + "\" selected.");
 
                 loadNetwork(ControllerImport.getFile().toPath());  // load network
@@ -318,15 +282,12 @@ public class ControllerOptions
     /*
       Handling the display of names/id in the substations tree
     */
-    private static void initTreeCellFactory()
-    {
+    private static void initTreeCellFactory() {
         optionsPane.getSubstationTree().setCellFactory(param -> {
             CheckBoxTreeCell<Container<?>> treeCell = new CheckBoxTreeCell<>();
-            StringConverter <TreeItem<Container<?>>> strConvert = new StringConverter <>()
-            {
+            StringConverter<TreeItem<Container<?>>> strConvert = new StringConverter<>() {
                 @Override
-                public String toString(TreeItem<Container<?>> c)
-                {
+                public String toString(TreeItem<Container<?>> c) {
                     if (c.getParent() == null) {
                         return "Full Network";
                     }
@@ -347,17 +308,13 @@ public class ControllerOptions
         });
     }
 
-    private static void addListenerOnFullNetworkCheck(CheckBoxTreeItem check)
-    {
-        check.selectedProperty().addListener((obs, oldVal, newVal) ->
-        {
-            if (check.isSelected())
-            {
+    private static void addListenerOnFullNetworkCheck(CheckBoxTreeItem check) {
+        check.selectedProperty().addListener((obs, oldVal, newVal) -> {
+            if (check.isSelected()) {
                 Util.loggerControllerOptions.debug("Network Check Selected OK");
 
                 getParamPane().setDisabledSvgSpinners(false);
-                if (ControllerImport.getFile() == null)
-                {
+                if (ControllerImport.getFile() == null) {
                     Util.loggerControllerOptions.debug("No file set. Please import a network first.");
                     return;
                 }
@@ -366,18 +323,12 @@ public class ControllerOptions
                     loadNetwork(ControllerImport.getFile().toPath());  // load network
                     drawNetwork();  // changes the variable svgWriter
 
-                    ControllerDiagram.addSvgToCheckedTab(
-                            "Full Network",
-                            "Full Network",
-                            (ControllerDiagram.getDiagramPane().getCheckedDiagramPane().getTabs().size() == 0 ? 0:ControllerDiagram.getDiagramPane().getCheckedDiagramPane().getTabs().size())
-                    );
+                    ControllerDiagram.addSvgToCheckedTab("Full Network", "Full Network", (ControllerDiagram.getDiagramPane().getCheckedDiagramPane().getTabs().size() == 0 ? 0 : ControllerDiagram.getDiagramPane().getCheckedDiagramPane().getTabs().size()));
 
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
-            }
-            else
-            {
+            } else {
                 // if event is unchecking the FullNetwork checkbox, close tab
                 Util.loggerControllerOptions.debug("Full Network Check unselected. Closing checked subtab..");
                 List<Tab> tabList = ControllerDiagram.getDiagramPane().getCheckedDiagramPane().getTabs();
@@ -391,21 +342,15 @@ public class ControllerOptions
         });
     }
 
-    private void addListenerOnDepthSpinner(Spinner <Integer> spinner)
-    {
-        spinner.valueProperty().addListener((obs, oldValue, newValue) ->
-        {
+    private void addListenerOnDepthSpinner(Spinner<Integer> spinner) {
+        spinner.valueProperty().addListener((obs, oldValue, newValue) -> {
 
-            if (oldValue < newValue)
-            {
+            if (oldValue < newValue) {
                 // Handle max depth ?
                 Util.loggerControllerOptions.debug("Depth Spinner value : " + oldValue + " incremented to : " + newValue);
                 depthSpinnerValue++;
-            }
-            else
-            {
-                if (depthSpinnerValue == 1)
-                {
+            } else {
+                if (depthSpinnerValue == 1) {
                     Util.loggerControllerOptions.error("Depth can not be less than 1.");
                     return;
                 }
@@ -416,12 +361,9 @@ public class ControllerOptions
         });
     }
 
-    private void addListenerOnRunFlowButton(Button button)
-    {
-        button.setOnAction(event ->
-        {
-            if (ControllerImport.getFile() == null)
-            {
+    private void addListenerOnRunFlowButton(Button button) {
+        button.setOnAction(event -> {
+            if (ControllerImport.getFile() == null) {
                 Util.loggerControllerOptions.info("No file set. Please import a network first.");
                 return;
             }
@@ -453,36 +395,15 @@ public class ControllerOptions
                 Tab tab = listCheckedTabs.get(i);
                 if (tab.getContent() instanceof ContainerFullNetworkDiagramPane) {
                     listCheckedTabs.remove(tab);
-                    diagramPane.redrawCheckedTabSVG(
-                            tab.getText(),
-                            tab.getTooltip().getText(),
-                            i
-                    );
-                }
-                else if (tab.getContent() instanceof ContainerSubstationDiagramPane) {
+                    diagramPane.redrawCheckedTabSVG(tab.getText(), tab.getTooltip().getText(), i);
+                } else if (tab.getContent() instanceof ContainerSubstationDiagramPane) {
                     listCheckedTabs.remove(tab);
-                    diagramPane.redrawCheckedTabSVG(
-                            ((ContainerSubstationDiagramPane) tab.getContent()).getVoltageLevelIds(),
-                            depthSpinnerValue,
-                            tab.getText(),
-                            tab.getTooltip().getText(),
-                            i
-                    );
-                }
-                else if (tab.getContent() instanceof ContainerVoltageDiagramPane) {
+                    diagramPane.redrawCheckedTabSVG(((ContainerSubstationDiagramPane) tab.getContent()).getVoltageLevelIds(), depthSpinnerValue, tab.getText(), tab.getTooltip().getText(), i);
+                } else if (tab.getContent() instanceof ContainerVoltageDiagramPane) {
                     listCheckedTabs.remove(tab);
-                    diagramPane.redrawCheckedTabSVG(
-                            ((ContainerVoltageDiagramPane) tab.getContent()).getVoltageLevelId(),
-                            depthSpinnerValue,
-                            tab.getText(),
-                            tab.getTooltip().getText(),
-                            i
-                    );
-                }
-                else {
-                    Util.loggerControllerParameters.error(
-                            "Fatal Error, unknown checkedDiagramPane.get(i).getContent() type"
-                    );
+                    diagramPane.redrawCheckedTabSVG(((ContainerVoltageDiagramPane) tab.getContent()).getVoltageLevelId(), depthSpinnerValue, tab.getText(), tab.getTooltip().getText(), i);
+                } else {
+                    Util.loggerControllerParameters.error("Fatal Error, unknown checkedDiagramPane.get(i).getContent() type");
                 }
             }
 
@@ -492,62 +413,40 @@ public class ControllerOptions
 
             if (selectedDiagramPane.getCenter() instanceof ContainerFullNetworkDiagramPane) {
                 diagramPane.redrawSelectedTabSVG();
-            }
-            else if (selectedDiagramPane.getCenter() instanceof ContainerSubstationDiagramPane) {
-                diagramPane.redrawSelectedTabSVG(
-                        ((ContainerSubstationDiagramPane) selectedDiagramPane.getCenter()).getVoltageLevelIds(),
-                        depthSpinnerValue
-                );
-            }
-            else if (selectedDiagramPane.getCenter() instanceof ContainerVoltageDiagramPane) {
-                diagramPane.redrawSelectedTabSVG(
-                        ((ContainerVoltageDiagramPane) selectedDiagramPane.getCenter()).getVoltageLevelId(),
-                        depthSpinnerValue
-                );
-            }
-            else {
-                Util.loggerControllerParameters.info(
-                        "Unknown selectedDiagramPane.getCenter() type. Means that no Network Area Diagram was selected."
-                );
+            } else if (selectedDiagramPane.getCenter() instanceof ContainerSubstationDiagramPane) {
+                diagramPane.redrawSelectedTabSVG(((ContainerSubstationDiagramPane) selectedDiagramPane.getCenter()).getVoltageLevelIds(), depthSpinnerValue);
+            } else if (selectedDiagramPane.getCenter() instanceof ContainerVoltageDiagramPane) {
+                diagramPane.redrawSelectedTabSVG(((ContainerVoltageDiagramPane) selectedDiagramPane.getCenter()).getVoltageLevelId(), depthSpinnerValue);
+            } else {
+                Util.loggerControllerParameters.info("Unknown selectedDiagramPane.getCenter() type. Means that no Network Area Diagram was selected.");
             }
 
             //// Restore the former displayed tab
             ControllerDiagram.getDiagramPane().setCheckedTabSelectedByUser(indexCheckedTabSelectedByUser);
 
-            Util.loggerControllerParameters.info(
-                    "Diagrams displayed with selected " + infoMessage + " OK."
-            );
-        }
-        else {
-            Util.loggerControllerParameters.info(
-                    "No SVGs to change."
-            );
+            Util.loggerControllerParameters.info("Diagrams displayed with selected " + infoMessage + " OK.");
+        } else {
+            Util.loggerControllerParameters.info("No SVGs to change.");
         }
     }
 
-    private void addListenerOnFilterField(TextField field)
-    {
-        field.setOnAction(event ->
-        {
+    private void addListenerOnFilterField(TextField field) {
+        field.setOnAction(event -> {
             Util.loggerControllerOptions.info("Filter field OK");
         });
     }
 
-    public static void resetOptions()
-    {
-        while (depthSpinnerValue != 1)
-            optionsPane.getDepthSpinner().decrement();
+    public static void resetOptions() {
+        while (depthSpinnerValue != 1) optionsPane.getDepthSpinner().decrement();
         optionsPane.getFullNetworkCheck().setSelected(false);
         optionsPane.getFiltersField().clear();
     }
 
-    public static void cleanSubstations()
-    {
+    public static void cleanSubstations() {
         optionsPane.clearSubstations();
     }
 
-    public static OptionsPane getOptionsPane()
-    {
-        return  optionsPane;
+    public static OptionsPane getOptionsPane() {
+        return optionsPane;
     }
 }

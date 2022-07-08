@@ -6,34 +6,24 @@
  */
 package com.powsybl.ad.viewer.view.diagram.containers;
 
-import com.powsybl.ad.viewer.model.NadCalls;
-import com.powsybl.ad.viewer.view.diagram.DiagramPane;
-import com.powsybl.nad.svg.SvgParameters;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.WeakChangeListener;
 import javafx.geometry.Side;
-import javafx.scene.control.*;
+import javafx.scene.control.Tab;
+import javafx.scene.control.TabPane;
+import javafx.scene.control.TextArea;
+import javafx.scene.control.TitledPane;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.web.WebEngine;
 import javafx.scene.web.WebView;
 
-import java.io.IOException;
-
-import static com.powsybl.ad.viewer.model.NadCalls.getSvgWriter;
-
-
 /**
  * @author Louis Lhotte <louis.lhotte@student-cs.fr>
  */
-public abstract class ContainerDiagramPane extends BorderPane
-{
-    // Info text area
+public abstract class ContainerDiagramPane extends BorderPane {
     private TitledPane infoPane;
     private TextArea infoArea;
 
     private TabPane tabPane;
 
-    // Diagram tab with webview
     private Tab diagramTab;
     private final WebView diagramView = new WebView();
     private final WebEngine webEngine = diagramView.getEngine();
@@ -42,8 +32,7 @@ public abstract class ContainerDiagramPane extends BorderPane
 
     private TextArea svgTextArea;
 
-    public ContainerDiagramPane()
-    {
+    public ContainerDiagramPane() {
         createInfoPane();
 
         createTabPane();
@@ -52,30 +41,26 @@ public abstract class ContainerDiagramPane extends BorderPane
         this.setBottom(infoPane);
     }
 
-    private void createTabPane()
-    {
+    private void createTabPane() {
         createDiagramTab();
         createSVGTab();
         tabPane = new TabPane(diagramTab, svgTab);
         tabPane.setSide(Side.BOTTOM);
     }
 
-    private void createSVGTab()
-    {
+    private void createSVGTab() {
         svgTextArea = new TextArea("");
         svgTextArea.setEditable(false);
         svgTab = new Tab("SVG", svgTextArea);
         svgTab.setClosable(false);
     }
 
-    private void createDiagramTab()
-    {
+    private void createDiagramTab() {
         diagramTab = new Tab("Diagram", diagramView);
         diagramTab.setClosable(false);
     }
 
-    private void createInfoPane()
-    {
+    private void createInfoPane() {
         infoArea = new TextArea();
         infoArea.setEditable(false);
         infoPane = new TitledPane("Voltage Level Infos", infoArea);
@@ -85,14 +70,17 @@ public abstract class ContainerDiagramPane extends BorderPane
         return infoArea;
     }
 
-
     public TextArea getSvgTextArea() {
         return svgTextArea;
     }
 
-    public void setSVGText(String newSvgText) { svgTextArea.setText(newSvgText); }
+    public void setSVGText(String newSvgText) {
+        svgTextArea.setText(newSvgText);
+    }
 
-    public void setSVGInfo(String newSvgInfo) { infoArea.setText(newSvgInfo); }
+    public void setSVGInfo(String newSvgInfo) {
+        infoArea.setText(newSvgInfo);
+    }
 
     public WebView getDiagramView() {
         return diagramView;

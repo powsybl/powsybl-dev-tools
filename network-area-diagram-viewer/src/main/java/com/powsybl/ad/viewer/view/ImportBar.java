@@ -16,15 +16,13 @@ import javafx.scene.layout.Priority;
 /**
  * @author Louis Lhotte <louis.lhotte@student-cs.fr>
  */
-public class ImportBar extends HBox
-{
+public class ImportBar extends HBox {
     private Button loadButton;
     private Button loadingStatus;
 
     private TextField pathTextField;
 
-    public ImportBar()
-    {
+    public ImportBar() {
         createLoadButton("...");
         createImportTextField();
         createLoadingStatusButton("-fx-background-color: red");
@@ -33,36 +31,30 @@ public class ImportBar extends HBox
         BorderPane.setMargin(this, new Insets(3, 3, 3, 3));
     }
 
-    private void createLoadingStatusButton(String style)
-    {
+    private void createLoadingStatusButton(String style) {
         loadingStatus = new Button();
         loadingStatus.setMinWidth(28);
         loadingStatus.setStyle(style);
     }
 
-    private void createLoadButton(String buttonName)
-    {
+    private void createLoadButton(String buttonName) {
         loadButton = new Button(buttonName);
     }
 
-    private void createImportTextField()
-    {
+    private void createImportTextField() {
         pathTextField = new TextField();
         HBox.setHgrow(pathTextField, Priority.ALWAYS);
     }
 
-    public Button getLoadingStatusButton()
-    {
+    public Button getLoadingStatusButton() {
         return loadingStatus;
     }
 
-    public Button getLoadButton()
-    {
+    public Button getLoadButton() {
         return loadButton;
     }
 
-    public TextField getPathTextField()
-    {
+    public TextField getPathTextField() {
         return pathTextField;
     }
 

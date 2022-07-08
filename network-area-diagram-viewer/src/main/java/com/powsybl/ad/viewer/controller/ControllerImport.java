@@ -4,8 +4,8 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
-
 package com.powsybl.ad.viewer.controller;
+
 import com.powsybl.ad.viewer.model.NadCalls;
 import com.powsybl.ad.viewer.util.Util;
 import com.powsybl.ad.viewer.view.ImportBar;
@@ -13,49 +13,42 @@ import com.powsybl.iidm.network.Network;
 import javafx.scene.control.Button;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
-import java.io.File;
-import static com.powsybl.ad.viewer.model.NadCalls.*;
 
+import java.io.File;
+
+import static com.powsybl.ad.viewer.model.NadCalls.*;
 
 /**
  * @author Louis Lhotte <louis.lhotte@student-cs.fr>
  */
-public class ControllerImport
-{
+public class ControllerImport {
     private final Stage primaryStage;
     private static ImportBar importBar;
     private static File file;
 
-    public ControllerImport(Stage stage)
-    {
+    public ControllerImport(Stage stage) {
         this.primaryStage = stage;
     }
 
-    public void createImportBar()
-    {
+    public void createImportBar() {
         importBar = new ImportBar();
     }
 
-    public void setImportBar()
-    {
+    public void setImportBar() {
         addListenerOnImportButton(importBar.getLoadButton(), primaryStage);
     }
 
-    private void addListenerOnImportButton(Button button, Stage primaryStage)
-    {
-        button.setOnAction(event ->
-        {
+    private void addListenerOnImportButton(Button button, Stage primaryStage) {
+        button.setOnAction(event -> {
             Util.loggerControllerImport.info("Import Button OK");
             FileChooser fileChooser = new FileChooser();
             String caseFolderPropertyValue = Util.preferences.get(Util.CASE_FOLDER_PROPERTY, null);
-            if (caseFolderPropertyValue != null)
-            {
+            if (caseFolderPropertyValue != null) {
                 fileChooser.setInitialDirectory(new File(caseFolderPropertyValue));
             }
             fileChooser.setTitle("Open case File");
             file = fileChooser.showOpenDialog(primaryStage);
-            if (file != null)
-            {
+            if (file != null) {
                 loadFile();
 
                 ControllerOptions.resetOptions();
@@ -63,8 +56,7 @@ public class ControllerImport
         });
     }
 
-    public static void loadFile()
-    {
+    public static void loadFile() {
         // load the network corresponding to zip
         loadNetwork(file.toPath());
 
@@ -72,8 +64,7 @@ public class ControllerImport
         handleLoadingResult(file);
     }
 
-    private static void handleLoadingResult(File file)
-    {
+    private static void handleLoadingResult(File file) {
         networkService.setOnRunning(event -> {
             importBar.getLoadingStatusButton().setStyle("-fx-background-color: yellow");
             importBar.getPathTextField().setText(file.getAbsolutePath());
@@ -99,10 +90,8 @@ public class ControllerImport
         networkService.start();
     }
 
-
     // Cleans all variables to prepare a new import (substations, SVG..)
-    public static void cleanNetwork()
-    {
+    public static void cleanNetwork() {
         // Clean Controller Diagram
         ControllerDiagram.getDiagramPane().resetTabContainers();
 
@@ -129,18 +118,15 @@ public class ControllerImport
         //setDiagramsNamesContent(network, true);
     }
 
-    public ImportBar getImportBar()
-    {
+    public ImportBar getImportBar() {
         return importBar;
     }
 
-    public static void setFile(File file)
-    {
+    public static void setFile(File file) {
         ControllerImport.file = file;
     }
 
-    public static File getFile()
-    {
+    public static File getFile() {
         return file;
     }
 }

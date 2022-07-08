@@ -14,10 +14,12 @@ import com.powsybl.ad.viewer.view.diagram.containers.ContainerFullNetworkDiagram
 import com.powsybl.ad.viewer.view.diagram.containers.ContainerSubstationDiagramPane;
 import com.powsybl.ad.viewer.view.diagram.containers.ContainerVoltageDiagramPane;
 import javafx.collections.ObservableList;
-import javafx.scene.control.*;
 import javafx.concurrent.Worker;
+import javafx.scene.control.Tab;
+import javafx.scene.control.Tooltip;
 import javafx.scene.input.ScrollEvent;
 import netscape.javascript.JSObject;
+
 import java.io.IOException;
 import java.util.List;
 import java.util.Objects;
@@ -29,45 +31,36 @@ import static com.powsybl.ad.viewer.model.NadCalls.getSvgWriter;
 /**
  * @author Louis Lhotte <louis.lhotte@student-cs.fr>
  */
-public class ControllerDiagram
-{
+public class ControllerDiagram {
     private static DiagramPane diagramPane;
 
-    public static void addSvgToSelectedTab() throws IOException
-    {
+    public static void addSvgToSelectedTab() throws IOException {
         // Full Network
         ContainerDiagramPane selectedContainerDiagramPane = new ContainerFullNetworkDiagramPane();
         addSVGToOneTab(selectedContainerDiagramPane);
         diagramPane.getSelectedDiagramPane().setCenter(selectedContainerDiagramPane);
     }
 
-    public static void addSvgToSelectedTab(List<String> voltageLevelIds, int depth) throws IOException
-    {
+    public static void addSvgToSelectedTab(List<String> voltageLevelIds, int depth) throws IOException {
         // Substation
         ContainerDiagramPane selectedContainerDiagramPane = new ContainerSubstationDiagramPane(voltageLevelIds, depth);
         addSVGToOneTab(selectedContainerDiagramPane);
         diagramPane.getSelectedDiagramPane().setCenter(selectedContainerDiagramPane);
     }
 
-    public static void addSvgToSelectedTab(String voltageLevelId, int depth) throws IOException
-    {
+    public static void addSvgToSelectedTab(String voltageLevelId, int depth) throws IOException {
         // Voltage (= Subgraph)
         ContainerDiagramPane selectedContainerDiagramPane = new ContainerVoltageDiagramPane(voltageLevelId, depth);
         addSVGToOneTab(selectedContainerDiagramPane);
         diagramPane.getSelectedDiagramPane().setCenter(selectedContainerDiagramPane);
     }
 
-    public static void addSvgToCheckedTab(
-            String tabName,
-            String whatIsGonnaBeDisplayedWhenHoveringOnTabName,
-            int index
-    )  throws IOException  // FullNetwork SVG
-    {
+    public static void addSvgToCheckedTab(String tabName, String whatIsGonnaBeDisplayedWhenHoveringOnTabName, int index) throws IOException {
+        // FullNetwork SVG
         List<Tab> tabList = diagramPane.getCheckedDiagramPane().getTabs();
         if (tabList.stream().map(Tab::getText).collect(Collectors.toList()).contains(tabName)) {
             Util.loggerControllerDiagram.error(tabName + " already in list of opened Tabs.");
-        }
-        else {
+        } else {
             ContainerDiagramPane checkedContainerDiagramPane;
             checkedContainerDiagramPane = new ContainerFullNetworkDiagramPane();
             addSVGToOneTab(checkedContainerDiagramPane);
@@ -78,19 +71,12 @@ public class ControllerDiagram
         }
     }
 
-    public static void addSvgToCheckedTab(
-            String tabName,
-            String whatIsGonnaBeDisplayedWhenHoveringOnTabName,
-            List<String> voltageLevelIds,
-            int depth,
-            int index
-    )  throws IOException  // Substation SVG
-    {
+    public static void addSvgToCheckedTab(String tabName, String whatIsGonnaBeDisplayedWhenHoveringOnTabName, List<String> voltageLevelIds, int depth, int index) throws IOException {
+        // Substation SVG
         List<Tab> tabList = diagramPane.getCheckedDiagramPane().getTabs();
         if (tabList.stream().map(Tab::getText).collect(Collectors.toList()).contains(tabName)) {
             Util.loggerControllerDiagram.error(tabName + " already in list of opened Tabs.");
-        }
-        else {
+        } else {
             ContainerDiagramPane checkedContainerDiagramPane;
             checkedContainerDiagramPane = new ContainerSubstationDiagramPane(voltageLevelIds, depth);
             addSVGToOneTab(checkedContainerDiagramPane);
@@ -101,19 +87,12 @@ public class ControllerDiagram
         }
     }
 
-    public static void addSvgToCheckedTab(
-            String tabName,
-            String whatIsGonnaBeDisplayedWhenHoveringOnTabName,
-            String voltageLevelId,
-            int depth,
-            int index
-    )  throws IOException  // Voltage (= Subgraph) SVG
-    {
+    public static void addSvgToCheckedTab(String tabName, String whatIsGonnaBeDisplayedWhenHoveringOnTabName, String voltageLevelId, int depth, int index) throws IOException {
+        // Voltage (= Subgraph) SVG
         List<Tab> tabList = diagramPane.getCheckedDiagramPane().getTabs();
         if (tabList.stream().map(Tab::getText).collect(Collectors.toList()).contains(tabName)) {
             Util.loggerControllerDiagram.error(tabName + " already in list of opened Tabs.");
-        }
-        else {
+        } else {
             ContainerDiagramPane checkedContainerDiagramPane;
             checkedContainerDiagramPane = new ContainerVoltageDiagramPane(voltageLevelId, depth);
             addSVGToOneTab(checkedContainerDiagramPane);
@@ -124,18 +103,13 @@ public class ControllerDiagram
         }
     }
 
-    public void createDiagramPane()
-    {
+    public void createDiagramPane() {
         diagramPane = new DiagramPane();
     }
 
     private static void addSVGToOneTab(ContainerDiagramPane containerDiagramPane) throws IOException {
-        //
         // SVG image
-        //
-        String html = new String(
-                ByteStreams.toByteArray(Objects.requireNonNull(DiagramPane.class.getResourceAsStream("/svg.html")))
-        );
+        String html = new String(ByteStreams.toByteArray(Objects.requireNonNull(DiagramPane.class.getResourceAsStream("/svg.html"))));
         DiagramPane.setContentSVG(html.replace("%__JS__%", "").replace("%__SVG__%", getSvgWriter().toString()));
         containerDiagramPane.getWebEngine().loadContent(diagramPane.getContentSVG());
 
@@ -164,34 +138,27 @@ public class ControllerDiagram
                 JSObject window = (JSObject) containerDiagramPane.getDiagramView().getEngine().executeScript("window");
             }
         });
-        //
+
         // SVG string
-        //
         containerDiagramPane.setSVGText(getSvgWriter().toString());
 
-        //
         // SVG info
-        //
         containerDiagramPane.setSVGInfo("Test selected container svg info");
     }
 
-    public static DiagramPane getDiagramPane()
-    {
+    public static DiagramPane getDiagramPane() {
         return diagramPane;
     }
 
-    public static ObservableList<Tab> getListCheckedTabs(){
+    public static ObservableList<Tab> getListCheckedTabs() {
         DiagramPane diagramPane = ControllerDiagram.getDiagramPane();
         ObservableList<Tab> listCheckedTabs = diagramPane.getCheckedDiagramPane().getTabs();
-
         return listCheckedTabs;
     }
-
 
     public static int getIndexCheckedTabSelectedByUser() {
         ObservableList<Tab> listCheckedTabs = getListCheckedTabs();
         int indexCheckedTabSelectedByUser = listCheckedTabs.indexOf(diagramPane.getCheckedTabSelectedByUser());
-
         return indexCheckedTabSelectedByUser;
     }
 
@@ -201,8 +168,7 @@ public class ControllerDiagram
             // The checkbox to uncheck can either be 'Full Network', or a 'Substation' or a 'VoltageLevel'
             if (tab.getText().equals("Full Network")) {
                 getOptionsPane().getFullNetworkCheck().setSelected(false);
-            }
-            else {
+            } else {
                 ControllerOptions.checkvItemTree(tab.getText(), false);
                 ControllerOptions.checksItemTree(tab.getText(), false);
             }

@@ -15,13 +15,12 @@ import javafx.application.Application;
  */
 public class Main {
 
-        public static void main(String[] args)
-        {
-            Util.logger.info("Starting Area Diagram Viewer application.");
+    public static void main(String[] args) {
+        Util.logger.info("Starting Area Diagram Viewer application.");
 
-            // Launches application
-            Application.launch(AreaDiagramViewer.class);
+        // Launches application
+        Application.launch(AreaDiagramViewer.class);
 
-            Util.logger.info("Ending Area Diagram Viewer application.");
-        }
+        Util.logger.info("Ending Area Diagram Viewer application.");
+    }
 }

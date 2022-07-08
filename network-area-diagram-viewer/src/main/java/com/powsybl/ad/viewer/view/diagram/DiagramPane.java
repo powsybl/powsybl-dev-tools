@@ -6,13 +6,13 @@
  */
 
 package com.powsybl.ad.viewer.view.diagram;
+
 import com.powsybl.ad.viewer.controller.ControllerDiagram;
 import com.powsybl.ad.viewer.model.NadCalls;
 import com.powsybl.ad.viewer.util.Util;
 import com.powsybl.ad.viewer.view.diagram.containers.ContainerDiagramPane;
 import com.powsybl.ad.viewer.view.diagram.containers.ContainerFullNetworkDiagramPane;
 import com.powsybl.iidm.network.Container;
-import com.powsybl.nad.svg.SvgParameters;
 import javafx.event.Event;
 import javafx.event.EventHandler;
 import javafx.scene.control.CheckBoxTreeItem;
@@ -23,13 +23,10 @@ import javafx.scene.layout.BorderPane;
 import java.io.IOException;
 import java.util.List;
 
-import static com.powsybl.ad.viewer.model.NadCalls.svgParametersProperty;
-
 /**
  * @author Louis Lhotte <louis.lhotte@student-cs.fr>
  */
-public class DiagramPane extends TabPane
-{
+public class DiagramPane extends TabPane {
     private Tab selectedTab;
     private Tab checkedTab;
 
@@ -40,44 +37,37 @@ public class DiagramPane extends TabPane
 
     private static String contentSVG;
 
-    public DiagramPane()
-    {
+    public DiagramPane() {
         createSelectedTab();
         createCheckedTab();
 
         this.getTabs().setAll(selectedTab, checkedTab);
     }
 
-    private void createSelectedTab()
-    {
+    private void createSelectedTab() {
         selectedContainer = new ContainerFullNetworkDiagramPane();  // will be overwritten with selectedDiagramPane.setCenter()
         selectedDiagramPane = new BorderPane(selectedContainer);
         selectedTab = new Tab("Selected", selectedDiagramPane);
         selectedTab.setClosable(false);
     }
 
-    private void createCheckedTab()
-    {
+    private void createCheckedTab() {
         checkedDiagramPane = new TabPane();
         checkedTab = new Tab("Checked", checkedDiagramPane);
         checkedTab.setClosable(false);
     }
 
-    public void resetTabContainers()
-    {
+    public void resetTabContainers() {
         resetCheckedTabs();
         resetSelectedTabs();
     }
 
-    public void resetSelectedTabs()
-    {
+    public void resetSelectedTabs() {
         selectedDiagramPane.getChildren().clear();
     }
 
-    public void resetCheckedTabs()
-    {
-        while (!checkedDiagramPane.getTabs().isEmpty())
-        {
+    public void resetCheckedTabs() {
+        while (!checkedDiagramPane.getTabs().isEmpty()) {
             // we call the listener to remove the tab
             EventHandler<Event> handler = checkedDiagramPane.getTabs().get(0).getOnClosed();
             handler.handle(null);
@@ -87,8 +77,7 @@ public class DiagramPane extends TabPane
     public void closeTabInCheckedDiagramPane(CheckBoxTreeItem<Container<?>> item) {
         List<Tab> tabList = checkedDiagramPane.getTabs();
         for (Tab checkedTab : tabList) {
-            if (checkedTab.getText().compareTo(item.getValue().getName()) == 0)
-            {
+            if (checkedTab.getText().compareTo(item.getValue().getName()) == 0) {
                 // we call the listener to remove the tab
                 EventHandler<Event> handler = checkedTab.getOnClosed();
                 handler.handle(null);
@@ -107,22 +96,18 @@ public class DiagramPane extends TabPane
             Util.loggerControllerParameters.info("Selected Tab - Full Network re-displayed succesfully.");
         } catch (IOException e) {
             e.printStackTrace();
-        };
+        }
     }
 
     public void redrawCheckedTabSVG(String tabName, String whatIsGonnaBeDisplayedWhenHoveringOnTabName, int index) {
         // Full Network - Checked Tab
         try {
             NadCalls.drawNetwork();
-            ControllerDiagram.addSvgToCheckedTab(
-                    tabName,
-                    whatIsGonnaBeDisplayedWhenHoveringOnTabName,
-                    index
-            );
+            ControllerDiagram.addSvgToCheckedTab(tabName, whatIsGonnaBeDisplayedWhenHoveringOnTabName, index);
             Util.loggerControllerParameters.info("Checked Tab - Full Network re-displayed succesfully.");
         } catch (IOException e) {
             e.printStackTrace();
-        };
+        }
     }
 
     public void redrawSelectedTabSVG(List<String> voltageLevelIds, int depth) {
@@ -133,25 +118,18 @@ public class DiagramPane extends TabPane
             Util.loggerControllerParameters.info("Selected Tab - Substation re-displayed successfully.");
         } catch (IOException e) {
             e.printStackTrace();
-        };
+        }
     }
 
-    public void redrawCheckedTabSVG(List<String> voltageLevelIds, int depth,
-                                    String tabName, String whatIsGonnaBeDisplayedWhenHoveringOnTabName, int index) {
+    public void redrawCheckedTabSVG(List<String> voltageLevelIds, int depth, String tabName, String whatIsGonnaBeDisplayedWhenHoveringOnTabName, int index) {
         // Substation - Checked Tab
         try {
             NadCalls.drawUniqueSubstation(voltageLevelIds, depth);
-            ControllerDiagram.addSvgToCheckedTab(
-                    tabName,
-                    whatIsGonnaBeDisplayedWhenHoveringOnTabName,
-                    voltageLevelIds,
-                    depth,
-                    index
-            );
+            ControllerDiagram.addSvgToCheckedTab(tabName, whatIsGonnaBeDisplayedWhenHoveringOnTabName, voltageLevelIds, depth, index);
             Util.loggerControllerParameters.info("Checked Tab - Substation re-displayed successfully.");
         } catch (IOException e) {
             e.printStackTrace();
-        };
+        }
     }
 
     public void redrawSelectedTabSVG(String voltageLevelId, int depth) {
@@ -162,34 +140,25 @@ public class DiagramPane extends TabPane
             Util.loggerControllerParameters.info("Selected Tab - Subgraph re-displayed successfully.");
         } catch (IOException e) {
             e.printStackTrace();
-        };
+        }
     }
 
-    public void redrawCheckedTabSVG(String voltageLevelId, int depth,
-                                    String tabName, String whatIsGonnaBeDisplayedWhenHoveringOnTabName, int index) {
+    public void redrawCheckedTabSVG(String voltageLevelId, int depth, String tabName, String whatIsGonnaBeDisplayedWhenHoveringOnTabName, int index) {
         // Voltage (= Subgraph) - Checked Tab
         try {
             NadCalls.drawSubgraph(voltageLevelId, depth);
-            ControllerDiagram.addSvgToCheckedTab(
-                    tabName,
-                    whatIsGonnaBeDisplayedWhenHoveringOnTabName,
-                    voltageLevelId,
-                    depth,
-                    index
-            );
+            ControllerDiagram.addSvgToCheckedTab(tabName, whatIsGonnaBeDisplayedWhenHoveringOnTabName, voltageLevelId, depth, index);
             Util.loggerControllerParameters.info("Checked Tab - Subgraph re-displayed successfully.");
         } catch (IOException e) {
             e.printStackTrace();
-        };
+        }
     }
 
-    public TabPane getCheckedDiagramPane()
-    {
+    public TabPane getCheckedDiagramPane() {
         return checkedDiagramPane;
     }
 
-    public BorderPane getSelectedDiagramPane()
-    {
+    public BorderPane getSelectedDiagramPane() {
         return selectedDiagramPane;
     }
 
@@ -205,8 +174,7 @@ public class DiagramPane extends TabPane
         checkedDiagramPane.getSelectionModel().select(indexOfTabToSelect);
     }
 
-    public String getContentSVG()
-    {
+    public String getContentSVG() {
         return contentSVG;
     }
 

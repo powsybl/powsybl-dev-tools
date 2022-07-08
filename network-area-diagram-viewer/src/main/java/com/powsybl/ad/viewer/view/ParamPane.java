@@ -5,6 +5,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 package com.powsybl.ad.viewer.view;
+
 import com.powsybl.ad.viewer.controller.ControllerParameters;
 import javafx.geometry.Insets;
 import javafx.scene.control.*;
@@ -14,8 +15,7 @@ import javafx.scene.text.Text;
 /**
  * @author Louis Lhotte <louis.lhotte@student-cs.fr>
  */
-public class ParamPane extends ScrollPane
-{
+public class ParamPane extends ScrollPane {
     private GridPane buttonsPane;
     private Button fitContentButton;
     private Button resetZoomButton;
@@ -40,8 +40,7 @@ public class ParamPane extends ScrollPane
     // Parameters pane is a grid pane inside a scroll pane
     private GridPane contentPane;
 
-    public ParamPane()
-    {
+    public ParamPane() {
         createContentPane();
 
         createButtonPane();
@@ -54,16 +53,15 @@ public class ParamPane extends ScrollPane
         this.setContent(contentPane);
     }
 
-    public void createContentPane()
-    {
+    public void createContentPane() {
         contentPane = new GridPane();
         contentPane.setHgap(5);
         contentPane.setVgap(5);
     }
-    public void createButtonPane()
-    {
+
+    public void createButtonPane() {
         fitContentButton = new Button("Fit to content");
-        resetZoomButton  = new Button("Reset zoom");
+        resetZoomButton = new Button("Reset zoom");
 
         buttonsPane = new GridPane();
         buttonsPane.add(fitContentButton, 0, 0);
@@ -73,8 +71,7 @@ public class ParamPane extends ScrollPane
         contentPane.add(buttonsPane, 0, rowIndex++);
     }
 
-    public void createChoiceBoxesPane()
-    {
+    public void createChoiceBoxesPane() {
         layoutChoice = new ChoiceBox();
         layoutChoice.getItems().add("Basic");
         layoutChoice.getSelectionModel().selectFirst();
@@ -83,13 +80,13 @@ public class ParamPane extends ScrollPane
         labelProviderChoice = new ChoiceBox();
         labelProviderChoice.getItems().add("Default");
         labelProviderChoice.getSelectionModel().selectFirst();
-        Label labelProviderLabel     = new Label("LabelProvider");
+        Label labelProviderLabel = new Label("LabelProvider");
 
         styleProviderChoice = new ChoiceBox();
         styleProviderChoice.getItems().add("Topological");
         styleProviderChoice.getItems().add("Nominal");
         styleProviderChoice.getSelectionModel().selectFirst();  // make ChoiceBox styleProviderChoice
-                                                                // select its first element
+        // select its first element
         Label styleProviderLabel = new Label("StyleProvider");
 
         choicePane = new GridPane();
@@ -104,8 +101,7 @@ public class ParamPane extends ScrollPane
         contentPane.add(choicePane, 0, rowIndex++);
     }
 
-    public void createLayoutParametersPane()
-    {
+    public void createLayoutParametersPane() {
         layoutXSpinner = new Spinner();
         Label layoutXLabel = new Label("Xxx");
 
@@ -122,8 +118,7 @@ public class ParamPane extends ScrollPane
         contentPane.add(layoutParametersPane, 0, rowIndex++);
     }
 
-    public void createSVGParametersPane()
-    {
+    public void createSVGParametersPane() {
         svgEdgeInfoCheckbox = new CheckBox();
         svgEdgeInfoCheckbox.setSelected(true);
         Label setEdgeInfo = new Label("Set Info Along Edge");
@@ -135,22 +130,17 @@ public class ParamPane extends ScrollPane
         svgParametersPane.add(setEdgeInfo, 0, 4);
 
         contentPane.add(svgParametersPane, 0, rowIndex++);
-
-
     }
 
-    public Button getFitContentButton()
-    {
+    public Button getFitContentButton() {
         return fitContentButton;
     }
 
-    public Button getResetZoomButton()
-    {
+    public Button getResetZoomButton() {
         return resetZoomButton;
     }
 
-    public GridPane getButtonsPane()
-    {
+    public GridPane getButtonsPane() {
         return buttonsPane;
     }
 
@@ -166,7 +156,9 @@ public class ParamPane extends ScrollPane
         return labelProviderChoice;
     }
 
-    public ChoiceBox getStyleProviderChoice() { return styleProviderChoice; }
+    public ChoiceBox getStyleProviderChoice() {
+        return styleProviderChoice;
+    }
 
     public void setLayoutChoice(ChoiceBox layoutChoice) {
         this.layoutChoice = layoutChoice;

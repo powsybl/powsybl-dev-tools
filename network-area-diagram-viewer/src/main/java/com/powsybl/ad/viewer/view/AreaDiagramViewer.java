@@ -7,55 +7,47 @@
 
 package com.powsybl.ad.viewer.view;
 
+import com.powsybl.ad.viewer.controller.ControllerDiagram;
 import com.powsybl.ad.viewer.controller.ControllerImport;
 import com.powsybl.ad.viewer.controller.ControllerOptions;
 import com.powsybl.ad.viewer.controller.ControllerParameters;
-import com.powsybl.ad.viewer.controller.ControllerDiagram;
-import com.powsybl.ad.viewer.model.NadCalls;
 import com.powsybl.ad.viewer.util.Util;
 import com.powsybl.ad.viewer.view.diagram.DiagramPane;
 import javafx.application.Application;
 import javafx.scene.Scene;
-import javafx.scene.control.*;
+import javafx.scene.control.SplitPane;
 import javafx.scene.image.Image;
 import javafx.scene.layout.BorderPane;
 import javafx.stage.Stage;
 
 import java.io.File;
 import java.net.URL;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 
 import static com.powsybl.ad.viewer.util.Util.CASE_PATH_PROPERTY;
 import static com.powsybl.ad.viewer.util.Util.preferences;
 
-
 /**
  * @author Louis Lhotte <louis.lhotte@student-cs.fr>
  */
-public class AreaDiagramViewer extends Application
-{
+public class AreaDiagramViewer extends Application {
     private static Stage primaryStage;
     private static Scene primaryScene;
 
-    private static ControllerDiagram    cDiagram;
-    private static ControllerImport     cImport;
-    private static ControllerOptions    cOptions;
+    private static ControllerDiagram cDiagram;
+    private static ControllerImport cImport;
+    private static ControllerOptions cOptions;
     private static ControllerParameters cParameters;
 
-
-    public void init() throws Exception
-    {
+    public void init() throws Exception {
         super.init();
     }
 
-    public void start(Stage stage)
-    {
+    public void start(Stage stage) {
         primaryStage = new Stage();
-        cParameters  = new ControllerParameters();
-        cOptions  = new ControllerOptions();
-        cDiagram  = new ControllerDiagram();
-        cImport  = new ControllerImport(primaryStage);
+        cParameters = new ControllerParameters();
+        cOptions = new ControllerOptions();
+        cDiagram = new ControllerDiagram();
+        cImport = new ControllerImport(primaryStage);
 
         ParamPane paramPane = createParamPane();
 
@@ -70,7 +62,6 @@ public class AreaDiagramViewer extends Application
         BorderPane mainPane = createMainPane(splitPane, importBar);
         primaryScene = new Scene(mainPane, 1000, 800);
 
-
         URL imageURL = getClass().getResource("images/logo.png");
         primaryStage.getIcons().add(new Image(imageURL.toExternalForm()));
         primaryStage.setTitle("Area Diagram Viewers");
@@ -79,12 +70,10 @@ public class AreaDiagramViewer extends Application
         primaryStage.show();
     }
 
-    public static boolean loadNetworkFromPreferences()
-    {
+    public static boolean loadNetworkFromPreferences() {
         Util.logger.debug("Trying to load network from preferences...");
         String casePathPropertyValue = preferences.get(CASE_PATH_PROPERTY, null);
-        if (casePathPropertyValue != null)
-        {
+        if (casePathPropertyValue != null) {
             Util.logger.debug("Network preferences loaded : " + casePathPropertyValue);
             ControllerImport.setFile(new File(casePathPropertyValue));
             ControllerImport.loadFile();
@@ -93,8 +82,7 @@ public class AreaDiagramViewer extends Application
         return false;
     }
 
-    private ParamPane createParamPane()
-    {
+    private ParamPane createParamPane() {
         cParameters.createParamPane();
         cParameters.setParamPane();
 
@@ -102,8 +90,7 @@ public class AreaDiagramViewer extends Application
         return cParameters.getParamPane();
     }
 
-    private OptionsPane createOptionsPane()
-    {
+    private OptionsPane createOptionsPane() {
         cOptions.createOptionsPane();
         cOptions.setParamPane();
 
@@ -111,16 +98,14 @@ public class AreaDiagramViewer extends Application
         return cOptions.getOptionsPane();
     }
 
-    private DiagramPane createDiagramPane()
-    {
+    private DiagramPane createDiagramPane() {
         cDiagram.createDiagramPane();
 
         Util.logger.trace("Diagram pane correctly created.");
         return cDiagram.getDiagramPane();
     }
 
-    private ImportBar createImportBar()
-    {
+    private ImportBar createImportBar() {
         cImport.createImportBar();
         cImport.setImportBar();
 
@@ -128,15 +113,13 @@ public class AreaDiagramViewer extends Application
         return cImport.getImportBar();
     }
 
-    private SplitPane createSplitPane(OptionsPane optionsPane, DiagramPane diagramPane, ParamPane paramPane)
-    {
+    private SplitPane createSplitPane(OptionsPane optionsPane, DiagramPane diagramPane, ParamPane paramPane) {
         SplitPane splitPane = new SplitPane(optionsPane, diagramPane, paramPane);
         splitPane.setDividerPositions(0.2, 0.7, 0.1);
         return splitPane;
     }
 
-    private BorderPane createMainPane(SplitPane splitPane, ImportBar importBar)
-    {
+    private BorderPane createMainPane(SplitPane splitPane, ImportBar importBar) {
         BorderPane mainPane = new BorderPane();
         mainPane.setCenter(splitPane);
         mainPane.setTop(importBar);

@@ -6,7 +6,7 @@ public class ContainerSubstationDiagramPane extends ContainerDiagramPane {
     private List<String> voltageLevelIds;
     private int depth;
 
-    public ContainerSubstationDiagramPane(List<String> voltageLevelIds, int depth){
+    public ContainerSubstationDiagramPane(List<String> voltageLevelIds, int depth) {
         this.voltageLevelIds = voltageLevelIds;
         this.depth = depth;
     }

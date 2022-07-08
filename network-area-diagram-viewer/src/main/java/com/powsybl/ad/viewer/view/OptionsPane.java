@@ -19,21 +19,19 @@ import javafx.scene.layout.VBox;
 /**
  * @author Louis Lhotte <louis.lhotte@student-cs.fr>
  */
-public class OptionsPane extends SplitPane
-{
+public class OptionsPane extends SplitPane {
     private GridPane voltageLevelToolbar;
 
     private CheckBoxTreeItem fullNetworkCheck;
-    private Spinner <Integer> depthSpinner;
+    private Spinner<Integer> depthSpinner;
 
     private Button runLoadFlowButton;
     private TextField filtersField;
 
     private VBox substationsPane;
-    private final TreeView<Container <?>> substationsTree = new TreeView<> ();
+    private final TreeView<Container<?>> substationsTree = new TreeView<>();
 
-    public OptionsPane()
-    {
+    public OptionsPane() {
         this.setPadding(new Insets(5, 5, 5, 5));
 
         createOptionsToolBar();
@@ -42,8 +40,7 @@ public class OptionsPane extends SplitPane
         this.setOrientation(Orientation.VERTICAL);
     }
 
-    public void createOptionsToolBar()
-    {
+    public void createOptionsToolBar() {
         voltageLevelToolbar = new GridPane();
 
         fullNetworkCheck = new CheckBoxTreeItem("Full network");
@@ -74,17 +71,14 @@ public class OptionsPane extends SplitPane
         voltageLevelToolbar.getColumnConstraints().addAll(c0, c1);
     }
 
-    public void createSubstationPane()
-    {
+    public void createSubstationPane() {
         substationsPane = new VBox();
         substationsPane.setPadding(new Insets(5, 5, 5, 5));
         substationsPane.setMinHeight(600);
     }
 
-    public void clearSubstations()
-    {
-        Util.logger.debug("Cleaning substations : " + substationsPane.getChildren().toString() +
-                " and substation tree : " + substationsTree);
+    public void clearSubstations() {
+        Util.logger.debug("Cleaning substations : " + substationsPane.getChildren().toString() + " and substation tree : " + substationsTree);
 
         substationsPane.getChildren().clear();
         substationsTree.setRoot(null);
@@ -92,34 +86,28 @@ public class OptionsPane extends SplitPane
         fullNetworkCheck.getChildren().clear();
     }
 
-    public void displaySubstations()
-    {
+    public void displaySubstations() {
         substationsPane.getChildren().add(substationsTree);
         substationsPane.setVgrow(substationsTree, Priority.ALWAYS);
     }
 
-    public CheckBoxTreeItem getFullNetworkCheck()
-    {
+    public CheckBoxTreeItem getFullNetworkCheck() {
         return fullNetworkCheck;
     }
 
-    public Spinner getDepthSpinner()
-    {
+    public Spinner getDepthSpinner() {
         return depthSpinner;
     }
 
-    public Button getRunLoadFlowButton()
-    {
+    public Button getRunLoadFlowButton() {
         return runLoadFlowButton;
     }
 
-    public TextField getFiltersField()
-    {
+    public TextField getFiltersField() {
         return filtersField;
     }
 
-    public TreeView getSubstationTree()
-    {
+    public TreeView getSubstationTree() {
         return substationsTree;
     }
 }
