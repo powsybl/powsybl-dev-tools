@@ -4,15 +4,15 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
-package com.powsybl.ad.viewer.controller;
+package com.powsybl.nad.viewer.controller;
 
 import com.google.common.io.ByteStreams;
-import com.powsybl.ad.viewer.util.Util;
-import com.powsybl.ad.viewer.view.diagram.DiagramPane;
-import com.powsybl.ad.viewer.view.diagram.containers.ContainerDiagramPane;
-import com.powsybl.ad.viewer.view.diagram.containers.ContainerFullNetworkDiagramPane;
-import com.powsybl.ad.viewer.view.diagram.containers.ContainerSubstationDiagramPane;
-import com.powsybl.ad.viewer.view.diagram.containers.ContainerVoltageDiagramPane;
+import com.powsybl.nad.viewer.util.Util;
+import com.powsybl.nad.viewer.view.diagram.DiagramPane;
+import com.powsybl.nad.viewer.view.diagram.containers.ContainerDiagramPane;
+import com.powsybl.nad.viewer.view.diagram.containers.ContainerFullNetworkDiagramPane;
+import com.powsybl.nad.viewer.view.diagram.containers.ContainerSubstationDiagramPane;
+import com.powsybl.nad.viewer.view.diagram.containers.ContainerVoltageDiagramPane;
 import javafx.collections.ObservableList;
 import javafx.concurrent.Worker;
 import javafx.scene.control.Tab;
@@ -27,8 +27,8 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
-import static com.powsybl.ad.viewer.controller.ControllerOptions.getOptionsPane;
-import static com.powsybl.ad.viewer.model.NadCalls.getSvgWriter;
+import static com.powsybl.nad.viewer.controller.ControllerOptions.getOptionsPane;
+import static com.powsybl.nad.viewer.model.NadCalls.getSvgWriter;
 
 /**
  * @author Louis Lhotte <louis.lhotte@student-cs.fr>

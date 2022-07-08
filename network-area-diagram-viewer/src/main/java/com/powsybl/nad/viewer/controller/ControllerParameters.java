@@ -4,15 +4,15 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
-package com.powsybl.ad.viewer.controller;
+package com.powsybl.nad.viewer.controller;
 
-import com.powsybl.ad.viewer.model.NadCalls;
-import com.powsybl.ad.viewer.util.Util;
-import com.powsybl.ad.viewer.view.ParamPane;
-import com.powsybl.ad.viewer.view.diagram.containers.ContainerDiagramPane;
-import com.powsybl.ad.viewer.view.diagram.containers.ContainerFullNetworkDiagramPane;
-import com.powsybl.ad.viewer.view.diagram.containers.ContainerSubstationDiagramPane;
-import com.powsybl.ad.viewer.view.diagram.containers.ContainerVoltageDiagramPane;
+import com.powsybl.nad.viewer.model.NadCalls;
+import com.powsybl.nad.viewer.util.Util;
+import com.powsybl.nad.viewer.view.ParamPane;
+import com.powsybl.nad.viewer.view.diagram.containers.ContainerDiagramPane;
+import com.powsybl.nad.viewer.view.diagram.containers.ContainerFullNetworkDiagramPane;
+import com.powsybl.nad.viewer.view.diagram.containers.ContainerSubstationDiagramPane;
+import com.powsybl.nad.viewer.view.diagram.containers.ContainerVoltageDiagramPane;
 import com.powsybl.nad.svg.Padding;
 import com.powsybl.nad.svg.StyleProvider;
 import com.powsybl.nad.svg.SvgParameters;
@@ -36,7 +36,7 @@ import java.util.function.ToDoubleFunction;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import static com.powsybl.ad.viewer.model.NadCalls.*;
+import static com.powsybl.nad.viewer.model.NadCalls.*;
 
 /**
  * @author Louis Lhotte <louis.lhotte@student-cs.fr>

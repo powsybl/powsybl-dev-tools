@@ -1,4 +1,4 @@
-package com.powsybl.ad.viewer.view.diagram.containers;
+package com.powsybl.nad.viewer.view.diagram.containers;
 
 public class ContainerVoltageDiagramPane extends ContainerDiagramPane {
     private String voltageLevelId;

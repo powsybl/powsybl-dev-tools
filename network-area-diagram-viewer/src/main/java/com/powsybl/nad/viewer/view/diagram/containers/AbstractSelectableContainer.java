@@ -1,4 +1,4 @@
-package com.powsybl.ad.viewer.view.diagram.containers;
+package com.powsybl.nad.viewer.view.diagram.containers;
 
 public abstract class AbstractSelectableContainer {
     protected final String id;

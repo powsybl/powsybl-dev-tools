@@ -4,11 +4,11 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
-package com.powsybl.ad.viewer.controller;
+package com.powsybl.nad.viewer.controller;
 
-import com.powsybl.ad.viewer.model.NadCalls;
-import com.powsybl.ad.viewer.util.Util;
-import com.powsybl.ad.viewer.view.ImportBar;
+import com.powsybl.nad.viewer.model.NadCalls;
+import com.powsybl.nad.viewer.util.Util;
+import com.powsybl.nad.viewer.view.ImportBar;
 import com.powsybl.iidm.network.Network;
 import javafx.scene.control.Button;
 import javafx.stage.FileChooser;
@@ -18,7 +18,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.File;
 
-import static com.powsybl.ad.viewer.model.NadCalls.*;
+import static com.powsybl.nad.viewer.model.NadCalls.*;
 
 /**
  * @author Louis Lhotte <louis.lhotte@student-cs.fr>

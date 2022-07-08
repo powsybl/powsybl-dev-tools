@@ -5,12 +5,12 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 
-package com.powsybl.ad.viewer.view.diagram;
+package com.powsybl.nad.viewer.view.diagram;
 
-import com.powsybl.ad.viewer.controller.ControllerDiagram;
-import com.powsybl.ad.viewer.model.NadCalls;
-import com.powsybl.ad.viewer.view.diagram.containers.ContainerDiagramPane;
-import com.powsybl.ad.viewer.view.diagram.containers.ContainerFullNetworkDiagramPane;
+import com.powsybl.nad.viewer.controller.ControllerDiagram;
+import com.powsybl.nad.viewer.model.NadCalls;
+import com.powsybl.nad.viewer.view.diagram.containers.ContainerDiagramPane;
+import com.powsybl.nad.viewer.view.diagram.containers.ContainerFullNetworkDiagramPane;
 import com.powsybl.iidm.network.Container;
 import javafx.event.Event;
 import javafx.event.EventHandler;

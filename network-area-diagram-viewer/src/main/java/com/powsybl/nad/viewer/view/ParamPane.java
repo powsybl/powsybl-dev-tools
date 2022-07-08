@@ -4,9 +4,9 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
-package com.powsybl.ad.viewer.view;
+package com.powsybl.nad.viewer.view;
 
-import com.powsybl.ad.viewer.controller.ControllerParameters;
+import com.powsybl.nad.viewer.controller.ControllerParameters;
 import javafx.geometry.Insets;
 import javafx.scene.control.*;
 import javafx.scene.layout.GridPane;

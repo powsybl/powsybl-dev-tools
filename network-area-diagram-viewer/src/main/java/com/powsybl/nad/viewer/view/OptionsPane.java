@@ -4,9 +4,9 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
-package com.powsybl.ad.viewer.view;
+package com.powsybl.nad.viewer.view;
 
-import com.powsybl.ad.viewer.util.Util;
+import com.powsybl.nad.viewer.util.Util;
 import com.powsybl.iidm.network.Container;
 import javafx.geometry.Insets;
 import javafx.geometry.Orientation;

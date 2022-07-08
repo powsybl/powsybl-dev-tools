@@ -5,33 +5,33 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 
-package com.powsybl.ad.viewer.view;
+package com.powsybl.nad.viewer;
 
-import com.powsybl.ad.viewer.controller.ControllerDiagram;
-import com.powsybl.ad.viewer.controller.ControllerImport;
-import com.powsybl.ad.viewer.controller.ControllerOptions;
-import com.powsybl.ad.viewer.controller.ControllerParameters;
-import com.powsybl.ad.viewer.view.diagram.DiagramPane;
+import com.powsybl.nad.viewer.controller.ControllerDiagram;
+import com.powsybl.nad.viewer.controller.ControllerImport;
+import com.powsybl.nad.viewer.controller.ControllerOptions;
+import com.powsybl.nad.viewer.controller.ControllerParameters;
+import com.powsybl.nad.viewer.view.ImportBar;
+import com.powsybl.nad.viewer.view.OptionsPane;
+import com.powsybl.nad.viewer.view.ParamPane;
+import com.powsybl.nad.viewer.view.diagram.DiagramPane;
 import javafx.application.Application;
 import javafx.scene.Scene;
 import javafx.scene.control.SplitPane;
 import javafx.scene.image.Image;
 import javafx.scene.layout.BorderPane;
 import javafx.stage.Stage;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.net.URL;
 
-import static com.powsybl.ad.viewer.util.Util.CASE_PATH_PROPERTY;
-import static com.powsybl.ad.viewer.util.Util.preferences;
+import static com.powsybl.nad.viewer.util.Util.CASE_PATH_PROPERTY;
+import static com.powsybl.nad.viewer.util.Util.preferences;
 
 /**
  * @author Louis Lhotte <louis.lhotte@student-cs.fr>
  */
-public class AreaDiagramViewer extends Application {
-    private static final Logger LOGGER = LoggerFactory.getLogger(AreaDiagramViewer.class);
+public class NetworkAreaDiagramViewer extends Application {
     private static Stage primaryStage;
     private static Scene primaryScene;
 
@@ -64,7 +64,7 @@ public class AreaDiagramViewer extends Application {
         BorderPane mainPane = createMainPane(splitPane, importBar);
         primaryScene = new Scene(mainPane, 1000, 800);
 
-        URL imageURL = getClass().getResource("images/logo.png");
+        URL imageURL = getClass().getResource("/images/logo.png");
         primaryStage.getIcons().add(new Image(imageURL.toExternalForm()));
         primaryStage.setTitle("Area Diagram Viewers");
         primaryStage.setScene(primaryScene);

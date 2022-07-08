@@ -5,10 +5,10 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 
-package com.powsybl.ad.viewer.model;
+package com.powsybl.nad.viewer.model;
 
-import com.powsybl.ad.viewer.controller.ControllerParameters;
-import com.powsybl.ad.viewer.util.Util;
+import com.powsybl.nad.viewer.controller.ControllerParameters;
+import com.powsybl.nad.viewer.util.Util;
 import com.powsybl.iidm.network.*;
 import com.powsybl.loadflow.LoadFlow;
 import com.powsybl.nad.NetworkAreaDiagram;
