@@ -6,21 +6,23 @@
  */
 package com.powsybl.ad.viewer.main;
 
-import com.powsybl.ad.viewer.util.Util;
 import com.powsybl.ad.viewer.view.AreaDiagramViewer;
 import javafx.application.Application;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * @author Louis Lhotte <louis.lhotte@student-cs.fr>
  */
 public class Main {
 
+    private Main() {
+    }
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(Main.class);
+
     public static void main(String[] args) {
-        Util.logger.info("Starting Area Diagram Viewer application.");
-
-        // Launches application
+        LOGGER.info("Starting Area Diagram Viewer application.");
         Application.launch(AreaDiagramViewer.class);
-
-        Util.logger.info("Ending Area Diagram Viewer application.");
     }
 }

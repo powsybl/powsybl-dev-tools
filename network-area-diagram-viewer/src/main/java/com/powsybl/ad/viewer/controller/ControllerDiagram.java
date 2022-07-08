@@ -19,6 +19,8 @@ import javafx.scene.control.Tab;
 import javafx.scene.control.Tooltip;
 import javafx.scene.input.ScrollEvent;
 import netscape.javascript.JSObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.List;
@@ -33,6 +35,8 @@ import static com.powsybl.ad.viewer.model.NadCalls.getSvgWriter;
  */
 public class ControllerDiagram {
     private static DiagramPane diagramPane;
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(ControllerDiagram.class);
 
     public static void addSvgToSelectedTab() throws IOException {
         // Full Network
@@ -59,7 +63,7 @@ public class ControllerDiagram {
         // FullNetwork SVG
         List<Tab> tabList = diagramPane.getCheckedDiagramPane().getTabs();
         if (tabList.stream().map(Tab::getText).collect(Collectors.toList()).contains(tabName)) {
-            Util.loggerControllerDiagram.error(tabName + " already in list of opened Tabs.");
+            LOGGER.warn("{} already in list of opened Tabs.", tabName);
         } else {
             ContainerDiagramPane checkedContainerDiagramPane;
             checkedContainerDiagramPane = new ContainerFullNetworkDiagramPane();
@@ -75,7 +79,7 @@ public class ControllerDiagram {
         // Substation SVG
         List<Tab> tabList = diagramPane.getCheckedDiagramPane().getTabs();
         if (tabList.stream().map(Tab::getText).collect(Collectors.toList()).contains(tabName)) {
-            Util.loggerControllerDiagram.error(tabName + " already in list of opened Tabs.");
+            LOGGER.warn("{} already in list of opened Tabs.", tabName);
         } else {
             ContainerDiagramPane checkedContainerDiagramPane;
             checkedContainerDiagramPane = new ContainerSubstationDiagramPane(voltageLevelIds, depth);
@@ -91,7 +95,7 @@ public class ControllerDiagram {
         // Voltage (= Subgraph) SVG
         List<Tab> tabList = diagramPane.getCheckedDiagramPane().getTabs();
         if (tabList.stream().map(Tab::getText).collect(Collectors.toList()).contains(tabName)) {
-            Util.loggerControllerDiagram.error(tabName + " already in list of opened Tabs.");
+            LOGGER.warn("{} already in list of opened Tabs.", tabName);
         } else {
             ContainerDiagramPane checkedContainerDiagramPane;
             checkedContainerDiagramPane = new ContainerVoltageDiagramPane(voltageLevelId, depth);
@@ -164,7 +168,6 @@ public class ControllerDiagram {
 
     private static void addListenerOnClosingTab(Tab tab) {
         tab.setOnClosed(arg0 -> {
-            Util.loggerControllerDiagram.info("Tab " + tab.getText() + " closed.");
             // The checkbox to uncheck can either be 'Full Network', or a 'Substation' or a 'VoltageLevel'
             if (tab.getText().equals("Full Network")) {
                 getOptionsPane().getFullNetworkCheck().setSelected(false);

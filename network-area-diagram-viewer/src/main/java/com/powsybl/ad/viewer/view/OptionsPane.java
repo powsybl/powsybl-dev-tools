@@ -78,8 +78,6 @@ public class OptionsPane extends SplitPane {
     }
 
     public void clearSubstations() {
-        Util.logger.debug("Cleaning substations : " + substationsPane.getChildren().toString() + " and substation tree : " + substationsTree);
-
         substationsPane.getChildren().clear();
         substationsTree.setRoot(null);
 

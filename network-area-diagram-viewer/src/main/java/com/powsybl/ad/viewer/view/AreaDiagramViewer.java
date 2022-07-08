@@ -11,7 +11,6 @@ import com.powsybl.ad.viewer.controller.ControllerDiagram;
 import com.powsybl.ad.viewer.controller.ControllerImport;
 import com.powsybl.ad.viewer.controller.ControllerOptions;
 import com.powsybl.ad.viewer.controller.ControllerParameters;
-import com.powsybl.ad.viewer.util.Util;
 import com.powsybl.ad.viewer.view.diagram.DiagramPane;
 import javafx.application.Application;
 import javafx.scene.Scene;
@@ -19,6 +18,8 @@ import javafx.scene.control.SplitPane;
 import javafx.scene.image.Image;
 import javafx.scene.layout.BorderPane;
 import javafx.stage.Stage;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.net.URL;
@@ -30,6 +31,7 @@ import static com.powsybl.ad.viewer.util.Util.preferences;
  * @author Louis Lhotte <louis.lhotte@student-cs.fr>
  */
 public class AreaDiagramViewer extends Application {
+    private static final Logger LOGGER = LoggerFactory.getLogger(AreaDiagramViewer.class);
     private static Stage primaryStage;
     private static Scene primaryScene;
 
@@ -71,10 +73,8 @@ public class AreaDiagramViewer extends Application {
     }
 
     public static boolean loadNetworkFromPreferences() {
-        Util.logger.debug("Trying to load network from preferences...");
         String casePathPropertyValue = preferences.get(CASE_PATH_PROPERTY, null);
         if (casePathPropertyValue != null) {
-            Util.logger.debug("Network preferences loaded : " + casePathPropertyValue);
             ControllerImport.setFile(new File(casePathPropertyValue));
             ControllerImport.loadFile();
             return true;
@@ -86,7 +86,6 @@ public class AreaDiagramViewer extends Application {
         cParameters.createParamPane();
         cParameters.setParamPane();
 
-        Util.logger.trace("Param pane correctly created.");
         return cParameters.getParamPane();
     }
 
@@ -94,14 +93,12 @@ public class AreaDiagramViewer extends Application {
         cOptions.createOptionsPane();
         cOptions.setParamPane();
 
-        Util.logger.trace("Options pane correctly created.");
         return cOptions.getOptionsPane();
     }
 
     private DiagramPane createDiagramPane() {
         cDiagram.createDiagramPane();
 
-        Util.logger.trace("Diagram pane correctly created.");
         return cDiagram.getDiagramPane();
     }
 
@@ -109,7 +106,6 @@ public class AreaDiagramViewer extends Application {
         cImport.createImportBar();
         cImport.setImportBar();
 
-        Util.logger.trace("Import bar correctly created.");
         return cImport.getImportBar();
     }
 

@@ -63,7 +63,6 @@ public final class NadCalls {
         cleanSvgWriter();
         setDefaultStyleProviderIfNull();
         new NetworkAreaDiagram(networkProperty.get()).draw(svgWriter, svgParametersProperty.get(), layoutParametersProperty.get(), ControllerParameters.getStyleProvider());
-        Util.loggerNadCalls.info("NAD SVG assigned to svgWriter");
     }
 
     public static void drawUniqueSubstation(List<String> voltageLevelIds, int depth) {
@@ -72,7 +71,6 @@ public final class NadCalls {
         cleanSvgWriter();
         setDefaultStyleProviderIfNull();
         new NetworkAreaDiagram(networkProperty.get(), voltageLevelIds, depth).draw(svgWriter, svgParametersProperty.get(), layoutParametersProperty.get(), ControllerParameters.getStyleProvider());
-        Util.loggerNadCalls.info("NAD (Substation) SVG assigned to svgWriter");
     }
 
     public static void drawSubgraph(String voltageLevelId, int depth) {
@@ -81,14 +79,12 @@ public final class NadCalls {
         cleanSvgWriter();
         setDefaultStyleProviderIfNull();
         new NetworkAreaDiagram(networkProperty.get(), voltageLevelId, depth).draw(svgWriter, svgParametersProperty.get(), layoutParametersProperty.get(), ControllerParameters.getStyleProvider());
-        Util.loggerNadCalls.info("NAD (Subgraph) SVG assigned to svgWriter");
     }
 
     public static void runLoadFlow() {
         // A button "Run loadflow" should be added, as often the power flow values in the input file are missing.
         // Requires a maven clean install of powsybl-open-loadflow
         LoadFlow.run(networkProperty.get());
-        Util.loggerNadCalls.info("LoadFlow calculations run");
     }
 
     public static StringWriter getSvgWriter() {
@@ -97,11 +93,9 @@ public final class NadCalls {
 
     public static void cleanSvgWriter() {
         svgWriter = new StringWriter();
-        Util.loggerNadCalls.info("svgWriter static variable cleaned");
     }
 
     public static void cleanNetwork() {
         networkProperty = new SimpleObjectProperty<>();
-        Util.loggerNadCalls.info("networkProperty static variable cleaned");
     }
 }

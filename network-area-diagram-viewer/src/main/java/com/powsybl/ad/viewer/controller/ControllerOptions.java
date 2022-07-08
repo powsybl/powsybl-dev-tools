@@ -21,6 +21,8 @@ import javafx.scene.control.*;
 import javafx.scene.control.cell.CheckBoxTreeCell;
 import javafx.scene.layout.BorderPane;
 import javafx.util.StringConverter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.io.StringWriter;
@@ -37,6 +39,7 @@ import static com.powsybl.ad.viewer.model.NadCalls.*;
  * @author Louis Lhotte <louis.lhotte@student-cs.fr>
  */
 public class ControllerOptions {
+    private static final Logger LOGGER = LoggerFactory.getLogger(ControllerOptions.class);
     private static OptionsPane optionsPane;
     private static int depthSpinnerValue = 1;
 
@@ -181,8 +184,6 @@ public class ControllerOptions {
         ArrayList<String> voltageIds = new ArrayList<>();
         substationItem.selectedProperty().addListener((obs, oldVal, newVal) -> {
             if (substationItem.isSelected()) {
-                Util.loggerControllerOptions.debug("Substation \"" + substationItem.getValue().getName() + "\" checked.");
-
                 getParamPane().setDisabledSvgSpinners(false);
                 voltageIds.clear();
                 for (TreeItem<Container<?>> voltageId : substationItem.getChildren())
@@ -198,8 +199,6 @@ public class ControllerOptions {
                     e.printStackTrace();
                 }
             } else {
-                Util.loggerControllerOptions.debug("Substation \"" + substationItem.getValue().getName() + "\" unchecked.");
-
                 // if event is unchecking the checkbox, close tab
                 ControllerDiagram.getDiagramPane().closeTabInCheckedDiagramPane(substationItem);
             }
@@ -210,8 +209,6 @@ public class ControllerOptions {
         // Handling checking Voltages
         voltageItem.selectedProperty().addListener((obs, oldVal, newVal) -> {
             if (voltageItem.isSelected()) {
-                Util.loggerControllerOptions.debug("Voltage level \"" + voltageItem.getValue().getName() + "\" checked.");
-
                 getParamPane().setDisabledSvgSpinners(false);
                 NadCalls.drawSubgraph(voltageItem.getValue().toString(), depthSpinnerValue);
                 try {
@@ -224,8 +221,6 @@ public class ControllerOptions {
                     e.printStackTrace();
                 }
             } else {
-                Util.loggerControllerOptions.debug("Voltage level \"" + voltageItem.getValue().getName() + "\" unchecked.");
-
                 // if event is unchecking the checkbox, close tab
                 ControllerDiagram.getDiagramPane().closeTabInCheckedDiagramPane(voltageItem);
             }
@@ -243,8 +238,6 @@ public class ControllerOptions {
 
             Container<?> c = newValue.getValue();
             if (c instanceof Substation) {
-                Util.loggerControllerOptions.debug("Substation \"" + c.getName() + "\" selected.");
-
                 ArrayList<String> voltageIds = new ArrayList<>();
                 voltageIds.clear();
                 for (TreeItem<Container<?>> voltageId : newValue.getChildren())
@@ -256,8 +249,6 @@ public class ControllerOptions {
                     e.printStackTrace();
                 }
             } else if (c instanceof VoltageLevel) {
-                Util.loggerControllerOptions.info("Voltage \"" + c.getName() + "\" selected.");
-
                 NadCalls.drawSubgraph(c.toString(), depthSpinnerValue);
                 try {
                     ControllerDiagram.addSvgToSelectedTab(c.toString(), depthSpinnerValue);
@@ -265,8 +256,6 @@ public class ControllerOptions {
                     e.printStackTrace();
                 }
             } else if (c instanceof Network) {
-                Util.loggerControllerOptions.info("Full Network \"" + c.getName() + "\" selected.");
-
                 loadNetwork(ControllerImport.getFile().toPath());  // load network
                 drawNetwork();  // changes the variable svgWriter
                 try {
@@ -311,11 +300,8 @@ public class ControllerOptions {
     private static void addListenerOnFullNetworkCheck(CheckBoxTreeItem check) {
         check.selectedProperty().addListener((obs, oldVal, newVal) -> {
             if (check.isSelected()) {
-                Util.loggerControllerOptions.debug("Network Check Selected OK");
-
                 getParamPane().setDisabledSvgSpinners(false);
                 if (ControllerImport.getFile() == null) {
-                    Util.loggerControllerOptions.debug("No file set. Please import a network first.");
                     return;
                 }
 
@@ -330,7 +316,6 @@ public class ControllerOptions {
                 }
             } else {
                 // if event is unchecking the FullNetwork checkbox, close tab
-                Util.loggerControllerOptions.debug("Full Network Check unselected. Closing checked subtab..");
                 List<Tab> tabList = ControllerDiagram.getDiagramPane().getCheckedDiagramPane().getTabs();
                 for (Tab checkedTab : tabList) {
                     if (checkedTab.getText().equals("Full Network")) {
@@ -347,37 +332,30 @@ public class ControllerOptions {
 
             if (oldValue < newValue) {
                 // Handle max depth ?
-                Util.loggerControllerOptions.debug("Depth Spinner value : " + oldValue + " incremented to : " + newValue);
                 depthSpinnerValue++;
             } else {
                 if (depthSpinnerValue == 1) {
-                    Util.loggerControllerOptions.error("Depth can not be less than 1.");
                     return;
                 }
-                Util.loggerControllerOptions.debug("Depth Spinner value : " + oldValue + " decremented to : " + newValue);
                 depthSpinnerValue--;
             }
-            redisplayAll("Depth");
+            redisplayAll();
         });
     }
 
     private void addListenerOnRunFlowButton(Button button) {
         button.setOnAction(event -> {
             if (ControllerImport.getFile() == null) {
-                Util.loggerControllerOptions.info("No file set. Please import a network first.");
                 return;
             }
             NadCalls.runLoadFlow();
 
             // All SVGs need to be re-displayed (SVGs in the subtabs of CheckedPane and SVG in the SelectedPane)
-
-            redisplayAll("Loadflow");
-
-            Util.loggerControllerOptions.info("Run Loadflow OK");
+            redisplayAll();
         });
     }
 
-    private void redisplayAll(String infoMessage) {
+    private void redisplayAll() {
         if (!(getSvgWriter().toString().equals(new StringWriter().toString()))) {
             // this if statement just checks whether or not the SvgWriter variable has been cleared before (or has
             // never been written). If "empty", there are no SVG to change, so there is not much to do.
@@ -403,7 +381,7 @@ public class ControllerOptions {
                     listCheckedTabs.remove(tab);
                     diagramPane.redrawCheckedTabSVG(((ContainerVoltageDiagramPane) tab.getContent()).getVoltageLevelId(), depthSpinnerValue, tab.getText(), tab.getTooltip().getText(), i);
                 } else {
-                    Util.loggerControllerParameters.error("Fatal Error, unknown checkedDiagramPane.get(i).getContent() type");
+                    throw new AssertionError();
                 }
             }
 
@@ -418,26 +396,22 @@ public class ControllerOptions {
             } else if (selectedDiagramPane.getCenter() instanceof ContainerVoltageDiagramPane) {
                 diagramPane.redrawSelectedTabSVG(((ContainerVoltageDiagramPane) selectedDiagramPane.getCenter()).getVoltageLevelId(), depthSpinnerValue);
             } else {
-                Util.loggerControllerParameters.info("Unknown selectedDiagramPane.getCenter() type. Means that no Network Area Diagram was selected.");
+                LOGGER.info("Unknown selectedDiagramPane.getCenter() type. Means that no Network Area Diagram was selected.");
             }
 
             //// Restore the former displayed tab
             ControllerDiagram.getDiagramPane().setCheckedTabSelectedByUser(indexCheckedTabSelectedByUser);
 
-            Util.loggerControllerParameters.info("Diagrams displayed with selected " + infoMessage + " OK.");
-        } else {
-            Util.loggerControllerParameters.info("No SVGs to change.");
         }
     }
 
     private void addListenerOnFilterField(TextField field) {
         field.setOnAction(event -> {
-            Util.loggerControllerOptions.info("Filter field OK");
+            LOGGER.info("Filter field not yet implemented");
         });
     }
 
     public static void resetOptions() {
-        while (depthSpinnerValue != 1) optionsPane.getDepthSpinner().decrement();
         optionsPane.getFullNetworkCheck().setSelected(false);
         optionsPane.getFiltersField().clear();
     }

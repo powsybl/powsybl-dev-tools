@@ -13,6 +13,8 @@ import com.powsybl.iidm.network.Network;
 import javafx.scene.control.Button;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 
@@ -22,6 +24,7 @@ import static com.powsybl.ad.viewer.model.NadCalls.*;
  * @author Louis Lhotte <louis.lhotte@student-cs.fr>
  */
 public class ControllerImport {
+    private static final Logger LOGGER = LoggerFactory.getLogger(ControllerImport.class);
     private final Stage primaryStage;
     private static ImportBar importBar;
     private static File file;
@@ -40,7 +43,7 @@ public class ControllerImport {
 
     private void addListenerOnImportButton(Button button, Stage primaryStage) {
         button.setOnAction(event -> {
-            Util.loggerControllerImport.info("Import Button OK");
+            LOGGER.info("Import Button OK");
             FileChooser fileChooser = new FileChooser();
             String caseFolderPropertyValue = Util.preferences.get(Util.CASE_FOLDER_PROPERTY, null);
             if (caseFolderPropertyValue != null) {
@@ -69,7 +72,7 @@ public class ControllerImport {
             importBar.getLoadingStatusButton().setStyle("-fx-background-color: yellow");
             importBar.getPathTextField().setText(file.getAbsolutePath());
             Util.preferences.put(Util.CASE_FOLDER_PROPERTY, file.getParent());
-            Util.loggerControllerImport.info("Please wait while we try to import the network...");
+            LOGGER.info("Please wait while we try to import the network...");
         });
 
         networkService.setOnSucceeded(event -> {
@@ -77,15 +80,15 @@ public class ControllerImport {
             setNetwork((Network) event.getSource().getValue());
             importBar.getLoadingStatusButton().setStyle("-fx-background-color: green");
             Util.preferences.put(Util.CASE_PATH_PROPERTY, file.getAbsolutePath());
-            Util.loggerControllerImport.info("Network imported successfully.");
+            LOGGER.info("Network imported successfully.");
         });
 
         networkService.setOnFailed(event -> {
             Throwable exception = event.getSource().getException();
-            Util.loggerControllerImport.error(exception.toString(), exception);
+            LOGGER.error(exception.toString(), exception);
             importBar.getPathTextField().setText("");
             importBar.getLoadingStatusButton().setStyle("-fx-background-color: red");
-            Util.loggerControllerImport.error("Error when importing network. ");
+            LOGGER.error("Error when importing network. ");
         });
         networkService.start();
     }
@@ -106,7 +109,7 @@ public class ControllerImport {
         NadCalls.cleanSvgWriter();
         NadCalls.cleanNetwork();
 
-        Util.loggerControllerImport.info("Cleaning diagram tabs and substations...");
+        LOGGER.info("Cleaning diagram tabs and substations...");
     }
 
     protected static void setNetwork(Network network) {

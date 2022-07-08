@@ -9,7 +9,6 @@ package com.powsybl.ad.viewer.controller;
 import com.powsybl.ad.viewer.model.NadCalls;
 import com.powsybl.ad.viewer.util.Util;
 import com.powsybl.ad.viewer.view.ParamPane;
-import com.powsybl.ad.viewer.view.diagram.DiagramPane;
 import com.powsybl.ad.viewer.view.diagram.containers.ContainerDiagramPane;
 import com.powsybl.ad.viewer.view.diagram.containers.ContainerFullNetworkDiagramPane;
 import com.powsybl.ad.viewer.view.diagram.containers.ContainerSubstationDiagramPane;
@@ -25,8 +24,8 @@ import javafx.scene.Node;
 import javafx.scene.control.*;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
-
-import static com.powsybl.ad.viewer.model.NadCalls.networkProperty;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.io.StringWriter;
@@ -43,6 +42,7 @@ import static com.powsybl.ad.viewer.model.NadCalls.*;
  * @author Louis Lhotte <louis.lhotte@student-cs.fr>
  */
 public class ControllerParameters {
+    private static final Logger LOGGER = LoggerFactory.getLogger(ControllerParameters.class);
     private static ParamPane paramPane;
 
     private ChangeListener<SvgParameters> listener;
@@ -86,7 +86,6 @@ public class ControllerParameters {
         try {
             NadCalls.drawNetwork();
             ControllerDiagram.addSvgToSelectedTab();
-            Util.loggerControllerParameters.info("svgParametersProperty changed succesfully (Selected Tab - Full Network).");
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -98,7 +97,6 @@ public class ControllerParameters {
         try {
             NadCalls.drawNetwork();
             ControllerDiagram.addSvgToCheckedTab(tabName, whatIsGonnaBeDisplayedWhenHoveringOnTabName, index);
-            Util.loggerControllerParameters.info("svgParametersProperty changed succesfully (Checked Tab - Full Network).");
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -110,7 +108,6 @@ public class ControllerParameters {
         try {
             NadCalls.drawUniqueSubstation(voltageLevelIds, depth);
             ControllerDiagram.addSvgToSelectedTab(voltageLevelIds, depth);
-            Util.loggerControllerParameters.info("svgParametersProperty changed succesfully (Selected Tab - Substation).");
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -122,7 +119,6 @@ public class ControllerParameters {
         try {
             NadCalls.drawUniqueSubstation(voltageLevelIds, depth);
             ControllerDiagram.addSvgToCheckedTab(tabName, whatIsGonnaBeDisplayedWhenHoveringOnTabName, voltageLevelIds, depth, index);
-            Util.loggerControllerParameters.info("svgParametersProperty changed succesfully (Checked Tab - Substation).");
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -134,7 +130,6 @@ public class ControllerParameters {
         try {
             NadCalls.drawSubgraph(voltageLevelId, depth);
             ControllerDiagram.addSvgToSelectedTab(voltageLevelId, depth);
-            Util.loggerControllerParameters.info("svgParametersProperty changed succesfully (Selected Tab - Subgraph).");
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -146,7 +141,6 @@ public class ControllerParameters {
         try {
             NadCalls.drawSubgraph(voltageLevelId, depth);
             ControllerDiagram.addSvgToCheckedTab(tabName, whatIsGonnaBeDisplayedWhenHoveringOnTabName, voltageLevelId, depth, index);
-            Util.loggerControllerParameters.info("svgParametersProperty changed succesfully (Checked Tab - Subgraph).");
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -163,13 +157,11 @@ public class ControllerParameters {
 
             if (tabSelectedByUserNode != null) {
                 if (tabSelectedByUserNode instanceof BorderPane) {  // that's if we in Selected (cf. createSelectedTab)
-                    Util.loggerControllerParameters.info("Fit to content clicked (logger 1/2) whilst in Selected");
                     // We need to downcast tabSelectedByUserNode into a BorderPane
                     BorderPane borderPaneDowncast = (BorderPane) tabSelectedByUserNode;
                     borderPaneNode = borderPaneDowncast.getCenter();
                 }
                 if (tabSelectedByUserNode instanceof TabPane) {  // that's if we in Checked (cf. createCheckedTab)
-                    Util.loggerControllerParameters.info("Fit to content clicked (logger 1/2) whilst in Checked");
                     // We need to downcast tabSelectedByUserNode into a TabPane
                     TabPane tabPaneDowncast = (TabPane) tabSelectedByUserNode;
                     selectedSubTabByUser = tabPaneDowncast.getSelectionModel().getSelectedItem();
@@ -180,7 +172,6 @@ public class ControllerParameters {
 
             if (borderPaneNode != null) {  //  that's if we in Selected
                 if (borderPaneNode instanceof ContainerDiagramPane) {
-                    Util.loggerControllerParameters.info("Fit to content clicked (logger 2/2) whilst in Selected");
                     // We need to downcast borderPaneNode into a ContainerDiagramPane
                     pane = (ContainerDiagramPane) borderPaneNode;
                 }
@@ -188,7 +179,6 @@ public class ControllerParameters {
             if (selectedSubTabByUser != null) { // that's if we in Checked
                 Node selectedSubTabByUserNode = selectedSubTabByUser.getContent();
                 if (selectedSubTabByUserNode instanceof ContainerDiagramPane) {
-                    Util.loggerControllerParameters.info("Fit to content clicked (logger 2/2) whilst in Checked");
                     // We need to downcast selectedSubTabByUserNode into a ContainerDiagramPane
                     pane = (ContainerDiagramPane) selectedSubTabByUserNode;
                 }
@@ -214,7 +204,6 @@ public class ControllerParameters {
                         pane.getDiagramView().setZoom(Math.min(zoomH, zoomW));
                     }
                 }
-                Util.loggerControllerParameters.info("Fit to content OK");
             }
         });
     }
@@ -231,13 +220,11 @@ public class ControllerParameters {
 
             if (tabSelectedByUserNode != null) {
                 if (tabSelectedByUserNode instanceof BorderPane) {  // that's if we in Selected (cf. createSelectedTab)
-                    Util.loggerControllerParameters.info("Reset Zoom clicked (logger 1/2) whilst in Selected");
                     // We need to downcast tabSelectedByUserNode into a BorderPane
                     BorderPane borderPaneDowncast = (BorderPane) tabSelectedByUserNode;
                     borderPaneNode = borderPaneDowncast.getCenter();
                 }
                 if (tabSelectedByUserNode instanceof TabPane) {  // that's if we in Checked (cf. createCheckedTab)
-                    Util.loggerControllerParameters.info("Reset Zoom clicked (logger 1/2) whilst in Checked");
                     // We need to downcast tabSelectedByUserNode into a TabPane
                     TabPane tabPaneDowncast = (TabPane) tabSelectedByUserNode;
                     selectedSubTabByUser = tabPaneDowncast.getSelectionModel().getSelectedItem();
@@ -248,7 +235,6 @@ public class ControllerParameters {
 
             if (borderPaneNode != null) {  //  that's if we in Selected
                 if (borderPaneNode instanceof ContainerDiagramPane) {
-                    Util.loggerControllerParameters.info("Reset Zoom clicked (logger 2/2) whilst in Selected");
                     // We need to downcast borderPaneNode into a ContainerDiagramPane
                     pane = (ContainerDiagramPane) borderPaneNode;
                 }
@@ -256,7 +242,6 @@ public class ControllerParameters {
             if (selectedSubTabByUser != null) { // that's if we in Checked
                 Node selectedSubTabByUserNode = selectedSubTabByUser.getContent();
                 if (selectedSubTabByUserNode instanceof ContainerDiagramPane) {
-                    Util.loggerControllerParameters.info("Reset Zoom clicked (logger 2/2) whilst in Checked");
                     // We need to downcast selectedSubTabByUserNode into a ContainerDiagramPane
                     pane = (ContainerDiagramPane) selectedSubTabByUserNode;
                 }
@@ -265,20 +250,18 @@ public class ControllerParameters {
             if (pane != null) {
                 pane.getDiagramView().setZoom(1.0);
             }
-
-            Util.loggerControllerParameters.info("Reset Zoom OK");
         });
     }
 
     private void addListenerOnLayoutChoice(ChoiceBox layoutChoice) {
         layoutChoice.setOnAction(event -> {
-            Util.loggerControllerParameters.info("Layout choice : " + layoutChoice.getValue());
+            LOGGER.info("Layout choice not implemented");
 //            NadCalls.setLayoutParameters(toString(layoutChoice.getValue()));
         });
     }
 
     private void addListenerOnLabelProviderChoice(ChoiceBox labelProviderChoice) {
-        labelProviderChoice.setOnAction(event -> Util.loggerControllerParameters.info("Label Provider : " + labelProviderChoice.getValue()));
+        labelProviderChoice.setOnAction(event -> LOGGER.info("Label Provider choice not implemented"));
     }
 
     private void addListenerOnStyleProviderChoice(ChoiceBox styleProviderChoice) {
@@ -294,10 +277,8 @@ public class ControllerParameters {
 
                 if (styleProviderChoice.getValue() == "Nominal") {
                     styleProvider = new NominalVoltageStyleProvider(networkProperty.get());
-                    Util.loggerControllerParameters.info("styleProvider variable successfully changed to 'NominalVoltageStyleProvider'");
                 } else if (styleProviderChoice.getValue() == "Topological") {
                     styleProvider = new TopologicalStyleProvider(NadCalls.networkProperty.get());
-                    Util.loggerControllerParameters.info("styleProvider variable successfully changed to 'TopologicalStyleProvider'");
                 }
 
                 //// If the dropdown list's value changes, it has got to affect all SVGs
@@ -315,7 +296,7 @@ public class ControllerParameters {
                         listCheckedTabs.remove(tab);
                         setParameters(svgParametersProperty.get(), ((ContainerVoltageDiagramPane) tab.getContent()).getVoltageLevelId(), ((ContainerVoltageDiagramPane) tab.getContent()).getDepth(), tab.getText(), tab.getTooltip().getText(), i);
                     } else {
-                        Util.loggerControllerParameters.error("Fatal Error, unknown checkedDiagramPane.get(i).getContent() type");
+                        throw new AssertionError();
                     }
                 }
 
@@ -330,15 +311,11 @@ public class ControllerParameters {
                 } else if (selectedDiagramPane.getCenter() instanceof ContainerVoltageDiagramPane) {
                     setParameters(svgParametersProperty.get(), ((ContainerVoltageDiagramPane) selectedDiagramPane.getCenter()).getVoltageLevelId(), ((ContainerVoltageDiagramPane) selectedDiagramPane.getCenter()).getDepth());
                 } else {
-                    Util.loggerControllerParameters.error("Unknown selectedDiagramPane.getCenter() type");
+                    LOGGER.error("Unknown selectedDiagramPane.getCenter() type");
                 }
 
                 //// Restore the former displayed tab
                 ControllerDiagram.getDiagramPane().setCheckedTabSelectedByUser(indexCheckedTabSelectedByUser);
-
-                Util.loggerControllerParameters.info("Diagrams displayed with selected StyleProvider OK.");
-            } else {
-                Util.loggerControllerParameters.info("No SVGs to change.");
             }
         });
     }
@@ -374,7 +351,7 @@ public class ControllerParameters {
                         listCheckedTabs.remove(tab);
                         setParameters(updater.apply(oldSvgParametersProperty, newValue), ((ContainerVoltageDiagramPane) tab.getContent()).getVoltageLevelId(), ((ContainerVoltageDiagramPane) tab.getContent()).getDepth(), tab.getText(), tab.getTooltip().getText(), i);
                     } else {
-                        Util.loggerControllerParameters.error("Fatal Error, unknown checkedDiagramPane.get(i).getContent() type");
+                        throw new AssertionError();
                     }
                 }
 
@@ -389,18 +366,12 @@ public class ControllerParameters {
                 } else if (selectedDiagramPane.getCenter() instanceof ContainerVoltageDiagramPane) {
                     setParameters(updater.apply(oldSvgParametersProperty, newValue), ((ContainerVoltageDiagramPane) selectedDiagramPane.getCenter()).getVoltageLevelId(), ((ContainerVoltageDiagramPane) selectedDiagramPane.getCenter()).getDepth());
                 } else {
-                    Util.loggerControllerParameters.error("Unknown selectedDiagramPane.getCenter() type");
+                    LOGGER.error("Unknown selectedDiagramPane.getCenter() type");
                 }
 
                 //// Restore the former displayed tab
                 ControllerDiagram.getDiagramPane().setCheckedTabSelectedByUser(indexCheckedTabSelectedByUser);
-
-                Util.loggerControllerParameters.info("Diagrams displayed with selected Padding OK.");
-            } else {
-                Util.loggerControllerParameters.info("No SVGs to change.");
             }
-
-            Util.loggerControllerParameters.info("Layout " + direction + " Spinner value :  " + oldValue + " transformed into : " + newValue);
         });
 
         spinner.setEditable(true);
@@ -412,11 +383,11 @@ public class ControllerParameters {
     }
 
     private void addListenerOnLayoutXSpinner(Spinner layoutXSpinner) {
-        layoutXSpinner.valueProperty().addListener((obs, oldValue, newValue) -> Util.loggerControllerParameters.info("Layout X Spinner value :  " + oldValue + " transformed into : " + newValue));
+        layoutXSpinner.valueProperty().addListener((obs, oldValue, newValue) -> LOGGER.info("Not implemented"));
     }
 
     private void addListenerOnLayoutYSpinner(Spinner layoutYSpinner) {
-        layoutYSpinner.valueProperty().addListener((obs, oldValue, newValue) -> Util.loggerControllerParameters.info("Layout Y Spinner value :  " + oldValue + " transformed into : " + newValue));
+        layoutYSpinner.valueProperty().addListener((obs, oldValue, newValue) -> LOGGER.info("Not implemented"));
     }
 
     private void addListenerOnSvgEdgeInfoCheckbox(CheckBox svgEdgeInfoCheckbox) {
@@ -444,7 +415,7 @@ public class ControllerParameters {
                     listCheckedTabs.remove(tab);
                     setParameters(svgParametersProperty.get().setEdgeInfoAlongEdge(isCheckBoxSelected), ((ContainerVoltageDiagramPane) tab.getContent()).getVoltageLevelId(), ((ContainerVoltageDiagramPane) tab.getContent()).getDepth(), tab.getText(), tab.getTooltip().getText(), i);
                 } else {
-                    Util.loggerControllerParameters.error("Fatal Error, unknown checkedDiagramPane.get(i).getContent() type");
+                    throw new AssertionError();
                 }
             }
 
@@ -459,14 +430,11 @@ public class ControllerParameters {
             } else if (selectedDiagramPane.getCenter() instanceof ContainerVoltageDiagramPane) {
                 setParameters(svgParametersProperty.get().setEdgeInfoAlongEdge(isCheckBoxSelected), ((ContainerVoltageDiagramPane) selectedDiagramPane.getCenter()).getVoltageLevelId(), ((ContainerVoltageDiagramPane) selectedDiagramPane.getCenter()).getDepth());
             } else {
-                Util.loggerControllerParameters.error("Unknown selectedDiagramPane.getCenter() type");
+                LOGGER.error("Unknown selectedDiagramPane.getCenter() type");
             }
 
             //// Restore the former displayed tab
             ControllerDiagram.getDiagramPane().setCheckedTabSelectedByUser(indexCheckedTabSelectedByUser);
-
-            //// Logger
-            Util.loggerControllerParameters.info("SVG Edge Info Checked (" + svgEdgeInfoCheckbox.isSelected() + ") OK");
         });
     }
 

@@ -9,7 +9,6 @@ package com.powsybl.ad.viewer.view.diagram;
 
 import com.powsybl.ad.viewer.controller.ControllerDiagram;
 import com.powsybl.ad.viewer.model.NadCalls;
-import com.powsybl.ad.viewer.util.Util;
 import com.powsybl.ad.viewer.view.diagram.containers.ContainerDiagramPane;
 import com.powsybl.ad.viewer.view.diagram.containers.ContainerFullNetworkDiagramPane;
 import com.powsybl.iidm.network.Container;
@@ -93,7 +92,6 @@ public class DiagramPane extends TabPane {
         try {
             NadCalls.drawNetwork();
             ControllerDiagram.addSvgToSelectedTab();
-            Util.loggerControllerParameters.info("Selected Tab - Full Network re-displayed succesfully.");
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -104,7 +102,6 @@ public class DiagramPane extends TabPane {
         try {
             NadCalls.drawNetwork();
             ControllerDiagram.addSvgToCheckedTab(tabName, whatIsGonnaBeDisplayedWhenHoveringOnTabName, index);
-            Util.loggerControllerParameters.info("Checked Tab - Full Network re-displayed succesfully.");
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -115,7 +112,6 @@ public class DiagramPane extends TabPane {
         try {
             NadCalls.drawUniqueSubstation(voltageLevelIds, depth);
             ControllerDiagram.addSvgToSelectedTab(voltageLevelIds, depth);
-            Util.loggerControllerParameters.info("Selected Tab - Substation re-displayed successfully.");
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -126,7 +122,6 @@ public class DiagramPane extends TabPane {
         try {
             NadCalls.drawUniqueSubstation(voltageLevelIds, depth);
             ControllerDiagram.addSvgToCheckedTab(tabName, whatIsGonnaBeDisplayedWhenHoveringOnTabName, voltageLevelIds, depth, index);
-            Util.loggerControllerParameters.info("Checked Tab - Substation re-displayed successfully.");
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -137,7 +132,6 @@ public class DiagramPane extends TabPane {
         try {
             NadCalls.drawSubgraph(voltageLevelId, depth);
             ControllerDiagram.addSvgToSelectedTab(voltageLevelId, depth);
-            Util.loggerControllerParameters.info("Selected Tab - Subgraph re-displayed successfully.");
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -148,7 +142,6 @@ public class DiagramPane extends TabPane {
         try {
             NadCalls.drawSubgraph(voltageLevelId, depth);
             ControllerDiagram.addSvgToCheckedTab(tabName, whatIsGonnaBeDisplayedWhenHoveringOnTabName, voltageLevelId, depth, index);
-            Util.loggerControllerParameters.info("Checked Tab - Subgraph re-displayed successfully.");
         } catch (IOException e) {
             e.printStackTrace();
         }
