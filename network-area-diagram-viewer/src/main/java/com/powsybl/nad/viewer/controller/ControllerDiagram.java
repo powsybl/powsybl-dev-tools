@@ -7,7 +7,6 @@
 package com.powsybl.nad.viewer.controller;
 
 import com.google.common.io.ByteStreams;
-import com.powsybl.nad.viewer.util.Util;
 import com.powsybl.nad.viewer.view.diagram.DiagramPane;
 import com.powsybl.nad.viewer.view.diagram.containers.ContainerDiagramPane;
 import com.powsybl.nad.viewer.view.diagram.containers.ContainerFullNetworkDiagramPane;

@@ -6,15 +6,16 @@
  */
 package com.powsybl.nad.viewer.controller;
 
-import com.powsybl.nad.viewer.model.NadCalls;
-import com.powsybl.nad.viewer.view.OptionsPane;
-import com.powsybl.nad.viewer.view.diagram.DiagramPane;
-import com.powsybl.nad.viewer.view.diagram.containers.*;
 import com.powsybl.iidm.network.Container;
 import com.powsybl.iidm.network.Network;
 import com.powsybl.iidm.network.Substation;
 import com.powsybl.iidm.network.VoltageLevel;
-import javafx.collections.FXCollections;
+import com.powsybl.nad.viewer.model.NadCalls;
+import com.powsybl.nad.viewer.view.OptionsPane;
+import com.powsybl.nad.viewer.view.diagram.DiagramPane;
+import com.powsybl.nad.viewer.view.diagram.containers.ContainerFullNetworkDiagramPane;
+import com.powsybl.nad.viewer.view.diagram.containers.ContainerSubstationDiagramPane;
+import com.powsybl.nad.viewer.view.diagram.containers.ContainerVoltageDiagramPane;
 import javafx.collections.ObservableList;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.CheckBoxTreeCell;
@@ -27,9 +28,6 @@ import java.io.IOException;
 import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 
 import static com.powsybl.nad.viewer.controller.ControllerParameters.getParamPane;
 import static com.powsybl.nad.viewer.model.NadCalls.*;
@@ -41,9 +39,6 @@ public class ControllerOptions {
     private static final Logger LOGGER = LoggerFactory.getLogger(ControllerOptions.class);
     private static OptionsPane optionsPane;
     private static int depthSpinnerValue = 1;
-
-    private static final ObservableList<SelectableSubstation> selectableSubstations = FXCollections.observableArrayList();
-    private static final ObservableList<SelectableVoltageLevel> selectableVoltageLevels = FXCollections.observableArrayList();
 
     public void createOptionsPane() {
         optionsPane = new OptionsPane();
@@ -78,12 +73,8 @@ public class ControllerOptions {
         rootItem.setIndependent(true);
         rootItem.setExpanded(true);
 
-        Map<String, SelectableSubstation> mapSubstations = selectableSubstations.stream().collect(Collectors.toMap(SelectableSubstation::getName, Function.identity()));
-
-        Map<String, SelectableVoltageLevel> mapVoltageLevels = selectableVoltageLevels.stream().collect(Collectors.toMap(SelectableVoltageLevel::getName, Function.identity()));
-
         for (Substation substation : NadCalls.networkProperty.get().getSubstations()) {
-            initVoltageLevelsTree(rootItem, substation, "", true, mapSubstations, mapVoltageLevels);
+            initVoltageLevelsTree(rootItem, substation, "", true);
         }
 
         TreeView substationsTree = optionsPane.getSubstationTree();
@@ -98,7 +89,7 @@ public class ControllerOptions {
         substationsTree.setShowRoot(true);
     }
 
-    private static void initVoltageLevelsTree(TreeItem substationTree, Substation substation, String filter, boolean emptyFilter, Map<String, SelectableSubstation> mapSubstations, Map<String, SelectableVoltageLevel> mapVoltageLevels) {
+    private static void initVoltageLevelsTree(TreeItem substationTree, Substation substation, String filter, boolean emptyFilter) {
         boolean firstVoltageLevel = true;
         CheckBoxTreeItem substationItem = null;
 
@@ -144,10 +135,6 @@ public class ControllerOptions {
                 CheckBoxTreeItem<Container<?>> voltageItem = new CheckBoxTreeItem(voltageLevel);
 
                 voltageItem.setIndependent(true);
-
-                if (mapVoltageLevels.containsKey(voltageLevel.getId()) && true) {
-                    voltageItem.setSelected(true);
-                }
 
                 if (substationItem != null) {
                     substationItem.getChildren().add(voltageItem);

@@ -40,10 +40,6 @@ public class NetworkAreaDiagramViewer extends Application {
     private static ControllerOptions cOptions;
     private static ControllerParameters cParameters;
 
-    public void init() throws Exception {
-        super.init();
-    }
-
     public void start(Stage stage) {
         primaryStage = new Stage();
         cParameters = new ControllerParameters();
