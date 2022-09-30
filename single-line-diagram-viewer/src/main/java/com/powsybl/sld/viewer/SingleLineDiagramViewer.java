@@ -1129,9 +1129,9 @@ public class SingleLineDiagramViewer extends Application implements DisplayVolta
 
         for (Substation s : n.getSubstations()) {
             CheckBoxTreeItem<Container<?>> sItem = null;
-            boolean sFilterOk = emptyFilter || (showNames.isSelected() ? s.getNameOrId().contains(filter) : s.getId().contains(filter));
+            boolean sFilterOk = emptyFilter || testPassed(filter, s);
             List<VoltageLevel> voltageLevels = s.getVoltageLevelStream()
-                    .filter(v -> sFilterOk || (showNames.isSelected() ? v.getNameOrId().contains(filter) : v.getId().contains(filter)))
+                    .filter(v -> sFilterOk || testPassed(filter, v))
                     .collect(Collectors.toList());
             if ((sFilterOk || !voltageLevels.isEmpty()) && !hideSubstations.isSelected()) {
                 sItem = new CheckBoxTreeItem<>(s);
@@ -1147,7 +1147,10 @@ public class SingleLineDiagramViewer extends Application implements DisplayVolta
             initVoltageLevelsTree(rootItem, sItem, voltageLevels, mapVoltageLevels);
         }
 
-        List<VoltageLevel> emptySubstationVoltageLevels = n.getVoltageLevelStream().filter(v -> v.getSubstation().isEmpty()).collect(Collectors.toList());
+        List<VoltageLevel> emptySubstationVoltageLevels = n.getVoltageLevelStream()
+                .filter(v -> v.getSubstation().isEmpty())
+                .filter(v -> testPassed(filter, v))
+                .collect(Collectors.toList());
         initVoltageLevelsTree(rootItem, null, emptySubstationVoltageLevels, mapVoltageLevels);
 
         if (substationsTree.getRoot() != null) {
@@ -1156,6 +1159,16 @@ public class SingleLineDiagramViewer extends Application implements DisplayVolta
 
         substationsTree.setRoot(rootItem);
         substationsTree.setShowRoot(false);
+    }
+
+    private Function<Identifiable<?>, String> getIdentifiableStringSupplier() {
+        return showNames.isSelected() ? Identifiable::getNameOrId : Identifiable::getId;
+    }
+
+    private boolean testPassed(String filter, Identifiable<?> identifiable) {
+        return getIdentifiableStringSupplier().apply(identifiable)
+                .toLowerCase(Locale.getDefault())
+                .contains(filter.toLowerCase(Locale.getDefault()));
     }
 
     @Override
