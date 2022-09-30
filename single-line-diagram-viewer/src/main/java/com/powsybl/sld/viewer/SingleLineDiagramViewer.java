@@ -1147,7 +1147,10 @@ public class SingleLineDiagramViewer extends Application implements DisplayVolta
             initVoltageLevelsTree(rootItem, sItem, voltageLevels, mapVoltageLevels);
         }
 
-        List<VoltageLevel> emptySubstationVoltageLevels = n.getVoltageLevelStream().filter(v -> v.getSubstation().isEmpty()).collect(Collectors.toList());
+        List<VoltageLevel> emptySubstationVoltageLevels = n.getVoltageLevelStream()
+                .filter(v -> v.getSubstation().isEmpty())
+                .filter(v -> testPassed(filter, v))
+                .collect(Collectors.toList());
         initVoltageLevelsTree(rootItem, null, emptySubstationVoltageLevels, mapVoltageLevels);
 
         if (substationsTree.getRoot() != null) {
