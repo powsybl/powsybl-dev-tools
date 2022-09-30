@@ -42,6 +42,7 @@ import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.CheckBoxTreeCell;
+import javafx.scene.image.Image;
 import javafx.scene.input.ScrollEvent;
 import javafx.scene.layout.*;
 import javafx.scene.web.WebView;
@@ -887,6 +888,8 @@ public class SingleLineDiagramViewer extends Application implements DisplayVolta
         initStylesProvider();
 
         initTreeCellFactory();
+
+        primaryStage.getIcons().add(new Image("/images/logo.png"));
 
         showNames.setSelected(true);
         showNames.selectedProperty().addListener((observable, oldValue, newValue) -> {
