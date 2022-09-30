@@ -1044,12 +1044,22 @@ public class SingleLineDiagramViewer extends Application implements DisplayVolta
         Button caseButton = new Button("...");
         caseButton.setOnAction(event -> {
             FileChooser fileChooser = new FileChooser();
+            fileChooser.setTitle("Open case File");
+
             String caseFolderPropertyValue = preferences.get(CASE_FOLDER_PROPERTY, null);
             if (caseFolderPropertyValue != null) {
                 fileChooser.setInitialDirectory(new File(caseFolderPropertyValue));
             }
-            fileChooser.setTitle("Open case File");
-            File file = fileChooser.showOpenDialog(primaryStage);
+
+            File file;
+            try {
+                file = fileChooser.showOpenDialog(primaryStage);
+            } catch (IllegalArgumentException e) {
+                LOGGER.info("Could not set initial directory to last used file directory");
+                fileChooser.setInitialDirectory(null);
+                file = fileChooser.showOpenDialog(primaryStage);
+            }
+
             if (file != null) {
                 loadNetwork(file.toPath());
             }
