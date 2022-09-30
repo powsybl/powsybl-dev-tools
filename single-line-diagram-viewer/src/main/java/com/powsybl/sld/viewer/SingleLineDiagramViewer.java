@@ -22,6 +22,7 @@ import com.powsybl.sld.layout.*;
 import com.powsybl.sld.layout.positionbyclustering.PositionByClustering;
 import com.powsybl.sld.layout.positionfromextension.PositionFromExtension;
 import com.powsybl.sld.library.ComponentLibrary;
+import com.powsybl.sld.library.ComponentTypeName;
 import com.powsybl.sld.svg.*;
 import com.powsybl.sld.util.NominalVoltageDiagramStyleProvider;
 import com.powsybl.sld.util.TopologicalStyleProvider;
@@ -712,6 +713,9 @@ public class SingleLineDiagramViewer extends Application implements DisplayVolta
         addCheckBox("Show internal nodes", rowIndex, LayoutParameters::isShowInternalNodes, LayoutParameters::setShowInternalNodes);
         rowIndex += 1;
         addCheckBox("Draw straight wires", rowIndex, LayoutParameters::isDrawStraightWires, LayoutParameters::setDrawStraightWires);
+        rowIndex += 1;
+        addCheckBox("Disconnectors on bus", rowIndex, lp -> lp.getComponentsOnBusbars().equals(List.of(ComponentTypeName.DISCONNECTOR)),
+            (lp, b) -> lp.setComponentsOnBusbars(b ? List.of(ComponentTypeName.DISCONNECTOR) : Collections.emptyList()));
         rowIndex += 1;
         addPositionLayoutCheckBox("Stack feeders", rowIndex, PositionVoltageLevelLayoutFactory::isFeederStacked, PositionVoltageLevelLayoutFactory::setFeederStacked);
         rowIndex += 1;
