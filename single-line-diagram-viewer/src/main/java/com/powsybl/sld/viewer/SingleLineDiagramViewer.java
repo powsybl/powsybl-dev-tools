@@ -1022,9 +1022,6 @@ public class SingleLineDiagramViewer extends Application implements DisplayVolta
         networkService.setOnFailed(event -> {
             Throwable exception = event.getSource().getException();
             LOGGER.error(exception.toString(), exception);
-            if (exception instanceof com.powsybl.commons.PowsyblException) {
-                LOGGER.info("The last loaded file is likely to have been deleted from the computer. You may proceed.");
-            }
             casePathTextField.setText("");
             caseLoadingStatus.setStyle("-fx-background-color: red");
         });
