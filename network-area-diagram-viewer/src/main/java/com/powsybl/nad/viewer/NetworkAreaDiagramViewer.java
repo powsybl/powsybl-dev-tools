@@ -7,7 +7,6 @@
 
 package com.powsybl.nad.viewer;
 
-import com.powsybl.nad.viewer.controller.ControllerDiagram;
 import com.powsybl.nad.viewer.controller.ControllerImport;
 import com.powsybl.nad.viewer.controller.ControllerOptions;
 import com.powsybl.nad.viewer.controller.ControllerParameters;
@@ -22,87 +21,40 @@ import javafx.scene.image.Image;
 import javafx.scene.layout.BorderPane;
 import javafx.stage.Stage;
 
-import java.io.File;
-import java.net.URL;
-
-import static com.powsybl.nad.viewer.util.Util.CASE_PATH_PROPERTY;
-import static com.powsybl.nad.viewer.util.Util.preferences;
+import java.util.prefs.Preferences;
 
 /**
  * @author Louis Lhotte <louis.lhotte@student-cs.fr>
  */
 public class NetworkAreaDiagramViewer extends Application {
-    private static Stage primaryStage;
-    private static Scene primaryScene;
 
-    private static ControllerDiagram cDiagram;
-    private static ControllerImport cImport;
-    private static ControllerOptions cOptions;
-    private static ControllerParameters cParameters;
+    public final Preferences preferences = Preferences.userNodeForPackage(NetworkAreaDiagramViewer.class);
 
     public void start(Stage stage) {
-        primaryStage = new Stage();
-        cParameters = new ControllerParameters();
-        cOptions = new ControllerOptions();
-        cDiagram = new ControllerDiagram();
-        cImport = new ControllerImport(primaryStage);
+        Stage primaryStage = new Stage();
 
-        ParamPane paramPane = createParamPane();
+        ParamPane paramPane = new ParamPane();
+        OptionsPane optionsPane = new OptionsPane();
+        DiagramPane diagramPane = new DiagramPane(optionsPane);
+        ControllerOptions cOptions = new ControllerOptions(diagramPane, optionsPane);
+        ControllerParameters cParameters = new ControllerParameters(paramPane, diagramPane);
 
-        DiagramPane diagramPane = createDiagramPane();
+        cParameters.setParamPane();
+        cOptions.setParamPane();
 
-        OptionsPane optionsPane = createOptionsPane();
-
-        ImportBar importBar = createImportBar();
+        ControllerImport cImport = new ControllerImport(primaryStage, optionsPane, diagramPane, paramPane, preferences);
+        cImport.loadNetworkFromPreferences();
 
         SplitPane splitPane = createSplitPane(optionsPane, diagramPane, paramPane);
 
-        BorderPane mainPane = createMainPane(splitPane, importBar);
-        primaryScene = new Scene(mainPane, 1000, 800);
+        BorderPane mainPane = createMainPane(splitPane, cImport.getImportBar());
+        Scene primaryScene = new Scene(mainPane, 1000, 800);
 
-        URL imageURL = getClass().getResource("/images/logo.png");
-        primaryStage.getIcons().add(new Image(imageURL.toExternalForm()));
+        primaryStage.getIcons().add(new Image("/images/logo.png"));
         primaryStage.setTitle("Area Diagram Viewers");
         primaryStage.setScene(primaryScene);
-        loadNetworkFromPreferences();
+
         primaryStage.show();
-    }
-
-    public static boolean loadNetworkFromPreferences() {
-        String casePathPropertyValue = preferences.get(CASE_PATH_PROPERTY, null);
-        if (casePathPropertyValue != null) {
-            ControllerImport.setFile(new File(casePathPropertyValue));
-            ControllerImport.loadFile();
-            return true;
-        }
-        return false;
-    }
-
-    private ParamPane createParamPane() {
-        cParameters.createParamPane();
-        cParameters.setParamPane();
-
-        return cParameters.getParamPane();
-    }
-
-    private OptionsPane createOptionsPane() {
-        cOptions.createOptionsPane();
-        cOptions.setParamPane();
-
-        return cOptions.getOptionsPane();
-    }
-
-    private DiagramPane createDiagramPane() {
-        cDiagram.createDiagramPane();
-
-        return cDiagram.getDiagramPane();
-    }
-
-    private ImportBar createImportBar() {
-        cImport.createImportBar();
-        cImport.setImportBar();
-
-        return cImport.getImportBar();
     }
 
     private SplitPane createSplitPane(OptionsPane optionsPane, DiagramPane diagramPane, ParamPane paramPane) {

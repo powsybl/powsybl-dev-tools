@@ -7,15 +7,14 @@
 
 package com.powsybl.nad.viewer.model;
 
-import com.powsybl.nad.viewer.controller.ControllerParameters;
-import com.powsybl.nad.viewer.util.Util;
-import com.powsybl.iidm.network.*;
+import com.powsybl.iidm.import_.Importers;
+import com.powsybl.iidm.network.Network;
 import com.powsybl.loadflow.LoadFlow;
 import com.powsybl.nad.NetworkAreaDiagram;
-import com.powsybl.iidm.import_.Importers;
 import com.powsybl.nad.layout.LayoutParameters;
+import com.powsybl.nad.svg.StyleProvider;
 import com.powsybl.nad.svg.SvgParameters;
-import com.powsybl.nad.svg.iidm.TopologicalStyleProvider;
+import com.powsybl.nad.svg.iidm.NominalVoltageStyleProvider;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.concurrent.Service;
@@ -33,15 +32,19 @@ public final class NadCalls {
     public static ObjectProperty<Network> networkProperty = new SimpleObjectProperty<>();
     public static final ObjectProperty<LayoutParameters> layoutParametersProperty = new SimpleObjectProperty<>(new LayoutParameters());
     public static final ObjectProperty<SvgParameters> svgParametersProperty = new SimpleObjectProperty<>(new SvgParameters().setSvgWidthAndHeightAdded(true));
+    public static final ObjectProperty<StyleProvider> styleProviderProperty = new SimpleObjectProperty<>();
     public static Service<Network> networkService;
 
     private static StringWriter svgWriter = new StringWriter();
 
+    private NadCalls() {
+    }
+
     public static void loadNetwork(Path file) {
-        networkService = new Service() {
+        networkService = new Service<>() {
             @Override
             protected Task<Network> createTask() {
-                return new Task() {
+                return new Task<>() {
                     @Override
                     protected Network call() {
                         return Importers.loadNetwork(file);
@@ -51,40 +54,48 @@ public final class NadCalls {
         };
     }
 
-
-    public static void setDefaultStyleProviderIfNull() {
-        if (ControllerParameters.getStyleProvider() == null) {
-            // set variable styleProvider to its default value if the dropdown menu's never been clicked on
-            ControllerParameters.setStyleProvider(new TopologicalStyleProvider(networkProperty.get()));
-        }
+    public static void drawNetwork(SvgParameters svgParameters) {
+        drawNetwork(networkProperty.get(), svgParameters);
     }
 
     public static void drawNetwork() {
-        cleanSvgWriter();
-        setDefaultStyleProviderIfNull();
-        new NetworkAreaDiagram(networkProperty.get()).draw(svgWriter, svgParametersProperty.get(), layoutParametersProperty.get(), ControllerParameters.getStyleProvider());
+        drawNetwork(networkProperty.get(), svgParametersProperty.get());
+    }
+
+    public static void drawNetwork(Network network) {
+        drawNetwork(network, svgParametersProperty.get());
+    }
+
+    public static void drawNetwork(Network network, SvgParameters svgParameters) {
+        networkProperty.set(network);
+        draw(new NetworkAreaDiagram(network), svgParameters);
     }
 
     public static void drawUniqueSubstation(List<String> voltageLevelIds, int depth) {
-        // draw when clicking on (or updating) a substation,
-        // with voltageLevelIds the list of voltage levels within the substation
-        cleanSvgWriter();
-        setDefaultStyleProviderIfNull();
-        new NetworkAreaDiagram(networkProperty.get(), voltageLevelIds, depth).draw(svgWriter, svgParametersProperty.get(), layoutParametersProperty.get(), ControllerParameters.getStyleProvider());
+        draw(new NetworkAreaDiagram(networkProperty.get(), voltageLevelIds, depth));
     }
 
     public static void drawSubgraph(String voltageLevelId, int depth) {
-        // draw when clicking on (or updating) a voltage / subgraph,
-        // with voltageLevelId the voltage level name
+        draw(new NetworkAreaDiagram(networkProperty.get(), voltageLevelId, depth));
+    }
+
+    private static void draw(NetworkAreaDiagram networkAreaDiagram) {
+        draw(networkAreaDiagram, svgParametersProperty.get());
+    }
+
+    private static void draw(NetworkAreaDiagram networkAreaDiagram, SvgParameters svgParameters) {
         cleanSvgWriter();
-        setDefaultStyleProviderIfNull();
-        new NetworkAreaDiagram(networkProperty.get(), voltageLevelId, depth).draw(svgWriter, svgParametersProperty.get(), layoutParametersProperty.get(), ControllerParameters.getStyleProvider());
+        svgParametersProperty.set(new SvgParameters(svgParameters));
+        if (styleProviderProperty.get() == null) {
+            styleProviderProperty.set(new NominalVoltageStyleProvider(networkProperty.get()));
+        }
+        networkAreaDiagram.draw(svgWriter, svgParametersProperty.get(), layoutParametersProperty.get(), styleProviderProperty.get());
     }
 
     public static void runLoadFlow() {
-        // A button "Run loadflow" should be added, as often the power flow values in the input file are missing.
-        // Requires a maven clean install of powsybl-open-loadflow
-        LoadFlow.run(networkProperty.get());
+        if (networkProperty.get() != null) {
+            LoadFlow.run(networkProperty.get());
+        }
     }
 
     public static StringWriter getSvgWriter() {

@@ -6,7 +6,7 @@
  */
 package com.powsybl.nad.viewer.view;
 
-import com.powsybl.nad.viewer.controller.ControllerParameters;
+import com.powsybl.nad.svg.StyleProvider;
 import javafx.geometry.Insets;
 import javafx.scene.control.*;
 import javafx.scene.layout.GridPane;
@@ -21,24 +21,25 @@ public class ParamPane extends ScrollPane {
     private Button resetZoomButton;
 
     private GridPane choicePane;
-    private ChoiceBox layoutChoice;
-    private ChoiceBox labelProviderChoice;
-    private ChoiceBox styleProviderChoice;
+    private ChoiceBox<String> layoutChoice;
+    private ChoiceBox<String> labelProviderChoice;
+    private ChoiceBox<String> styleProviderChoice;
 
     private GridPane layoutParametersPane;
-    private Spinner layoutXSpinner;
-    private Spinner layoutYSpinner;
+    private Spinner<Double> layoutXSpinner;
+    private Spinner<Double> layoutYSpinner;
 
     private GridPane svgParametersPane;
 
-    private Spinner svgXSpinner;
-    private Spinner svgYSpinner;
     private CheckBox svgEdgeInfoCheckbox;
 
     private int rowIndex = 0;
 
     // Parameters pane is a grid pane inside a scroll pane
     private GridPane contentPane;
+
+    private StyleProvider styleProvider;  // inside it will be stored the dropdown list's selected value
+    // NadCalls methods will read the value from this class when drawing diagrams
 
     public ParamPane() {
         createContentPane();
@@ -72,17 +73,17 @@ public class ParamPane extends ScrollPane {
     }
 
     public void createChoiceBoxesPane() {
-        layoutChoice = new ChoiceBox();
+        layoutChoice = new ChoiceBox<>();
         layoutChoice.getItems().add("Basic");
         layoutChoice.getSelectionModel().selectFirst();
         Label layoutLabel = new Label("Layout");
 
-        labelProviderChoice = new ChoiceBox();
+        labelProviderChoice = new ChoiceBox<>();
         labelProviderChoice.getItems().add("Default");
         labelProviderChoice.getSelectionModel().selectFirst();
         Label labelProviderLabel = new Label("LabelProvider");
 
-        styleProviderChoice = new ChoiceBox();
+        styleProviderChoice = new ChoiceBox<>();
         styleProviderChoice.getItems().add("Topological");
         styleProviderChoice.getItems().add("Nominal");
         styleProviderChoice.getSelectionModel().selectFirst();  // make ChoiceBox styleProviderChoice
@@ -102,10 +103,10 @@ public class ParamPane extends ScrollPane {
     }
 
     public void createLayoutParametersPane() {
-        layoutXSpinner = new Spinner();
+        layoutXSpinner = new Spinner<>();
         Label layoutXLabel = new Label("Xxx");
 
-        layoutYSpinner = new Spinner();
+        layoutYSpinner = new Spinner<>();
         Label layoutYLabel = new Label("Yyy");
 
         layoutParametersPane = new GridPane();
@@ -121,13 +122,12 @@ public class ParamPane extends ScrollPane {
     public void createSVGParametersPane() {
         svgEdgeInfoCheckbox = new CheckBox();
         svgEdgeInfoCheckbox.setSelected(true);
-        Label setEdgeInfo = new Label("Set Info Along Edge");
 
         svgParametersPane = new GridPane();
         svgParametersPane.setPadding(new Insets(5, 5, 5, 5));
 
+        svgParametersPane.add(new Label("Set Info Along Edge"), 0, 4);
         svgParametersPane.add(svgEdgeInfoCheckbox, 0, 5);
-        svgParametersPane.add(setEdgeInfo, 0, 4);
 
         contentPane.add(svgParametersPane, 0, rowIndex++);
     }
@@ -148,39 +148,27 @@ public class ParamPane extends ScrollPane {
         return choicePane;
     }
 
-    public ChoiceBox getLayoutChoice() {
+    public ChoiceBox<String> getLayoutChoice() {
         return layoutChoice;
     }
 
-    public ChoiceBox getLabelProviderChoice() {
+    public ChoiceBox<String> getLabelProviderChoice() {
         return labelProviderChoice;
     }
 
-    public ChoiceBox getStyleProviderChoice() {
+    public ChoiceBox<String> getStyleProviderChoice() {
         return styleProviderChoice;
-    }
-
-    public void setLayoutChoice(ChoiceBox layoutChoice) {
-        this.layoutChoice = layoutChoice;
-    }
-
-    public void setLabelProviderChoice(ChoiceBox labelProviderChoice) {
-        this.labelProviderChoice = labelProviderChoice;
-    }
-
-    public void setStyleProviderChoice(ChoiceBox styleProviderChoice) {
-        this.styleProviderChoice = styleProviderChoice;
     }
 
     public GridPane getLayoutParametersPane() {
         return layoutParametersPane;
     }
 
-    public Spinner getLayoutXSpinner() {
+    public Spinner<Double> getLayoutXSpinner() {
         return layoutXSpinner;
     }
 
-    public Spinner getLayoutYSpinner() {
+    public Spinner<Double> getLayoutYSpinner() {
         return layoutYSpinner;
     }
 
@@ -188,29 +176,15 @@ public class ParamPane extends ScrollPane {
         return svgParametersPane;
     }
 
-    public Spinner getSvgXSpinner() {
-        return svgXSpinner;
-    }
-
-    public void setSvgXSpinner(Spinner svgXSpinner) {
-        this.svgXSpinner = svgXSpinner;
-    }
-
-    public Spinner getSvgYSpinner() {
-        return svgYSpinner;
-    }
-
-    public void setSvgYSpinner(Spinner svgYSpinner) {
-        this.svgYSpinner = svgYSpinner;
-    }
-
-    public void setDisabledSvgSpinners(boolean enableOrDisable) {
-        ControllerParameters.getParamPane().getSvgXSpinner().setDisable(enableOrDisable);
-        ControllerParameters.getParamPane().getSvgYSpinner().setDisable(enableOrDisable);
-    }
-
     public CheckBox getSvgEdgeInfoCheckbox() {
         return svgEdgeInfoCheckbox;
     }
 
+    public StyleProvider getStyleProvider() {
+        return styleProvider;
+    }
+
+    public void setStyleProvider(StyleProvider styleProvider) {
+        this.styleProvider = styleProvider;
+    }
 }

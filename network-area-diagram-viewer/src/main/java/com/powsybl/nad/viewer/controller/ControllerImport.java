@@ -6,10 +6,12 @@
  */
 package com.powsybl.nad.viewer.controller;
 
-import com.powsybl.nad.viewer.model.NadCalls;
-import com.powsybl.nad.viewer.util.Util;
-import com.powsybl.nad.viewer.view.ImportBar;
 import com.powsybl.iidm.network.Network;
+import com.powsybl.nad.viewer.model.NadCalls;
+import com.powsybl.nad.viewer.view.ImportBar;
+import com.powsybl.nad.viewer.view.OptionsPane;
+import com.powsybl.nad.viewer.view.ParamPane;
+import com.powsybl.nad.viewer.view.diagram.DiagramPane;
 import javafx.scene.control.Button;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
@@ -17,6 +19,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
+import java.util.prefs.Preferences;
 
 import static com.powsybl.nad.viewer.model.NadCalls.*;
 
@@ -25,53 +28,61 @@ import static com.powsybl.nad.viewer.model.NadCalls.*;
  */
 public class ControllerImport {
     private static final Logger LOGGER = LoggerFactory.getLogger(ControllerImport.class);
-    private final Stage primaryStage;
-    private static ImportBar importBar;
-    private static File file;
+    public static final String CASE_PATH_PROPERTY = "casePath";
+    public static final String CASE_FOLDER_PROPERTY = "caseFolder";
 
-    public ControllerImport(Stage stage) {
-        this.primaryStage = stage;
+    private final ImportBar importBar;
+    private final Preferences preferences;
+    private File file;
+    private final OptionsPane optionsPane;
+    private final DiagramPane diagramPane;
+    private final ParamPane paramPane;
+
+    public ControllerImport(Stage stage, OptionsPane optionsPane, DiagramPane diagramPane, ParamPane paramPane,
+                            Preferences preferences) {
+        this.optionsPane = optionsPane;
+        this.diagramPane = diagramPane;
+        this.paramPane = paramPane;
+        this.preferences = preferences;
+
+        this.importBar = new ImportBar();
+        addListenerOnImportButton(importBar.getLoadButton(), stage);
     }
 
-    public void createImportBar() {
-        importBar = new ImportBar();
-    }
-
-    public void setImportBar() {
-        addListenerOnImportButton(importBar.getLoadButton(), primaryStage);
+    public void loadNetworkFromPreferences() {
+        String casePathPropertyValue = preferences.get(CASE_PATH_PROPERTY, null);
+        if (casePathPropertyValue != null) {
+            loadFile(new File(casePathPropertyValue));
+        }
     }
 
     private void addListenerOnImportButton(Button button, Stage primaryStage) {
         button.setOnAction(event -> {
             LOGGER.info("Import Button OK");
             FileChooser fileChooser = new FileChooser();
-            String caseFolderPropertyValue = Util.preferences.get(Util.CASE_FOLDER_PROPERTY, null);
+            String caseFolderPropertyValue = preferences.get(CASE_FOLDER_PROPERTY, null);
             if (caseFolderPropertyValue != null) {
                 fileChooser.setInitialDirectory(new File(caseFolderPropertyValue));
             }
             fileChooser.setTitle("Open case File");
-            file = fileChooser.showOpenDialog(primaryStage);
-            if (file != null) {
-                loadFile();
-
-                ControllerOptions.resetOptions();
-            }
+            loadFile(fileChooser.showOpenDialog(primaryStage));
         });
     }
 
-    public static void loadFile() {
-        // load the network corresponding to zip
-        loadNetwork(file.toPath());
-
-        // Update loading bar
-        handleLoadingResult(file);
+    public void loadFile(File file) {
+        if (file != null) {
+            this.file = file;
+            loadNetwork(file.toPath());
+            handleLoadingResult(file);
+            optionsPane.resetOptions();
+        }
     }
 
-    private static void handleLoadingResult(File file) {
+    private void handleLoadingResult(File file) {
         networkService.setOnRunning(event -> {
             importBar.getLoadingStatusButton().setStyle("-fx-background-color: yellow");
             importBar.getPathTextField().setText(file.getAbsolutePath());
-            Util.preferences.put(Util.CASE_FOLDER_PROPERTY, file.getParent());
+            preferences.put(CASE_FOLDER_PROPERTY, file.getParent());
             LOGGER.info("Please wait while we try to import the network...");
         });
 
@@ -79,7 +90,7 @@ public class ControllerImport {
             cleanNetwork();
             setNetwork((Network) event.getSource().getValue());
             importBar.getLoadingStatusButton().setStyle("-fx-background-color: green");
-            Util.preferences.put(Util.CASE_PATH_PROPERTY, file.getAbsolutePath());
+            preferences.put(CASE_PATH_PROPERTY, file.getAbsolutePath());
             LOGGER.info("Network imported successfully.");
         });
 
@@ -94,16 +105,15 @@ public class ControllerImport {
     }
 
     // Cleans all variables to prepare a new import (substations, SVG..)
-    public static void cleanNetwork() {
+    public void cleanNetwork() {
         // Clean Controller Diagram
-        ControllerDiagram.getDiagramPane().resetTabContainers();
+        diagramPane.resetTabContainers();
 
         // Clean Controller Options
-        ControllerOptions.cleanSubstations();
+        optionsPane.clearSubstations();
 
         // Clean Controller Parameters
-        ControllerParameters.setStyleProvider(null);
-        ControllerParameters.getParamPane().setDisabledSvgSpinners(true);
+        paramPane.setStyleProvider(null);
 
         // Clean NadCalls
         NadCalls.cleanSvgWriter();
@@ -112,24 +122,16 @@ public class ControllerImport {
         LOGGER.info("Cleaning diagram tabs and substations...");
     }
 
-    protected static void setNetwork(Network network) {
-        //closeAllTabs();
-        //updateLayoutsFactory(network);
-        //updateStylesProvider(network);
+    protected void setNetwork(Network network) {
         networkProperty.set(network);
-        ControllerOptions.setNodesList();
-        //setDiagramsNamesContent(network, true);
+        optionsPane.setNodesList(network, diagramPane);
     }
 
     public ImportBar getImportBar() {
         return importBar;
     }
 
-    public static void setFile(File file) {
-        ControllerImport.file = file;
-    }
-
-    public static File getFile() {
+    public File getFile() {
         return file;
     }
 }
