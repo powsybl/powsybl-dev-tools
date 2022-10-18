@@ -37,6 +37,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <java.version>11</java.version>
         <javafx.version>17.0.1</javafx.version>
+        <javafx-mvn-plugin.version>0.0.8</javafx-mvn-plugin.version>
         <slf4j.version>1.7.22</slf4j.version>
         <junit.version>4.13.1</junit.version>
         <maven.compiler.source>17</maven.compiler.source>
@@ -107,6 +108,11 @@
             <artifactId>javafx-web</artifactId>
             <version>${javafx.version}</version>
         </dependency>
+        <dependency>
+            <groupId>org.openjfx</groupId>
+            <artifactId>javafx-fxml</artifactId>
+            <version>${javafx.version}</version>
+        </dependency>
     </dependencies>
 
     <build>
@@ -116,6 +122,14 @@
                 <artifactId>maven-checkstyle-plugin</artifactId>
                 <configuration>
                     <skip>true</skip>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.openjfx</groupId>
+                <artifactId>javafx-maven-plugin</artifactId>
+                <version>${javafx-mvn-plugin.version}</version>
+                <configuration>
+                    <mainClass>com.powsybl.nad.viewer.NetworkAreaDiagramViewer</mainClass>
                 </configuration>
             </plugin>
         </plugins>
