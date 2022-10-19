@@ -1,7 +1,12 @@
 name: CI
 
-on: [push]
-
+on:
+  push:
+    branches:
+      - 'main'
+      - 'release-v**'
+  pull_request:
+    
 jobs:
   build:
     name: Build OS ${{ matrix.os }}
