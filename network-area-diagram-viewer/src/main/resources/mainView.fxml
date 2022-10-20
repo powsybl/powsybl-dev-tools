@@ -91,6 +91,12 @@
                     <GridPane hgap="5" vgap="5">
                         <Label text="Layout parameters:" style="-fx-font-weight: bold" GridPane.rowIndex="0"/>
                         <CheckBox fx:id="layoutIncludeTextNodes" text="Include info nodes in layout" GridPane.rowIndex="2"/>
+                        <Label text="Spring repulsion factor:" GridPane.rowIndex="4"/>
+                        <Spinner fx:id="springRepulsionSpinner" GridPane.rowIndex="5">
+                            <valueFactory>
+                                <SpinnerValueFactory.DoubleSpinnerValueFactory min="0" max="10" amountToStepBy="0.1"/>
+                            </valueFactory>
+                        </Spinner>
                     </GridPane>
                     <Separator>
                         <VBox.margin>

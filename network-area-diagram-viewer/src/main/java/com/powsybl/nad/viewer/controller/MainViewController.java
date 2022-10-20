@@ -65,6 +65,8 @@ public class MainViewController implements ChangeListener<Object> {
     @FXML
     public CheckBox layoutIncludeTextNodes;
     @FXML
+    public Spinner<Double> springRepulsionSpinner;
+    @FXML
     public TabPane checkedTab;
     @FXML
     public BorderPane selectedDiagram;
@@ -95,6 +97,7 @@ public class MainViewController implements ChangeListener<Object> {
                 layoutChoice.valueProperty(),
                 labelProviderChoice.valueProperty(),
                 layoutIncludeTextNodes.selectedProperty(),
+                springRepulsionSpinner.valueProperty(),
                 infoAlongEdge.selectedProperty(),
                 showNames.selectedProperty());
 
@@ -105,6 +108,7 @@ public class MainViewController implements ChangeListener<Object> {
         layoutChoice.valueProperty().addListener(this);
         labelProviderChoice.valueProperty().addListener(this);
         layoutIncludeTextNodes.selectedProperty().addListener(this);
+        springRepulsionSpinner.valueProperty().addListener(this);
         infoAlongEdge.selectedProperty().addListener(this);
         showNames.selectedProperty().addListener(this);
 
