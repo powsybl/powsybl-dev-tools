@@ -31,6 +31,7 @@ public class Model {
     private final ObjectProperty<Network> network = new SimpleObjectProperty<>();
     private final ObjectProperty<Container<?>> selectedContainer = new SimpleObjectProperty<>();
     private final BooleanProperty infoAlongEdge = new SimpleBooleanProperty();
+    private final BooleanProperty textNodesIncluded = new SimpleBooleanProperty();
     private final IntegerProperty depth = new SimpleIntegerProperty();
     private final StringProperty svgContent = new SimpleStringProperty();
     private final StringProperty labelProvider = new SimpleStringProperty();
@@ -39,10 +40,11 @@ public class Model {
     private final Map<Container<?>, StringProperty> containerToSvgMap = new HashMap<>();
 
     public Model(ReadOnlyObjectProperty<Integer> depth, ObjectProperty<String> layout, ObjectProperty<String> label,
-                 BooleanProperty infoAlongEdge, BooleanProperty showNames) {
+                 BooleanProperty textNodesIncluded, BooleanProperty infoAlongEdge, BooleanProperty showNames) {
         this.depth.bind(depth);
         this.layoutFactory.bind(layout);
         this.labelProvider.bind(label);
+        this.textNodesIncluded.bind(textNodesIncluded);
         this.infoAlongEdge.bind(infoAlongEdge);
         this.showNames.bind(showNames);
     }
@@ -82,7 +84,7 @@ public class Model {
     }
 
     public LayoutParameters getLayoutParameters() {
-        return new LayoutParameters();
+        return new LayoutParameters().setTextNodesForceLayout(textNodesIncluded.get());
     }
 
     public LabelProvider getLabelProvider() {

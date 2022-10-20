@@ -63,6 +63,8 @@ public class MainViewController implements ChangeListener<Object> {
     @FXML
     public Spinner<Integer> depthSpinner;
     @FXML
+    public CheckBox layoutIncludeTextNodes;
+    @FXML
     public TabPane checkedTab;
     @FXML
     public BorderPane selectedDiagram;
@@ -92,6 +94,7 @@ public class MainViewController implements ChangeListener<Object> {
         model = new Model(depthSpinner.valueProperty(),
                 layoutChoice.valueProperty(),
                 labelProviderChoice.valueProperty(),
+                layoutIncludeTextNodes.selectedProperty(),
                 infoAlongEdge.selectedProperty(),
                 showNames.selectedProperty());
 
@@ -101,6 +104,7 @@ public class MainViewController implements ChangeListener<Object> {
         depthSpinner.valueProperty().addListener(this);
         layoutChoice.valueProperty().addListener(this);
         labelProviderChoice.valueProperty().addListener(this);
+        layoutIncludeTextNodes.selectedProperty().addListener(this);
         infoAlongEdge.selectedProperty().addListener(this);
         showNames.selectedProperty().addListener(this);
 

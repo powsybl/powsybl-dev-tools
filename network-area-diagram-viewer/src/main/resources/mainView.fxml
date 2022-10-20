@@ -90,6 +90,7 @@
                     </Separator>
                     <GridPane hgap="5" vgap="5">
                         <Label text="Layout parameters:" style="-fx-font-weight: bold" GridPane.rowIndex="0"/>
+                        <CheckBox fx:id="layoutIncludeTextNodes" text="Include info nodes in layout" GridPane.rowIndex="2"/>
                     </GridPane>
                     <Separator>
                         <VBox.margin>
