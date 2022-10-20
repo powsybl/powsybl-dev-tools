@@ -29,4 +29,8 @@ public class NetworkAreaDiagramViewer extends Application {
         primaryStage.setScene(new Scene(root));
         primaryStage.show();
     }
+
+    public static void main(String[] args) {
+        Application.launch(NetworkAreaDiagramViewer.class);
+    }
 }

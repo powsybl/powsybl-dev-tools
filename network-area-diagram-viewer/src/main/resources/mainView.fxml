@@ -8,7 +8,7 @@
 
 <BorderPane xmlns="http://javafx.com/javafx/17.0.1" xmlns:fx="http://javafx.com/fxml/1"
             prefHeight="900.0" prefWidth="1000.0"
-            fx:controller="com.powsybl.nad.viewer.controller.MainViewController">
+            fx:controller="com.powsybl.nad.viewer.MainViewController">
     <top>
         <HBox>
             <BorderPane.margin>
