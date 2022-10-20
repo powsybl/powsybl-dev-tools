@@ -9,11 +9,8 @@ on:
     
 jobs:
   build:
-    name: Build OS ${{ matrix.os }}
-    runs-on: ${{ matrix.os }}
-    strategy:
-      matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest]
+    name: Build OS ubuntu-latest
+    runs-on: ubuntu-latest
 
     steps:
       - name: Checkout powsybl-network-area-diagram latest sources
@@ -38,7 +35,6 @@ jobs:
         run: mvn --file network-area-diagram-viewer --batch-mode -P jacoco,checks package
 
       - name: Run SonarCloud analysis
-        if: matrix.os == 'ubuntu-latest'
         run: >
           mvn --file network-area-diagram-viewer --batch-mode -Pjacoco verify sonar:sonar
           -Dsonar.host.url=https://sonarcloud.io
