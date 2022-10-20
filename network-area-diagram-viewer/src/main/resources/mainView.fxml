@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.collections.FXCollections?>
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import java.lang.String?>
+
+<BorderPane xmlns="http://javafx.com/javafx/17.0.1" xmlns:fx="http://javafx.com/fxml/1"
+            prefHeight="900.0" prefWidth="1000.0"
+            fx:controller="com.powsybl.nad.viewer.controller.MainViewController">
+    <top>
+        <HBox>
+            <BorderPane.margin>
+                <Insets topRightBottomLeft="5"/>
+            </BorderPane.margin>
+            <Button fx:id="loadingStatus" minWidth="28" style="-fx-background-color: red"/>
+            <TextField fx:id="filePath" prefWidth="900" HBox.hgrow="ALWAYS" maxWidth="Infinity"/>
+            <Button onMouseClicked="#onClickLoadFile" text="..."/>
+        </HBox>
+    </top>
+    <center>
+        <SplitPane dividerPositions="0.25, 0.8" style="-fx-box-border: transparent">
+            <BorderPane.margin>
+                <Insets topRightBottomLeft="5"/>
+            </BorderPane.margin>
+            <SplitPane orientation="VERTICAL">
+                <GridPane hgap="5" vgap="5">
+                    <Label GridPane.rowIndex="0" text="Depth:"/>
+                    <Spinner fx:id="depthSpinner" GridPane.rowIndex="1">
+                        <valueFactory>
+                            <SpinnerValueFactory.IntegerSpinnerValueFactory min="0" max="10" initialValue="1"/>
+                        </valueFactory>
+                    </Spinner>
+                    <Button onMouseClicked="#onClickLoadFlow" text="Run powsybl open-loadflow" GridPane.rowIndex="4"/>
+                    <CheckBox fx:id="showNames" onMouseClicked="#initSubstationsTree" text="Show names" selected="true" GridPane.rowIndex="7"/>
+                    <CheckBox fx:id="hideSubstations" onMouseClicked="#initSubstationsTree" text="Hide substations" GridPane.rowIndex="9"/>
+                    <CheckBox fx:id="hideVoltageLevels" onMouseClicked="#initSubstationsTree" text="Hide voltage levels" GridPane.rowIndex="11"/>
+                    <Label text="Filter:" GridPane.rowIndex="13"/>
+                    <TextField fx:id="filterField" onKeyTyped="#initSubstationsTree" minWidth="40" GridPane.rowIndex="14"/>
+                </GridPane>
+                <VBox minHeight="600">
+                    <TreeView VBox.vgrow="ALWAYS" maxHeight="Infinity" fx:id="vlTree"/>
+                </VBox>
+            </SplitPane>
+            <TabPane fx:id="checkedOrSelected">
+                <Tab text="Selected" closable="false">
+                    <fx:include fx:id="selectedDiagram" source="diagramView.fxml"/>
+                </Tab>
+                <Tab text="Checked" closable="false">
+                    <TabPane fx:id="checkedTab"/>
+                </Tab>
+            </TabPane>
+            <VBox>
+                <VBox>
+                    <VBox.margin>
+                        <Insets topRightBottomLeft="10"/>
+                    </VBox.margin>
+                    <GridPane hgap="5" vgap="5">
+                        <Button onMouseClicked="#onClickFitToContent" text="Fit to content" GridPane.rowIndex="0"/>
+                        <Button onMouseClicked="#onClickResetZoom" text="Reset zoom" GridPane.rowIndex="1"/>
+                    </GridPane>
+                    <Separator>
+                        <VBox.margin>
+                            <Insets topRightBottomLeft="10"/>
+                        </VBox.margin>
+                    </Separator>
+                    <GridPane hgap="5" vgap="5">
+                        <Label text="Layout:" GridPane.rowIndex="0"/>
+                        <ChoiceBox fx:id="layoutChoice" GridPane.rowIndex="1" value="Basic">
+                            <items>
+                                <FXCollections fx:factory="observableArrayList">
+                                    <String fx:value="Basic"/>
+                                </FXCollections>
+                            </items>
+                        </ChoiceBox>
+                        <Label text="LabelProvider:" GridPane.rowIndex="3"/>
+                        <ChoiceBox fx:id="labelProviderChoice" GridPane.rowIndex="4" value="Default">
+                            <items>
+                                <FXCollections fx:factory="observableArrayList">
+                                    <String fx:value="Default"/>
+                                </FXCollections>
+                            </items>
+                        </ChoiceBox>
+                    </GridPane>
+                    <Separator>
+                        <VBox.margin>
+                            <Insets topRightBottomLeft="10"/>
+                        </VBox.margin>
+                    </Separator>
+                    <GridPane hgap="5" vgap="5">
+                        <Label text="Layout parameters:" style="-fx-font-weight: bold" GridPane.rowIndex="0"/>
+                    </GridPane>
+                    <Separator>
+                        <VBox.margin>
+                            <Insets topRightBottomLeft="10"/>
+                        </VBox.margin>
+                    </Separator>
+                    <GridPane hgap="5" vgap="5">
+                        <Label style="-fx-font-weight: bold" text="SVG parameters:" GridPane.rowIndex="0"/>
+                        <CheckBox fx:id="infoAlongEdge" text="Set Info Along Edge" selected="true" GridPane.rowIndex="2"/>
+                    </GridPane>
+                </VBox>
+            </VBox>
+        </SplitPane>
+    </center>
+    <padding>
+        <Insets topRightBottomLeft="5"/>
+    </padding>
+</BorderPane>
