@@ -51,6 +51,8 @@ public class DiagramController {
     private String html;
     private String js;
 
+    private final JsHandler jsHandler = new JsHandler();
+
     @FXML
     private void initialize() throws IOException {
         // Add Zoom management
@@ -76,7 +78,9 @@ public class DiagramController {
         diagramWebView.getEngine().getLoadWorker().stateProperty().addListener((observable, oldValue, newValue) -> {
             if (Worker.State.SUCCEEDED == newValue) {
                 JSObject window = (JSObject) diagramWebView.getEngine().executeScript("window");
-                window.setMember("jsHandler", new Object());
+                window.setMember("jsHandler", jsHandler);
+                diagramWebView.getEngine().executeScript("console.log = function(message) " +
+                        "{ jsHandler.log(message); };");
             }
         });
 
