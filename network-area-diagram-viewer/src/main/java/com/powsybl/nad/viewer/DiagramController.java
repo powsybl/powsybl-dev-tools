@@ -12,6 +12,8 @@ import com.powsybl.iidm.network.Network;
 import com.powsybl.iidm.network.Substation;
 import com.powsybl.iidm.network.VoltageLevel;
 import com.powsybl.nad.NetworkAreaDiagram;
+import com.powsybl.nad.layout.LayoutParameters;
+import com.powsybl.nad.model.Point;
 import com.powsybl.nad.svg.iidm.NominalVoltageStyleProvider;
 import javafx.beans.property.StringProperty;
 import javafx.concurrent.Service;
@@ -28,6 +30,7 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.regex.Matcher;
@@ -79,6 +82,7 @@ public class DiagramController {
             if (Worker.State.SUCCEEDED == newValue) {
                 JSObject window = (JSObject) diagramWebView.getEngine().executeScript("window");
                 window.setMember("jsHandler", jsHandler);
+                // For easier debugging, redirect the console.log to the jsHandler
                 diagramWebView.getEngine().executeScript("console.log = function(message) " +
                         "{ jsHandler.log(message); };");
             }
@@ -95,7 +99,51 @@ public class DiagramController {
         });
         svgContent.textProperty().bind(modelSvgContent);
 
+        // Link the jsHandler with this controller
+        jsHandler.linkWithController(model, modelSvgContent, container);
+
         updateDiagram(model, modelSvgContent, container);
+    }
+
+    public static void updateDiagram(Model model, StringProperty modelSvgContent, Container<?> container, Map<String, Point> postLayoutPositions) {
+        Objects.requireNonNull(postLayoutPositions);
+        // TODO(Luma) not the best way to do it, just to explore how things could work ...
+        // Instead of updating only the location of the given equipment
+        // We do a complete layout without restrictions,
+        // then apply the given post layout positions to the result
+        // and after that we use the updated positions to do final complete drawing
+        StringWriter writer = new StringWriter();
+        Service<String> nadService = new Service<>() {
+            @Override
+            protected Task<String> createTask() {
+                return new Task<>() {
+                    @Override
+                    protected String call() {
+                        NetworkAreaDiagram nad = getNetworkAreaDiagram(model, container);
+                        // First layout without restrictions
+                        Map<String, Point> positions = nad.layout(model.getLayoutParameters(), model.getLayoutFactory());
+                        // Update the positions with the parameters given
+                        postLayoutPositions.putAll(positions);
+                        // And use the updated positions as initial for the new layout
+                        LayoutParameters layoutParameters = new LayoutParameters(model.getLayoutParameters())
+                                .setInitialPositions(positions);
+                        nad.draw(writer,
+                                model.getSvgParameters(),
+                                layoutParameters,
+                                new NominalVoltageStyleProvider(model.getNetwork()),
+                                model.getLabelProvider(), model.getLayoutFactory());
+                        return writer.toString();
+                    }
+                };
+            }
+        };
+
+        nadService.setOnSucceeded(event -> modelSvgContent.setValue((String) event.getSource().getValue()));
+        nadService.setOnFailed(event -> {
+            Throwable exception = event.getSource().getException();
+            LOGGER.error(exception.toString(), exception);
+        });
+        nadService.start();
     }
 
     public static void updateDiagram(Model model, StringProperty modelSvgContent, Container<?> container) {
@@ -107,7 +155,9 @@ public class DiagramController {
                     @Override
                     protected String call() {
                         NetworkAreaDiagram nad = getNetworkAreaDiagram(model, container);
-                        nad.draw(writer, model.getSvgParameters(), model.getLayoutParameters(),
+                        nad.draw(writer,
+                                model.getSvgParameters(),
+                                model.getLayoutParameters(),
                                 new NominalVoltageStyleProvider(model.getNetwork()),
                                 model.getLabelProvider(), model.getLayoutFactory());
                         return writer.toString();
