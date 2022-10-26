@@ -123,7 +123,7 @@ public class DiagramController {
                         // First layout without restrictions
                         Map<String, Point> positions = nad.layout(model.getLayoutParameters(), model.getLayoutFactory());
                         // Update the positions with the parameters given
-                        postLayoutPositions.putAll(positions);
+                        positions.putAll(postLayoutPositions);
                         // And use the updated positions as initial for the new layout
                         LayoutParameters layoutParameters = new LayoutParameters(model.getLayoutParameters())
                                 .setInitialPositions(positions);
