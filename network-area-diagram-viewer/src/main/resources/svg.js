@@ -26,10 +26,13 @@ function makeDraggableSvg(svg) {
     }
 
     function startDrag(event) {
-        if (!isDraggable(event.target)) {
+        if (isDraggable(event.target)) {
+            selectedElement = event.target;
+        } else if (isDraggable(event.target.parentElement)) {
+            selectedElement = event.target.parentElement;
+        } else {
             return;
         }
-        selectedElement = event.target;
         selectedElement.style.cursor = 'grabbing';
 
         offset = getMousePosition(event);
@@ -84,7 +87,7 @@ function isDraggable(element) {
 }
 
 function hasId(element){
-    return typeof element.id != 'undefined';
+    return typeof element.id != 'undefined' && element.id != '';
 }
 
 function findEquipmentId(svg, svgId) {
