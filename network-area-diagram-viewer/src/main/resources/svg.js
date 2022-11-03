@@ -65,21 +65,48 @@ function makeDraggableSvg(svg) {
         if (selectedElement) {
             console.log("endDrag for SVG element " + selectedElement.id);
             selectedElement.style.cursor = 'grab';
-
-            // TODO(Luma) allow drag multiple equipment before updating the diagram
-            // We could keep a local list of new locations for some equipment
-            // and wait until the user confirms the re-layout with all the updates
-
-            // Obtain the equipmentId from the metadata and pass it to the jsHandler with the new position for it
-            var equipmentId = findEquipmentId(svg, selectedElement.id);
-            // Final desired position for the equipment is current mouse position in SVG coordinate system
-            var coords = getMousePosition(event);
-            if (typeof jsHandler !== 'undefined') {
-                jsHandler.updateDiagramWithEquipmentLocation(equipmentId, coords.x, coords.y);
-            }
+            // Desired position for the selected element is current mouse position in SVG coordinate system
+            updateDiagram(svg, selectedElement.id, getMousePosition(event));
         }
         selectedElement = null;
     }
+}
+
+function updateDiagram(svg, diagramId, coords) {
+    // In this version we simply ignore the updated position of the diagram element,
+    // we just gather all positions and fire a global update of the diagram.
+    // An alternative could be to request a diagram update passing only the change in the element moved.
+    // Or, we could keep a local list of new locations for some equipment
+    // and wait until the user confirms the re-layout with all the updated positions.
+    positions = gatherAllEquipmentPositions(svg);
+    if (typeof jsHandler !== 'undefined') {
+        jsHandler.updateDiagramWithPositions(JSON.stringify(positions));
+    }
+}
+
+function gatherAllEquipmentPositions(svg) {
+    // Store all node id mappings in a dictionary
+    var diagramId2EquipmentId = {};
+    for (node of svg.getElementsByTagName("nad:node")) {
+        diagramId2EquipmentId[node.getAttribute("diagramid")] = node.getAttribute("equipmentid");
+    }
+
+    // For all elements in svg that have the id property, create position of equipment id
+    var positions = {};
+    var CTM = svg.getScreenCTM();
+    for (svgElem of svg.querySelectorAll("[id]")) {
+        if (svgElem.id in diagramId2EquipmentId) {
+            id = diagramId2EquipmentId[svgElem.id];
+            // getBBox returns coordinates without considering transforms to the element itself or its parents
+            // getBoundingClientRect returns actual coordinates but in screen space
+            var rect = svgElem.getBoundingClientRect();
+            var point = {x: rect.x + .5 * rect.width, y: rect.y + .5 * rect.height};
+            point.x = (point.x - CTM.e) / CTM.a;
+            point.y = (point.y - CTM.f) / CTM.d;
+            positions[id] = point;
+        }
+    }
+    return positions;
 }
 
 function isDraggable(element) {
@@ -89,20 +116,3 @@ function isDraggable(element) {
 function hasId(element){
     return typeof element.id != 'undefined' && element.id != '';
 }
-
-function findEquipmentId(svg, svgId) {
-    console.log("findEquipmentId (" + svgId + ")");
-    for (node of svg.getElementsByTagName("nad:node")) {
-        if (node.getAttribute("diagramid") === svgId) {
-            console.log("  found node " + node.getAttribute("equipmentid"));
-            return node.getAttribute("equipmentid");
-        }
-    }
-    for (node of svg.getElementsByTagName("nad:busnode")) {
-        if (node.getAttribute("diagramid") === svgId) {
-            console.log("  found busnode " + node.getAttribute("equipmentid"));
-            return node.getAttribute("equipmentid");
-        }
-    }
-}
-

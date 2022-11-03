@@ -12,10 +12,11 @@ import com.powsybl.iidm.network.Network;
 import com.powsybl.iidm.network.Substation;
 import com.powsybl.iidm.network.VoltageLevel;
 import com.powsybl.nad.NetworkAreaDiagram;
+import com.powsybl.nad.layout.BasicFixedLayoutFactory;
 import com.powsybl.nad.layout.Layout;
-import com.powsybl.nad.layout.LayoutFactory;
 import com.powsybl.nad.model.Graph;
 import com.powsybl.nad.model.Point;
+import com.powsybl.nad.svg.SvgWriter;
 import com.powsybl.nad.svg.iidm.NominalVoltageStyleProvider;
 import javafx.beans.property.StringProperty;
 import javafx.concurrent.Service;
@@ -107,13 +108,8 @@ public class DiagramController {
         updateDiagram(model, modelSvgContent, container);
     }
 
-    public static void updateDiagram(Model model, StringProperty modelSvgContent, Container<?> container, Map<String, Point> postLayoutPositions) {
-        Objects.requireNonNull(postLayoutPositions);
-        // TODO(Luma) not the best way to do it, just to explore how things could work ...
-        // Instead of updating only the location of the given equipment
-        // We do a complete layout without restrictions,
-        // then apply the given post layout positions to the result
-        // and after that we use the updated positions to do final complete drawing
+    public static void updateDiagram(Model model, StringProperty modelSvgContent, Container<?> container, Map<String, Point> positions) {
+        Objects.requireNonNull(positions);
         StringWriter writer = new StringWriter();
         Service<String> nadService = new Service<>() {
             @Override
@@ -122,24 +118,18 @@ public class DiagramController {
                     @Override
                     protected String call() {
                         NetworkAreaDiagram nad = getNetworkAreaDiagram(model, container);
-                        // First layout without restrictions
-                        Layout layout = nad.getLayout();
+
+                        // Use the diagram definition but apply a fixed layout
                         Graph graph = nad.buildGraph();
-                        Map<String, Point> positions = layout.run(graph, model.getLayoutParameters());
-                        // Update the positions with the parameters given
-                        positions.putAll(postLayoutPositions);
-                        // And use the updated positions as initial for the new layout
-                        LayoutFactory layoutFactory = () -> {
-                            Layout layout1 = model.getLayoutFactory().create();
-                            layout1.setInitialNodePositions(positions);
-                            layout1.setNodesWithFixedPosition(positions.keySet());
-                            return layout1;
-                        };
-                        nad.draw(writer,
+                        Layout fixedLayout = new BasicFixedLayoutFactory().create();
+                        fixedLayout.setInitialNodePositions(positions);
+                        fixedLayout.run(graph, model.getLayoutParameters());
+
+                        new SvgWriter(
                                 model.getSvgParameters(),
-                                model.getLayoutParameters(),
                                 new NominalVoltageStyleProvider(model.getNetwork()),
-                                model.getLabelProvider(), layoutFactory);
+                                model.getLabelProvider())
+                                .writeSvg(graph, writer);
                         return writer.toString();
                     }
                 };

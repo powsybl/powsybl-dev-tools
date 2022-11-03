@@ -1,8 +1,10 @@
 package com.powsybl.nad.viewer;
 
-import com.powsybl.iidm.network.Bus;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.powsybl.commons.PowsyblException;
 import com.powsybl.iidm.network.Container;
-import com.powsybl.iidm.network.VoltageLevel;
 import com.powsybl.nad.model.Point;
 import javafx.beans.property.StringProperty;
 import org.slf4j.Logger;
@@ -17,7 +19,10 @@ public class JsHandler {
     private StringProperty modelSvgContent;
     private Container<?> container;
 
-    private final Map<String, Point> postLayoutPositions = new HashMap<>();
+    // To be able to access the Java Logger from JavaScript
+    public void log(String message) {
+        LOG.info(message);
+    }
 
     // FIXME(Luma) The handler is created in the default constructor of the diagram controller,
     // when we do not have information about the model information
@@ -29,28 +34,20 @@ public class JsHandler {
 
     /**
      * Called when the JS side decides that the diagram should be updated
-     * @param equipmentId the id of the equipment that has been moved
-     * @param x the x coord of the new location for the equipment
-     * @param y the y coord of the new location for the equipment
+     * @param jsonPositions a JSON string with new positions for (eventually all) elements in the diagram
      */
-    public void updateDiagramWithEquipmentLocation(String equipmentId, double x, double y) {
-        LOG.info("updateDiagramWithEquipmentLocation ({}, {}, {})", equipmentId, x, y);
-        // Check if we have a bus id or a voltage level id
-        VoltageLevel vl = model.getNetwork().getVoltageLevel(equipmentId);
-        if (vl == null) {
-            Bus bus = model.getNetwork().getBusView().getBus(equipmentId);
-            if (bus != null) {
-                vl = bus.getVoltageLevel();
-            }
-        }
-        if (vl != null) {
-            postLayoutPositions.put(vl.getId(), new Point(x, y));
-            DiagramController.updateDiagram(model, modelSvgContent, container, postLayoutPositions);
-        }
+    public void updateDiagramWithPositions(String jsonPositions) {
+        LOG.info("updateDiagramWithEquipmentPositions ({})", jsonPositions);
+        DiagramController.updateDiagram(model, modelSvgContent, container, deserializePositions(jsonPositions));
     }
 
-    public void log(String message) {
-        LOG.info(message);
+    private Map<String, Point> deserializePositions(String jsonPositions) {
+        TypeReference<HashMap<String, Point>> typeRef = new TypeReference<>() { };
+        try {
+            return new ObjectMapper().readValue(jsonPositions, typeRef);
+        } catch (JsonProcessingException x) {
+            throw new PowsyblException("deserializing positions from " + jsonPositions, x);
+        }
     }
 
     private static final Logger LOG = LoggerFactory.getLogger(JsHandler.class);
