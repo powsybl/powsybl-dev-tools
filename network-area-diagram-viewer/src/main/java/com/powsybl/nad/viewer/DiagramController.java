@@ -12,7 +12,9 @@ import com.powsybl.iidm.network.Network;
 import com.powsybl.iidm.network.Substation;
 import com.powsybl.iidm.network.VoltageLevel;
 import com.powsybl.nad.NetworkAreaDiagram;
-import com.powsybl.nad.layout.LayoutParameters;
+import com.powsybl.nad.layout.Layout;
+import com.powsybl.nad.layout.LayoutFactory;
+import com.powsybl.nad.model.Graph;
 import com.powsybl.nad.model.Point;
 import com.powsybl.nad.svg.iidm.NominalVoltageStyleProvider;
 import javafx.beans.property.StringProperty;
@@ -121,17 +123,23 @@ public class DiagramController {
                     protected String call() {
                         NetworkAreaDiagram nad = getNetworkAreaDiagram(model, container);
                         // First layout without restrictions
-                        Map<String, Point> positions = nad.layout(model.getLayoutParameters(), model.getLayoutFactory());
+                        Layout layout = nad.getLayout();
+                        Graph graph = nad.buildGraph();
+                        Map<String, Point> positions = layout.run(graph, model.getLayoutParameters());
                         // Update the positions with the parameters given
                         positions.putAll(postLayoutPositions);
                         // And use the updated positions as initial for the new layout
-                        LayoutParameters layoutParameters = new LayoutParameters(model.getLayoutParameters())
-                                .setInitialPositions(positions);
+                        LayoutFactory layoutFactory = () -> {
+                            Layout layout1 = model.getLayoutFactory().create();
+                            layout1.setInitialNodePositions(positions);
+                            layout1.setNodesWithFixedPosition(positions.keySet());
+                            return layout1;
+                        };
                         nad.draw(writer,
                                 model.getSvgParameters(),
-                                layoutParameters,
+                                model.getLayoutParameters(),
                                 new NominalVoltageStyleProvider(model.getNetwork()),
-                                model.getLabelProvider(), model.getLayoutFactory());
+                                model.getLabelProvider(), layoutFactory);
                         return writer.toString();
                     }
                 };
