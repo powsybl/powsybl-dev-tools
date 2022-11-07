@@ -6,7 +6,6 @@
  */
 package com.powsybl.nad.viewer;
 
-import com.powsybl.iidm.import_.Importers;
 import com.powsybl.iidm.network.*;
 import com.powsybl.loadflow.LoadFlow;
 import javafx.beans.value.ChangeListener;
@@ -62,19 +61,30 @@ public class MainViewController implements ChangeListener<Object> {
     @FXML
     public Spinner<Integer> depthSpinner;
     @FXML
-    public CheckBox layoutIncludeTextNodes;
+    public ChoiceBox<String> labelProviderChoice;
+    @FXML
+    public ChoiceBox<String> layoutChoice;
+
+    // Layout parameters
     @FXML
     public Spinner<Double> springRepulsionSpinner;
+    @FXML
+    public CheckBox layoutIncludeTextNodes;
+
+    // SVG parameters
+    @FXML
+    public CheckBox idDisplayed;
+    @FXML
+    public CheckBox infoAlongEdge;
+    @FXML
+    public CheckBox insertNameDesc;
+    @FXML
+    public CheckBox substationDescriptionDisplayed;
+
     @FXML
     public TabPane checkedTab;
     @FXML
     public BorderPane selectedDiagram;
-    @FXML
-    public ChoiceBox<String> labelProviderChoice;
-    @FXML
-    public ChoiceBox<String> layoutChoice;
-    @FXML
-    public CheckBox infoAlongEdge;
     @FXML
     public TabPane checkedOrSelected;
     @FXML
@@ -93,29 +103,38 @@ public class MainViewController implements ChangeListener<Object> {
         }
 
         model = new Model(depthSpinner.valueProperty(),
-                layoutChoice.valueProperty(),
                 labelProviderChoice.valueProperty(),
-                layoutIncludeTextNodes.selectedProperty(),
+                layoutChoice.valueProperty(),
+                showNames.selectedProperty(),
+
                 springRepulsionSpinner.valueProperty(),
+                layoutIncludeTextNodes.selectedProperty(),
+
+                idDisplayed.selectedProperty(),
                 infoAlongEdge.selectedProperty(),
-                showNames.selectedProperty());
+                insertNameDesc.selectedProperty(),
+                substationDescriptionDisplayed.selectedProperty());
 
         model.getNetworkProperty().addListener((observableValue, oldNetwork, newNetwork) ->
                 initSubstationsTree(newNetwork));
 
         depthSpinner.valueProperty().addListener(this);
-        layoutChoice.valueProperty().addListener(this);
         labelProviderChoice.valueProperty().addListener(this);
+        layoutChoice.valueProperty().addListener(this);
+
         layoutIncludeTextNodes.selectedProperty().addListener(this);
         springRepulsionSpinner.valueProperty().addListener(this);
-        infoAlongEdge.selectedProperty().addListener(this);
-        showNames.selectedProperty().addListener(this);
 
+        idDisplayed.selectedProperty().addListener(this);
+        infoAlongEdge.selectedProperty().addListener(this);
+        insertNameDesc.selectedProperty().addListener(this);
+        substationDescriptionDisplayed.selectedProperty().addListener(this);
+
+        showNames.selectedProperty().addListener(this);
         vlTree.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
             model.setSelectedContainer(newValue.getValue());
             selectedDiagramController.createDiagram(model, model.getSvgContent(), newValue.getValue());
         });
-
         vlTree.setCellFactory(param -> {
             CheckBoxTreeCell<Container<?>> treeCell = new CheckBoxTreeCell<>();
             StringConverter<TreeItem<Container<?>>> strConvert = new StringConverter<>() {
@@ -172,7 +191,7 @@ public class MainViewController implements ChangeListener<Object> {
                     return new Task<>() {
                         @Override
                         protected Network call() {
-                            return Importers.loadNetwork(file.toPath());
+                            return Network.read(file.toPath());
                         }
                     };
                 }
