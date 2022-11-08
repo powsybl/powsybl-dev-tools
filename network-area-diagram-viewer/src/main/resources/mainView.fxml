@@ -106,6 +106,9 @@
                     <GridPane hgap="5" vgap="5">
                         <Label style="-fx-font-weight: bold" text="SVG parameters:" GridPane.rowIndex="0"/>
                         <CheckBox fx:id="infoAlongEdge" text="Set Info Along Edge" selected="true" GridPane.rowIndex="2"/>
+                        <CheckBox fx:id="idDisplayed" text="Display id (instead of name)" selected="false" GridPane.rowIndex="3"/>
+                        <CheckBox fx:id="insertNameDesc" text="Insert desc elements" selected="true" GridPane.rowIndex="4"/>
+                        <CheckBox fx:id="substationDescriptionDisplayed" text="Display substation" selected="false" GridPane.rowIndex="5"/>
                     </GridPane>
                 </VBox>
             </VBox>
