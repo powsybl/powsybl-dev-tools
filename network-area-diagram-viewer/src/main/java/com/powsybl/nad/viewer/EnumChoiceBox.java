@@ -12,7 +12,7 @@ import javafx.scene.control.ChoiceBox;
 // From https://stackoverflow.com/questions/31325062/pass-enum-in-fxml
 // Author https://stackoverflow.com/users/2189127/james-d
 public class EnumChoiceBox<E extends Enum<E>> extends ChoiceBox<E> {
-    public EnumChoiceBox(@NamedArg("enumType") String enumType) throws Exception {
+    public EnumChoiceBox(@NamedArg("enumType") String enumType) throws ClassNotFoundException {
         Class<E> enumClass = (Class<E>) Class.forName(enumType);
         getItems().setAll(enumClass.getEnumConstants());
         getSelectionModel().select(0);
