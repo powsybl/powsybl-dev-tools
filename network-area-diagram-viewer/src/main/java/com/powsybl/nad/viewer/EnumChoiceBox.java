@@ -9,12 +9,21 @@ package com.powsybl.nad.viewer;
 import javafx.beans.NamedArg;
 import javafx.scene.control.ChoiceBox;
 
+import java.util.Arrays;
+
 // From https://stackoverflow.com/questions/31325062/pass-enum-in-fxml
 // Author https://stackoverflow.com/users/2189127/james-d
 public class EnumChoiceBox<E extends Enum<E>> extends ChoiceBox<E> {
-    public EnumChoiceBox(@NamedArg("enumType") String enumType) throws ClassNotFoundException {
+    public EnumChoiceBox(@NamedArg("enumType") String enumType, @NamedArg("initialValue") String initialValue) throws ClassNotFoundException {
         Class<E> enumClass = (Class<E>) Class.forName(enumType);
-        getItems().setAll(enumClass.getEnumConstants());
-        getSelectionModel().select(0);
+        E[] values = enumClass.getEnumConstants();
+        getItems().setAll(values);
+        int i;
+        for (i = 0; i < values.length; i++) {
+            if (values[i].name().equals(initialValue)) {
+                break;
+            }
+        }
+        getSelectionModel().select(i == values.length ? 0 : i);
     }
 }

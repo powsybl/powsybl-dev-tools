@@ -87,7 +87,7 @@ public class MainViewController implements ChangeListener<Object> {
     @FXML
     public ChoiceBox<SvgParameters.SizeConstraint> sizeConstraintChoice;
     @FXML
-    public Spinner<Integer> fixedSizeSpinner;
+    public Spinner<Double> fixedSizeSpinner;
 
     @FXML
     public TabPane checkedTab;

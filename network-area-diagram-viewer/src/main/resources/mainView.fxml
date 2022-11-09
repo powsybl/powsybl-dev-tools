@@ -1,12 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import com.powsybl.nad.viewer.EnumChoiceBox?>
 <?import javafx.collections.FXCollections?>
 <?import javafx.geometry.*?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 <?import java.lang.String?>
-<?import com.powsybl.nad.viewer.EnumChoiceBox?>
-
 <BorderPane xmlns="http://javafx.com/javafx/17.0.1" xmlns:fx="http://javafx.com/fxml/1"
             prefHeight="900.0" prefWidth="1000.0"
             fx:controller="com.powsybl.nad.viewer.MainViewController">
@@ -117,10 +116,10 @@
                             </VBox.margin>
                         </Separator>
                         <CheckBox fx:id="widthHeightAdded" text="Add height and width" selected="true" GridPane.rowIndex="7"/>
-                        <EnumChoiceBox enumType="com.powsybl.nad.svg.SvgParameters$SizeConstraint" fx:id="sizeConstraintChoice" GridPane.rowIndex="8"/>
+                        <EnumChoiceBox enumType="com.powsybl.nad.svg.SvgParameters$SizeConstraint" fx:id="sizeConstraintChoice" initialValue="FIXED_HEIGHT" GridPane.rowIndex="8"/>
                         <Spinner fx:id="fixedSizeSpinner" GridPane.rowIndex="9">
                             <valueFactory>
-                                <SpinnerValueFactory.IntegerSpinnerValueFactory min="200" max="2000" amountToStepBy="100"/>
+                                <SpinnerValueFactory.DoubleSpinnerValueFactory min="1" max="2000" amountToStepBy="100" initialValue="200"/>
                             </valueFactory>
                         </Spinner>
                         <Separator GridPane.rowIndex="11">

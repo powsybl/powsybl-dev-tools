@@ -43,7 +43,7 @@ public class Model {
     // Diagram size
     private final BooleanProperty widthHeightAdded = new SimpleBooleanProperty();
     private final ObjectProperty<SvgParameters.SizeConstraint> sizeConstraint = new SimpleObjectProperty<>(this, "sizeConstraint", SvgParameters.SizeConstraint.NONE);
-    private final IntegerProperty fixedSize = new SimpleIntegerProperty();
+    private final DoubleProperty fixedSize = new SimpleDoubleProperty();
 
     private final IntegerProperty depth = new SimpleIntegerProperty();
     private final StringProperty svgContent = new SimpleStringProperty();
@@ -69,7 +69,7 @@ public class Model {
                  // Diagram size
                  BooleanProperty widthHeightAdded,
                  ReadOnlyObjectProperty<SvgParameters.SizeConstraint> sizeConstraint,
-                 ReadOnlyObjectProperty<Integer> fixedSize
+                 ReadOnlyObjectProperty<Double> fixedSize
     ) {
         this.depth.bind(depth);
         this.labelProvider.bind(label);
@@ -128,10 +128,13 @@ public class Model {
                 .setSizeConstraint(sizeConstraint.get());
         switch (sizeConstraint.get()) {
             case FIXED_HEIGHT:
-                svgParameters.setFixedHeight(fixedSize.get());
+                svgParameters.setFixedHeight((int) Math.round(fixedSize.get()));
                 break;
             case FIXED_WIDTH:
-                svgParameters.setFixedWidth(fixedSize.get());
+                svgParameters.setFixedWidth((int) Math.round(fixedSize.get()));
+                break;
+            case FIXED_SCALE:
+                svgParameters.setFixedScale(fixedSize.get());
                 break;
             default:
                 break;
