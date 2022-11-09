@@ -40,6 +40,10 @@ public class Model {
     private final BooleanProperty infoAlongEdge = new SimpleBooleanProperty();
     private final BooleanProperty insertNameDesc = new SimpleBooleanProperty();
     private final BooleanProperty substationDescriptionDisplayed = new SimpleBooleanProperty();
+    // Diagram size
+    private final BooleanProperty widthHeightAdded = new SimpleBooleanProperty();
+    private final ObjectProperty<SvgParameters.SizeConstraint> sizeConstraint = new SimpleObjectProperty<>(this, "sizeConstraint", SvgParameters.SizeConstraint.NONE);
+    private final IntegerProperty fixedSize = new SimpleIntegerProperty();
 
     private final IntegerProperty depth = new SimpleIntegerProperty();
     private final StringProperty svgContent = new SimpleStringProperty();
@@ -61,8 +65,12 @@ public class Model {
                  BooleanProperty idDisplayed,
                  BooleanProperty infoAlongEdge,
                  BooleanProperty insertNameDesc,
-                 BooleanProperty substationDescriptionDisplayed
-                 ) {
+                 BooleanProperty substationDescriptionDisplayed,
+                 // Diagram size
+                 BooleanProperty widthHeightAdded,
+                 ReadOnlyObjectProperty<SvgParameters.SizeConstraint> sizeConstraint,
+                 ReadOnlyObjectProperty<Integer> fixedSize
+    ) {
         this.depth.bind(depth);
         this.labelProvider.bind(label);
         this.layoutFactory.bind(layout);
@@ -71,10 +79,15 @@ public class Model {
         this.springRepulsionFactor.bind(springRepulsionFactor);
         this.textNodesIncluded.bind(textNodesIncluded);
 
+        // SVG parameters
         this.idDisplayed.bind(idDisplayed);
         this.infoAlongEdge.bind(infoAlongEdge);
         this.insertNameDesc.bind(insertNameDesc);
         this.substationDescriptionDisplayed.bind(substationDescriptionDisplayed);
+        // Diagram size
+        this.widthHeightAdded.bind(widthHeightAdded);
+        this.sizeConstraint.bind(sizeConstraint);
+        this.fixedSize.bind(fixedSize);
     }
 
     public void setNetwork(Network network) {
@@ -106,12 +119,24 @@ public class Model {
     }
 
     public SvgParameters getSvgParameters() {
-        return new SvgParameters()
+        SvgParameters svgParameters = new SvgParameters()
                 .setIdDisplayed(idDisplayed.get())
                 .setInsertNameDesc(insertNameDesc.get())
                 .setSubstationDescriptionDisplayed(substationDescriptionDisplayed.get())
                 .setEdgeInfoAlongEdge(infoAlongEdge.get())
-                .setSvgWidthAndHeightAdded(true);
+                .setSvgWidthAndHeightAdded(widthHeightAdded.get())
+                .setSizeConstraint(sizeConstraint.get());
+        switch (sizeConstraint.get()) {
+            case FIXED_HEIGHT:
+                svgParameters.setFixedHeight(fixedSize.get());
+                break;
+            case FIXED_WIDTH:
+                svgParameters.setFixedWidth(fixedSize.get());
+                break;
+            default:
+                break;
+        }
+        return svgParameters;
     }
 
     public LayoutParameters getLayoutParameters() {
