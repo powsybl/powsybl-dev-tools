@@ -9,8 +9,6 @@ package com.powsybl.nad.viewer;
 import javafx.beans.NamedArg;
 import javafx.scene.control.ChoiceBox;
 
-import java.util.Arrays;
-
 // From https://stackoverflow.com/questions/31325062/pass-enum-in-fxml
 // Author https://stackoverflow.com/users/2189127/james-d
 public class EnumChoiceBox<E extends Enum<E>> extends ChoiceBox<E> {
