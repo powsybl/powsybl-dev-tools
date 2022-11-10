@@ -14,9 +14,8 @@ import com.powsybl.iidm.network.VoltageLevel;
 import com.powsybl.nad.NetworkAreaDiagram;
 import com.powsybl.nad.layout.BasicFixedLayoutFactory;
 import com.powsybl.nad.layout.Layout;
-import com.powsybl.nad.model.Graph;
+import com.powsybl.nad.layout.LayoutFactory;
 import com.powsybl.nad.model.Point;
-import com.powsybl.nad.svg.SvgWriter;
 import com.powsybl.nad.svg.iidm.NominalVoltageStyleProvider;
 import javafx.beans.property.StringProperty;
 import javafx.concurrent.Service;
@@ -118,18 +117,18 @@ public class DiagramController {
                     @Override
                     protected String call() {
                         NetworkAreaDiagram nad = getNetworkAreaDiagram(model, container);
-
-                        // Use the diagram definition but apply a fixed layout
-                        Graph graph = nad.buildGraph();
-                        Layout fixedLayout = new BasicFixedLayoutFactory().create();
-                        fixedLayout.setInitialNodePositions(positions);
-                        fixedLayout.run(graph, model.getLayoutParameters());
-
-                        new SvgWriter(
+                        // Use the diagram definition to draw,
+                        // but apply a fixed layout using the given positions
+                        LayoutFactory layoutFactory = () -> {
+                            Layout fixedLayout = new BasicFixedLayoutFactory().create();
+                            fixedLayout.setInitialNodePositions(positions);
+                            return fixedLayout;
+                        };
+                        nad.draw(writer,
                                 model.getSvgParameters(),
+                                model.getLayoutParameters(),
                                 new NominalVoltageStyleProvider(model.getNetwork()),
-                                model.getLabelProvider())
-                                .writeSvg(graph, writer);
+                                model.getLabelProvider(), layoutFactory);
                         return writer.toString();
                     }
                 };

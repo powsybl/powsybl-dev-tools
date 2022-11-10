@@ -6,7 +6,6 @@
  */
 package com.powsybl.nad.viewer;
 
-import com.powsybl.iidm.import_.Importers;
 import com.powsybl.iidm.network.*;
 import com.powsybl.loadflow.LoadFlow;
 import javafx.beans.value.ChangeListener;
@@ -172,7 +171,7 @@ public class MainViewController implements ChangeListener<Object> {
                     return new Task<>() {
                         @Override
                         protected Network call() {
-                            return Importers.loadNetwork(file.toPath());
+                            return Network.read(file.toPath());
                         }
                     };
                 }
