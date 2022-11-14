@@ -30,9 +30,21 @@ public class Model {
     private final BooleanProperty showNames = new SimpleBooleanProperty();
     private final ObjectProperty<Network> network = new SimpleObjectProperty<>();
     private final ObjectProperty<Container<?>> selectedContainer = new SimpleObjectProperty<>();
-    private final BooleanProperty infoAlongEdge = new SimpleBooleanProperty();
+
+    // Layout Parameters
     private final BooleanProperty textNodesIncluded = new SimpleBooleanProperty();
     private final DoubleProperty springRepulsionFactor = new SimpleDoubleProperty();
+
+    // SVG Parameters
+    private final BooleanProperty idDisplayed = new SimpleBooleanProperty();
+    private final BooleanProperty infoAlongEdge = new SimpleBooleanProperty();
+    private final BooleanProperty insertNameDesc = new SimpleBooleanProperty();
+    private final BooleanProperty substationDescriptionDisplayed = new SimpleBooleanProperty();
+    // Diagram size
+    private final BooleanProperty widthHeightAdded = new SimpleBooleanProperty();
+    private final ObjectProperty<SvgParameters.SizeConstraint> sizeConstraint = new SimpleObjectProperty<>(this, "sizeConstraint", SvgParameters.SizeConstraint.NONE);
+    private final DoubleProperty fixedSize = new SimpleDoubleProperty();
+
     private final IntegerProperty depth = new SimpleIntegerProperty();
     private final StringProperty svgContent = new SimpleStringProperty();
     private final StringProperty labelProvider = new SimpleStringProperty();
@@ -40,15 +52,42 @@ public class Model {
 
     private final Map<Container<?>, StringProperty> containerToSvgMap = new HashMap<>();
 
-    public Model(ReadOnlyObjectProperty<Integer> depth, ObjectProperty<String> layout, ObjectProperty<String> label,
-                 BooleanProperty textNodesIncluded, ReadOnlyObjectProperty<Double> springRepulsionFactor, BooleanProperty infoAlongEdge, BooleanProperty showNames) {
+    public Model(ReadOnlyObjectProperty<Integer> depth,
+                 ObjectProperty<String> label,
+                 ObjectProperty<String> layout,
+                 BooleanProperty showNames,
+
+                 // Layout parameters
+                 ReadOnlyObjectProperty<Double> springRepulsionFactor,
+                 BooleanProperty textNodesIncluded,
+
+                 // SVG parameters
+                 BooleanProperty idDisplayed,
+                 BooleanProperty infoAlongEdge,
+                 BooleanProperty insertNameDesc,
+                 BooleanProperty substationDescriptionDisplayed,
+                 // Diagram size
+                 BooleanProperty widthHeightAdded,
+                 ReadOnlyObjectProperty<SvgParameters.SizeConstraint> sizeConstraint,
+                 ReadOnlyObjectProperty<Double> fixedSize
+    ) {
         this.depth.bind(depth);
-        this.layoutFactory.bind(layout);
         this.labelProvider.bind(label);
-        this.textNodesIncluded.bind(textNodesIncluded);
-        this.springRepulsionFactor.bind(springRepulsionFactor);
-        this.infoAlongEdge.bind(infoAlongEdge);
+        this.layoutFactory.bind(layout);
         this.showNames.bind(showNames);
+
+        this.springRepulsionFactor.bind(springRepulsionFactor);
+        this.textNodesIncluded.bind(textNodesIncluded);
+
+        // SVG parameters
+        this.idDisplayed.bind(idDisplayed);
+        this.infoAlongEdge.bind(infoAlongEdge);
+        this.insertNameDesc.bind(insertNameDesc);
+        this.substationDescriptionDisplayed.bind(substationDescriptionDisplayed);
+        // Diagram size
+        this.widthHeightAdded.bind(widthHeightAdded);
+        this.sizeConstraint.bind(sizeConstraint);
+        this.fixedSize.bind(fixedSize);
     }
 
     public void setNetwork(Network network) {
@@ -80,9 +119,27 @@ public class Model {
     }
 
     public SvgParameters getSvgParameters() {
-        return new SvgParameters()
-                .setSvgWidthAndHeightAdded(true)
-                .setEdgeInfoAlongEdge(infoAlongEdge.get());
+        SvgParameters svgParameters = new SvgParameters()
+                .setIdDisplayed(idDisplayed.get())
+                .setInsertNameDesc(insertNameDesc.get())
+                .setSubstationDescriptionDisplayed(substationDescriptionDisplayed.get())
+                .setEdgeInfoAlongEdge(infoAlongEdge.get())
+                .setSvgWidthAndHeightAdded(widthHeightAdded.get())
+                .setSizeConstraint(sizeConstraint.get());
+        switch (sizeConstraint.get()) {
+            case FIXED_HEIGHT:
+                svgParameters.setFixedHeight((int) Math.round(fixedSize.get()));
+                break;
+            case FIXED_WIDTH:
+                svgParameters.setFixedWidth((int) Math.round(fixedSize.get()));
+                break;
+            case FIXED_SCALE:
+                svgParameters.setFixedScale(fixedSize.get());
+                break;
+            default:
+                break;
+        }
+        return svgParameters;
     }
 
     public LayoutParameters getLayoutParameters() {

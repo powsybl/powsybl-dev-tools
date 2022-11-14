@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import com.powsybl.nad.viewer.EnumChoiceBox?>
 <?import javafx.collections.FXCollections?>
 <?import javafx.geometry.*?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 <?import java.lang.String?>
-
 <BorderPane xmlns="http://javafx.com/javafx/17.0.1" xmlns:fx="http://javafx.com/fxml/1"
             prefHeight="900.0" prefWidth="1000.0"
             fx:controller="com.powsybl.nad.viewer.MainViewController">
@@ -106,6 +106,27 @@
                     <GridPane hgap="5" vgap="5">
                         <Label style="-fx-font-weight: bold" text="SVG parameters:" GridPane.rowIndex="0"/>
                         <CheckBox fx:id="infoAlongEdge" text="Set Info Along Edge" selected="true" GridPane.rowIndex="2"/>
+                        <CheckBox fx:id="idDisplayed" text="Display id (instead of name)" selected="false" GridPane.rowIndex="3"/>
+                        <CheckBox fx:id="insertNameDesc" text="Insert desc elements" selected="true" GridPane.rowIndex="4"/>
+                        <CheckBox fx:id="substationDescriptionDisplayed" text="Display substation" selected="false" GridPane.rowIndex="5"/>
+
+                        <Separator GridPane.rowIndex="6">
+                            <VBox.margin>
+                                <Insets topRightBottomLeft="5"/>
+                            </VBox.margin>
+                        </Separator>
+                        <CheckBox fx:id="widthHeightAdded" text="Add height and width" selected="true" GridPane.rowIndex="7"/>
+                        <EnumChoiceBox enumType="com.powsybl.nad.svg.SvgParameters$SizeConstraint" fx:id="sizeConstraintChoice" initialValue="FIXED_HEIGHT" GridPane.rowIndex="8"/>
+                        <Spinner fx:id="fixedSizeSpinner" GridPane.rowIndex="9">
+                            <valueFactory>
+                                <SpinnerValueFactory.DoubleSpinnerValueFactory min="1" max="2000" amountToStepBy="100" initialValue="200"/>
+                            </valueFactory>
+                        </Spinner>
+                        <Separator GridPane.rowIndex="11">
+                            <VBox.margin>
+                                <Insets topRightBottomLeft="5"/>
+                            </VBox.margin>
+                        </Separator>
                     </GridPane>
                 </VBox>
             </VBox>

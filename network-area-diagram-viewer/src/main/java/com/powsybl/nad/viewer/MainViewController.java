@@ -8,6 +8,7 @@ package com.powsybl.nad.viewer;
 
 import com.powsybl.iidm.network.*;
 import com.powsybl.loadflow.LoadFlow;
+import com.powsybl.nad.svg.SvgParameters;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.concurrent.Service;
@@ -61,19 +62,37 @@ public class MainViewController implements ChangeListener<Object> {
     @FXML
     public Spinner<Integer> depthSpinner;
     @FXML
-    public CheckBox layoutIncludeTextNodes;
+    public ChoiceBox<String> labelProviderChoice;
+    @FXML
+    public ChoiceBox<String> layoutChoice;
+
+    // Layout parameters
     @FXML
     public Spinner<Double> springRepulsionSpinner;
+    @FXML
+    public CheckBox layoutIncludeTextNodes;
+
+    // SVG parameters
+    @FXML
+    public CheckBox idDisplayed;
+    @FXML
+    public CheckBox infoAlongEdge;
+    @FXML
+    public CheckBox insertNameDesc;
+    @FXML
+    public CheckBox substationDescriptionDisplayed;
+    // Diagram size
+    @FXML
+    public CheckBox widthHeightAdded;
+    @FXML
+    public ChoiceBox<SvgParameters.SizeConstraint> sizeConstraintChoice;
+    @FXML
+    public Spinner<Double> fixedSizeSpinner;
+
     @FXML
     public TabPane checkedTab;
     @FXML
     public BorderPane selectedDiagram;
-    @FXML
-    public ChoiceBox<String> labelProviderChoice;
-    @FXML
-    public ChoiceBox<String> layoutChoice;
-    @FXML
-    public CheckBox infoAlongEdge;
     @FXML
     public TabPane checkedOrSelected;
     @FXML
@@ -92,29 +111,52 @@ public class MainViewController implements ChangeListener<Object> {
         }
 
         model = new Model(depthSpinner.valueProperty(),
-                layoutChoice.valueProperty(),
                 labelProviderChoice.valueProperty(),
-                layoutIncludeTextNodes.selectedProperty(),
+                layoutChoice.valueProperty(),
+                showNames.selectedProperty(),
+
                 springRepulsionSpinner.valueProperty(),
+                layoutIncludeTextNodes.selectedProperty(),
+
+                idDisplayed.selectedProperty(),
                 infoAlongEdge.selectedProperty(),
-                showNames.selectedProperty());
+                insertNameDesc.selectedProperty(),
+                substationDescriptionDisplayed.selectedProperty(),
+                // Diagram size
+                widthHeightAdded.selectedProperty(),
+                sizeConstraintChoice.valueProperty(),
+                fixedSizeSpinner.valueProperty()
+                );
 
         model.getNetworkProperty().addListener((observableValue, oldNetwork, newNetwork) ->
                 initSubstationsTree(newNetwork));
 
         depthSpinner.valueProperty().addListener(this);
-        layoutChoice.valueProperty().addListener(this);
         labelProviderChoice.valueProperty().addListener(this);
+        layoutChoice.valueProperty().addListener(this);
+
         layoutIncludeTextNodes.selectedProperty().addListener(this);
         springRepulsionSpinner.valueProperty().addListener(this);
-        infoAlongEdge.selectedProperty().addListener(this);
-        showNames.selectedProperty().addListener(this);
 
+        idDisplayed.selectedProperty().addListener(this);
+        infoAlongEdge.selectedProperty().addListener(this);
+        insertNameDesc.selectedProperty().addListener(this);
+        substationDescriptionDisplayed.selectedProperty().addListener(this);
+        // Diagram size
+        widthHeightAdded.selectedProperty().addListener(this);
+        sizeConstraintChoice.valueProperty().addListener(this);
+        fixedSizeSpinner.valueProperty().addListener(this);
+        this.sizeConstraintChoice.disableProperty().bind(widthHeightAdded.selectedProperty().not());
+        this.fixedSizeSpinner.disableProperty().bind(
+                widthHeightAdded.selectedProperty().not()
+                        .or(this.sizeConstraintChoice.valueProperty().isEqualTo(SvgParameters.SizeConstraint.NONE))
+        );
+
+        showNames.selectedProperty().addListener(this);
         vlTree.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
             model.setSelectedContainer(newValue.getValue());
             selectedDiagramController.createDiagram(model, model.getSvgContent(), newValue.getValue());
         });
-
         vlTree.setCellFactory(param -> {
             CheckBoxTreeCell<Container<?>> treeCell = new CheckBoxTreeCell<>();
             StringConverter<TreeItem<Container<?>>> strConvert = new StringConverter<>() {
