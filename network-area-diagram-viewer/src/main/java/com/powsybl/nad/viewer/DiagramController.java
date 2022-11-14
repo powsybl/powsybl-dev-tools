@@ -13,8 +13,6 @@ import com.powsybl.iidm.network.Substation;
 import com.powsybl.iidm.network.VoltageLevel;
 import com.powsybl.nad.NetworkAreaDiagram;
 import com.powsybl.nad.layout.BasicFixedLayoutFactory;
-import com.powsybl.nad.layout.Layout;
-import com.powsybl.nad.layout.LayoutFactory;
 import com.powsybl.nad.model.Point;
 import com.powsybl.nad.svg.iidm.NominalVoltageStyleProvider;
 import javafx.beans.property.StringProperty;
@@ -119,16 +117,11 @@ public class DiagramController {
                         NetworkAreaDiagram nad = getNetworkAreaDiagram(model, container);
                         // Use the diagram definition to draw,
                         // but apply a fixed layout using the given positions
-                        LayoutFactory layoutFactory = () -> {
-                            Layout fixedLayout = new BasicFixedLayoutFactory().create();
-                            fixedLayout.setInitialNodePositions(positions);
-                            return fixedLayout;
-                        };
                         nad.draw(writer,
                                 model.getSvgParameters(),
                                 model.getLayoutParameters(),
                                 new NominalVoltageStyleProvider(model.getNetwork()),
-                                model.getLabelProvider(), layoutFactory);
+                                model.getLabelProvider(), new BasicFixedLayoutFactory(positions));
                         return writer.toString();
                     }
                 };
