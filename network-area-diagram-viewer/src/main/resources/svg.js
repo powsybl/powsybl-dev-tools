@@ -85,25 +85,28 @@ function updateDiagram(svg, diagramId, coords) {
 }
 
 function gatherAllEquipmentPositions(svg) {
+    var positions = {};
     // Store all node id mappings in a dictionary
+    // With the initial positions
     var diagramId2EquipmentId = {};
     for (node of svg.getElementsByTagName("nad:node")) {
-        diagramId2EquipmentId[node.getAttribute("diagramid")] = node.getAttribute("equipmentid");
+        id = node.getAttribute("diagramid");
+        equipmentId = node.getAttribute("equipmentid");
+        diagramId2EquipmentId[id] = equipmentId;
+        positions[equipmentId] = {x: node.getAttribute("x"), y: node.getAttribute("y")};
     }
-
-    // For all elements in svg that have the id property, create position of equipment id
-    var positions = {};
+    // For all elements in svg that have the id property, update the position of equipment id
     var CTM = svg.getScreenCTM();
     for (svgElem of svg.querySelectorAll("[id]")) {
         if (svgElem.id in diagramId2EquipmentId) {
-            id = diagramId2EquipmentId[svgElem.id];
+            equipmentId = diagramId2EquipmentId[svgElem.id];
             // getBBox returns coordinates without considering transforms to the element itself or its parents
             // getBoundingClientRect returns actual coordinates but in screen space
             var rect = svgElem.getBoundingClientRect();
             var point = {x: rect.x + .5 * rect.width, y: rect.y + .5 * rect.height};
             point.x = (point.x - CTM.e) / CTM.a;
             point.y = (point.y - CTM.f) / CTM.d;
-            positions[id] = point;
+            positions[equipmentId] = point;
         }
     }
     return positions;
