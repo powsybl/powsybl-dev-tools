@@ -64,6 +64,8 @@ public class MainViewController implements ChangeListener<Object> {
     @FXML
     public ChoiceBox<String> labelProviderChoice;
     @FXML
+    public ChoiceBox<String> styleProviderChoice;
+    @FXML
     public ChoiceBox<String> layoutChoice;
 
     // Layout parameters
@@ -81,6 +83,10 @@ public class MainViewController implements ChangeListener<Object> {
     public CheckBox insertNameDesc;
     @FXML
     public CheckBox substationDescriptionDisplayed;
+    @FXML
+    public CheckBox busLegend;
+    @FXML
+    public CheckBox vlDetails;
     // Diagram size
     @FXML
     public CheckBox widthHeightAdded;
@@ -112,6 +118,7 @@ public class MainViewController implements ChangeListener<Object> {
 
         model = new Model(depthSpinner.valueProperty(),
                 labelProviderChoice.valueProperty(),
+                styleProviderChoice.valueProperty(),
                 layoutChoice.valueProperty(),
                 showNames.selectedProperty(),
 
@@ -122,6 +129,8 @@ public class MainViewController implements ChangeListener<Object> {
                 infoAlongEdge.selectedProperty(),
                 insertNameDesc.selectedProperty(),
                 substationDescriptionDisplayed.selectedProperty(),
+                busLegend.selectedProperty(),
+                vlDetails.selectedProperty(),
                 // Diagram size
                 widthHeightAdded.selectedProperty(),
                 sizeConstraintChoice.valueProperty(),
@@ -133,6 +142,7 @@ public class MainViewController implements ChangeListener<Object> {
 
         depthSpinner.valueProperty().addListener(this);
         labelProviderChoice.valueProperty().addListener(this);
+        styleProviderChoice.valueProperty().addListener(this);
         layoutChoice.valueProperty().addListener(this);
 
         layoutIncludeTextNodes.selectedProperty().addListener(this);
@@ -142,6 +152,8 @@ public class MainViewController implements ChangeListener<Object> {
         infoAlongEdge.selectedProperty().addListener(this);
         insertNameDesc.selectedProperty().addListener(this);
         substationDescriptionDisplayed.selectedProperty().addListener(this);
+        busLegend.selectedProperty().addListener(this);
+        vlDetails.selectedProperty().addListener(this);
         // Diagram size
         widthHeightAdded.selectedProperty().addListener(this);
         sizeConstraintChoice.valueProperty().addListener(this);

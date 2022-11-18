@@ -12,8 +12,11 @@ import com.powsybl.nad.layout.BasicForceLayoutFactory;
 import com.powsybl.nad.layout.LayoutFactory;
 import com.powsybl.nad.layout.LayoutParameters;
 import com.powsybl.nad.svg.LabelProvider;
+import com.powsybl.nad.svg.StyleProvider;
 import com.powsybl.nad.svg.SvgParameters;
 import com.powsybl.nad.svg.iidm.DefaultLabelProvider;
+import com.powsybl.nad.svg.iidm.NominalVoltageStyleProvider;
+import com.powsybl.nad.svg.iidm.TopologicalStyleProvider;
 import javafx.beans.property.*;
 
 import java.util.HashMap;
@@ -26,6 +29,7 @@ import java.util.stream.Stream;
 public class Model {
     private static final String DEFAULT_LABEL_PROVIDER = "Default";
     private static final String BASIC_LAYOUT = "Basic";
+    private static final String TOPOLOGICAL_STYLE_PROVIDER = "Topological";
 
     private final BooleanProperty showNames = new SimpleBooleanProperty();
     private final ObjectProperty<Network> network = new SimpleObjectProperty<>();
@@ -40,6 +44,8 @@ public class Model {
     private final BooleanProperty infoAlongEdge = new SimpleBooleanProperty();
     private final BooleanProperty insertNameDesc = new SimpleBooleanProperty();
     private final BooleanProperty substationDescriptionDisplayed = new SimpleBooleanProperty();
+    private final BooleanProperty busLegend = new SimpleBooleanProperty();
+    private final BooleanProperty vlDetails = new SimpleBooleanProperty();
     // Diagram size
     private final BooleanProperty widthHeightAdded = new SimpleBooleanProperty();
     private final ObjectProperty<SvgParameters.SizeConstraint> sizeConstraint = new SimpleObjectProperty<>(this, "sizeConstraint", SvgParameters.SizeConstraint.NONE);
@@ -48,12 +54,14 @@ public class Model {
     private final IntegerProperty depth = new SimpleIntegerProperty();
     private final StringProperty svgContent = new SimpleStringProperty();
     private final StringProperty labelProvider = new SimpleStringProperty();
+    private final StringProperty styleProvider = new SimpleStringProperty();
     private final StringProperty layoutFactory = new SimpleStringProperty();
 
     private final Map<Container<?>, StringProperty> containerToSvgMap = new HashMap<>();
 
     public Model(ReadOnlyObjectProperty<Integer> depth,
                  ObjectProperty<String> label,
+                 ObjectProperty<String> style,
                  ObjectProperty<String> layout,
                  BooleanProperty showNames,
 
@@ -66,6 +74,8 @@ public class Model {
                  BooleanProperty infoAlongEdge,
                  BooleanProperty insertNameDesc,
                  BooleanProperty substationDescriptionDisplayed,
+                 BooleanProperty busLegend,
+                 BooleanProperty vlDetails,
                  // Diagram size
                  BooleanProperty widthHeightAdded,
                  ReadOnlyObjectProperty<SvgParameters.SizeConstraint> sizeConstraint,
@@ -73,6 +83,7 @@ public class Model {
     ) {
         this.depth.bind(depth);
         this.labelProvider.bind(label);
+        this.styleProvider.bind(style);
         this.layoutFactory.bind(layout);
         this.showNames.bind(showNames);
 
@@ -84,6 +95,8 @@ public class Model {
         this.infoAlongEdge.bind(infoAlongEdge);
         this.insertNameDesc.bind(insertNameDesc);
         this.substationDescriptionDisplayed.bind(substationDescriptionDisplayed);
+        this.busLegend.bind(busLegend);
+        this.vlDetails.bind(vlDetails);
         // Diagram size
         this.widthHeightAdded.bind(widthHeightAdded);
         this.sizeConstraint.bind(sizeConstraint);
@@ -123,6 +136,8 @@ public class Model {
                 .setIdDisplayed(idDisplayed.get())
                 .setInsertNameDesc(insertNameDesc.get())
                 .setSubstationDescriptionDisplayed(substationDescriptionDisplayed.get())
+                .setBusLegend(busLegend.get())
+                .setVoltageLevelDetails(vlDetails.get())
                 .setEdgeInfoAlongEdge(infoAlongEdge.get())
                 .setSvgWidthAndHeightAdded(widthHeightAdded.get())
                 .setSizeConstraint(sizeConstraint.get());
@@ -150,6 +165,12 @@ public class Model {
 
     public LabelProvider getLabelProvider() {
         return DEFAULT_LABEL_PROVIDER.equals(labelProvider.getValue()) ? new DefaultLabelProvider(network.getValue(), getSvgParameters()) : null;
+    }
+
+    public StyleProvider getStyleProvider() {
+        return TOPOLOGICAL_STYLE_PROVIDER.equals(styleProvider.getValue())
+                ? new TopologicalStyleProvider(network.getValue())
+                : new NominalVoltageStyleProvider(network.getValue());
     }
 
     public LayoutFactory getLayoutFactory() {
