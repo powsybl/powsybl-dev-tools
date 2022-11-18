@@ -13,6 +13,7 @@ import com.powsybl.iidm.network.Substation;
 import com.powsybl.iidm.network.VoltageLevel;
 import com.powsybl.nad.NetworkAreaDiagram;
 import com.powsybl.nad.svg.iidm.NominalVoltageStyleProvider;
+import com.powsybl.nad.svg.iidm.TopologicalStyleProvider;
 import javafx.beans.property.StringProperty;
 import javafx.concurrent.Service;
 import javafx.concurrent.Task;
@@ -104,7 +105,7 @@ public class DiagramController {
                     protected String call() {
                         NetworkAreaDiagram nad = getNetworkAreaDiagram(model, container);
                         nad.draw(writer, model.getSvgParameters(), model.getLayoutParameters(),
-                                new NominalVoltageStyleProvider(model.getNetwork()),
+                                model.getStyleProvider(),
                                 model.getLabelProvider(), model.getLayoutFactory());
                         return writer.toString();
                     }
