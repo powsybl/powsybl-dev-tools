@@ -30,7 +30,6 @@ public class Model {
     private static final String DEFAULT_LABEL_PROVIDER = "Default";
     private static final String BASIC_LAYOUT = "Basic";
     private static final String TOPOLOGICAL_STYLE_PROVIDER = "Topological";
-    private static final String NOMINAL_VOLTAGE_STYLE_PROVIDER = "NominalVoltage";
 
     private final BooleanProperty showNames = new SimpleBooleanProperty();
     private final ObjectProperty<Network> network = new SimpleObjectProperty<>();
