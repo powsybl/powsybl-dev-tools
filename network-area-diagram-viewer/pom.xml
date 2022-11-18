@@ -42,7 +42,7 @@
         <junit.version>4.13.1</junit.version>
         <maven.compiler.source>17</maven.compiler.source>
         <maven.compiler.target>17</maven.compiler.target>
-        <powsybl.nad.version>0.7.0-SNAPSHOT</powsybl.nad.version>
+        <powsybl.diagram.version>3.0.0-SNAPSHOT</powsybl.diagram.version>
         <powsybl.core.version>5.0.0-RC1</powsybl.core.version>
         <powsybl.open.loadflow.version>0.23.2</powsybl.open.loadflow.version>
     </properties>
@@ -51,7 +51,7 @@
         <dependency>
             <groupId>com.powsybl</groupId>
             <artifactId>powsybl-network-area-diagram</artifactId>
-            <version>${powsybl.nad.version}</version>
+            <version>${powsybl.diagram.version}</version>
         </dependency>
         <dependency>
             <groupId>com.powsybl</groupId>
@@ -61,11 +61,6 @@
         <dependency>
             <groupId>com.powsybl</groupId>
             <artifactId>powsybl-iidm-test</artifactId>
-            <version>${powsybl.core.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.powsybl</groupId>
-            <artifactId>powsybl-config-test</artifactId>
             <version>${powsybl.core.version}</version>
         </dependency>
         <dependency>
