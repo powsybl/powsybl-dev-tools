@@ -120,8 +120,9 @@ public class DiagramController {
                         nad.draw(writer,
                                 model.getSvgParameters(),
                                 model.getLayoutParameters(),
-                                new NominalVoltageStyleProvider(model.getNetwork()),
-                                model.getLabelProvider(), new BasicFixedLayoutFactory(positions));
+                                model.getStyleProvider(),
+                                model.getLabelProvider(),
+                                new BasicFixedLayoutFactory(positions));
                         return writer.toString();
                     }
                 };
@@ -148,8 +149,9 @@ public class DiagramController {
                         nad.draw(writer,
                                 model.getSvgParameters(),
                                 model.getLayoutParameters(),
-                                new NominalVoltageStyleProvider(model.getNetwork()),
-                                model.getLabelProvider(), model.getLayoutFactory());
+                                model.getStyleProvider(),
+                                model.getLabelProvider(),
+                                model.getLayoutFactory());
                         return writer.toString();
                     }
                 };
