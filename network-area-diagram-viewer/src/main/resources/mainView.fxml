@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import com.powsybl.nad.viewer.EnumChoiceBox?>
 <?import javafx.collections.FXCollections?>
 <?import javafx.geometry.*?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 <?import java.lang.String?>
-
 <BorderPane xmlns="http://javafx.com/javafx/17.0.1" xmlns:fx="http://javafx.com/fxml/1"
             prefHeight="900.0" prefWidth="1000.0"
             fx:controller="com.powsybl.nad.viewer.MainViewController">
@@ -82,6 +82,15 @@
                                 </FXCollections>
                             </items>
                         </ChoiceBox>
+                        <Label text="StyleProvider:" GridPane.rowIndex="5"/>
+                        <ChoiceBox fx:id="styleProviderChoice" GridPane.rowIndex="6" value="Topological">
+                            <items>
+                                <FXCollections fx:factory="observableArrayList">
+                                    <String fx:value="Topological"/>
+                                    <String fx:value="NominalVoltage"/>
+                                </FXCollections>
+                            </items>
+                        </ChoiceBox>
                     </GridPane>
                     <Separator>
                         <VBox.margin>
@@ -109,6 +118,26 @@
                         <CheckBox fx:id="idDisplayed" text="Display id (instead of name)" selected="false" GridPane.rowIndex="3"/>
                         <CheckBox fx:id="insertNameDesc" text="Insert desc elements" selected="true" GridPane.rowIndex="4"/>
                         <CheckBox fx:id="substationDescriptionDisplayed" text="Display substation" selected="false" GridPane.rowIndex="5"/>
+                        <CheckBox fx:id="busLegend" text="Bus legend" selected="true" GridPane.rowIndex="6"/>
+                        <CheckBox fx:id="vlDetails" text="Voltage level details" selected="false" GridPane.rowIndex="7"/>
+
+                        <Separator GridPane.rowIndex="8">
+                            <VBox.margin>
+                                <Insets topRightBottomLeft="5"/>
+                            </VBox.margin>
+                        </Separator>
+                        <CheckBox fx:id="widthHeightAdded" text="Add height and width" selected="true" GridPane.rowIndex="9"/>
+                        <EnumChoiceBox enumType="com.powsybl.nad.svg.SvgParameters$SizeConstraint" fx:id="sizeConstraintChoice" initialValue="FIXED_HEIGHT" GridPane.rowIndex="10"/>
+                        <Spinner fx:id="fixedSizeSpinner" GridPane.rowIndex="11">
+                            <valueFactory>
+                                <SpinnerValueFactory.DoubleSpinnerValueFactory min="1" max="2000" amountToStepBy="100" initialValue="200"/>
+                            </valueFactory>
+                        </Spinner>
+                        <Separator GridPane.rowIndex="13">
+                            <VBox.margin>
+                                <Insets topRightBottomLeft="5"/>
+                            </VBox.margin>
+                        </Separator>
                     </GridPane>
                 </VBox>
             </VBox>

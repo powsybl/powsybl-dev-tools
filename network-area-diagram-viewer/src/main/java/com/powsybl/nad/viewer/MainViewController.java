@@ -8,6 +8,7 @@ package com.powsybl.nad.viewer;
 
 import com.powsybl.iidm.network.*;
 import com.powsybl.loadflow.LoadFlow;
+import com.powsybl.nad.svg.SvgParameters;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.concurrent.Service;
@@ -63,6 +64,8 @@ public class MainViewController implements ChangeListener<Object> {
     @FXML
     public ChoiceBox<String> labelProviderChoice;
     @FXML
+    public ChoiceBox<String> styleProviderChoice;
+    @FXML
     public ChoiceBox<String> layoutChoice;
 
     // Layout parameters
@@ -80,6 +83,17 @@ public class MainViewController implements ChangeListener<Object> {
     public CheckBox insertNameDesc;
     @FXML
     public CheckBox substationDescriptionDisplayed;
+    @FXML
+    public CheckBox busLegend;
+    @FXML
+    public CheckBox vlDetails;
+    // Diagram size
+    @FXML
+    public CheckBox widthHeightAdded;
+    @FXML
+    public ChoiceBox<SvgParameters.SizeConstraint> sizeConstraintChoice;
+    @FXML
+    public Spinner<Double> fixedSizeSpinner;
 
     @FXML
     public TabPane checkedTab;
@@ -104,6 +118,7 @@ public class MainViewController implements ChangeListener<Object> {
 
         model = new Model(depthSpinner.valueProperty(),
                 labelProviderChoice.valueProperty(),
+                styleProviderChoice.valueProperty(),
                 layoutChoice.valueProperty(),
                 showNames.selectedProperty(),
 
@@ -113,13 +128,21 @@ public class MainViewController implements ChangeListener<Object> {
                 idDisplayed.selectedProperty(),
                 infoAlongEdge.selectedProperty(),
                 insertNameDesc.selectedProperty(),
-                substationDescriptionDisplayed.selectedProperty());
+                substationDescriptionDisplayed.selectedProperty(),
+                busLegend.selectedProperty(),
+                vlDetails.selectedProperty(),
+                // Diagram size
+                widthHeightAdded.selectedProperty(),
+                sizeConstraintChoice.valueProperty(),
+                fixedSizeSpinner.valueProperty()
+                );
 
         model.getNetworkProperty().addListener((observableValue, oldNetwork, newNetwork) ->
                 initSubstationsTree(newNetwork));
 
         depthSpinner.valueProperty().addListener(this);
         labelProviderChoice.valueProperty().addListener(this);
+        styleProviderChoice.valueProperty().addListener(this);
         layoutChoice.valueProperty().addListener(this);
 
         layoutIncludeTextNodes.selectedProperty().addListener(this);
@@ -129,6 +152,17 @@ public class MainViewController implements ChangeListener<Object> {
         infoAlongEdge.selectedProperty().addListener(this);
         insertNameDesc.selectedProperty().addListener(this);
         substationDescriptionDisplayed.selectedProperty().addListener(this);
+        busLegend.selectedProperty().addListener(this);
+        vlDetails.selectedProperty().addListener(this);
+        // Diagram size
+        widthHeightAdded.selectedProperty().addListener(this);
+        sizeConstraintChoice.valueProperty().addListener(this);
+        fixedSizeSpinner.valueProperty().addListener(this);
+        this.sizeConstraintChoice.disableProperty().bind(widthHeightAdded.selectedProperty().not());
+        this.fixedSizeSpinner.disableProperty().bind(
+                widthHeightAdded.selectedProperty().not()
+                        .or(this.sizeConstraintChoice.valueProperty().isEqualTo(SvgParameters.SizeConstraint.NONE))
+        );
 
         showNames.selectedProperty().addListener(this);
         vlTree.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
