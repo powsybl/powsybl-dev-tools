@@ -11,8 +11,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.io.ByteStreams;
 import com.powsybl.commons.json.JsonUtil;
 import com.powsybl.computation.local.LocalComputationManager;
-import com.powsybl.iidm.import_.ImportConfig;
-import com.powsybl.iidm.import_.Importers;
 import com.powsybl.iidm.network.*;
 import com.powsybl.sld.SingleLineDiagram;
 import com.powsybl.sld.cgmes.dl.iidm.extensions.NetworkDiagramData;
@@ -1007,7 +1005,7 @@ public class SingleLineDiagramViewer extends Application implements DisplayVolta
                     protected Network call() {
                         Properties properties = new Properties();
                         properties.put("iidm.import.cgmes.post-processors", "cgmesDLImport");
-                        return Importers.loadNetwork(file, LocalComputationManager.getDefault(), new ImportConfig(), properties);
+                        return Network.read(file, LocalComputationManager.getDefault(), new ImportConfig(), properties);
                     }
                 };
             }
