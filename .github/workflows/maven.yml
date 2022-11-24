@@ -13,7 +13,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout powsybl-network-area-diagram latest sources
+      - name: Checkout powsybl-diagram latest sources
         uses: actions/checkout@v1
         with:
           repository: powsybl/powsybl-diagram
@@ -28,15 +28,28 @@ jobs:
           distribution: 'zulu'
           java-version: 11
 
-      - name: Build and install powsybl-network-area-diagram with Maven
+      - name: Build and install powsybl-diagram with Maven
         run: mvn --batch-mode -DskipTests=true --file ../powsybl-diagram/pom.xml install
 
-      - name: Build with Maven
+      - name: Build nad viewer with Maven
         run: mvn --file network-area-diagram-viewer --batch-mode -P jacoco,checks package
 
-      - name: Run SonarCloud analysis
+      - name: Build sld-viewer with Maven
+        run: mvn --file single-line-diagram-viewer --batch-mode -P jacoco,checks package
+
+      - name: Run SonarCloud analysis on nad viewer
         run: >
           mvn --file network-area-diagram-viewer --batch-mode -Pjacoco verify sonar:sonar
+          -Dsonar.host.url=https://sonarcloud.io
+          -Dsonar.organization=powsybl-ci-github
+          -Dsonar.projectKey=com.powsybl:powsybl-dev-tools
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+
+      - name: Run SonarCloud analysis on sld viewer
+        run: >
+          mvn --file single-line-diagram-viewer --batch-mode -Pjacoco verify sonar:sonar
           -Dsonar.host.url=https://sonarcloud.io
           -Dsonar.organization=powsybl-ci-github
           -Dsonar.projectKey=com.powsybl:powsybl-dev-tools
