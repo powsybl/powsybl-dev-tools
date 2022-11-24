@@ -277,18 +277,21 @@ function Diagram(svg) {
         var x1 = polyline1.points[0].x;
         var y1 = polyline1.points[0].y;
 
-        polyline.points[1].x = x0 + (x1 - x0) * 0.4;
-        polyline.points[1].y = y0 + (y1 - y0) * 0.4;
-        polyline1.points[1].x = x1 + (x0 - x1) * 0.4;
-        polyline1.points[1].y = y1 + (y0 - y1) * 0.4;
-
-        // Centers of transformer symbols
+        // If we have a circle is a transformer
+        var middlePointFactor = 0.5;
         var circle = g.querySelector("circle");
-        circle.setAttribute("cx", x0 + (x1 - x0) * 0.45);
-        circle.setAttribute("cy", y0 + (y1 - y0) * 0.45);
-        circle = g1.querySelector("circle");
-        circle.setAttribute("cx", x1 + (x0 - x1) * 0.45);
-        circle.setAttribute("cy", y1 + (y0 - y1) * 0.45);
+        if (circle) {
+            middlePointFactor = 0.4
+            circle.setAttribute("cx", x0 + (x1 - x0) * 0.45);
+            circle.setAttribute("cy", y0 + (y1 - y0) * 0.45);
+            circle = g1.querySelector("circle");
+            circle.setAttribute("cx", x1 + (x0 - x1) * 0.45);
+            circle.setAttribute("cy", y1 + (y0 - y1) * 0.45);
+        }
+        polyline.points[1].x = x0 + (x1 - x0) * middlePointFactor;
+        polyline.points[1].y = y0 + (y1 - y0) * middlePointFactor;
+        polyline1.points[1].x = x1 + (x0 - x1) * middlePointFactor;
+        polyline1.points[1].y = y1 + (y0 - y1) * middlePointFactor;
     }
 }
 
