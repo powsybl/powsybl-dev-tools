@@ -46,13 +46,7 @@ public class DLExporter {
         try {
             CommandLine line = parser.parse(command.getOptions(), args);
 
-            Class<? extends ComputationManagerFactory> shortTimeExecutionComputationManagerFactoryClass;
-            try {
-                shortTimeExecutionComputationManagerFactoryClass = (Class<? extends ComputationManagerFactory>) Class.forName("com.powsybl.computation.local.LocalComputationManagerFactory");
-            } catch (ClassNotFoundException e) {
-                throw new UncheckedClassNotFoundException(e);
-            }
-            DefaultComputationManagerConfig config = new DefaultComputationManagerConfig(shortTimeExecutionComputationManagerFactoryClass, null);
+            DefaultComputationManagerConfig config = getComputationManagerConfig();
 
             ToolInitializationContext initContext = new ToolInitializationContext() {
                 @Override
@@ -86,15 +80,27 @@ public class DLExporter {
                 }
             };
 
-            exporterTool.run(line, new ToolRunningContext(initContext.getOutputStream(),
-                    initContext.getErrorStream(),
-                    initContext.getFileSystem(),
-                    initContext.createShortTimeExecutionComputationManager(line),
-                    initContext.createLongTimeExecutionComputationManager(line)));
+            try (ComputationManager shortTimeExecutionComputationManager = initContext.createShortTimeExecutionComputationManager(line)) {
+                exporterTool.run(line, new ToolRunningContext(initContext.getOutputStream(),
+                        initContext.getErrorStream(),
+                        initContext.getFileSystem(),
+                        shortTimeExecutionComputationManager,
+                        initContext.createLongTimeExecutionComputationManager(line)));
+            }
         } catch (ParseException e) {
             LOGGER.warn(getUsage(command));
         } catch (Exception e) {
-            e.printStackTrace();
+            LOGGER.warn("Unexpected exception", e);
         }
+    }
+
+    private static DefaultComputationManagerConfig getComputationManagerConfig() {
+        Class<? extends ComputationManagerFactory> shortTimeExecutionComputationManagerFactoryClass;
+        try {
+            shortTimeExecutionComputationManagerFactoryClass = (Class<? extends ComputationManagerFactory>) Class.forName("com.powsybl.computation.local.LocalComputationManagerFactory");
+        } catch (ClassNotFoundException e) {
+            throw new UncheckedClassNotFoundException(e);
+        }
+        return new DefaultComputationManagerConfig(shortTimeExecutionComputationManagerFactoryClass, null);
     }
 }
