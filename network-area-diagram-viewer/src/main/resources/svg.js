@@ -1,5 +1,7 @@
 
 // TODO(Luma) separate components of edges, having one that can be "scaled" (length line from exit of node to middle point)
+//              for reference, see Android NinePatch drawables
+//              https://developer.android.com/develop/ui/views/graphics/drawables#nine-patch
 // TODO(Luma) JavaFX seems to have problems drawing a translated foreign object, try to enclose it in a <g> element?
 // TODO(Luma) update on client: find related hidden nodes and update initial position in metadata?
 
@@ -46,13 +48,16 @@ function makeDraggableSvg(svg) {
         offset.y -= transform.matrix.f;
     }
 
+    const CONTINUOUS_UPDATE = true;
     function drag(event) {
         if (selectedElement) {
             event.preventDefault();
             var position = getMousePosition(event);
-            position.x -= offset.x;
-            position.y -= offset.y
-            transform.setTranslate(position.x, position.y);
+            var translation = {x: position.x - offset.x, y: position.y - offset.y};
+            transform.setTranslate(translation.x, translation.y);
+            if (CONTINUOUS_UPDATE) {
+                diagram.update(selectedElement, position, translation);
+            }
         }
     }
 
