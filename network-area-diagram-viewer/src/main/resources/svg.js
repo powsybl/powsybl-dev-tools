@@ -140,7 +140,7 @@ function Diagram(svg) {
     function updateEdgeUsingRotation(edgeMetadata, node1, node2, movedNodeId, position, translation) {
         // This edge is adjacent to the moved node
         console.log("  adjacent edge (" + node1 + ", " + node2 + ")");
-        var edgeId = edgeMetadata.getAttribute("diagramid");
+        var edgeId = edgeMetadata.getAttribute("svgid");
         var edgeSvg = svg.getElementById(edgeId);
         if (!edgeSvg) {
             return;
@@ -163,8 +163,8 @@ function Diagram(svg) {
 
     function rotateEdge(edgeId, edgeSvg, movedNodeId, otherNodeId, otherNodeSvg, position, translation) {
         var otherNodeCenter = center(otherNodeSvg);
-        var movedNodeMetadata = svg.querySelectorAll('nad\\\\:node[diagramid="' + movedNodeId + '"]')[0];
-        var otherNodeMetadata = svg.querySelectorAll('nad\\\\:node[diagramid="' + otherNodeId + '"]')[0];
+        var movedNodeMetadata = svg.querySelectorAll('nad\\\\:node[svgid="' + movedNodeId + '"]')[0];
+        var otherNodeMetadata = svg.querySelectorAll('nad\\\\:node[svgid="' + otherNodeId + '"]')[0];
         var position0 = {x: movedNodeMetadata.getAttribute("x"), y: movedNodeMetadata.getAttribute("y")};
         var otherNodePosition0 = {x: otherNodeMetadata.getAttribute("x"), y: otherNodeMetadata.getAttribute("y")};
         var rotation0 = calcRotation(position0, otherNodePosition0);
@@ -215,7 +215,7 @@ function Diagram(svg) {
     function updateEdgeExperiments(edgeMetadata, node1, node2, movedNodeId, position, translation) {
         // This edge is adjacent to the moved node
         console.log("  adjacent edge (" + node1 + ", " + node2 + ")");
-        var edgeId = edgeMetadata.getAttribute("diagramid");
+        var edgeId = edgeMetadata.getAttribute("svgid");
         var edgeSvg = svg.getElementById(edgeId);
         if (!edgeSvg) {
             return;
@@ -425,7 +425,7 @@ function gatherAllEquipmentPositions(svg) {
     // With the initial positions
     var diagramId2EquipmentId = {};
     for (node of svg.getElementsByTagName("nad:node")) {
-        id = node.getAttribute("diagramid");
+        id = node.getAttribute("svgid");
         equipmentId = node.getAttribute("equipmentid");
         diagramId2EquipmentId[id] = equipmentId;
         positions[equipmentId] = {x: node.getAttribute("x"), y: node.getAttribute("y")};
