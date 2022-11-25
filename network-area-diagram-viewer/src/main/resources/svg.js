@@ -1,5 +1,6 @@
 
 // TODO(Luma) consider three winding transformers
+// TODO(Luma) consider nodes with multiple buses
 // TODO(Luma) separate components of edges, having one that can be "scaled" (length line from exit of node to middle point)
 //              for reference, see Android NinePatch drawables
 //              https://developer.android.com/develop/ui/views/graphics/drawables#nine-patch
