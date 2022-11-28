@@ -42,8 +42,8 @@
         <javafx-mvn-plugin.version>0.0.8</javafx-mvn-plugin.version>
         <slf4j.version>1.7.22</slf4j.version>
 
-        <powsybl-single-line-diagram.version>2.14.0-SNAPSHOT</powsybl-single-line-diagram.version>
-        <powsybl-core.version>4.10.1</powsybl-core.version>
+        <powsybl-diagram.version>3.1.0-SNAPSHOT</powsybl-diagram.version>
+        <powsybl-core.version>5.0.0</powsybl-core.version>
     </properties>
 
     <dependencyManagement>
@@ -86,17 +86,17 @@
         <dependency>
             <groupId>com.powsybl</groupId>
             <artifactId>powsybl-single-line-diagram-core</artifactId>
-            <version>${powsybl-single-line-diagram.version}</version>
+            <version>${powsybl-diagram.version}</version>
         </dependency>
         <dependency>
             <groupId>com.powsybl</groupId>
             <artifactId>powsybl-single-line-diagram-cgmes-dl-conversion</artifactId>
-            <version>${powsybl-single-line-diagram.version}</version>
+            <version>${powsybl-diagram.version}</version>
         </dependency>
         <dependency>
             <groupId>com.powsybl</groupId>
             <artifactId>powsybl-single-line-diagram-cgmes-layout</artifactId>
-            <version>${powsybl-single-line-diagram.version}</version>
+            <version>${powsybl-diagram.version}</version>
         </dependency>
 
         <dependency>
