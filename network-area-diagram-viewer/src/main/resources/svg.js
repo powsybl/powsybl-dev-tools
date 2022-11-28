@@ -106,8 +106,9 @@ function Diagram(svg) {
             // Adjust the id of the element that has been moved
             // It we were moving a bus node (its circle),
             // find the id of the corresponding voltage level
+            var id = svgElem.getAttribute("id");
             var parent = svgElem.parentElement;
-            idParent = parent.getAttribute("id");
+            var idParent = parent.getAttribute("id");
             if (idParent) {
                 id = idParent;
             }
@@ -118,6 +119,7 @@ function Diagram(svg) {
     function updateOnClient(id, position, translation) {
         console.log("updateOnClient, moved node id = " + id);
         translateText(id, translation);
+        // TODO(Luma) Update here the position of all inner busNodes
         for (var edge of svg.getElementsByTagName("nad:edge")) {
             var node1 = edge.getAttribute("node1");
             var node2 = edge.getAttribute("node2");
@@ -131,9 +133,9 @@ function Diagram(svg) {
     function updateEdge(edgeMetadata, node1, node2, movedNodeId, position, translation) {
         const DEBUG_EXPERIMENTS = false;
         if (DEBUG_EXPERIMENTS) {
-            updateEdgeExperiments(edgeMetadata, node1, node2, id, position, translation);
+            updateEdgeExperiments(edgeMetadata, node1, node2, movedNodeId, position, translation);
         } else {
-            updateEdgeUsingRotation(edgeMetadata, node1, node2, id, position, translation);
+            updateEdgeUsingRotation(edgeMetadata, node1, node2, movedNodeId, position, translation);
         }
     }
 
