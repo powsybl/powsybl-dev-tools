@@ -91,7 +91,20 @@ function Diagram(svg) {
     }
 
     function isDraggable(element) {
-        return hasId(element);
+        return hasId(element) && classIsDraggable(element);
+    }
+
+    function classIsDraggable(element) {
+        // For svg objects it is better to get class names through attribute, to avoid potential SVGAnimatedString values
+        // https://developer.mozilla.org/en-US/docs/Web/API/Element/className
+        var className = element.getAttribute("class");
+        if (!className) {
+            var parent = element.parentElement;
+            if (parent) {
+                className = parent.getAttribute("class");
+            }
+        }
+        return className && (className.includes("vl-node") || className.includes("boundary-node") || className.includes("busnode"));
     }
 
     function hasId(element){
