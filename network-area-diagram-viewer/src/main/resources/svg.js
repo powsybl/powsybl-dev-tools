@@ -172,23 +172,23 @@ function Diagram(svg) {
         var otherNodeSvg = svg.getElementById(otherNodeId);
         console.log("  other node is " + otherNodeId + ", svg = " + otherNodeSvg);
         if (otherNodeSvg) {
-            rotateEdge(edgeId, edgeSvg, movedNodeId, otherNodeId, otherNodeSvg, position, translation);
+            rotateEdge(edgeId, edgeSvg, movedNodeId, otherNodeId, otherNodeSvg, position);
         }
     }
 
-    function rotateEdge(edgeId, edgeSvg, movedNodeId, otherNodeId, otherNodeSvg, position, translation) {
+    function rotateEdge(edgeId, edgeSvg, movedNodeId, otherNodeId, otherNodeSvg, position1) {
         var otherNodeCenter = center(otherNodeSvg);
         var movedNodeMetadata = svg.querySelectorAll('nad\\\\:node[svgid="' + movedNodeId + '"]')[0];
         var otherNodeMetadata = svg.querySelectorAll('nad\\\\:node[svgid="' + otherNodeId + '"]')[0];
-        var position0 = {x: movedNodeMetadata.getAttribute("x"), y: movedNodeMetadata.getAttribute("y")};
-        var otherNodePosition0 = {x: otherNodeMetadata.getAttribute("x"), y: otherNodeMetadata.getAttribute("y")};
+        var position0 = {x: parseFloat(movedNodeMetadata.getAttribute("x")), y: parseFloat(movedNodeMetadata.getAttribute("y"))};
+        var otherNodePosition0 = {x: parseFloat(otherNodeMetadata.getAttribute("x")), y: parseFloat(otherNodeMetadata.getAttribute("y"))};
         var rotation0 = calcRotation(position0, otherNodePosition0);
-        var rotation1 = calcRotation(position, otherNodeCenter);
-        updateRotation(svg, edgeSvg, edgeId, position0, position, rotation0, rotation1);
+        var rotation1 = calcRotation(position1, otherNodeCenter);
+        updateRotation(svg, edgeSvg, edgeId, position0, position1, rotation0, rotation1);
         // Add a debug line connecting the two ends of the edge
         // It will be useful as an indication for the "continuation" of the edge,
         // that we have not scaled/elongated to cover the whole current segment between them
-        debugConnection(svg, edgeSvg, edgeId, position, otherNodeCenter);
+        debugConnection(svg, edgeSvg, edgeId, position1, otherNodeCenter);
     }
 
     function calcRotation(p, q) {
