@@ -133,13 +133,11 @@ function Diagram(svg) {
         console.log("updateOnClient, moved node id = " + id);
         translateText(id, translation);
         // TODO(Luma) Update here the position of all inner busNodes
-        for (var edge of svg.getElementsByTagName("nad:edge")) {
+        for (var edge of svg.querySelectorAll('nad\\\\:edge[node1="' + id + '"], nad\\\\:edge[node2="' + id + '"]')) {
             var node1 = edge.getAttribute("node1");
             var node2 = edge.getAttribute("node2");
             console.log("  consider edge (" + node1 + ", " + node2 + ") after moved node " + id);
-            if (node1 === id || node2 === id) {
-                updateEdge(edge, node1, node2, id, position, translation);
-            }
+            updateEdge(edge, node1, node2, id, position, translation);
         }
     }
 
