@@ -176,8 +176,8 @@ function Diagram(svg) {
 
     function rotateEdge(edgeId, edgeSvg, movedNodeId, otherNodeId, otherNodeSvg, position1) {
         var otherNodeCenter = center(otherNodeSvg);
-        var movedNodeMetadata = svg.querySelectorAll('nad\\\\:node[svgid="' + movedNodeId + '"]')[0];
-        var otherNodeMetadata = svg.querySelectorAll('nad\\\\:node[svgid="' + otherNodeId + '"]')[0];
+        var movedNodeMetadata = svg.querySelector('nad\\\\:node[svgid="' + movedNodeId + '"]');
+        var otherNodeMetadata = svg.querySelector('nad\\\\:node[svgid="' + otherNodeId + '"]');
         var position0 = {x: parseFloat(movedNodeMetadata.getAttribute("x")), y: parseFloat(movedNodeMetadata.getAttribute("y"))};
         var otherNodePosition0 = {x: parseFloat(otherNodeMetadata.getAttribute("x")), y: parseFloat(otherNodeMetadata.getAttribute("y"))};
         var rotation0 = calcRotation(position0, otherNodePosition0);
