@@ -1,11 +1,18 @@
 
+// TODO(Luma) adapt transform of parts glued to edge end instead of calculating glue point
+// TODO(Luma) change text orientation or hide node infos if rotation makes them appear inverted
+// TODO(Luma) how to handle multi-lines without having to split stretchable and glued to end? (avoid gaps and/or overlaps)
+// TODO(Luma) redraw the annuli
 // TODO(Luma) consider three winding transformers
-// TODO(Luma) separate components of edges, having one that can be "scaled" (length line from exit of node to middle point)
-//              for reference, see Android NinePatch drawables
-//              https://developer.android.com/develop/ui/views/graphics/drawables#nine-patch
 // TODO(Luma) update on client: find related hidden nodes and update initial position in metadata?
 
+const DIAGRAM_UPDATE_ON_SERVER = false;
 const DIAGRAM_UPDATE_WHILE_DRAG = true;
+const DIAGRAM_SCALE_ALL_EDGE_PARTS = false;
+// TODO(Luma) this distance must be computed or glue point calculation avoided
+const DIAGRAM_DISTANCE_FROM_NODE_TO_GLUED_PART = 70;
+const DIAGRAM_DEBUG_EDGE_ROTATION = false;
+const DIAGRAM_DEBUG_GLUE_POINT = false;
 
 window.addEventListener('load', function() {
     var svgDiagram = document.getElementsByTagName("svg")[0];
@@ -109,14 +116,9 @@ function Diagram(svg, svgTools, updateWhileDrag) {
         return element.classList.contains("nad-vl-nodes") || element.classList.contains("nad-boundary-nodes");
     }
 
-    function hasId(element){
-        return typeof element.id != 'undefined' && element.id != '';
-    }
-
     function update(svgElem, position, translation) {
-        var updateOnServer = false;
-        if (updateOnServer) {
-            updateOnServer();
+        if (DIAGRAM_UPDATE_ON_SERVER) {
+            updateOnServer(svg);
         } else {
             // the element that is being moved has to have an id
             var id = svgElem.getAttribute("id");
@@ -158,6 +160,7 @@ function Diagram(svg, svgTools, updateWhileDrag) {
         if (node1 === node2) {
             svgTools.translate(edgeSvg, translation);
         } else {
+            var movedNodeSide = movedNodeId === node1 ? 1 : 2;
             var otherNodeId = movedNodeId === node1 ? node2 : node1;
             var otherNodeSvg = svg.getElementById(otherNodeId);
             if (!otherNodeSvg) {
@@ -167,13 +170,13 @@ function Diagram(svg, svgTools, updateWhileDrag) {
                 // the transform to apply on edge drawings is complex: 
                 // we have to rotate them to point to the new location of the moved node
                 // and expand (the stretchable parts) so the drawing fills the new distance between nodes
-                transformEdge(edgeId, edgeSvg, movedNodeId, otherNodeId, otherNodeSvg, position);
+                transformEdge(edgeId, edgeSvg, movedNodeId, movedNodeSide, otherNodeId, otherNodeSvg, position);
             }
         }
     }
 
     var cachedEdgeDistances0 = {};
-    function transformEdge(edgeId, edgeSvg, movedNodeId, otherNodeId, otherNodeSvg, p1) {
+    function transformEdge(edgeId, edgeSvg, movedNodeId, movedNodeSide, otherNodeId, otherNodeSvg, p1) {
         var q1 = center(otherNodeSvg);
         var a1 = calcRotation(p1, q1);
 
@@ -193,38 +196,125 @@ function Diagram(svg, svgTools, updateWhileDrag) {
         var dy1 = p1.y - q1.y;
         var s = Math.sqrt((dx1*dx1 + dy1*dy1)/d02);
 
-        updateEdgeTransform(edgeSvg, edgeId, p0, p1, a0, a1, s);
+        updateEdgeTransform(edgeSvg, edgeId, movedNodeSide, p0, q0, p1, q1, a0, a1, s);
 
-        //svgTools.debugRotation(p1.x, p1.y, a0, "debug-rotation0");
-        //svgTools.debugRotation(p1.x, p1.y, a1, "debug-rotation1");
-        //svgTools.debugConnection(edgeSvg, edgeId, p1, q1);
+        if (DIAGRAM_DEBUG_EDGE_ROTATION) {
+            svgTools.debugRotation(p1.x, p1.y, a0, "debug-rotation0");
+            svgTools.debugRotation(p1.x, p1.y, a1, "debug-rotation1");
+            svgTools.debugConnection(edgeSvg, edgeId, p1, q1);
+        }
     }
 
-    var edgeTransforms = {}
-    function updateEdgeTransform(svgElem, id, p0, p1, a0, a1, s) {
-        var transform = null;
-        if (!(id in edgeTransforms)) {
-            transform = svg.createSVGTransform();
-            // We append the rotation at the list of transforms,
+    var edgeTransforms = {};
+    function updateEdgeTransform(svgElem, edgeId, movedNodeSide, p0, q0, p1, q1, a0, a1, s) {
+        for (const part of svgElem.getElementsByTagName("*")) {
+            if (part.transform && isEdgePartUpdatable(part)) {
+                createCachedTransform(edgeId, part);
+                updateEdgePartTransform(part, edgeTransforms[edgeId][part.id], movedNodeSide, p0, q0, p1, q1, a0, a1, s);
+            }
+        }
+    }
+
+    function createCachedTransform(edgeId, part) {
+        if (!part.id) {
+            part.id = uniqueIdentifier();
+        }
+        if (!(edgeId in edgeTransforms)) {
+            edgeTransforms[edgeId] = {};
+        }
+        if (!edgeTransforms[edgeId][part.id]) {
+            // We can not reuse the same transform for multiple elements,
+            // when we add a transform to a list, it is removed from the previous one
+            // if it was inserted in one.
+            // From https://developer.mozilla.org/en-US/docs/Web/API/SVGTransformList:
+            // "If newItem is already in a list, it is removed from its previous list
+            // before it is inserted into this list"
+            var transform = svg.createSVGTransform();
+            part.transform.baseVal.insertItemBefore(transform, 0);
+            edgeTransforms[edgeId][part.id] = transform;
+        }
+    }
+
+    function updateEdgePartTransform(svgEdgePart, transform, movedNodeSide, p0, q0, p1, q1, a0, a1, s) {
+        // The moved node was located at point p0, now it is at p1
+        // The other node of edge was initially at q0, but its current position is q1
+
+        // We first undo the rotation of the segment (p0, q0) respect the x axis
+        // by moving to p0, rotating -a0
+        // then we re-scale the part if it is stretchable (scale only over the x axis)
+        // then rotate to get the current orientation of the edge, following the segment (p1, q1)
+        // after that we translate everything to the 
             // Order from left to right is order of nested transform,
             // The last transform in the list is the first applied,
             // We have to rotate centered on the initial position
-            // We want to keep the first position for the (generic) translations
-            svgElem.transform.baseVal.appendItem(transform);
-            edgeTransforms[id] = transform;
-        }
-        edgeTransforms[id].setMatrix(svg.createSVGMatrix()
+        // For glued elements we need to know to which side they are glued,
+        // and which side is the moved node "p"
+        // TODO(Luma) we need the original distance from the center of the glued part to the correct end
+        //   for now we assume it is fixed
+        transform.setMatrix(svg.createSVGMatrix()
             .translate(p1.x, p1.y)
             .rotate(a1)
-            .scale(s, 0)
+            .scaleNonUniform((isStretchable(svgEdgePart) ? s : 1), 1)
             .rotate(-a0)
             .translate(-p0.x, -p0.y)
             );
+        if (!DIAGRAM_SCALE_ALL_EDGE_PARTS) {
+            var gluePoint = findGluePoint(svgEdgePart, p1, q1, movedNodeSide);
+            if (gluePoint) {
+                var c = center(svgEdgePart);
+                var additionalTranslationToGluePoint = {x: gluePoint.x - c.x, y: gluePoint.y - c.y};
+                transform.setMatrix(svg.createSVGMatrix()
+                    .translate(additionalTranslationToGluePoint.x, additionalTranslationToGluePoint.y)
+                    .translate(p1.x, p1.y)
+                    .rotate(a1)
+                    .scaleNonUniform((isStretchable(svgEdgePart) ? s : 1), 1)
+                    .rotate(-a0)
+                    .translate(-p0.x, -p0.y)
+                    );
+            }
+        }
     }
 
-    function calcRotation(p, q) {
-        var rotation = Math.atan2(q.y - p.y, q.x - p.x);
-        return rotation * 180 / Math.PI;
+    function findGluePoint(svgElem, p1, q1, movedNodeSide) {
+        if (svgElem.classList.contains("nad-glued-center")) {
+            return {x: (p1.x + q1.x)/2, y: (p1.y + q1.y)/2}
+        }
+        // p1 is the new position of the moved node side
+        // q1 is the current position of the other node of the edge
+        var d = DIAGRAM_DISTANCE_FROM_NODE_TO_GLUED_PART;
+        var gluedToOtherNode = movedNodeSide === 2 && svgElem.classList.contains("nad-glued-1")
+            || movedNodeSide === 1 && svgElem.classList.contains("nad-glued-2");
+        if (gluedToOtherNode) {
+            // translate to a point at distance d from q1 over the segment (p1, q1)
+            gluePoint = findPointInSegment(d, q1, p1);
+            if (DIAGRAM_DEBUG_GLUE_POINT) {
+                svgTools.debugPoint(gluePoint, "debug-glue-point");
+                svgTools.debugPoint(p1, "debug-moved-node");
+                svgTools.debugPoint(q1, "debug-other-node");
+                console.log("findGluePoint:");
+                console.log("  p1 = (" + p1.x.toFixed(0) + ", " + p1.y.toFixed(0) + ")");
+                console.log("  q1 = (" + q1.x.toFixed(0) + ", " + q1.y.toFixed(0) + ")");
+                console.log("  moved side   = " + movedNodeSide);
+                console.log("  glue point   = (" + gluePoint.x.toFixed(0) + ", " + gluePoint.y.toFixed(0) + ")");
+                console.log("  d glue-moved = " + distance(gluePoint, p1));
+                console.log("  d glue-other = " + distance(gluePoint, q1));
+            }
+            return gluePoint;
+        }
+    }
+
+    function isEdgePartUpdatable(element) {
+        return element.classList.contains("nad-glued-center")
+            || element.classList.contains("nad-glued-1")
+            || element.classList.contains("nad-glued-2")
+            || element.classList.contains("nad-stretchable");
+    }
+
+    function isStretchable(element) {
+        if (DIAGRAM_SCALE_ALL_EDGE_PARTS) {
+            return true;
+        }
+        return element.classList.contains("nad-stretchable");
     }
 
     function center(svgElem) {
@@ -255,6 +345,7 @@ function Diagram(svg, svgTools, updateWhileDrag) {
 
 // SVG helper tools
 function SvgTools(svg) {
+    this.debugPoint = debugPoint;
     this.debugRotation = debugRotation;
     this.debugConnection = debugConnection;
     this.translate = translate;
@@ -262,10 +353,32 @@ function SvgTools(svg) {
 
     const SVG_NAMESPACE = "http://www.w3.org/2000/svg";
     const DEBUG_COLOR = {
+        "debug-center": "#888888",
+        "debug-glue-point": "#888888",
+        "debug-moved-node": "#880000",
+        "debug-other-node": "#000088",
         "debug-rotation0": "#CCCCCC",
         "debug-rotation1": "#888888",
         "debug-connection": "#CCCCCC"};
 
+    function debugPoint(p, debugPointId) {
+        var debugSvg = svg.getElementById(debugPointId);
+        if (!debugSvg) {
+            var polyline = document.createElementNS(SVG_NAMESPACE, "polyline");
+            polyline.setAttribute("id", debugPointId);
+            polyline.setAttribute("points", "0,0 30,30 -30,-30 0,0 -30,30 30,-30");
+            polyline.setAttribute("style", "fill:none;stroke:" + DEBUG_COLOR[debugPointId] + ";stroke-width:2");
+            svg.appendChild(polyline);
+            debugSvg = polyline
+        }
+        var transforms = debugSvg.transform.baseVal;
+            if (transforms.length == 0) {
+                transforms.appendItem(svg.createSVGTransform());
+        }
+        console.log("debugPoint " + debugPointId + " " + p.x + ", " + p.y);
+        transforms.getItem(0).setTranslate(p.x, p.y);
+        return debugSvg;
+    }
     function debugRotation(cx, cy, angle, debugRotationId) {
         debugSvg = getCreateDebugRotation(debugRotationId);
         if (debugSvg) {
@@ -381,3 +494,60 @@ function gatherAllEquipmentPositions(svg) {
     }
     return positions;
 }
+
+// Identifiers
+
+function hasId(element){
+    return typeof element.id != 'undefined' && element.id != '';
+}
+
+var uniqueIdentifier = function (id) {
+    return function () { 
+        return 'uid-' + (++id); 
+    };
+} (0);
+
+// Geometry
+
+function distance(p, q) {
+    var dx = p.x - q.x;
+    var dy = p.y - q.y;
+    return Math.sqrt(dx*dx + dy*dy);
+}
+
+function findPointInSegment(d, p, q) {
+    // Find a point at distance d from p that belongs to the segment (p, q)
+    var p1 = {x: p.x, y: p.y};
+    var x = 0;
+    var y = 0;
+    var dx = q.x - p.x;
+    //console.log("dx = " + dx);
+    if (dx != 0) {
+        var m = (q.y - p.y)/dx;
+        //console.log("m  = " + m);
+        x = d / Math.sqrt(1 + m*m);
+        y = m*x;
+        //console.log("x  = " + x);
+        //console.log("y  = " + y);
+        if (Math.sign(x) != Math.sign(dx)) {
+            x = -x;
+            y = -y;
+        }
+    } else {
+        if (p.y < q.y) {
+            y = d;
+        } else {
+            y = - d;
+        }
+    }
+    p1.x += x;
+    p1.y += y;
+    return p1;
+}
+
+function calcRotation(p, q) {
+    var rotation = Math.atan2(q.y - p.y, q.x - p.x);
+    return rotation * 180 / Math.PI;
+}
+
+
