@@ -80,6 +80,8 @@ public class MainViewController implements ChangeListener<Object> {
     @FXML
     public CheckBox infoAlongEdge;
     @FXML
+    public CheckBox lineNameDisplayed;
+    @FXML
     public CheckBox insertNameDesc;
     @FXML
     public CheckBox substationDescriptionDisplayed;
@@ -127,6 +129,7 @@ public class MainViewController implements ChangeListener<Object> {
 
                 idDisplayed.selectedProperty(),
                 infoAlongEdge.selectedProperty(),
+                lineNameDisplayed.selectedProperty(),
                 insertNameDesc.selectedProperty(),
                 substationDescriptionDisplayed.selectedProperty(),
                 busLegend.selectedProperty(),
@@ -150,6 +153,7 @@ public class MainViewController implements ChangeListener<Object> {
 
         idDisplayed.selectedProperty().addListener(this);
         infoAlongEdge.selectedProperty().addListener(this);
+        lineNameDisplayed.selectedProperty().addListener(this);
         insertNameDesc.selectedProperty().addListener(this);
         substationDescriptionDisplayed.selectedProperty().addListener(this);
         busLegend.selectedProperty().addListener(this);
