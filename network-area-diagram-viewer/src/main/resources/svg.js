@@ -266,15 +266,14 @@ function Diagram(svg, svgTools, updateWhileDrag) {
             .rotate(a1)
             .scaleNonUniform((isStretchable(svgEdgePart) ? s : 1), 1)
             .rotate(-a0)
-            .translate(-referencePoint0.x, -referencePoint0.y)
-            );
+            .translate(-referencePoint0.x, -referencePoint0.y));
         if (!DIAGRAM_SCALE_ALL_EDGE_PARTS) {
             var gluePoint = getGluedToPoint(svgEdgePart, p1, q1);
             if (gluePoint) {
                 var c = center(svgEdgePart);
                 var additionalTranslationToGluePoint = {x: gluePoint.x - c.x, y: gluePoint.y - c.y};
-                transform.setMatrix(
-                    svg.createSVGMatrix().translate(additionalTranslationToGluePoint.x, additionalTranslationToGluePoint.y)
+                transform.setMatrix(svg.createSVGMatrix()
+                    .translate(additionalTranslationToGluePoint.x, additionalTranslationToGluePoint.y)
                     .multiply(transform.matrix));
             }
         }
