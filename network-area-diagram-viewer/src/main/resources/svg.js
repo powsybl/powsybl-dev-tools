@@ -1,5 +1,4 @@
 
-// TODO(Luma) adapt transform of parts glued to edge end instead of calculating glue point
 // TODO(Luma) change text orientation or hide node infos if rotation makes them appear inverted
 // TODO(Luma) how to handle multi-lines without having to split stretchable and glued to end? (avoid gaps and/or overlaps)
 // TODO(Luma) redraw the annuli
@@ -242,64 +241,56 @@ function Diagram(svg, svgTools, updateWhileDrag) {
         // We first undo the rotation of the segment (p0, q0) respect the x axis
         // by moving to p0, rotating -a0
         // then we re-scale the part if it is stretchable (scale only over the x axis)
-        // then rotate to get the current orientation of the edge, following the segment (p1, q1)
-        // after that we translate everything to the 
-            // Order from left to right is order of nested transform,
-            // The last transform in the list is the first applied,
-            // We have to rotate centered on the initial position
-        // For glued elements we need to know to which side they are glued,
-        // and which side is the moved node "p"
-        // TODO(Luma) we need the original distance from the center of the glued part to the correct end
-        //   for now we assume it is fixed
+        // and then rotate to get the current orientation of the edge following the segment (p1, q1).
+        // After that we translate everything to the new location of the moved node.
+
+        // Order from left to right is order of nested transform,
+        // The last transform in the list is the first applied,
+        // We have to rotate centered on the initial position.
+
+        // For parts glued to one side of the edge,
+        // we need to know to which side (end) they are glued,
+        // and which side is the moved node "p".
+        // Glued parts receive the same set of transformations with a different reference point.
+        var gluedToSide = getGluedToSide(svgEdgePart);
+        var referencePoint0 = p0;
+        var referencePoint1 = p1;
+        if (gluedToSide) {
+            if (movedNodeSide != gluedToSide) {
+                referencePoint0 = q0;
+                referencePoint1 = q1;
+            }
+        }
         transform.setMatrix(svg.createSVGMatrix()
-            .translate(p1.x, p1.y)
+            .translate(referencePoint1.x, referencePoint1.y)
             .rotate(a1)
             .scaleNonUniform((isStretchable(svgEdgePart) ? s : 1), 1)
             .rotate(-a0)
-            .translate(-p0.x, -p0.y)
+            .translate(-referencePoint0.x, -referencePoint0.y)
             );
         if (!DIAGRAM_SCALE_ALL_EDGE_PARTS) {
-            var gluePoint = findGluePoint(svgEdgePart, p1, q1, movedNodeSide);
+            var gluePoint = getGluedToPoint(svgEdgePart, p1, q1);
             if (gluePoint) {
                 var c = center(svgEdgePart);
                 var additionalTranslationToGluePoint = {x: gluePoint.x - c.x, y: gluePoint.y - c.y};
-                transform.setMatrix(svg.createSVGMatrix()
-                    .translate(additionalTranslationToGluePoint.x, additionalTranslationToGluePoint.y)
-                    .translate(p1.x, p1.y)
-                    .rotate(a1)
-                    .scaleNonUniform((isStretchable(svgEdgePart) ? s : 1), 1)
-                    .rotate(-a0)
-                    .translate(-p0.x, -p0.y)
-                    );
+                transform.setMatrix(
+                    svg.createSVGMatrix().translate(additionalTranslationToGluePoint.x, additionalTranslationToGluePoint.y)
+                    .multiply(transform.matrix));
             }
         }
     }
 
-    function findGluePoint(svgElem, p1, q1, movedNodeSide) {
+    function getGluedToSide(svgElem) {
+        if (svgElem.classList.contains("nad-glued-1")) {
+            return 1;
+        } else if (svgElem.classList.contains("nad-glued-2")) {
+            return 2;
+        }
+    }
+
+    function getGluedToPoint(svgElem, p1, q1) {
         if (svgElem.classList.contains("nad-glued-center")) {
             return {x: (p1.x + q1.x)/2, y: (p1.y + q1.y)/2}
-        }
-        // p1 is the new position of the moved node side
-        // q1 is the current position of the other node of the edge
-        var d = DIAGRAM_DISTANCE_FROM_NODE_TO_GLUED_PART;
-        var gluedToOtherNode = movedNodeSide === 2 && svgElem.classList.contains("nad-glued-1")
-            || movedNodeSide === 1 && svgElem.classList.contains("nad-glued-2");
-        if (gluedToOtherNode) {
-            // translate to a point at distance d from q1 over the segment (p1, q1)
-            gluePoint = findPointInSegment(d, q1, p1);
-            if (DIAGRAM_DEBUG_GLUE_POINT) {
-                svgTools.debugPoint(gluePoint, "debug-glue-point");
-                svgTools.debugPoint(p1, "debug-moved-node");
-                svgTools.debugPoint(q1, "debug-other-node");
-                console.log("findGluePoint:");
-                console.log("  p1 = (" + p1.x.toFixed(0) + ", " + p1.y.toFixed(0) + ")");
-                console.log("  q1 = (" + q1.x.toFixed(0) + ", " + q1.y.toFixed(0) + ")");
-                console.log("  moved side   = " + movedNodeSide);
-                console.log("  glue point   = (" + gluePoint.x.toFixed(0) + ", " + gluePoint.y.toFixed(0) + ")");
-                console.log("  d glue-moved = " + distance(gluePoint, p1));
-                console.log("  d glue-other = " + distance(gluePoint, q1));
-            }
-            return gluePoint;
         }
     }
 
@@ -329,7 +320,6 @@ function Diagram(svg, svgTools, updateWhileDrag) {
     }
 
     function translateText(id, translation) {
-        // Find the graphical element corresponding to the right end
         var textNodeId = id + "-textnode";
         var g = svg.getElementById(textNodeId);
         if (g) {
