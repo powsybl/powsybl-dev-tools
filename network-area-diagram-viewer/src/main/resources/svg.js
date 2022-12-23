@@ -8,10 +8,7 @@
 const DIAGRAM_UPDATE_ON_SERVER = false;
 const DIAGRAM_UPDATE_WHILE_DRAG = true;
 const DIAGRAM_SCALE_ALL_EDGE_PARTS = false;
-// TODO(Luma) this distance must be computed or glue point calculation avoided
-const DIAGRAM_DISTANCE_FROM_NODE_TO_GLUED_PART = 70;
 const DIAGRAM_DEBUG_EDGE_ROTATION = false;
-const DIAGRAM_DEBUG_GLUE_POINT = false;
 
 window.addEventListener('load', function() {
     var svgDiagram = document.getElementsByTagName("svg")[0];
