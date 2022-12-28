@@ -2,13 +2,19 @@
 // TODO(Luma) change text orientation or hide node infos if rotation makes them appear inverted
 // TODO(Luma) how to handle multi-lines without having to split stretchable and glued to end? (avoid gaps and/or overlaps)
 // TODO(Luma) redraw the annuli
-// TODO(Luma) consider three winding transformers
 // TODO(Luma) update on client: find related hidden nodes and update initial position in metadata?
 
 const DIAGRAM_UPDATE_ON_SERVER = false;
 const DIAGRAM_UPDATE_WHILE_DRAG = true;
 const DIAGRAM_SCALE_ALL_EDGE_PARTS = false;
 const DIAGRAM_DEBUG_EDGE_ROTATION = false;
+
+// FIXME(Luma) why edges lying at boundary node leave a gap when updated???
+// FIXME(Luma) these should not be parameters of the diagram
+// FIXME(Luma) only consider delta for center when there is a part glued to the center
+// FIXME(Luma) delta end could be different in side 1 and side 2
+const XXX_SDELTA_END = 27.5;
+const XXX_SDELTA_CENTER = 30;
 
 window.addEventListener('load', function() {
     var svgDiagram = document.getElementsByTagName("svg")[0];
@@ -22,7 +28,7 @@ window.addEventListener('load', function() {
 function makeDraggableSvg(svg) {
     var selectedElement = false, offset, transform, translation0;
     var svgTools = new SvgTools(svg);
-    var diagram = new Diagram(svg, svgTools, DIAGRAM_UPDATE_WHILE_DRAG);
+    var diagram = new Diagram(svg, svgTools, DIAGRAM_UPDATE_WHILE_DRAG, XXX_SDELTA_END, XXX_SDELTA_CENTER);
 
     svg.addEventListener('mousedown', startDrag);
     svg.addEventListener('mousemove', drag);
@@ -46,14 +52,13 @@ function makeDraggableSvg(svg) {
         selectedElement = draggableElem;
         selectedElement.style.cursor = 'grabbing';
 
-        offset = getMousePosition(event);
+        var mouse0 = getMousePosition(event);
         var transforms = svgTools.getTransformsEnsuringFirstIsTranslation(selectedElement);
         // Get initial translation amount
         transform = transforms.getItem(0);
-        // Save inital translation of selected element
+        // Save translation of selected element at the start of dragging operation
         translation0 = {x: transform.matrix.e, y: transform.matrix.f};
-        offset.x -= transform.matrix.e;
-        offset.y -= transform.matrix.f;
+        offset = {x: mouse0.x - translation0.x, y: mouse0.y - translation0.y};
     }
 
     function drag(event) {
@@ -72,12 +77,12 @@ function makeDraggableSvg(svg) {
     }
 
     function updateAfter(event, dragInProgress) {
-        var position = getMousePosition(event);
-        position = {x: position.x - offset.x, y: position.y - offset.y};
-        transform.setTranslate(position.x, position.y);
+        var mouse1 = getMousePosition(event);
+        var translation = {x: mouse1.x - offset.x, y: mouse1.y - offset.y};
+        transform.setTranslate(translation.x, translation.y);
         if (!dragInProgress || diagram.updateWhileDrag()) {
-            var translation = {x: position.x - translation0.x, y: position.y - translation0.y};
-            diagram.update(selectedElement, position, translation);
+            translationForOthers = {x: translation.x - translation0.x, y: translation.y - translation0.y}
+            diagram.update(selectedElement, translationForOthers);
             translation0 = {x: transform.matrix.e, y: transform.matrix.f};
         }
     }
@@ -85,10 +90,12 @@ function makeDraggableSvg(svg) {
 
 // PowSyBl (Network Area) Diagram
 
-function Diagram(svg, svgTools, updateWhileDrag) {
+function Diagram(svg, svgTools, updateWhileDrag, sdeltaEnd, sdeltaCenter) {
     this.getDraggableFrom = getDraggableFrom;
     this.update = update;
     this.updateWhileDrag = () => updateWhileDrag;
+    this.sdeltaEnd = sdeltaEnd;
+    this.sdeltaCenter = sdeltaCenter;
 
     function getDraggableFrom(element) {
         if (isDraggable(element)) {
@@ -112,14 +119,14 @@ function Diagram(svg, svgTools, updateWhileDrag) {
         return element.classList.contains("nad-vl-nodes") || element.classList.contains("nad-boundary-nodes");
     }
 
-    function update(svgElem, position, translation) {
+    function update(svgElem, translation) {
         if (DIAGRAM_UPDATE_ON_SERVER) {
             updateOnServer(svg);
         } else {
             // the element that is being moved has to have an id
             var id = svgElem.getAttribute("id");
             if (id) {
-            updateOnClient(id, position, translation);
+            updateOnClient(id, svgElem, translation);
             } else {
                 console.log("error trying to update: moved element has no id attribute");
             }
@@ -128,7 +135,7 @@ function Diagram(svg, svgTools, updateWhileDrag) {
 
     var cachedEdgesForId;
     var cachedEdges;
-    function updateOnClient(id, position, translation) {
+    function updateOnClient(id, nodeSvg, translation) {
         translateText(id, translation);
         var edges;
         if (id != cachedEdgesForId) {
@@ -140,11 +147,11 @@ function Diagram(svg, svgTools, updateWhileDrag) {
         for (var edge of edges) {
             var node1 = edge.getAttribute("node1");
             var node2 = edge.getAttribute("node2");
-            updateEdge(edge, node1, node2, id, position, translation);
+            updateEdge(edge, node1, node2, id, nodeSvg, translation);
         }
     }
 
-    function updateEdge(edgeMetadata, node1, node2, movedNodeId, position, translation) {
+    function updateEdge(edgeMetadata, node1, node2, movedNodeId, movedNodeSvg, translation) {
         // This edge is adjacent to the moved node
         var edgeId = edgeMetadata.getAttribute("svgid");
         var edgeSvg = svg.getElementById(edgeId);
@@ -166,37 +173,42 @@ function Diagram(svg, svgTools, updateWhileDrag) {
                 // the transform to apply on edge drawings is complex: 
                 // we have to rotate them to point to the new location of the moved node
                 // and expand (the stretchable parts) so the drawing fills the new distance between nodes
-                transformEdge(edgeId, edgeSvg, movedNodeId, movedNodeSide, otherNodeId, otherNodeSvg, position);
+                transformEdge(edgeId, edgeSvg, movedNodeId, movedNodeSide, movedNodeSvg, otherNodeId, otherNodeSvg);
             }
         }
     }
 
     var cachedEdgeDistances0 = {};
-    function transformEdge(edgeId, edgeSvg, movedNodeId, movedNodeSide, otherNodeId, otherNodeSvg, p1) {
-        var q1 = center(otherNodeSvg);
-        var a1 = calcRotation(p1, q1);
-
+    function transformEdge(edgeId, edgeSvg, movedNodeId, movedNodeSide, movedNodeSvg, otherNodeId, otherNodeSvg) {
         var movedNodeMetadata = svg.querySelector('nad\\\\:node[svgid="' + movedNodeId + '"]');
         var otherNodeMetadata = svg.querySelector('nad\\\\:node[svgid="' + otherNodeId + '"]');
         var p0 = {x: parseFloat(movedNodeMetadata.getAttribute("x")), y: parseFloat(movedNodeMetadata.getAttribute("y"))};
         var q0 = {x: parseFloat(otherNodeMetadata.getAttribute("x")), y: parseFloat(otherNodeMetadata.getAttribute("y"))};
         var a0 = calcRotation(p0, q0);
+        var p1 = center(movedNodeSvg);
+        var q1 = center(otherNodeSvg);
+        var a1 = calcRotation(p1, q1);
 
         if (!(edgeId in cachedEdgeDistances0)) {
             var dx0 = p0.x - q0.x;
             var dy0 = p0.y - q0.y;
-            cachedEdgeDistances0[edgeId] = dx0*dx0 + dy0*dy0;
+            cachedEdgeDistances0[edgeId] = Math.sqrt(dx0*dx0 + dy0*dy0);
         }
-        var d02 = cachedEdgeDistances0[edgeId];
+        var d0 = cachedEdgeDistances0[edgeId];
         var dx1 = p1.x - q1.x;
         var dy1 = p1.y - q1.y;
-        var s = Math.sqrt((dx1*dx1 + dy1*dy1)/d02);
+        // FIXME(Luma) approx to radius of annuli, start of edge drawing
+        // FIXME(Luma) Received as a parameter for initial version
+        //var s = Math.sqrt((dx1*dx1 + dy1*dy1)/d02); // Approx, it does not take into account non-stretchable parts and delta from node centers
+        var d1 = Math.sqrt(dx1*dx1 + dy1*dy1);
+        // difference respect scale1.html: there are two stretchables in the edge drawing, scaling factor
+        var s = (d1 - 2 * sdeltaEnd - 2 * sdeltaCenter) / (d0 - 2 * sdeltaEnd - 2 * sdeltaCenter);
 
         if (isDanglingLine(edgeSvg)) {
             // Rotate the boundary node according to new edge orientation
             updateBoundaryNode((movedNodeSide === 2 ? movedNodeId : otherNodeId), a0, a1);
         }
-        updateEdgeTransform(edgeSvg, edgeId, movedNodeSide, p0, q0, p1, q1, a0, a1, s);
+        updateEdgeTransform(edgeSvg, edgeId, movedNodeSide, p0, q0, p1, q1, a0, a1, s, sdeltaEnd);
 
         if (DIAGRAM_DEBUG_EDGE_ROTATION) {
             svgTools.debugRotation(p1.x, p1.y, a0, "debug-rotation0");
@@ -206,11 +218,11 @@ function Diagram(svg, svgTools, updateWhileDrag) {
     }
 
     var edgeTransforms = {};
-    function updateEdgeTransform(svgElem, edgeId, movedNodeSide, p0, q0, p1, q1, a0, a1, s) {
+    function updateEdgeTransform(svgElem, edgeId, movedNodeSide, p0, q0, p1, q1, a0, a1, s, sdeltaEnd) {
         for (const part of svgElem.getElementsByTagName("*")) {
             if (part.transform && isEdgePartUpdatable(part)) {
                 createCachedTransform(edgeId, part);
-                updateEdgePartTransform(part, edgeTransforms[edgeId][part.id], movedNodeSide, p0, q0, p1, q1, a0, a1, s);
+                updateEdgePartTransform(part, edgeTransforms[edgeId][part.id], movedNodeSide, p0, q0, p1, q1, a0, a1, s, sdeltaEnd);
             }
         }
     }
@@ -246,7 +258,7 @@ function Diagram(svg, svgTools, updateWhileDrag) {
         }
     }
 
-    function updateEdgePartTransform(svgEdgePart, transform, movedNodeSide, p0, q0, p1, q1, a0, a1, s) {
+    function updateEdgePartTransform(svgEdgePart, transform, movedNodeSide, p0, q0, p1, q1, a0, a1, s, sdeltaEnd) {
         // The moved node was located at point p0, now it is at p1
         // The other node of edge was initially at q0, but its current position is q1
 
@@ -271,12 +283,15 @@ function Diagram(svg, svgTools, updateWhileDrag) {
             if (movedNodeSide != gluedToSide) {
                 referencePoint0 = q0;
                 referencePoint1 = q1;
+                sdeltaEnd = -sdeltaEnd;
             }
         }
         transform.setMatrix(svg.createSVGMatrix()
             .translate(referencePoint1.x, referencePoint1.y)
             .rotate(a1)
+            .translate(sdeltaEnd, 0)
             .scaleNonUniform((isStretchable(svgEdgePart) ? s : 1), 1)
+            .translate(-sdeltaEnd, 0)
             .rotate(-a0)
             .translate(-referencePoint0.x, -referencePoint0.y));
         if (!DIAGRAM_SCALE_ALL_EDGE_PARTS) {
@@ -349,6 +364,7 @@ function Diagram(svg, svgTools, updateWhileDrag) {
 }
 
 // SVG helper tools
+
 function SvgTools(svg) {
     this.debugPoint = debugPoint;
     this.debugRotation = debugRotation;
