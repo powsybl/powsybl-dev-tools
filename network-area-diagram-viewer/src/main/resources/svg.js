@@ -9,12 +9,9 @@ const DIAGRAM_UPDATE_WHILE_DRAG = true;
 const DIAGRAM_SCALE_ALL_EDGE_PARTS = false;
 const DIAGRAM_DEBUG_EDGE_ROTATION = false;
 
-// FIXME(Luma) why edges lying at boundary node leave a gap when updated???
-// FIXME(Luma) these should not be parameters of the diagram
-// FIXME(Luma) only consider delta for center when there is a part glued to the center
-// FIXME(Luma) delta end could be different in side 1 and side 2
-const XXX_SDELTA_END = 27.5;
-const XXX_SDELTA_CENTER = 30;
+// FIXME(Luma) these should not be parameters of the diagram, they should be computed for each edge drawing
+const XXX_NON_STRETCHABLE_SIDE_SIZE = 27.5;
+const XXX_NON_STRETCHABLE_CENTER_SIZE = 60;
 
 window.addEventListener('load', function() {
     var svgDiagram = document.getElementsByTagName("svg")[0];
@@ -28,7 +25,7 @@ window.addEventListener('load', function() {
 function makeDraggableSvg(svg) {
     var selectedElement = false, offset, transform, translation0;
     var svgTools = new SvgTools(svg);
-    var diagram = new Diagram(svg, svgTools, DIAGRAM_UPDATE_WHILE_DRAG, XXX_SDELTA_END, XXX_SDELTA_CENTER);
+    var diagram = new Diagram(svg, svgTools, DIAGRAM_UPDATE_WHILE_DRAG, XXX_NON_STRETCHABLE_SIDE_SIZE, XXX_NON_STRETCHABLE_CENTER_SIZE);
 
     svg.addEventListener('mousedown', startDrag);
     svg.addEventListener('mousemove', drag);
@@ -90,12 +87,12 @@ function makeDraggableSvg(svg) {
 
 // PowSyBl (Network Area) Diagram
 
-function Diagram(svg, svgTools, updateWhileDrag, sdeltaEnd, sdeltaCenter) {
+function Diagram(svg, svgTools, updateWhileDrag, nonStretchableSideSize, nonStretchableCenterSize) {
     this.getDraggableFrom = getDraggableFrom;
     this.update = update;
     this.updateWhileDrag = () => updateWhileDrag;
-    this.sdeltaEnd = sdeltaEnd;
-    this.sdeltaCenter = sdeltaCenter;
+    this.nonStretchableSideSize = nonStretchableSideSize;
+    this.nonStretchableCenterSize = nonStretchableCenterSize;
 
     function getDraggableFrom(element) {
         if (isDraggable(element)) {
@@ -197,18 +194,15 @@ function Diagram(svg, svgTools, updateWhileDrag, sdeltaEnd, sdeltaCenter) {
         var d0 = cachedEdgeDistances0[edgeId];
         var dx1 = p1.x - q1.x;
         var dy1 = p1.y - q1.y;
-        // FIXME(Luma) approx to radius of annuli, start of edge drawing
-        // FIXME(Luma) Received as a parameter for initial version
-        //var s = Math.sqrt((dx1*dx1 + dy1*dy1)/d02); // Approx, it does not take into account non-stretchable parts and delta from node centers
         var d1 = Math.sqrt(dx1*dx1 + dy1*dy1);
-        // difference respect scale1.html: there are two stretchables in the edge drawing, scaling factor
-        var s = (d1 - 2 * sdeltaEnd - 2 * sdeltaCenter) / (d0 - 2 * sdeltaEnd - 2 * sdeltaCenter);
+        var nonStretchables = findNonStretchables(edgeSvg);
+        var s = (d1 - nonStretchables.d) / (d0 - nonStretchables.d);
 
         if (isDanglingLine(edgeSvg)) {
             // Rotate the boundary node according to new edge orientation
             updateBoundaryNode((movedNodeSide === 2 ? movedNodeId : otherNodeId), a0, a1);
         }
-        updateEdgeTransform(edgeSvg, edgeId, movedNodeSide, p0, q0, p1, q1, a0, a1, s, sdeltaEnd);
+        updateEdgeTransform(edgeSvg, edgeId, movedNodeSide, p0, q0, p1, q1, a0, a1, s, nonStretchables);
 
         if (DIAGRAM_DEBUG_EDGE_ROTATION) {
             svgTools.debugRotation(p1.x, p1.y, a0, "debug-rotation0");
@@ -217,12 +211,42 @@ function Diagram(svg, svgTools, updateWhileDrag, sdeltaEnd, sdeltaCenter) {
         }
     }
 
+    function findNonStretchables(edgeSvg) {
+        // TODO(Luma) This information could be cached
+        var dcenter = 0;
+        var dside1 = 0;
+        var dside2 = 0;
+        for (const part of edgeSvg.getElementsByTagName("*")) {
+            if (part.classList.contains("nad-glued-center")) {
+                dcenter = nonStretchableCenterSize;
+            } else if (!part.classList.contains("nad-stretchable")) {
+                if (part.classList.contains("nad-glued-1")) {
+                    dside1 = nonStretchableSideSize;
+                } else if (part.classList.contains("nad-glued-2")) {
+                    dside2 = nonStretchableSideSize;
+                }
+            }
+        }
+        // For 3wt:
+        // although the side close to the center node does not have any glued part,
+        // we have to keep a distance from the center node drawing
+        if (edgeSvg.parentElement.classList.contains("nad-3wt-edges")) {
+            dside2 = nonStretchableSideSize;
+        }
+        // FIXME(Luma) return dside1 and dside2 instead of a single dside
+        console.log("nonStretchables edgeSvg id = " + edgeSvg.getAttribute("id"));
+        console.log("  side1  = " + dside1);
+        console.log("  side2  = " + dside2);
+        console.log("  center = " + dcenter);
+        return {dside: dside1, d: dside1 + dside2 + dcenter}
+    }
+
     var edgeTransforms = {};
-    function updateEdgeTransform(svgElem, edgeId, movedNodeSide, p0, q0, p1, q1, a0, a1, s, sdeltaEnd) {
+    function updateEdgeTransform(svgElem, edgeId, movedNodeSide, p0, q0, p1, q1, a0, a1, s, nonStretchables) {
         for (const part of svgElem.getElementsByTagName("*")) {
             if (part.transform && isEdgePartUpdatable(part)) {
                 createCachedTransform(edgeId, part);
-                updateEdgePartTransform(part, edgeTransforms[edgeId][part.id], movedNodeSide, p0, q0, p1, q1, a0, a1, s, sdeltaEnd);
+                updateEdgePartTransform(part, edgeTransforms[edgeId][part.id], movedNodeSide, p0, q0, p1, q1, a0, a1, s, nonStretchables);
             }
         }
     }
@@ -258,7 +282,7 @@ function Diagram(svg, svgTools, updateWhileDrag, sdeltaEnd, sdeltaCenter) {
         }
     }
 
-    function updateEdgePartTransform(svgEdgePart, transform, movedNodeSide, p0, q0, p1, q1, a0, a1, s, sdeltaEnd) {
+    function updateEdgePartTransform(svgEdgePart, transform, movedNodeSide, p0, q0, p1, q1, a0, a1, s, nonStretchables) {
         // The moved node was located at point p0, now it is at p1
         // The other node of edge was initially at q0, but its current position is q1
 
@@ -283,15 +307,15 @@ function Diagram(svg, svgTools, updateWhileDrag, sdeltaEnd, sdeltaCenter) {
             if (movedNodeSide != gluedToSide) {
                 referencePoint0 = q0;
                 referencePoint1 = q1;
-                sdeltaEnd = -sdeltaEnd;
+                nonStretchables.dside = -nonStretchables.dside;
             }
         }
         transform.setMatrix(svg.createSVGMatrix()
             .translate(referencePoint1.x, referencePoint1.y)
             .rotate(a1)
-            .translate(sdeltaEnd, 0)
+            .translate(nonStretchables.dside, 0)
             .scaleNonUniform((isStretchable(svgEdgePart) ? s : 1), 1)
-            .translate(-sdeltaEnd, 0)
+            .translate(-nonStretchables.dside, 0)
             .rotate(-a0)
             .translate(-referencePoint0.x, -referencePoint0.y));
         if (!DIAGRAM_SCALE_ALL_EDGE_PARTS) {
