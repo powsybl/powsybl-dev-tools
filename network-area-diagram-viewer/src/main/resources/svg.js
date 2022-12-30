@@ -234,10 +234,10 @@ function Diagram(svg, svgTools, updateWhileDrag, nonStretchableSideSize, nonStre
             dside2 = nonStretchableSideSize;
         }
         // FIXME(Luma) return dside1 and dside2 instead of a single dside
-        console.log("nonStretchables edgeSvg id = " + edgeSvg.getAttribute("id"));
-        console.log("  side1  = " + dside1);
-        console.log("  side2  = " + dside2);
-        console.log("  center = " + dcenter);
+        //console.log("nonStretchables edgeSvg id = " + edgeSvg.getAttribute("id"));
+        //console.log("  side1  = " + dside1);
+        //console.log("  side2  = " + dside2);
+        //console.log("  center = " + dcenter);
         return {dside: dside1, d: dside1 + dside2 + dcenter}
     }
 
@@ -300,15 +300,18 @@ function Diagram(svg, svgTools, updateWhileDrag, nonStretchableSideSize, nonStre
         // we need to know to which side (end) they are glued,
         // and which side is the moved node "p".
         // Glued parts receive the same set of transformations with a different reference point.
-        var gluedToSide = getGluedToSide(svgEdgePart);
         var referencePoint0 = p0;
         var referencePoint1 = p1;
-        if (gluedToSide) {
-            if (movedNodeSide != gluedToSide) {
-                referencePoint0 = q0;
-                referencePoint1 = q1;
-                nonStretchables.dside = -nonStretchables.dside;
-            }
+        var gluedToSide = getGluedToSide(svgEdgePart);
+        if (gluedToSide && movedNodeSide != gluedToSide) {
+            referencePoint0 = q0;
+            referencePoint1 = q1;
+            nonStretchables.dside = -nonStretchables.dside;
+        } else if (isGluedToCenter(svgEdgePart)) {
+            referencePoint1 = {x: (p1.x + q1.x)/2, y: (p1.y + q1.y)/2};
+            referencePoint0 = {x: (p0.x + q0.x)/2, y: (p0.y + q0.y)/2};
+            //svgTools.debugPoint(referencePoint0, "center0", "#FF77FF"); // light magenta
+            //svgTools.debugPoint(referencePoint1, "center1", "magenta");
         }
         transform.setMatrix(svg.createSVGMatrix()
             .translate(referencePoint1.x, referencePoint1.y)
@@ -318,16 +321,6 @@ function Diagram(svg, svgTools, updateWhileDrag, nonStretchableSideSize, nonStre
             .translate(-nonStretchables.dside, 0)
             .rotate(-a0)
             .translate(-referencePoint0.x, -referencePoint0.y));
-        if (!DIAGRAM_SCALE_ALL_EDGE_PARTS) {
-            var gluePoint = getGluedToPoint(svgEdgePart, p1, q1);
-            if (gluePoint) {
-                var c = center(svgEdgePart);
-                var additionalTranslationToGluePoint = {x: gluePoint.x - c.x, y: gluePoint.y - c.y};
-                transform.setMatrix(svg.createSVGMatrix()
-                    .translate(additionalTranslationToGluePoint.x, additionalTranslationToGluePoint.y)
-                    .multiply(transform.matrix));
-            }
-        }
     }
 
     function isDanglingLine(svgElem) {
@@ -342,10 +335,8 @@ function Diagram(svg, svgTools, updateWhileDrag, nonStretchableSideSize, nonStre
         }
     }
 
-    function getGluedToPoint(svgElem, p1, q1) {
-        if (svgElem.classList.contains("nad-glued-center")) {
-            return {x: (p1.x + q1.x)/2, y: (p1.y + q1.y)/2}
-        }
+    function isGluedToCenter(svgElem) {
+        return svgElem.classList.contains("nad-glued-center");
     }
 
     function isEdgePartUpdatable(element) {
@@ -397,6 +388,7 @@ function SvgTools(svg) {
     this.getTransformsEnsuringFirstIsTranslation = getTransformsEnsuringFirstIsTranslation;
 
     const SVG_NAMESPACE = "http://www.w3.org/2000/svg";
+    const DEBUG_COLOR_DEFAULT = "magenta";
     const DEBUG_COLOR = {
         "debug-center": "#888888",
         "debug-glue-point": "#888888",
@@ -406,13 +398,14 @@ function SvgTools(svg) {
         "debug-rotation1": "#888888",
         "debug-connection": "#CCCCCC"};
 
-    function debugPoint(p, debugPointId) {
+    function debugPoint(p, debugPointId, debugColor) {
         var debugSvg = svg.getElementById(debugPointId);
         if (!debugSvg) {
             var polyline = document.createElementNS(SVG_NAMESPACE, "polyline");
             polyline.setAttribute("id", debugPointId);
-            polyline.setAttribute("points", "0,0 30,30 -30,-30 0,0 -30,30 30,-30");
-            polyline.setAttribute("style", "fill:none;stroke:" + DEBUG_COLOR[debugPointId] + ";stroke-width:2");
+            polyline.setAttribute("points", "0,0 20,20 -20,-20 0,0 -20,20 20,-20");
+            var color = debugColor ? debugColor : (debugPointId in DEBUG_COLOR ? DEBUG_COLOR[debugPointId] : DEBUG_COLOR_DEFAULT);
+            polyline.setAttribute("style", "fill:none;stroke:" + color + ";stroke-width:3");
             svg.appendChild(polyline);
             debugSvg = polyline
         }
@@ -420,7 +413,7 @@ function SvgTools(svg) {
             if (transforms.length == 0) {
                 transforms.appendItem(svg.createSVGTransform());
         }
-        console.log("debugPoint " + debugPointId + " " + p.x + ", " + p.y);
+        //console.log("debugPoint " + debugPointId + " " + p.x + ", " + p.y);
         transforms.getItem(0).setTranslate(p.x, p.y);
         return debugSvg;
     }
