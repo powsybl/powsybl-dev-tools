@@ -113,7 +113,9 @@ function Diagram(svg, svgTools, updateWhileDrag, nonStretchableSideSize, nonStre
     }
 
     function classIsContainerOfDraggables(element) {
-        return element.classList.contains("nad-vl-nodes") || element.classList.contains("nad-boundary-nodes");
+        return element.classList.contains("nad-vl-nodes")
+            || element.classList.contains("nad-boundary-nodes")
+            || element.classList.contains("nad-3wt-nodes");
     }
 
     function update(svgElem, translation) {
