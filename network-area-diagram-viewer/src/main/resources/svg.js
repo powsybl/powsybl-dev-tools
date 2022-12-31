@@ -4,6 +4,9 @@
 // TODO(Luma) redraw the annuli
 // TODO(Luma) update on client: find related hidden nodes and update initial position in metadata?
 
+const DRAGGABLE_SNAP_TO_GRID = true;
+const DRAGGABLE_GRID_SIZE = 100;
+
 const DIAGRAM_UPDATE_ON_SERVER = false;
 const DIAGRAM_UPDATE_WHILE_DRAG = true;
 const DIAGRAM_SCALE_ALL_EDGE_PARTS = false;
@@ -75,6 +78,12 @@ function makeDraggableSvg(svg) {
 
     function updateAfter(event, dragInProgress) {
         var mouse1 = getMousePosition(event);
+        if (DRAGGABLE_SNAP_TO_GRID && !dragInProgress) {
+            // Only snap to grid at the end of dragging operation
+            var c1 = svgTools.center(selectedElement);
+            var c1s = snap(c1, DRAGGABLE_GRID_SIZE);
+            mouse1 = {x: mouse1.x + c1s.x - c1.x, y: mouse1.y + c1s.y - c1.y};
+        }
         var translation = {x: mouse1.x - offset.x, y: mouse1.y - offset.y};
         transform.setTranslate(translation.x, translation.y);
         if (!dragInProgress || diagram.updateWhileDrag()) {
@@ -184,8 +193,8 @@ function Diagram(svg, svgTools, updateWhileDrag, nonStretchableSideSize, nonStre
         var p0 = {x: parseFloat(movedNodeMetadata.getAttribute("x")), y: parseFloat(movedNodeMetadata.getAttribute("y"))};
         var q0 = {x: parseFloat(otherNodeMetadata.getAttribute("x")), y: parseFloat(otherNodeMetadata.getAttribute("y"))};
         var a0 = calcRotation(p0, q0);
-        var p1 = center(movedNodeSvg);
-        var q1 = center(otherNodeSvg);
+        var p1 = svgTools.center(movedNodeSvg);
+        var q1 = svgTools.center(otherNodeSvg);
         var a1 = calcRotation(p1, q1);
 
         if (!(edgeId in cachedEdgeDistances0)) {
@@ -355,17 +364,6 @@ function Diagram(svg, svgTools, updateWhileDrag, nonStretchableSideSize, nonStre
         return element.classList.contains("nad-stretchable");
     }
 
-    function center(svgElem) {
-        var rect = svgElem.getBoundingClientRect();
-        var center = {x: rect.x + .5 * rect.width, y: rect.y + .5 * rect.height};
-        var CTM = svg.getScreenCTM();
-        if (CTM) {
-            center.x = (center.x - CTM.e) / CTM.a;
-            center.y = (center.y - CTM.f) / CTM.d;
-        }
-        return center;
-    }
-
     function translateText(id, translation) {
         var textNodeId = id + "-textnode";
         var g = svg.getElementById(textNodeId);
@@ -383,13 +381,92 @@ function Diagram(svg, svgTools, updateWhileDrag, nonStretchableSideSize, nonStre
 // SVG helper tools
 
 function SvgTools(svg) {
-    this.debugPoint = debugPoint;
-    this.debugRotation = debugRotation;
-    this.debugConnection = debugConnection;
+    this.center = center;
     this.translate = translate;
     this.getTransformsEnsuringFirstIsTranslation = getTransformsEnsuringFirstIsTranslation;
 
+    this.debugPoint = debugPoint;
+    this.debugRotation = debugRotation;
+    this.debugConnection = debugConnection;
+
     const SVG_NAMESPACE = "http://www.w3.org/2000/svg";
+    const XHTML_NAMESPACE = "http://www.w3.org/1999/xhtml";
+    const SVG_TOOLS_GRID_ID = "svg-tools-grid";
+    
+    createGrid();
+
+    function createGrid() {
+        var pattern = document.createElementNS(SVG_NAMESPACE, "pattern");
+        pattern.setAttribute("id", "svg-tools-grid-pattern");
+        pattern.setAttribute("width", "100");
+        pattern.setAttribute("height", "100");
+        pattern.setAttribute("patternUnits", "userSpaceOnUse");
+        var path = document.createElementNS(SVG_NAMESPACE, "path");
+        path.setAttribute("d", "M 100 0 L 0 0 0 100");
+        path.setAttribute("fill", "none");
+        path.setAttribute("stroke", "gray");
+        path.setAttribute("stroke-width", "2");
+        svg.appendChild(pattern);
+        pattern.appendChild(path);
+        var rect = document.createElementNS(SVG_NAMESPACE, "rect");
+        rect.setAttribute("id", SVG_TOOLS_GRID_ID);
+        rect.setAttribute("x", "-1500");
+        rect.setAttribute("y", "-1500");
+        rect.setAttribute("width", "3000");
+        rect.setAttribute("height", "3000");
+        rect.setAttribute("visibility", "hidden");
+        svg.insertBefore(rect, svg.children[0]);
+        rect.setAttribute("fill", "url(#svg-tools-grid-pattern)");
+        createGridShowButton();
+    }
+
+    function createGridShowButton() {
+        var buttonShowGrid = document.createElement("button");
+        buttonShowGrid.addEventListener("mousedown", () => showHideGrid());
+        buttonShowGrid.append("show/hide grid");
+        document.body.appendChild(buttonShowGrid);
+    }
+
+    var gridShown = false;
+    function showHideGrid() {
+        var grid = svg.getElementById(SVG_TOOLS_GRID_ID);
+        gridShown = !gridShown;
+        console.log("grid shown : " + gridShown);
+        grid.setAttribute("visibility", gridShown ? "visible" : "hidden");
+    }
+
+    function center(svgElem) {
+        var rect = svgElem.getBoundingClientRect();
+        var center = {x: rect.x + .5 * rect.width, y: rect.y + .5 * rect.height};
+        var CTM = svg.getScreenCTM();
+        if (CTM) {
+            center.x = (center.x - CTM.e) / CTM.a;
+            center.y = (center.y - CTM.f) / CTM.d;
+        }
+        return center;
+    }
+
+    function translate(svgElem, translation) {
+        // Add the given translation to the current one
+        var transform = getTransformsEnsuringFirstIsTranslation(svgElem).getItem(0);
+        var totalTranslation = {x: transform.matrix.e + translation.x, y: transform.matrix.f + translation.y};
+        transform.setTranslate(totalTranslation.x, totalTranslation.y);
+    }
+
+    function getTransformsEnsuringFirstIsTranslation(svgElem) {
+        // Get all the transforms currently on this element
+        var transforms = svgElem.transform.baseVal;
+        // Ensure the first transform is a translate transform
+        if (transforms.length === 0 ||
+            transforms.getItem(0).type !== SVGTransform.SVG_TRANSFORM_TRANSLATE) {
+            // Create an transform that translates by (0, 0)
+            var translate = svg.createSVGTransform();
+            translate.setTranslate(0, 0);
+            // Add the translation to the front of the transforms list
+            svgElem.transform.baseVal.insertItemBefore(translate, 0);
+        }
+        return transforms;
+    }
     const DEBUG_COLOR_DEFAULT = "magenta";
     const DEBUG_COLOR = {
         "debug-center": "#888888",
@@ -470,27 +547,6 @@ function SvgTools(svg) {
         return debugSvg;
     }
 
-    function translate(svgElem, translation) {
-        // Add the given translation to the current one
-        var transform = getTransformsEnsuringFirstIsTranslation(svgElem).getItem(0);
-        var totalTranslation = {x: transform.matrix.e + translation.x, y: transform.matrix.f + translation.y};
-        transform.setTranslate(totalTranslation.x, totalTranslation.y);
-    }
-
-    function getTransformsEnsuringFirstIsTranslation(svgElem) {
-        // Get all the transforms currently on this element
-        var transforms = svgElem.transform.baseVal;
-        // Ensure the first transform is a translate transform
-        if (transforms.length === 0 ||
-            transforms.getItem(0).type !== SVGTransform.SVG_TRANSFORM_TRANSLATE) {
-            // Create an transform that translates by (0, 0)
-            var translate = svg.createSVGTransform();
-            translate.setTranslate(0, 0);
-            // Add the translation to the front of the transforms list
-            svgElem.transform.baseVal.insertItemBefore(translate, 0);
-        }
-        return transforms;
-    }
 }
 
 // Updated positions processed on server
@@ -588,6 +644,10 @@ function findPointInSegment(d, p, q) {
 function calcRotation(p, q) {
     var rotation = Math.atan2(q.y - p.y, q.x - p.x);
     return rotation * 180 / Math.PI;
+}
+
+function snap(p, gridSize) {
+    return {x: Math.round(p.x / gridSize) * gridSize, y: Math.round(p.y / gridSize) * gridSize};
 }
 
 
