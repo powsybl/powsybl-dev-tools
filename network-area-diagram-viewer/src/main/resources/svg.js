@@ -4,7 +4,6 @@
 // TODO(Luma) redraw the annuli
 // TODO(Luma) update on client: find related hidden nodes and update initial position in metadata?
 
-const DIAGRAM_SCALE_ALL_EDGE_PARTS = false;
 const DIAGRAM_DEBUG_EDGE_ROTATION = false;
 
 // FIXME(Luma) these should not be parameters of the diagram, they should be computed for each edge drawing
@@ -321,9 +320,6 @@ function Diagram(svg, svgTools, nonStretchableSideSize, nonStretchableCenterSize
     }
 
     function isStretchable(element) {
-        if (DIAGRAM_SCALE_ALL_EDGE_PARTS) {
-            return true;
-        }
         return element.classList.contains("nad-stretchable");
     }
 
