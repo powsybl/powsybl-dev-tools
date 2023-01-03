@@ -12,6 +12,8 @@ import com.powsybl.iidm.network.Network;
 import com.powsybl.iidm.network.Substation;
 import com.powsybl.iidm.network.VoltageLevel;
 import com.powsybl.nad.NetworkAreaDiagram;
+import com.powsybl.nad.layout.BasicFixedLayoutFactory;
+import com.powsybl.nad.model.Point;
 import javafx.beans.property.StringProperty;
 import javafx.concurrent.Service;
 import javafx.concurrent.Task;
@@ -27,6 +29,7 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.regex.Matcher;
@@ -49,6 +52,8 @@ public class DiagramController {
 
     private String html;
     private String js;
+
+    private final JsHandler jsHandler = new JsHandler();
 
     @FXML
     private void initialize() throws IOException {
@@ -75,7 +80,10 @@ public class DiagramController {
         diagramWebView.getEngine().getLoadWorker().stateProperty().addListener((observable, oldValue, newValue) -> {
             if (Worker.State.SUCCEEDED == newValue) {
                 JSObject window = (JSObject) diagramWebView.getEngine().executeScript("window");
-                window.setMember("jsHandler", new Object());
+                window.setMember("jsHandler", jsHandler);
+                // For easier debugging, redirect the console.log to the jsHandler
+                diagramWebView.getEngine().executeScript("console.log = function(message) " +
+                        "{ jsHandler.log(message); };");
             }
         });
 
@@ -93,6 +101,38 @@ public class DiagramController {
         updateDiagram(model, modelSvgContent, container);
     }
 
+    public static void updateDiagram(Model model, StringProperty modelSvgContent, Container<?> container, Map<String, Point> positions) {
+        Objects.requireNonNull(positions);
+        StringWriter writer = new StringWriter();
+        Service<String> nadService = new Service<>() {
+            @Override
+            protected Task<String> createTask() {
+                return new Task<>() {
+                    @Override
+                    protected String call() {
+                        NetworkAreaDiagram nad = getNetworkAreaDiagram(model, container);
+                        // Use the diagram definition to draw,
+                        // but apply a fixed layout using the given positions
+                        nad.draw(writer,
+                                model.getSvgParameters(),
+                                model.getLayoutParameters(),
+                                model.getStyleProvider(),
+                                model.getLabelProvider(),
+                                new BasicFixedLayoutFactory(positions));
+                        return writer.toString();
+                    }
+                };
+            }
+        };
+
+        nadService.setOnSucceeded(event -> modelSvgContent.setValue((String) event.getSource().getValue()));
+        nadService.setOnFailed(event -> {
+            Throwable exception = event.getSource().getException();
+            LOGGER.error(exception.toString(), exception);
+        });
+        nadService.start();
+    }
+
     public static void updateDiagram(Model model, StringProperty modelSvgContent, Container<?> container) {
         StringWriter writer = new StringWriter();
         Service<String> nadService = new Service<>() {
@@ -102,9 +142,12 @@ public class DiagramController {
                     @Override
                     protected String call() {
                         NetworkAreaDiagram nad = getNetworkAreaDiagram(model, container);
-                        nad.draw(writer, model.getSvgParameters(), model.getLayoutParameters(),
+                        nad.draw(writer,
+                                model.getSvgParameters(),
+                                model.getLayoutParameters(),
                                 model.getStyleProvider(),
-                                model.getLabelProvider(), model.getLayoutFactory());
+                                model.getLabelProvider(),
+                                model.getLayoutFactory());
                         return writer.toString();
                     }
                 };
