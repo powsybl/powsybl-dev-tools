@@ -95,8 +95,6 @@ function Diagram(svg, svgTools, nonStretchableSideSize, nonStretchableCenterSize
     }
 
     function isDraggable(element) {
-        // TODO(Luma) if we decide to add explicit classes for every drawing we could use
-        //return hasId(element) && classIsDraggable(element);
         return hasId(element) && element.parentElement && classIsContainerOfDraggables(element.parentElement);
     }
 
@@ -214,10 +212,6 @@ function Diagram(svg, svgTools, nonStretchableSideSize, nonStretchableCenterSize
             dside2 = nonStretchableSideSize;
         }
         // FIXME(Luma) return dside1 and dside2 instead of a single dside
-        //console.log("nonStretchables edgeSvg id = " + edgeSvg.getAttribute("id"));
-        //console.log("  side1  = " + dside1);
-        //console.log("  side2  = " + dside2);
-        //console.log("  center = " + dcenter);
         return {dside: dside1, d: dside1 + dside2 + dcenter}
     }
 
@@ -393,14 +387,10 @@ function findPointInSegment(d, p, q) {
     var x = 0;
     var y = 0;
     var dx = q.x - p.x;
-    //console.log("dx = " + dx);
     if (dx != 0) {
         var m = (q.y - p.y)/dx;
-        //console.log("m  = " + m);
         x = d / Math.sqrt(1 + m*m);
         y = m*x;
-        //console.log("x  = " + x);
-        //console.log("y  = " + y);
         if (Math.sign(x) != Math.sign(dx)) {
             x = -x;
             y = -y;
