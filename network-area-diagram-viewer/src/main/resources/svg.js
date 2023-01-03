@@ -4,7 +4,6 @@
 // TODO(Luma) redraw the annuli
 // TODO(Luma) update on client: find related hidden nodes and update initial position in metadata?
 
-const DIAGRAM_UPDATE_WHILE_DRAG = true;
 const DIAGRAM_SCALE_ALL_EDGE_PARTS = false;
 const DIAGRAM_DEBUG_EDGE_ROTATION = false;
 
@@ -24,7 +23,7 @@ window.addEventListener('load', function() {
 function makeDraggableSvg(svg) {
     var selectedElement = false, offset, transform, translation0;
     var svgTools = new SvgTools(svg);
-    var diagram = new Diagram(svg, svgTools, DIAGRAM_UPDATE_WHILE_DRAG, XXX_NON_STRETCHABLE_SIDE_SIZE, XXX_NON_STRETCHABLE_CENTER_SIZE);
+    var diagram = new Diagram(svg, svgTools, XXX_NON_STRETCHABLE_SIDE_SIZE, XXX_NON_STRETCHABLE_CENTER_SIZE);
 
     svg.addEventListener('mousedown', startDrag);
     svg.addEventListener('mousemove', drag);
@@ -76,20 +75,17 @@ function makeDraggableSvg(svg) {
         var mouse1 = getMousePosition(event);
         var translation = {x: mouse1.x - offset.x, y: mouse1.y - offset.y};
         transform.setTranslate(translation.x, translation.y);
-        if (!dragInProgress || diagram.updateWhileDrag()) {
-            translationForOthers = {x: translation.x - translation0.x, y: translation.y - translation0.y}
-            diagram.update(selectedElement, translationForOthers);
-            translation0 = {x: transform.matrix.e, y: transform.matrix.f};
-        }
+        translationForOthers = {x: translation.x - translation0.x, y: translation.y - translation0.y}
+        diagram.update(selectedElement, translationForOthers);
+        translation0 = {x: transform.matrix.e, y: transform.matrix.f};
     }
 }
 
 // PowSyBl (Network Area) Diagram
 
-function Diagram(svg, svgTools, updateWhileDrag, nonStretchableSideSize, nonStretchableCenterSize) {
+function Diagram(svg, svgTools, nonStretchableSideSize, nonStretchableCenterSize) {
     this.getDraggableFrom = getDraggableFrom;
     this.update = update;
-    this.updateWhileDrag = () => updateWhileDrag;
     this.nonStretchableSideSize = nonStretchableSideSize;
     this.nonStretchableCenterSize = nonStretchableCenterSize;
 
