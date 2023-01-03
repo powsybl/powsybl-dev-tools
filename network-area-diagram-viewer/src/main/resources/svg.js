@@ -4,7 +4,6 @@
 // TODO(Luma) redraw the annuli
 // TODO(Luma) update on client: find related hidden nodes and update initial position in metadata?
 
-const DIAGRAM_UPDATE_ON_SERVER = false;
 const DIAGRAM_UPDATE_WHILE_DRAG = true;
 const DIAGRAM_SCALE_ALL_EDGE_PARTS = false;
 const DIAGRAM_DEBUG_EDGE_ROTATION = false;
@@ -119,16 +118,12 @@ function Diagram(svg, svgTools, updateWhileDrag, nonStretchableSideSize, nonStre
     }
 
     function update(svgElem, translation) {
-        if (DIAGRAM_UPDATE_ON_SERVER) {
-            updateOnServer(svg);
+        // the element that is being moved has to have an id
+        var id = svgElem.getAttribute("id");
+        if (id) {
+        updateOnClient(id, svgElem, translation);
         } else {
-            // the element that is being moved has to have an id
-            var id = svgElem.getAttribute("id");
-            if (id) {
-            updateOnClient(id, svgElem, translation);
-            } else {
-                console.log("error trying to update: moved element has no id attribute");
-            }
+            console.log("error trying to update: moved element has no id attribute");
         }
     }
 
@@ -472,48 +467,6 @@ function SvgTools(svg) {
         }
         return transforms;
     }
-}
-
-// Updated positions processed on server
-
-function updateDiagramOnServer(svg) {
-    // In this version we simply ignore the updated position of the diagram element,
-    // we just gather all positions and fire a global update of the diagram.
-    // An alternative could be to request a diagram update passing only the change in the element moved.
-    // Or, we could keep a local list of new locations for some equipment
-    // and wait until the user confirms the re-layout with all the updated positions.
-    positions = gatherAllEquipmentPositions(svg);
-    if (typeof jsHandler !== 'undefined') {
-        jsHandler.updateDiagramWithPositions(JSON.stringify(positions));
-    }
-}
-
-function gatherAllEquipmentPositions(svg) {
-    var positions = {};
-    // Store all node id mappings in a dictionary
-    // With the initial positions
-    var diagramId2EquipmentId = {};
-    for (node of svg.getElementsByTagName("nad:node")) {
-        id = node.getAttribute("svgid");
-        equipmentId = node.getAttribute("equipmentid");
-        diagramId2EquipmentId[id] = equipmentId;
-        positions[equipmentId] = {x: node.getAttribute("x"), y: node.getAttribute("y")};
-    }
-    // For all elements in svg that have the id property, update the position of equipment id
-    var CTM = svg.getScreenCTM();
-    for (svgElem of svg.querySelectorAll("[id]")) {
-        if (svgElem.id in diagramId2EquipmentId) {
-            equipmentId = diagramId2EquipmentId[svgElem.id];
-            // getBBox returns coordinates without considering transforms to the element itself or its parents
-            // getBoundingClientRect returns actual coordinates but in screen space
-            var rect = svgElem.getBoundingClientRect();
-            var point = {x: rect.x + .5 * rect.width, y: rect.y + .5 * rect.height};
-            point.x = (point.x - CTM.e) / CTM.a;
-            point.y = (point.y - CTM.f) / CTM.d;
-            positions[equipmentId] = point;
-        }
-    }
-    return positions;
 }
 
 // Identifiers

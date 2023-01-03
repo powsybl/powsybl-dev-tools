@@ -14,7 +14,6 @@ import com.powsybl.iidm.network.VoltageLevel;
 import com.powsybl.nad.NetworkAreaDiagram;
 import com.powsybl.nad.layout.BasicFixedLayoutFactory;
 import com.powsybl.nad.model.Point;
-import com.powsybl.nad.svg.iidm.NominalVoltageStyleProvider;
 import javafx.beans.property.StringProperty;
 import javafx.concurrent.Service;
 import javafx.concurrent.Task;
@@ -98,9 +97,6 @@ public class DiagramController {
             diagramWebView.getEngine().loadContent(embeddedSvg);
         });
         svgContent.textProperty().bind(modelSvgContent);
-
-        // Link the jsHandler with this controller
-        jsHandler.linkWithController(model, modelSvgContent, container);
 
         updateDiagram(model, modelSvgContent, container);
     }
