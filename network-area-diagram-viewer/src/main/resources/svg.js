@@ -4,8 +4,6 @@
 // TODO(Luma) redraw the annuli
 // TODO(Luma) update on client: find related hidden nodes and update initial position in metadata?
 
-const DIAGRAM_DEBUG_EDGE_ROTATION = false;
-
 // FIXME(Luma) these should not be parameters of the diagram, they should be computed for each edge drawing
 const XXX_NON_STRETCHABLE_SIDE_SIZE = 27.5;
 const XXX_NON_STRETCHABLE_CENTER_SIZE = 60;
@@ -191,12 +189,6 @@ function Diagram(svg, svgTools, nonStretchableSideSize, nonStretchableCenterSize
         var s = (d1 - nonStretchables.d) / (d0 - nonStretchables.d);
 
         updateEdgeTransform(edgeSvg, edgeId, movedNodeSide, p0, q0, p1, q1, a0, a1, s, nonStretchables);
-
-        if (DIAGRAM_DEBUG_EDGE_ROTATION) {
-            svgTools.debugRotation(p1.x, p1.y, a0, "debug-rotation0");
-            svgTools.debugRotation(p1.x, p1.y, a1, "debug-rotation1");
-            svgTools.debugConnection(edgeSvg, edgeId, p1, q1);
-        }
     }
 
     function findNonStretchables(edgeSvg) {
@@ -287,8 +279,6 @@ function Diagram(svg, svgTools, nonStretchableSideSize, nonStretchableCenterSize
         } else if (isGluedToCenter(svgEdgePart)) {
             referencePoint1 = {x: (p1.x + q1.x)/2, y: (p1.y + q1.y)/2};
             referencePoint0 = {x: (p0.x + q0.x)/2, y: (p0.y + q0.y)/2};
-            //svgTools.debugPoint(referencePoint0, "center0", "#FF77FF"); // light magenta
-            //svgTools.debugPoint(referencePoint1, "center1", "magenta");
         }
         transform.setMatrix(svg.createSVGMatrix()
             .translate(referencePoint1.x, referencePoint1.y)
@@ -351,92 +341,8 @@ function Diagram(svg, svgTools, nonStretchableSideSize, nonStretchableCenterSize
 // SVG helper tools
 
 function SvgTools(svg) {
-    this.debugPoint = debugPoint;
-    this.debugRotation = debugRotation;
-    this.debugConnection = debugConnection;
     this.translate = translate;
     this.getTransformsEnsuringFirstIsTranslation = getTransformsEnsuringFirstIsTranslation;
-
-    const SVG_NAMESPACE = "http://www.w3.org/2000/svg";
-    const DEBUG_COLOR_DEFAULT = "magenta";
-    const DEBUG_COLOR = {
-        "debug-center": "#888888",
-        "debug-glue-point": "#888888",
-        "debug-moved-node": "#880000",
-        "debug-other-node": "#000088",
-        "debug-rotation0": "#CCCCCC",
-        "debug-rotation1": "#888888",
-        "debug-connection": "#CCCCCC"};
-
-    function debugPoint(p, debugPointId, debugColor) {
-        var debugSvg = svg.getElementById(debugPointId);
-        if (!debugSvg) {
-            var polyline = document.createElementNS(SVG_NAMESPACE, "polyline");
-            polyline.setAttribute("id", debugPointId);
-            polyline.setAttribute("points", "0,0 20,20 -20,-20 0,0 -20,20 20,-20");
-            var color = debugColor ? debugColor : (debugPointId in DEBUG_COLOR ? DEBUG_COLOR[debugPointId] : DEBUG_COLOR_DEFAULT);
-            polyline.setAttribute("style", "fill:none;stroke:" + color + ";stroke-width:3");
-            svg.appendChild(polyline);
-            debugSvg = polyline
-        }
-        var transforms = debugSvg.transform.baseVal;
-            if (transforms.length == 0) {
-                transforms.appendItem(svg.createSVGTransform());
-        }
-        //console.log("debugPoint " + debugPointId + " " + p.x + ", " + p.y);
-        transforms.getItem(0).setTranslate(p.x, p.y);
-        return debugSvg;
-    }
-    function debugRotation(cx, cy, angle, debugRotationId) {
-        debugSvg = getCreateDebugRotation(debugRotationId);
-        if (debugSvg) {
-            var transforms = debugSvg.transform.baseVal;
-                if (transforms.length == 0) {
-                    transforms.appendItem(svg.createSVGTransform());
-            }
-            transforms.getItem(0).setMatrix(svg.createSVGMatrix()
-                .translate(cx, cy)
-                .rotate(angle)
-                );
-        }
-    }
-
-    function debugConnection(edgeSvg, edgeId, p0, p1) {
-        var debugConnectionId = edgeId + "-debug";
-        var debugSvg = svg.getElementById(debugConnectionId);
-        if (!debugSvg) {
-            var polyline = document.createElementNS(SVG_NAMESPACE, "polyline");
-            polyline.setAttribute("id", debugConnectionId);
-            polyline.setAttribute("points", p0.x + ", " + p0.y + " " + p1.x + " " + p1.y);
-            polyline.setAttribute("style", "fill:none;stroke:" + DEBUG_COLOR["debug-connection"] + ";stroke-width:2");
-            svg.appendChild(polyline);
-        } else {
-            var polyline = debugSvg;
-            polyline.points.clear();
-            var p = svg.createSVGPoint();
-            p.x = p0.x;
-            p.y = p0.y;
-            polyline.points.appendItem(p);
-            p = svg.createSVGPoint();
-            p.x = p1.x;
-            p.y = p1.y;
-            polyline.points.appendItem(p);
-        }
-    }
-
-    function getCreateDebugRotation(debugRotationId) {
-        var debugSvg = svg.getElementById(debugRotationId);
-        if (!debugSvg) {
-            // https://www.motiontricks.com/creating-dynamic-svg-elements-with-javascript/
-            var polyline = document.createElementNS(SVG_NAMESPACE, "polyline");
-            polyline.setAttribute("id", debugRotationId);
-            polyline.setAttribute("points", "0, 0 50, 0 40, 10 50, 0, 40, -10");
-            polyline.setAttribute("style", "fill:none;stroke:" + DEBUG_COLOR[debugRotationId] + ";stroke-width:2");
-            svg.appendChild(polyline);
-            debugSvg = polyline
-        }
-        return debugSvg;
-    }
 
     function translate(svgElem, translation) {
         // Add the given translation to the current one
