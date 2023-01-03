@@ -196,29 +196,14 @@ function Diagram(svg, svgTools, nonStretchableSideSize, nonStretchableCenterSize
     }
 
     function findNonStretchables(edgeSvg) {
-        // TODO(Luma) This information could be cached
-        var dcenter = 0;
-        var dside1 = 0;
-        var dside2 = 0;
-        for (const part of edgeSvg.getElementsByTagName("*")) {
-            if (part.classList.contains("nad-glued-center")) {
-                dcenter = nonStretchableCenterSize;
-            } else if (!part.classList.contains("nad-stretchable")) {
-                if (part.classList.contains("nad-glued-1")) {
-                    dside1 = nonStretchableSideSize;
-                } else if (part.classList.contains("nad-glued-2")) {
-                    dside2 = nonStretchableSideSize;
-                }
-            }
-        }
         // For 3wt:
         // although the side close to the center node does not have any glued part,
         // we have to keep a distance from the center node drawing
         if (edgeSvg.parentElement.classList.contains("nad-3wt-edges")) {
-            dside2 = nonStretchableSideSize;
+            return {dside: nonStretchableSideSize, d: nonStretchableSideSize + nonStretchableSideSize}
+        } else {
+            return {dside: nonStretchableSideSize, d: nonStretchableSideSize + nonStretchableSideSize + nonStretchableCenterSize}
         }
-        // FIXME(Luma) return dside1 and dside2 instead of a single dside
-        return {dside: dside1, d: dside1 + dside2 + dcenter}
     }
 
     var edgeTransforms = {};
