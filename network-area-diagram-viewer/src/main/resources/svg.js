@@ -118,7 +118,7 @@ function Diagram(svg, svgTools, nonStretchableSideSize, nonStretchableCenterSize
         // the element that is being moved has to have an id
         var id = svgElem.getAttribute("id");
         if (id) {
-        updateOnClient(id, svgElem, translation);
+            updateOnClient(id, svgElem, translation);
         } else {
             console.log("error trying to update: moved element has no id attribute");
         }
@@ -192,6 +192,10 @@ function Diagram(svg, svgTools, nonStretchableSideSize, nonStretchableCenterSize
         var nonStretchables = findNonStretchables(edgeSvg);
         var s = (d1 - nonStretchables.d) / (d0 - nonStretchables.d);
 
+        if (isDanglingLine(edgeSvg)) {
+            // Rotate the boundary node according to new edge orientation
+            updateBoundaryNode((movedNodeSide === 2 ? movedNodeId : otherNodeId), a0, a1);
+        }
         updateEdgeTransform(edgeSvg, edgeId, movedNodeSide, p0, q0, p1, q1, a0, a1, s, nonStretchables);
     }
 
@@ -214,6 +218,17 @@ function Diagram(svg, svgTools, nonStretchableSideSize, nonStretchableCenterSize
                 updateEdgePartTransform(part, edgeTransforms[edgeId][part.id], movedNodeSide, p0, q0, p1, q1, a0, a1, s, nonStretchables);
             }
         }
+    }
+
+    var boundaryNodeTransforms = {};
+    function updateBoundaryNode(nodeId, a0, a1) {
+        var nodeSvg = svg.getElementById(nodeId);
+        if (!(nodeId in boundaryNodeTransforms)) {
+            var transform = svg.createSVGTransform();
+            nodeSvg.transform.baseVal.appendItem(transform);
+            boundaryNodeTransforms[nodeId] = transform;
+        }
+        boundaryNodeTransforms[nodeId].setRotate(a1 - a0, 0, 0);
     }
 
     function createCachedTransform(edgeId, part) {
@@ -273,6 +288,10 @@ function Diagram(svg, svgTools, nonStretchableSideSize, nonStretchableCenterSize
             .translate(-nonStretchables.dside, 0)
             .rotate(-a0)
             .translate(-referencePoint0.x, -referencePoint0.y));
+    }
+
+    function isDanglingLine(svgElem) {
+        return svgElem.classList.contains("nad-dangling-line-edge");
     }
 
     function getGluedToSide(svgElem) {
