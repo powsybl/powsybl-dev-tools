@@ -43,9 +43,21 @@
         <maven.compiler.source>17</maven.compiler.source>
         <maven.compiler.target>17</maven.compiler.target>
         <powsybl.diagram.version>3.1.0-SNAPSHOT</powsybl.diagram.version>
-        <powsybl.core.version>5.0.0</powsybl.core.version>
+        <powsybl-core.version>5.0.0</powsybl-core.version>
         <powsybl.open.loadflow.version>0.24.0</powsybl.open.loadflow.version>
     </properties>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>com.powsybl</groupId>
+                <artifactId>powsybl-core</artifactId>
+                <version>${powsybl-core.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
 
     <dependencies>
         <dependency>
@@ -56,17 +68,14 @@
         <dependency>
             <groupId>com.powsybl</groupId>
             <artifactId>powsybl-iidm-impl</artifactId>
-            <version>${powsybl.core.version}</version>
         </dependency>
         <dependency>
             <groupId>com.powsybl</groupId>
             <artifactId>powsybl-iidm-test</artifactId>
-            <version>${powsybl.core.version}</version>
         </dependency>
         <dependency>
             <groupId>com.powsybl</groupId>
             <artifactId>powsybl-ieee-cdf-converter</artifactId>
-            <version>${powsybl.core.version}</version>
         </dependency>
         <dependency>
             <groupId>org.slf4j</groupId>
@@ -76,17 +85,18 @@
         <dependency>
             <groupId>com.powsybl</groupId>
             <artifactId>powsybl-cgmes-conversion</artifactId>
-            <version>${powsybl.core.version}</version>
         </dependency>
         <dependency>
             <groupId>com.powsybl</groupId>
             <artifactId>powsybl-triple-store-impl-rdf4j</artifactId>
-            <version>${powsybl.core.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.powsybl</groupId>
+            <artifactId>powsybl-matpower-converter</artifactId>
         </dependency>
         <dependency>
             <groupId>com.powsybl</groupId>
             <artifactId>powsybl-ucte-converter</artifactId>
-            <version>${powsybl.core.version}</version>
         </dependency>
         <dependency>
             <groupId>com.powsybl</groupId>
