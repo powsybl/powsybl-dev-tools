@@ -12,10 +12,16 @@ import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
+import javafx.geometry.Insets;
+import javafx.geometry.Pos;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.TextFieldTreeTableCell;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.Priority;
 import javafx.util.Callback;
+import org.controlsfx.glyphfont.FontAwesome;
+import org.controlsfx.glyphfont.Glyph;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -37,6 +43,12 @@ public class DataObjectTree extends BorderPane {
     private final SimpleObjectProperty<DataObject> selectedDataObject = new SimpleObjectProperty<>();
 
     private Project project;
+
+    private final TextField seachText = new TextField();
+
+    private List<DataObject> searchResults;
+
+    private int searchResultsIndex;
 
     @SuppressWarnings("unchecked")
     public DataObjectTree() {
@@ -89,7 +101,7 @@ public class DataObjectTree extends BorderPane {
                     for (DataObject backwardLink : backwardLinks) {
                         Hyperlink hyperlink = new Hyperlink(backwardLink.toString());
                         hyperlink.setOnAction(event -> {
-                            search(backwardLink);
+                            selectObj(backwardLink);
                             menu.hide();
                         });
                         backwardLinksMenuItem.getItems().add(new MenuItem("", hyperlink));
@@ -99,6 +111,54 @@ public class DataObjectTree extends BorderPane {
         });
         menu.setStyle("-fx-selection-bar: yellow; -fx-selection-bar-non-focused: lightyellow;");
         menu.getItems().add(backwardLinksMenuItem);
+
+        Button nextButton = new Button("", new Glyph("FontAwesome", FontAwesome.Glyph.ARROW_RIGHT));
+        nextButton.setOnAction(actionEvent -> {
+            searchResultsIndex++;
+            if (searchResultsIndex > searchResults.size()) {
+                searchResultsIndex = 0;
+            }
+            selectObj(searchResults.get(searchResultsIndex));
+        });
+        nextButton.setDisable(true);
+        Button previousButton = new Button("", new Glyph("FontAwesome", FontAwesome.Glyph.ARROW_LEFT));
+        previousButton.setOnAction(actionEvent -> {
+            searchResultsIndex--;
+            if (searchResultsIndex < 0) {
+                searchResultsIndex = searchResults.size() - 1;
+            }
+            selectObj(searchResults.get(searchResultsIndex));
+        });
+        previousButton.setDisable(true);
+        HBox.setHgrow(seachText, Priority.ALWAYS);
+        seachText.textProperty().addListener((observableValue, oldStr, newStr) -> {
+            searchResults = search(newStr);
+            searchResultsIndex = 0;
+            LOGGER.info("Found {} results for search '{}'", searchResults.size(), newStr);
+            if (!searchResults.isEmpty()) {
+                selectObj(searchResults.get(0));
+            }
+            previousButton.setDisable(searchResults.isEmpty());
+            nextButton.setDisable(searchResults.isEmpty());
+        });
+        var searchIcon = new Glyph("FontAwesome", FontAwesome.Glyph.SEARCH);
+        HBox searchBar = new HBox(3, searchIcon, seachText, previousButton, nextButton);
+        searchBar.setAlignment(Pos.CENTER_LEFT);
+        searchBar.setPadding(new Insets(3, 3, 3, 3));
+        setBottom(searchBar);
+    }
+
+    private List<DataObject> search(String str) {
+        if (str.isEmpty()) {
+            return Collections.emptyList();
+        }
+        List<DataObject> result = new ArrayList<>();
+        project.getRootObject().traverse(object -> {
+            if (object.getLocName().contains(str)) {
+                result.add(object);
+            }
+        });
+        return result;
     }
 
     public void setProject(Project project) {
@@ -114,9 +174,9 @@ public class DataObjectTree extends BorderPane {
         }
     }
 
-    public void search(DataObject dataObject) {
+    public void selectObj(DataObject dataObject) {
         Objects.requireNonNull(dataObject);
-        LOGGER.info("Searching '{}'", dataObject);
+        LOGGER.info("Selecting '{}'", dataObject);
 
         TreeItem<DataObject> currentTreeItem = treeTableView.getRoot();
         List<TreeItem<DataObject>> treeItemPath = new ArrayList<>(10);

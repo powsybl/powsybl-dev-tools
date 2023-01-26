@@ -66,7 +66,7 @@ public class DataAttributeTable extends BorderPane {
                     Hyperlink hyperlink = new Hyperlink(otherDataObject.toString());
                     hyperlink.setTooltip(new Tooltip(otherDataObject.toString()));
                     hyperlink.setOnAction((ActionEvent event) -> {
-                        dataObjectTree.search(otherDataObject);
+                        dataObjectTree.selectObj(otherDataObject);
                         tableView.requestFocus();
                     });
                     return hyperlink;
