@@ -176,8 +176,8 @@ function Diagram(svg, svgTools, nonStretchableSideSize, nonStretchableCenterSize
         var p0 = {x: parseFloat(movedNodeMetadata.getAttribute("x")), y: parseFloat(movedNodeMetadata.getAttribute("y"))};
         var q0 = {x: parseFloat(otherNodeMetadata.getAttribute("x")), y: parseFloat(otherNodeMetadata.getAttribute("y"))};
         var a0 = calcRotation(p0, q0);
-        var p1 = center(movedNodeSvg);
-        var q1 = center(otherNodeSvg);
+        var p1 = currentTranslation(movedNodeSvg);
+        var q1 = currentTranslation(otherNodeSvg);
         var a1 = calcRotation(p1, q1);
 
         if (!(edgeId in cachedEdgeDistances0)) {
@@ -317,14 +317,9 @@ function Diagram(svg, svgTools, nonStretchableSideSize, nonStretchableCenterSize
         return element.classList.contains("nad-stretchable");
     }
 
-    function center(svgElem) {
-        var rect = svgElem.getBoundingClientRect();
-        var center = {x: rect.x + .5 * rect.width, y: rect.y + .5 * rect.height};
-        var CTM = svg.getScreenCTM();
-        if (CTM) {
-            center.x = (center.x - CTM.e) / CTM.a;
-            center.y = (center.y - CTM.f) / CTM.d;
-        }
+    function currentTranslation(svgElem) {
+        var transform = svgTools.getTransformsEnsuringFirstIsTranslation(svgElem).getItem(0);
+        var center = {x: transform.matrix.e, y: transform.matrix.f};
         return center;
     }
 
