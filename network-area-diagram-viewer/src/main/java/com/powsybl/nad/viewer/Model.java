@@ -42,6 +42,7 @@ public class Model {
     // SVG Parameters
     private final BooleanProperty idDisplayed = new SimpleBooleanProperty();
     private final BooleanProperty infoAlongEdge = new SimpleBooleanProperty();
+    private final BooleanProperty edgeNameDisplayed = new SimpleBooleanProperty();
     private final BooleanProperty insertNameDesc = new SimpleBooleanProperty();
     private final BooleanProperty substationDescriptionDisplayed = new SimpleBooleanProperty();
     private final BooleanProperty busLegend = new SimpleBooleanProperty();
@@ -72,6 +73,7 @@ public class Model {
                  // SVG parameters
                  BooleanProperty idDisplayed,
                  BooleanProperty infoAlongEdge,
+                 BooleanProperty edgeNameDisplayed,
                  BooleanProperty insertNameDesc,
                  BooleanProperty substationDescriptionDisplayed,
                  BooleanProperty busLegend,
@@ -93,6 +95,7 @@ public class Model {
         // SVG parameters
         this.idDisplayed.bind(idDisplayed);
         this.infoAlongEdge.bind(infoAlongEdge);
+        this.edgeNameDisplayed.bind(edgeNameDisplayed);
         this.insertNameDesc.bind(insertNameDesc);
         this.substationDescriptionDisplayed.bind(substationDescriptionDisplayed);
         this.busLegend.bind(busLegend);
@@ -139,6 +142,7 @@ public class Model {
                 .setBusLegend(busLegend.get())
                 .setVoltageLevelDetails(vlDetails.get())
                 .setEdgeInfoAlongEdge(infoAlongEdge.get())
+                .setEdgeNameDisplayed(edgeNameDisplayed.get())
                 .setSvgWidthAndHeightAdded(widthHeightAdded.get())
                 .setSizeConstraint(sizeConstraint.get());
         switch (sizeConstraint.get()) {
