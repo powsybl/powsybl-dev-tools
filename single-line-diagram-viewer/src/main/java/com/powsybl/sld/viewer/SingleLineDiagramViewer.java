@@ -231,7 +231,7 @@ public class SingleLineDiagramViewer extends Application {
                         .setCssLocation(LayoutParameters.CssLocation.INSERTED_IN_SVG)
                         .setSvgWidthAndHeightAdded(true);
 
-                DiagramLabelProvider initProvider = new DefaultDiagramLabelProvider(networkProperty.get(), getComponentLibrary(), diagramLayoutParameters);
+                DiagramLabelProvider initProvider = new DebugDiagramLabelProvider(networkProperty.get(), getComponentLibrary(), diagramLayoutParameters);
 
                 SingleLineDiagram.draw(networkProperty.get(), sOrVlId,
                         svgWriter,
