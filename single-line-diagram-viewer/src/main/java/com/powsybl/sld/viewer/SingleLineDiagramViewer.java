@@ -233,6 +233,7 @@ public class SingleLineDiagramViewer extends Application {
 
                 DiagramLabelProvider initProvider = new DefaultDiagramLabelProvider(networkProperty.get(), getComponentLibrary(), diagramLayoutParameters);
 
+                updateStylesProvider(networkProperty.get());
                 SingleLineDiagram.draw(networkProperty.get(), sOrVlId,
                         svgWriter,
                         metadataWriter,
