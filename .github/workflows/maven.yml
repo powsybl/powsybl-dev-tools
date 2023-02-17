@@ -17,7 +17,7 @@ jobs:
         uses: actions/checkout@v1
         with:
           repository: powsybl/powsybl-diagram
-          ref: refs/heads/translate_circle
+          ref: refs/heads/main
 
       - name: Checkout sources
         uses: actions/checkout@v2.3.4
