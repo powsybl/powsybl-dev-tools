@@ -139,6 +139,10 @@ public class SingleLineDiagramViewer extends Application {
         /** For communication from the Javascript engine. */
         private final JsHandler jsHandler;
 
+        /** We have to keep a reference to the following ChangeListener, which is passed to a WeakChangeListener,
+         * otherwise it will be garbage collected too soon. */
+        private final ChangeListener<LayoutParameters> listener;
+
         ContainerDiagramPane(Container<?> c) {
             jsHandler = new JsHandler(substationsTree, swId -> {
                 Switch sw = c.getNetwork().getSwitch(swId);
@@ -170,7 +174,7 @@ public class SingleLineDiagramViewer extends Application {
             infoArea.setText(String.join(System.lineSeparator(), "id: " + c.getId(), "name: " + c.getNameOrId()));
             setBottom(new TitledPane("Infos", infoArea));
 
-            ChangeListener<LayoutParameters> listener = (observable, oldValue, newValue) -> loadDiagram(c.getId(), newValue);
+            listener = (observable, oldValue, newValue) -> loadDiagram(c.getId(), newValue);
             layoutParameters.addListener(new WeakChangeListener<>(listener));
             loadDiagram(c.getId(), layoutParameters.get());
 
