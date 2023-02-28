@@ -11,10 +11,6 @@ import com.powsybl.iidm.network.Container;
 import com.powsybl.iidm.network.Network;
 import javafx.beans.property.*;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.stream.Stream;
-
 /**
  * @author Florian Dupuy <florian.dupuy at rte-france.com>
  */
@@ -45,6 +41,7 @@ public class Model {
     public Container<?> getSelectedContainer() {
         return selectedContainer.getValue();
     }
+
     public void setSelectedContainer(Container<?> container) {
         selectedContainer.setValue(container);
     }

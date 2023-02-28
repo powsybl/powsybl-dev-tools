@@ -100,11 +100,11 @@
                         <Label style="-fx-font-weight: bold" text="SVG parameters:" GridPane.rowIndex="0"/>
                         <CheckBox fx:id="edgeNameDisplayed" text="Display edge name" selected="true" GridPane.rowIndex="1"/>
                         <CheckBox fx:id="infoAlongEdge" text="Set Info Along Edge" selected="true" GridPane.rowIndex="2"/>
-                        <CheckBox fx:id="idDisplayed" text="Display id (instead of name)" selected="false" GridPane.rowIndex="3"/>
+                        <CheckBox fx:id="idDisplayed" text="Display id (instead of name)" GridPane.rowIndex="3"/>
                         <CheckBox fx:id="insertNameDesc" text="Insert desc elements" selected="true" GridPane.rowIndex="4"/>
-                        <CheckBox fx:id="substationDescriptionDisplayed" text="Display substation" selected="false" GridPane.rowIndex="5"/>
+                        <CheckBox fx:id="substationDescriptionDisplayed" text="Display substation" GridPane.rowIndex="5"/>
                         <CheckBox fx:id="busLegend" text="Bus legend" selected="true" GridPane.rowIndex="6"/>
-                        <CheckBox fx:id="vlDetails" text="Voltage level details" selected="false" GridPane.rowIndex="7"/>
+                        <CheckBox fx:id="vlDetails" text="Voltage level details" GridPane.rowIndex="7"/>
 
                         <Separator GridPane.rowIndex="8">
                             <VBox.margin>

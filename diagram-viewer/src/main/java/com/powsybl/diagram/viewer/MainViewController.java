@@ -6,7 +6,6 @@
  */
 package com.powsybl.diagram.viewer;
 
-import com.powsybl.diagram.viewer.nad.NetworkAreaDiagramView;
 import com.powsybl.diagram.viewer.nad.NetworkAreaDiagramViewController;
 import com.powsybl.iidm.network.*;
 import com.powsybl.loadflow.LoadFlow;
@@ -257,7 +256,7 @@ public class MainViewController implements ChangeListener<Object> {
                 .filter(item -> item.getValue().getId().equals(selectedContainerId))
                 .findFirst()
                 .ifPresentOrElse(item -> vlTree.getSelectionModel().select(item),
-                        () -> vlTree.getSelectionModel().clearSelection());
+                    () -> vlTree.getSelectionModel().clearSelection());
         vlTree.setShowRoot(true);
     }
 
