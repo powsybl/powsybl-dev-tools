@@ -53,7 +53,7 @@ public class NetworkAreaDiagramController {
     private String html;
     private String js;
 
-    private final NetworkAreaJsHandler jsHandler = new NetworkAreaJsHandler();
+    private final NetworkAreaDiagramJsHandler jsHandler = new NetworkAreaDiagramJsHandler();
 
     @FXML
     private void initialize() throws IOException {
@@ -87,8 +87,8 @@ public class NetworkAreaDiagramController {
             }
         });
 
-        html = new String(ByteStreams.toByteArray(Objects.requireNonNull(getClass().getResourceAsStream("/networkAreaSvg.html"))));
-        js = new String(ByteStreams.toByteArray(Objects.requireNonNull(getClass().getResourceAsStream("/networkAreaSvg.js"))));
+        html = new String(ByteStreams.toByteArray(Objects.requireNonNull(getClass().getResourceAsStream("/nad/svg.html"))));
+        js = new String(ByteStreams.toByteArray(Objects.requireNonNull(getClass().getResourceAsStream("/nad/svg.js"))));
     }
 
     public void createDiagram(Network network, NetworkAreaDiagramModel model, StringProperty modelSvgContent, Container<?> container) {

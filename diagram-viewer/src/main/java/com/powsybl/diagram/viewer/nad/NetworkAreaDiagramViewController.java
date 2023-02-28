@@ -154,7 +154,7 @@ public class NetworkAreaDiagramViewController {
         if (tabList.stream().map(Tab::getText).noneMatch(tabName::equals)) {
             try {
                 FXMLLoader fxmlLoader = new FXMLLoader();
-                Parent diagram = fxmlLoader.load(Objects.requireNonNull(getClass().getResourceAsStream("/networkAreaDiagramView.fxml")));
+                Parent diagram = fxmlLoader.load(Objects.requireNonNull(getClass().getResourceAsStream("/nad/networkAreaDiagramView.fxml")));
                 NetworkAreaDiagramController checkedDiagramController = fxmlLoader.getController();
                 checkedDiagramController.createDiagram(network, model, model.getCheckedSvgContent(container), container);
                 Tab newCheckedTab = new Tab(tabName, diagram);

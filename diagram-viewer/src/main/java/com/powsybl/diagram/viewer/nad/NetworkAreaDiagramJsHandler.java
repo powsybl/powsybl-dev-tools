@@ -13,9 +13,9 @@ import org.slf4j.LoggerFactory;
 /**
  * @author Luma Zamarreño <zamarrenolm at aia.es>
  */
-public class NetworkAreaJsHandler {
+public class NetworkAreaDiagramJsHandler {
 
-    private static final Logger LOG = LoggerFactory.getLogger(NetworkAreaJsHandler.class);
+    private static final Logger LOG = LoggerFactory.getLogger(NetworkAreaDiagramJsHandler.class);
 
     // To be able to access the Java Logger from JavaScript
     public void log(String message) {

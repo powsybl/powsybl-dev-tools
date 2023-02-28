@@ -61,17 +61,18 @@ public class MainViewController implements ChangeListener<Object> {
     @FXML
     public TabPane sldOrNad;
 
-    @FXML
-    BorderPane networkAreaDiagram;
-
     // Status info
     @FXML
     private Node loadingStatus;
 
     private Model model;
 
+    /**
+     * NetworkAreaDiagram tab content is included from nadView.fxml.
+     * To get associated controller we have to use "Controller" suffix to nadView.fxml associated fx:id.
+     */
     @FXML
-    private NetworkAreaDiagramViewController networkAreaDiagramController;
+    private NetworkAreaDiagramViewController nadViewController;
 
     @FXML
     private void initialize() {
@@ -80,7 +81,7 @@ public class MainViewController implements ChangeListener<Object> {
             loadFile(new File(casePathPropertyValue));
         }
 
-        model = new Model(showNames.selectedProperty(), networkAreaDiagramController.getModel());
+        model = new Model(showNames.selectedProperty(), nadViewController.getModel());
 
         model.getNetworkProperty().addListener((observableValue, oldNetwork, newNetwork) ->
                 initSubstationsTree(newNetwork));
@@ -88,7 +89,7 @@ public class MainViewController implements ChangeListener<Object> {
         showNames.selectedProperty().addListener(this);
         vlTree.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
             model.setSelectedContainer(newValue.getValue());
-            networkAreaDiagramController.createDiagram(model.getNetwork(), newValue.getValue());
+            nadViewController.createDiagram(model.getNetwork(), newValue.getValue());
         });
         vlTree.setCellFactory(param -> {
             CheckBoxTreeCell<Container<?>> treeCell = new CheckBoxTreeCell<>();
@@ -112,7 +113,7 @@ public class MainViewController implements ChangeListener<Object> {
             treeCell.setConverter(strConvert);
             return treeCell;
         });
-        networkAreaDiagramController.addListener(this);
+        nadViewController.addListener(this);
         // FIXME : SLD case is missing
     }
 
@@ -122,7 +123,7 @@ public class MainViewController implements ChangeListener<Object> {
     }
 
     private void updateAllDiagrams() {
-        networkAreaDiagramController.updateAllDiagrams(model.getNetwork(), model.getSelectedContainer());
+        nadViewController.updateAllDiagrams(model.getNetwork(), model.getSelectedContainer());
         // FIXME : SLD case is missing
     }
 
@@ -182,7 +183,7 @@ public class MainViewController implements ChangeListener<Object> {
         // View
         filterField.setText("");
         // Controller (sld & nad)
-        networkAreaDiagramController.clean();
+        nadViewController.clean();
         // FIXME : SLD case is missing
         // Model (sld & nad)
         model.clean();
@@ -298,6 +299,6 @@ public class MainViewController implements ChangeListener<Object> {
     public void createCheckedTab(CheckBoxTreeItem<Container<?>> containerTreeItem) {
         Container<?> container = containerTreeItem.getValue();
         String tabName = getIdentifiableStringSupplier().apply(container);
-        networkAreaDiagramController.createCheckedTab(model.getNetwork(), containerTreeItem, tabName);
+        nadViewController.createCheckedTab(model.getNetwork(), containerTreeItem, tabName);
     }
 }
