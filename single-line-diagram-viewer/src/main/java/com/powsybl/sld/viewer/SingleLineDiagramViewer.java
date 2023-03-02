@@ -26,8 +26,6 @@ import com.powsybl.sld.util.NominalVoltageDiagramStyleProvider;
 import com.powsybl.sld.util.TopologicalStyleProvider;
 import javafx.application.Application;
 import javafx.beans.property.*;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.WeakChangeListener;
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
@@ -139,10 +137,6 @@ public class SingleLineDiagramViewer extends Application {
         /** For communication from the Javascript engine. */
         private final JsHandler jsHandler;
 
-        /** We have to keep a reference to the following ChangeListener, which is passed to a WeakChangeListener,
-         * otherwise it will be garbage collected too soon. */
-        private final ChangeListener<LayoutParameters> listener;
-
         ContainerDiagramPane(Container<?> c) {
             jsHandler = new JsHandler(substationsTree, swId -> {
                 Switch sw = c.getNetwork().getSwitch(swId);
@@ -174,8 +168,7 @@ public class SingleLineDiagramViewer extends Application {
             infoArea.setText(String.join(System.lineSeparator(), "id: " + c.getId(), "name: " + c.getNameOrId()));
             setBottom(new TitledPane("Infos", infoArea));
 
-            listener = (observable, oldValue, newValue) -> loadDiagram(c.getId(), newValue);
-            layoutParameters.addListener(new WeakChangeListener<>(listener));
+            layoutParameters.addListener((observable, oldValue, newValue) -> loadDiagram(c.getId(), newValue));
             loadDiagram(c.getId(), layoutParameters.get());
 
             // Add Zoom management
