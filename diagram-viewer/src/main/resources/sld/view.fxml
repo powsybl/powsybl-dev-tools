@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import com.powsybl.diagram.viewer.common.EnumChoiceBox?>
+<?import javafx.collections.FXCollections?>
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import java.lang.String?>
+<BorderPane xmlns="http://javafx.com/javafx/17.0.1" xmlns:fx="http://javafx.com/fxml/1"
+            prefHeight="900.0" prefWidth="1000.0"
+            fx:controller="com.powsybl.diagram.viewer.sld.SingleLineDiagramViewController">
+    <center>
+        <SplitPane dividerPositions="0.8, 0.2" style="-fx-box-border: transparent">
+            <BorderPane.margin>
+                <Insets topRightBottomLeft="5"/>
+            </BorderPane.margin>
+            <TabPane fx:id="checkedOrSelected">
+                <Tab text="Selected" closable="false">
+                    <fx:include fx:id="selectedDiagram" source="singleLineDiagramView.fxml"/>
+                </Tab>
+                <Tab text="Checked" closable="false">
+                    <TabPane fx:id="checkedTab"/>
+                </Tab>
+            </TabPane>
+            <VBox>
+                <VBox>
+                    <VBox.margin>
+                        <Insets topRightBottomLeft="10"/>
+                    </VBox.margin>
+                    <GridPane hgap="5" vgap="5">
+                        <Button onMouseClicked="#onClickFitToContent" text="Fit to content" GridPane.rowIndex="0"/>
+                        <Button onMouseClicked="#onClickResetZoom" text="Reset zoom" GridPane.rowIndex="1"/>
+                    </GridPane>
+                    <Separator>
+                        <VBox.margin>
+                            <Insets topRightBottomLeft="10"/>
+                        </VBox.margin>
+                    </Separator>
+                    <GridPane hgap="5" vgap="5">
+                        <Label text="Design:" GridPane.rowIndex="0"/>
+                        <ComboBox fx:id="componentLibraryChoice" GridPane.rowIndex="1"/>
+                        <Label text="Style:" GridPane.rowIndex="3"/>
+                        <ComboBox fx:id="styleChoice" GridPane.rowIndex="4"/>
+                        <Label text="Substation Layout:" GridPane.rowIndex="5"/>
+                        <ComboBox fx:id="substationLayoutChoice" GridPane.rowIndex="6"/>
+                        <Label text="VoltageLevel Layout:" GridPane.rowIndex="7"/>
+                        <ComboBox fx:id="voltageLevelLayoutChoice" GridPane.rowIndex="8"/>
+                        <Label text="CGMES-DL Diagrams:" GridPane.rowIndex="9"/>
+                        <ComboBox fx:id="cgmesDLDiagramsChoice" GridPane.rowIndex="10"/>
+                        <Label text="Diagram padding top/bottom:" GridPane.rowIndex="11"/>
+                        <Spinner fx:id="diagramPaddingTopBottomSpinner" GridPane.rowIndex="12">
+                            <valueFactory>
+                                <SpinnerValueFactory.DoubleSpinnerValueFactory min="0" max="300" amountToStepBy="5"/>
+                            </valueFactory>
+                        </Spinner>
+                        <Label text="Diagram padding left/right:" GridPane.rowIndex="13"/>
+                        <Spinner fx:id="diagramPaddingLeftRightSpinner" GridPane.rowIndex="14">
+                            <valueFactory>
+                                <SpinnerValueFactory.DoubleSpinnerValueFactory min="0" max="300" amountToStepBy="5"/>
+                            </valueFactory>
+                        </Spinner>
+                    </GridPane>
+                </VBox>
+            </VBox>
+        </SplitPane>
+    </center>
+    <padding>
+        <Insets topRightBottomLeft="5"/>
+    </padding>
+</BorderPane>

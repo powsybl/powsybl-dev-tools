@@ -156,10 +156,6 @@ public class NetworkAreaDiagramModel {
         return svgContent;
     }
 
-    public void setSvgContent(String svgContent) {
-        this.svgContent.setValue(svgContent);
-    }
-
     public StringProperty getCheckedSvgContent(Container<?> container) {
         return containerToSvgMap.computeIfAbsent(container, c -> new SimpleStringProperty());
     }
@@ -170,5 +166,9 @@ public class NetworkAreaDiagramModel {
 
     public void removeSvgContent(Container<?> container) {
         containerToSvgMap.remove(container);
+    }
+
+    public void clean() {
+        svgContent.set("");
     }
 }

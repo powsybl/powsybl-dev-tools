@@ -7,6 +7,8 @@
 package com.powsybl.diagram.viewer;
 
 import com.powsybl.diagram.viewer.nad.NetworkAreaDiagramViewController;
+import com.powsybl.diagram.viewer.sld.SingleLineDiagramJsHandler;
+import com.powsybl.diagram.viewer.sld.SingleLineDiagramViewController;
 import com.powsybl.iidm.network.*;
 import com.powsybl.loadflow.LoadFlow;
 import javafx.beans.value.ChangeListener;
@@ -73,26 +75,45 @@ public class MainViewController implements ChangeListener<Object> {
     @FXML
     private NetworkAreaDiagramViewController nadViewController;
 
+    /**
+     * SingleLineDiagram tab content is included from sldView.fxml.
+     * To get associated controller we have to use "Controller" suffix to sldView.fxml associated fx:id.
+     */
+    @FXML
+    private SingleLineDiagramViewController sldViewController;
+
+    private SingleLineDiagramJsHandler sldJsHandler;
+
     @FXML
     private void initialize() {
+        sldJsHandler = new SingleLineDiagramJsHandler(vlTree);
+
         String casePathPropertyValue = preferences.get(CASE_PATH_PROPERTY, null);
         if (casePathPropertyValue != null) {
             loadFile(new File(casePathPropertyValue));
         }
 
-        model = new Model(showNames.selectedProperty(), nadViewController.getModel());
+        model = new Model(showNames.selectedProperty(), nadViewController.getModel(), sldViewController.getModel());
 
-        model.getNetworkProperty().addListener((observableValue, oldNetwork, newNetwork) ->
-                initSubstationsTree(newNetwork));
+        model.networkProperty().addListener((observableValue, oldNetwork, newNetwork) -> {
+            initSubstationsTree(newNetwork);
+            sldViewController.getModel().updateFrom(newNetwork);
+        });
 
         showNames.selectedProperty().addListener(this);
         vlTree.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
-            model.setSelectedContainer(newValue.getValue());
-            nadViewController.createDiagram(model.getNetwork(), newValue.getValue());
+            if (newValue != null) {
+                Container<?> c = newValue.getValue();
+                model.setSelectedContainer(c);
+                nadViewController.createDiagram(model.getNetwork(), c);
+                sldViewController.createDiagram(sldJsHandler, model.getNetwork(), model.showNamesProperty(), c);
+            } else {
+                clean();
+            }
         });
         vlTree.setCellFactory(param -> {
             CheckBoxTreeCell<Container<?>> treeCell = new CheckBoxTreeCell<>();
-            StringConverter<TreeItem<Container<?>>> strConvert = new StringConverter<>() {
+            treeCell.setConverter(new StringConverter<>() {
                 @Override
                 public String toString(TreeItem<Container<?>> c) {
                     if (c.getValue().getContainerType() == ContainerType.NETWORK) {
@@ -108,12 +129,11 @@ public class MainViewController implements ChangeListener<Object> {
                 public TreeItem<Container<?>> fromString(String string) {
                     return null;
                 }
-            };
-            treeCell.setConverter(strConvert);
+            });
             return treeCell;
         });
         nadViewController.addListener(this);
-        // FIXME : SLD case is missing
+        sldViewController.addListener(this);
     }
 
     @Override
@@ -123,7 +143,7 @@ public class MainViewController implements ChangeListener<Object> {
 
     private void updateAllDiagrams() {
         nadViewController.updateAllDiagrams(model.getNetwork(), model.getSelectedContainer());
-        // FIXME : SLD case is missing
+        sldViewController.updateAllDiagrams(model.getNetwork(), model.showNamesProperty(), model.getSelectedContainer());
     }
 
     @FXML
@@ -183,7 +203,7 @@ public class MainViewController implements ChangeListener<Object> {
         filterField.setText("");
         // Controller (sld & nad)
         nadViewController.clean();
-        // FIXME : SLD case is missing
+        sldViewController.clean();
         // Model (sld & nad)
         model.clean();
     }
@@ -299,5 +319,6 @@ public class MainViewController implements ChangeListener<Object> {
         Container<?> container = containerTreeItem.getValue();
         String tabName = getIdentifiableStringSupplier().apply(container);
         nadViewController.createCheckedTab(model.getNetwork(), containerTreeItem, tabName);
+        sldViewController.createCheckedTab(sldJsHandler, model.getNetwork(), model.showNamesProperty(), containerTreeItem, tabName);
     }
 }

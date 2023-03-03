@@ -12,8 +12,6 @@ import com.powsybl.iidm.network.Network;
 import com.powsybl.iidm.network.Substation;
 import com.powsybl.iidm.network.VoltageLevel;
 import com.powsybl.nad.NetworkAreaDiagram;
-import com.powsybl.nad.layout.BasicFixedLayoutFactory;
-import com.powsybl.nad.model.Point;
 import javafx.beans.property.StringProperty;
 import javafx.concurrent.Service;
 import javafx.concurrent.Task;
@@ -29,7 +27,6 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.regex.Matcher;
@@ -99,38 +96,6 @@ public class NetworkAreaDiagramController {
         svgContent.textProperty().bind(modelSvgContent);
 
         updateDiagram(network, model, modelSvgContent, container);
-    }
-
-    public static void updateDiagram(Network network, NetworkAreaDiagramModel model, StringProperty modelSvgContent, Container<?> container, Map<String, Point> positions) {
-        Objects.requireNonNull(positions);
-        StringWriter writer = new StringWriter();
-        Service<String> nadService = new Service<>() {
-            @Override
-            protected Task<String> createTask() {
-                return new Task<>() {
-                    @Override
-                    protected String call() {
-                        NetworkAreaDiagram nad = getNetworkAreaDiagram(network, model, container);
-                        // Use the diagram definition to draw,
-                        // but apply a fixed layout using the given positions
-                        nad.draw(writer,
-                                model.getSvgParameters(),
-                                model.getLayoutParameters(),
-                                model.getStyleProvider(network),
-                                model.getLabelProvider(network),
-                                new BasicFixedLayoutFactory(positions));
-                        return writer.toString();
-                    }
-                };
-            }
-        };
-
-        nadService.setOnSucceeded(event -> modelSvgContent.setValue((String) event.getSource().getValue()));
-        nadService.setOnFailed(event -> {
-            Throwable exception = event.getSource().getException();
-            LOGGER.error(exception.toString(), exception);
-        });
-        nadService.start();
     }
 
     public static void updateDiagram(Network network, NetworkAreaDiagramModel model, StringProperty modelSvgContent, Container<?> container) {

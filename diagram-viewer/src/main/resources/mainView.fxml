@@ -36,9 +36,7 @@
             </SplitPane>
             <TabPane fx:id="sldOrNad">
                 <Tab text="Single Line" closable="false">
-                    <!-- FIXME : missing SLD case
                     <fx:include fx:id="sldView" source="sld/view.fxml"/>
-                    -->
                 </Tab>
                 <Tab text="Network Area" closable="false">
                     <fx:include fx:id="nadView" source="nad/view.fxml"/>

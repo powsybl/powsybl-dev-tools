@@ -7,6 +7,7 @@
 package com.powsybl.diagram.viewer;
 
 import com.powsybl.diagram.viewer.nad.NetworkAreaDiagramModel;
+import com.powsybl.diagram.viewer.sld.SingleLineDiagramModel;
 import com.powsybl.iidm.network.Container;
 import com.powsybl.iidm.network.Network;
 import javafx.beans.property.*;
@@ -17,13 +18,16 @@ import javafx.beans.property.*;
 public class Model {
     private final BooleanProperty showNames = new SimpleBooleanProperty();
     private final ObjectProperty<Network> network = new SimpleObjectProperty<>();
-    private final ObjectProperty<Container<?>> selectedContainer = new SimpleObjectProperty<>();
+    private Container<?> selectedContainer = null;
 
     private final NetworkAreaDiagramModel nadModel;
 
-    public Model(BooleanProperty showNames, NetworkAreaDiagramModel nadModel) {
+    private final SingleLineDiagramModel sldModel;
+
+    public Model(BooleanProperty showNames, NetworkAreaDiagramModel nadModel, SingleLineDiagramModel sldModel) {
         this.showNames.bind(showNames);
         this.nadModel = nadModel;
+        this.sldModel = sldModel;
     }
 
     public void setNetwork(Network network) {
@@ -34,20 +38,25 @@ public class Model {
         return network.getValue();
     }
 
-    public ObjectProperty<Network> getNetworkProperty() {
+    public BooleanProperty showNamesProperty() {
+        return showNames;
+    }
+
+    public ObjectProperty<Network> networkProperty() {
         return network;
     }
 
     public Container<?> getSelectedContainer() {
-        return selectedContainer.getValue();
+        return selectedContainer;
     }
 
     public void setSelectedContainer(Container<?> container) {
-        selectedContainer.setValue(container);
+        selectedContainer = container;
     }
 
     public void clean() {
         setSelectedContainer(null);
-        nadModel.setSvgContent("");
+        nadModel.clean();
+        sldModel.clean();
     }
 }
