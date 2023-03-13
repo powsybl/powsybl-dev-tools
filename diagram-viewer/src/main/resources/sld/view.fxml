@@ -1,16 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import com.powsybl.diagram.viewer.common.EnumChoiceBox?>
-<?import javafx.collections.FXCollections?>
 <?import javafx.geometry.*?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
-<?import java.lang.String?>
 <BorderPane xmlns="http://javafx.com/javafx/17.0.1" xmlns:fx="http://javafx.com/fxml/1"
             prefHeight="900.0" prefWidth="1000.0"
             fx:controller="com.powsybl.diagram.viewer.sld.SingleLineDiagramViewController">
     <center>
-        <SplitPane dividerPositions="0.8, 0.2" style="-fx-box-border: transparent">
+        <SplitPane dividerPositions="0.65, 0.35" style="-fx-box-border: transparent">
             <BorderPane.margin>
                 <Insets topRightBottomLeft="5"/>
             </BorderPane.margin>
@@ -23,13 +21,35 @@
                 </Tab>
             </TabPane>
             <VBox>
-                <VBox>
+                <VBox.margin>
+                    <Insets topRightBottomLeft="10"/>
+                </VBox.margin>
+                <GridPane hgap="5" vgap="5">
+                    <Button onMouseClicked="#onClickFitToContent" text="Fit to content" GridPane.rowIndex="0"/>
+                    <Button onMouseClicked="#onClickResetZoom" text="Reset zoom" GridPane.rowIndex="1"/>
+                </GridPane>
+                <Separator>
                     <VBox.margin>
                         <Insets topRightBottomLeft="10"/>
                     </VBox.margin>
+                </Separator>
+                <ScrollPane vbarPolicy="ALWAYS" hbarPolicy="NEVER" fitToHeight="true" fitToWidth="true">
                     <GridPane hgap="5" vgap="5">
-                        <Button onMouseClicked="#onClickFitToContent" text="Fit to content" GridPane.rowIndex="0"/>
-                        <Button onMouseClicked="#onClickResetZoom" text="Reset zoom" GridPane.rowIndex="1"/>
+                        <Label text="Design:" GridPane.rowIndex="0"/>
+                        <ComboBox fx:id="componentLibraryComboBox" GridPane.rowIndex="1"/>
+                        <Label text="Style:" GridPane.rowIndex="2"/>
+                        <ComboBox fx:id="styleComboBox" GridPane.rowIndex="3"/>
+                        <Label text="Substation Layout:" GridPane.rowIndex="4"/>
+                        <ComboBox fx:id="substationLayoutComboBox" GridPane.rowIndex="5"/>
+                        <Label text="VoltageLevel Layout:" GridPane.rowIndex="6"/>
+                        <ComboBox fx:id="voltageLevelLayoutComboBox" GridPane.rowIndex="7"/>
+                        <CheckBox fx:id="stackFeedersCheckBox" text="Stack feeders" GridPane.rowIndex="8"/>
+                        <CheckBox fx:id="exceptionWhenPatternUnhandledCheckBox" text="Exception when pattern unhandled" GridPane.rowIndex="9"/>
+                        <CheckBox fx:id="handleShuntsCheckBox" text="Handle shunts" GridPane.rowIndex="10"/>
+                        <CheckBox fx:id="removeFictitiousNodesCheckBox" text="Remove fictitious nodes" GridPane.rowIndex="11"/>
+                        <CheckBox fx:id="substituteSingularFictitiousNodesCheckBox" text="Substitute singular fictitious nodes" GridPane.rowIndex="12"/>
+                        <Label text="CGMES-DL Diagrams:" GridPane.rowIndex="13"/>
+                        <ComboBox fx:id="cgmesDLDiagramsComboBox" GridPane.rowIndex="14"/>
                     </GridPane>
                     <Separator>
                         <VBox.margin>
@@ -37,30 +57,124 @@
                         </VBox.margin>
                     </Separator>
                     <GridPane hgap="5" vgap="5">
-                        <Label text="Design:" GridPane.rowIndex="0"/>
-                        <ComboBox fx:id="componentLibraryChoice" GridPane.rowIndex="1"/>
-                        <Label text="Style:" GridPane.rowIndex="3"/>
-                        <ComboBox fx:id="styleChoice" GridPane.rowIndex="4"/>
-                        <Label text="Substation Layout:" GridPane.rowIndex="5"/>
-                        <ComboBox fx:id="substationLayoutChoice" GridPane.rowIndex="6"/>
-                        <Label text="VoltageLevel Layout:" GridPane.rowIndex="7"/>
-                        <ComboBox fx:id="voltageLevelLayoutChoice" GridPane.rowIndex="8"/>
-                        <Label text="CGMES-DL Diagrams:" GridPane.rowIndex="9"/>
-                        <ComboBox fx:id="cgmesDLDiagramsChoice" GridPane.rowIndex="10"/>
-                        <Label text="Diagram padding top/bottom:" GridPane.rowIndex="11"/>
-                        <Spinner fx:id="diagramPaddingTopBottomSpinner" GridPane.rowIndex="12">
+                        <Label text="Layout parameters:" style="-fx-font-weight: bold" GridPane.rowIndex="0"/>
+                        <Label text="Diagram padding top/bottom:" GridPane.rowIndex="1"/>
+                        <Spinner fx:id="diagramPaddingTopBottomSpinner" GridPane.rowIndex="2">
                             <valueFactory>
                                 <SpinnerValueFactory.DoubleSpinnerValueFactory min="0" max="300" amountToStepBy="5"/>
                             </valueFactory>
                         </Spinner>
-                        <Label text="Diagram padding left/right:" GridPane.rowIndex="13"/>
-                        <Spinner fx:id="diagramPaddingLeftRightSpinner" GridPane.rowIndex="14">
+                        <Label text="Diagram padding left/right:" GridPane.rowIndex="3"/>
+                        <Spinner fx:id="diagramPaddingLeftRightSpinner" GridPane.rowIndex="4">
                             <valueFactory>
                                 <SpinnerValueFactory.DoubleSpinnerValueFactory min="0" max="300" amountToStepBy="5"/>
+                            </valueFactory>
+                        </Spinner>
+                        <Label text="Voltage padding top/bottom:" GridPane.rowIndex="5"/>
+                        <Spinner fx:id="voltagePaddingTopBottomSpinner" GridPane.rowIndex="6">
+                            <valueFactory>
+                                <SpinnerValueFactory.DoubleSpinnerValueFactory min="0" max="300" amountToStepBy="5"/>
+                            </valueFactory>
+                        </Spinner>
+                        <Label text="Voltage padding left/right:" GridPane.rowIndex="7"/>
+                        <Spinner fx:id="voltagePaddingLeftRightSpinner" GridPane.rowIndex="8">
+                            <valueFactory>
+                                <SpinnerValueFactory.DoubleSpinnerValueFactory min="0" max="300" amountToStepBy="5"/>
+                            </valueFactory>
+                        </Spinner>
+                        <Label text="Busbar vertical space:" GridPane.rowIndex="9"/>
+                        <Spinner fx:id="busbarVerticalSpaceSpinner" GridPane.rowIndex="10">
+                            <valueFactory>
+                                <SpinnerValueFactory.DoubleSpinnerValueFactory min="10" max="100" amountToStepBy="5"/>
+                            </valueFactory>
+                        </Spinner>
+                        <Label text="Busbar horizontal space:" GridPane.rowIndex="11"/>
+                        <Spinner fx:id="busbarHorizontalSpaceSpinner" GridPane.rowIndex="12">
+                            <valueFactory>
+                                <SpinnerValueFactory.DoubleSpinnerValueFactory min="10" max="100" amountToStepBy="5"/>
+                            </valueFactory>
+                        </Spinner>
+                        <Label text="Cell width:" GridPane.rowIndex="13"/>
+                        <Spinner fx:id="cellWidthSpinner" GridPane.rowIndex="14">
+                            <valueFactory>
+                                <SpinnerValueFactory.DoubleSpinnerValueFactory min="10" max="100" amountToStepBy="5"/>
+                            </valueFactory>
+                        </Spinner>
+                        <Label text="Extern cell height" GridPane.rowIndex="15"/>
+                        <Spinner fx:id="externCellHeightSpinner" GridPane.rowIndex="16">
+                            <valueFactory>
+                                <SpinnerValueFactory.DoubleSpinnerValueFactory min="100" max="500" amountToStepBy="10"/>
+                            </valueFactory>
+                        </Spinner>
+                        <Label text="Intern cell height" GridPane.rowIndex="17"/>
+                        <Spinner fx:id="internCellHeightSpinner" GridPane.rowIndex="18">
+                            <valueFactory>
+                                <SpinnerValueFactory.DoubleSpinnerValueFactory min="10" max="100" amountToStepBy="5"/>
+                            </valueFactory>
+                        </Spinner>
+                        <Label text="Stack height:" GridPane.rowIndex="19"/>
+                        <Spinner fx:id="stackHeightSpinner" GridPane.rowIndex="20">
+                            <valueFactory>
+                                <SpinnerValueFactory.DoubleSpinnerValueFactory min="10" max="100" amountToStepBy="5"/>
+                            </valueFactory>
+                        </Spinner>
+                        <CheckBox fx:id="showGridCheckBox" text="Show grid" selected="true" GridPane.rowIndex="21"/>
+                        <CheckBox fx:id="showInternalNodesCheckBox" text="Show internal nodes" GridPane.rowIndex="22"/>
+                        <CheckBox fx:id="drawStraightWiresCheckBox" text="Draw straight wires" GridPane.rowIndex="23"/>
+                        <CheckBox fx:id="disconnectorsOnBusCheckBox" text="Disconnectors on bus" GridPane.rowIndex="24"/>
+                        <Label text="Scale factor:" GridPane.rowIndex="25"/>
+                        <Spinner fx:id="scaleFactorSpinner" GridPane.rowIndex="26">
+                            <valueFactory>
+                                <SpinnerValueFactory.DoubleSpinnerValueFactory min="1" max="20" amountToStepBy="1"/>
+                            </valueFactory>
+                        </Spinner>
+                        <CheckBox fx:id="avoidSVGComponentsDuplicationCheckBox" text="Avoid SVG components duplication" GridPane.rowIndex="27"/>
+                        <CheckBox fx:id="adaptCellHeightToContentCheckBox" text="Adapt cell height to content" selected="true" GridPane.rowIndex="28"/>
+                        <Label text="Min space between components:" GridPane.rowIndex="29"/>
+                        <Spinner fx:id="minSpaceBetweenComponentsSpinner" GridPane.rowIndex="30">
+                            <valueFactory>
+                                <SpinnerValueFactory.DoubleSpinnerValueFactory min="8" max="60" amountToStepBy="1"/>
+                            </valueFactory>
+                        </Spinner>
+                        <Label text="Minimum extern cell height:" GridPane.rowIndex="31"/>
+                        <Spinner fx:id="minimumExternCellHeightSpinner" GridPane.rowIndex="32">
+                            <valueFactory>
+                                <SpinnerValueFactory.DoubleSpinnerValueFactory min="80" max="300" amountToStepBy="10"/>
+                            </valueFactory>
+                        </Spinner>
+                        <Label text="BusBar alignment:" GridPane.rowIndex="33"/>
+                        <EnumChoiceBox enumType="com.powsybl.sld.layout.LayoutParameters$Alignment" fx:id="busBarAlignmentChoice" initialValue="FIRST" GridPane.rowIndex="34"/>
+                        <CheckBox fx:id="centerLabelCheckBox" text="Center label" GridPane.rowIndex="35"/>
+                        <CheckBox fx:id="labelDiagonalCheckBox" text="Label diagonal" GridPane.rowIndex="36"/>
+                        <Label text="Angle label:" GridPane.rowIndex="37"/>
+                        <Spinner fx:id="angleLabelSpinner" GridPane.rowIndex="38">
+                            <valueFactory>
+                                <SpinnerValueFactory.DoubleSpinnerValueFactory min="-360" max="360" amountToStepBy="1"/>
+                            </valueFactory>
+                        </Spinner>
+                        <CheckBox fx:id="highLightLineStateCheckBox" text="HighLight line state" GridPane.rowIndex="39"/>
+                        <CheckBox fx:id="addNodesInfosCheckBox" text="Add nodes infos" GridPane.rowIndex="40"/>
+                        <CheckBox fx:id="feederInfoSymmetryCheckBox" text="Feeder info symmetry" GridPane.rowIndex="41"/>
+                        <Label text="Space for feeder infos:" GridPane.rowIndex="42"/>
+                        <Spinner fx:id="spaceForFeederInfosSpinner" GridPane.rowIndex="43">
+                            <valueFactory>
+                                <SpinnerValueFactory.DoubleSpinnerValueFactory min="0" max="200" amountToStepBy="1"/>
+                            </valueFactory>
+                        </Spinner>
+                        <Label text="Feeder infos outer margin:" GridPane.rowIndex="44"/>
+                        <Spinner fx:id="feederInfosOuterMarginSpinner" GridPane.rowIndex="45">
+                            <valueFactory>
+                                <SpinnerValueFactory.DoubleSpinnerValueFactory min="0" max="200" amountToStepBy="1"/>
+                            </valueFactory>
+                        </Spinner>
+                        <Label text="Feeder infos intra margin:" GridPane.rowIndex="46"/>
+                        <Spinner fx:id="feederInfosIntraMarginSpinner" GridPane.rowIndex="47">
+                            <valueFactory>
+                                <SpinnerValueFactory.DoubleSpinnerValueFactory min="0" max="200" amountToStepBy="1"/>
                             </valueFactory>
                         </Spinner>
                     </GridPane>
-                </VBox>
+                </ScrollPane>
             </VBox>
         </SplitPane>
     </center>

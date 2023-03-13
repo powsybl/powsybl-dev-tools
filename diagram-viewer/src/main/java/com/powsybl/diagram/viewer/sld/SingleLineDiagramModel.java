@@ -16,6 +16,7 @@ import com.powsybl.sld.layout.*;
 import com.powsybl.sld.layout.positionbyclustering.PositionByClustering;
 import com.powsybl.sld.layout.positionfromextension.PositionFromExtension;
 import com.powsybl.sld.library.ComponentLibrary;
+import com.powsybl.sld.library.ComponentTypeName;
 import com.powsybl.sld.svg.BasicStyleProvider;
 import com.powsybl.sld.svg.DiagramStyleProvider;
 import com.powsybl.sld.util.NominalVoltageDiagramStyleProvider;
@@ -25,9 +26,7 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.util.StringConverter;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Stream;
 
 /**
@@ -85,10 +84,76 @@ public class SingleLineDiagramModel {
     private final Map<Container<?>, ContainerResult> containerToResultMap = new HashMap<>();
 
     // Layout Parameters
-    private final DoubleProperty diagramPaddingTopBottom = new SimpleDoubleProperty();
+    private final DoubleProperty diagramPaddingTopBottom = new SimpleDoubleProperty(new LayoutParameters().getDiagramPadding().getTop());
 
-    private final DoubleProperty diagramPaddingLeftRight = new SimpleDoubleProperty();
+    private final DoubleProperty diagramPaddingLeftRight = new SimpleDoubleProperty(new LayoutParameters().getDiagramPadding().getLeft());
 
+    private final DoubleProperty voltagePaddingTopBottom = new SimpleDoubleProperty(new LayoutParameters().getVoltageLevelPadding().getTop());
+
+    private final DoubleProperty voltagePaddingLeftRight = new SimpleDoubleProperty(new LayoutParameters().getVoltageLevelPadding().getLeft());
+
+    private final DoubleProperty busbarVerticalSpace = new SimpleDoubleProperty(new LayoutParameters().getVerticalSpaceBus());
+
+    private final DoubleProperty busbarHorizontalSpace = new SimpleDoubleProperty(new LayoutParameters().getHorizontalBusPadding());
+
+    private final DoubleProperty cellWidth = new SimpleDoubleProperty();
+
+    private final DoubleProperty externCellHeight = new SimpleDoubleProperty();
+
+    private final DoubleProperty internCellHeight = new SimpleDoubleProperty();
+
+    private final DoubleProperty stackHeight = new SimpleDoubleProperty();
+
+    private final BooleanProperty showGrid = new SimpleBooleanProperty();
+
+    private final BooleanProperty showInternalNodes = new SimpleBooleanProperty();
+
+    private final BooleanProperty drawStraightWires = new SimpleBooleanProperty();
+
+    private final BooleanProperty disconnectorsOnBus = new SimpleBooleanProperty();
+
+    private final DoubleProperty scaleFactor = new SimpleDoubleProperty();
+
+    private final BooleanProperty avoidSVGComponentsDuplication = new SimpleBooleanProperty();
+
+    private final BooleanProperty adaptCellHeightToContent = new SimpleBooleanProperty();
+
+    private final DoubleProperty minSpaceBetweenComponents = new SimpleDoubleProperty();
+
+    private final DoubleProperty minimumExternCellHeight = new SimpleDoubleProperty();
+
+    private final ObjectProperty<LayoutParameters.Alignment> busBarAlignment = new SimpleObjectProperty<>();
+
+    private final BooleanProperty centerLabel = new SimpleBooleanProperty();
+
+    private final BooleanProperty labelDiagonal = new SimpleBooleanProperty();
+
+    private final DoubleProperty angleLabel = new SimpleDoubleProperty();
+
+    private final BooleanProperty highLightLineState = new SimpleBooleanProperty();
+
+    private final BooleanProperty addNodesInfos = new SimpleBooleanProperty();
+
+    private final BooleanProperty feederInfoSymmetry = new SimpleBooleanProperty();
+
+    private final DoubleProperty spaceForFeederInfos = new SimpleDoubleProperty();
+
+    private final DoubleProperty feederInfosOuterMargin = new SimpleDoubleProperty(new LayoutParameters().getFeederInfosOuterMargin());
+
+    private final DoubleProperty feederInfosIntraMargin = new SimpleDoubleProperty(new LayoutParameters().getFeederInfosIntraMargin());
+
+    // PositionVoltageLevelLayoutFactory
+    private final BooleanProperty stackFeeders = new SimpleBooleanProperty();
+
+    private final BooleanProperty exceptionWhenPatternUnhandled = new SimpleBooleanProperty();
+
+    private final BooleanProperty handleShunts = new SimpleBooleanProperty();
+
+    private final BooleanProperty removeFictitiousNodes = new SimpleBooleanProperty();
+
+    private final BooleanProperty substituteSingularFictitiousNodes = new SimpleBooleanProperty();
+
+    // Providers
     private final ObservableList<ComponentLibrary> componentLibraries = FXCollections.observableArrayList();
 
     private final ObservableList<DiagramStyleProvider> styleProviders = FXCollections.observableArrayList();
@@ -121,23 +186,98 @@ public class SingleLineDiagramModel {
                                   ReadOnlyObjectProperty<SubstationLayoutFactory> substationLayoutFactory,
                                   ReadOnlyObjectProperty<String> cgmesDLDiagramName,
                                   ReadOnlyObjectProperty<Double> diagramPaddingTopBottom,
-                                  ReadOnlyObjectProperty<Double> diagramPaddingLeftRight) {
+                                  ReadOnlyObjectProperty<Double> diagramPaddingLeftRight,
+                                  ReadOnlyObjectProperty<Double> voltagePaddingTopBottom,
+                                  ReadOnlyObjectProperty<Double> voltagePaddingLeftRight,
+                                  ReadOnlyObjectProperty<Double> busbarVerticalSpace,
+                                  ReadOnlyObjectProperty<Double> busbarHorizontalSpace,
+                                  ReadOnlyObjectProperty<Double> cellWidth,
+                                  ReadOnlyObjectProperty<Double> externCellHeight,
+                                  ReadOnlyObjectProperty<Double> internCellHeight,
+                                  ReadOnlyObjectProperty<Double> stackHeight,
+                                  ReadOnlyBooleanProperty showGrid,
+                                  ReadOnlyBooleanProperty showInternalNodes,
+                                  ReadOnlyBooleanProperty drawStraightWires,
+                                  ReadOnlyBooleanProperty disconnectorsOnBus,
+                                  BooleanProperty stackFeeders,
+                                  BooleanProperty exceptionWhenPatternUnhandled,
+                                  BooleanProperty handleShunts,
+                                  BooleanProperty removeFictitiousNodes,
+                                  BooleanProperty substituteSingularFictitiousNodes,
+                                  ReadOnlyObjectProperty<Double> scaleFactor,
+                                  ReadOnlyBooleanProperty avoidSVGComponentsDuplication,
+                                  ReadOnlyBooleanProperty adaptCellHeightToContent,
+                                  ReadOnlyObjectProperty<Double> minSpaceBetweenComponents,
+                                  ReadOnlyObjectProperty<Double> minimumExternCellHeight,
+                                  ReadOnlyObjectProperty<LayoutParameters.Alignment> busBarAlignment,
+                                  ReadOnlyBooleanProperty centerLabel,
+                                  ReadOnlyBooleanProperty labelDiagonal,
+                                  ReadOnlyObjectProperty<Double> angleLabel,
+                                  ReadOnlyBooleanProperty highLightLineState,
+                                  ReadOnlyBooleanProperty addNodesInfos,
+                                  ReadOnlyBooleanProperty feederInfoSymmetry,
+                                  ReadOnlyObjectProperty<Double> spaceForFeederInfos,
+                                  ReadOnlyObjectProperty<Double> feederInfosOuterMargin,
+                                  ReadOnlyObjectProperty<Double> feederInfosIntraMargin
+                                  ) {
         // Providers
         this.componentLibrary.bind(componentLibrary);
         this.styleProvider.bind(styleProvider);
         this.voltageLevelLayoutFactory.bind(voltageLevelLayoutFactory);
+        this.voltageLevelLayoutFactory.addListener((observable, oldValue, newValue) -> {
+            boolean selected = newValue instanceof PositionVoltageLevelLayoutFactory;
+            if (selected) {
+                this.stackFeeders.setValue(((PositionVoltageLevelLayoutFactory) newValue).isFeederStacked());
+                this.exceptionWhenPatternUnhandled.setValue(((PositionVoltageLevelLayoutFactory) newValue).isExceptionIfPatternNotHandled());
+                this.handleShunts.setValue(((PositionVoltageLevelLayoutFactory) newValue).isHandleShunts());
+                this.removeFictitiousNodes.setValue(((PositionVoltageLevelLayoutFactory) newValue).isRemoveUnnecessaryFictitiousNodes());
+                this.substituteSingularFictitiousNodes.setValue(((PositionVoltageLevelLayoutFactory) newValue).isSubstituteSingularFictitiousByFeederNode());
+            }
+        });
+
         this.substationLayoutFactory.bind(substationLayoutFactory);
         this.cgmesDLDiagramName.bind(cgmesDLDiagramName);
 
         // Layout Parameters
         this.diagramPaddingTopBottom.bind(diagramPaddingTopBottom);
         this.diagramPaddingLeftRight.bind(diagramPaddingLeftRight);
+        this.voltagePaddingTopBottom.bind(voltagePaddingTopBottom);
+        this.voltagePaddingLeftRight.bind(voltagePaddingLeftRight);
+        this.busbarVerticalSpace.bind(busbarVerticalSpace);
+        this.busbarHorizontalSpace.bind(busbarHorizontalSpace);
+        this.cellWidth.bind(cellWidth);
+        this.externCellHeight.bind(externCellHeight);
+        this.internCellHeight.bind(internCellHeight);
+        this.stackHeight.bind(stackHeight);
+        this.showGrid.bind(showGrid);
+        this.showInternalNodes.bind(showInternalNodes);
+        this.drawStraightWires.bind(drawStraightWires);
+        this.disconnectorsOnBus.bind(disconnectorsOnBus);
+        this.scaleFactor.bind(scaleFactor);
+        this.avoidSVGComponentsDuplication.bind(avoidSVGComponentsDuplication);
+        this.adaptCellHeightToContent.bind(adaptCellHeightToContent);
+        this.minSpaceBetweenComponents.bind(minSpaceBetweenComponents);
+        this.minimumExternCellHeight.bind(minimumExternCellHeight);
+        this.busBarAlignment.bind(busBarAlignment);
+        this.centerLabel.bind(centerLabel);
+        this.labelDiagonal.bind(labelDiagonal);
+        this.angleLabel.bind(angleLabel);
+        this.highLightLineState.bind(highLightLineState);
+        this.addNodesInfos.bind(addNodesInfos);
+        this.feederInfoSymmetry.bind(feederInfoSymmetry);
+        this.spaceForFeederInfos.bind(spaceForFeederInfos);
+        this.feederInfosOuterMargin.bind(feederInfosOuterMargin);
+        this.feederInfosIntraMargin.bind(feederInfosIntraMargin);
+
+        // PositionVoltageLevelLayoutFactory
+        this.stackFeeders.bindBidirectional(stackFeeders);
+        this.exceptionWhenPatternUnhandled.bindBidirectional(exceptionWhenPatternUnhandled);
+        this.handleShunts.bindBidirectional(handleShunts);
+        this.removeFictitiousNodes.bindBidirectional(removeFictitiousNodes);
+        this.substituteSingularFictitiousNodes.bindBidirectional(substituteSingularFictitiousNodes);
 
         // Update observable lists
-        initProviders();
-        styleProviders.setAll(nameToDiagramStyleProviderMap.values());
-        voltageLevelLayouts.setAll(nameToVoltageLevelLayoutFactoryMap.values());
-        substationLayouts.setAll(nameToSubstationLayoutFactoryMap.values());
+        updateFrom(null);
     }
 
     public void initProviders() {
@@ -155,18 +295,20 @@ public class SingleLineDiagramModel {
 
     public void updateFrom(Network network) {
         initProviders();
-        // Styles
-        nameToDiagramStyleProviderMap.put(NOMINAL_STYLE, new NominalVoltageDiagramStyleProvider(network));
-        nameToDiagramStyleProviderMap.put(TOPOLOGY_STYLE, new TopologicalStyleProvider(network));
-        // VoltageLevelLayouts
-        nameToVoltageLevelLayoutFactoryMap.put(SMART_VOLTAGELEVEL_LAYOUT, new SmartVoltageLevelLayoutFactory(network));
-        nameToVoltageLevelLayoutFactoryMap.put(CGMES_VOLTAGELEVEL_LAYOUT, new CgmesVoltageLevelLayoutFactory(network));
-        nameToSubstationLayoutFactoryMap.put(CGMES_SUBSTATION_LAYOUT, new CgmesSubstationLayoutFactory(network));
-
+        if (network != null) {
+            // Styles
+            nameToDiagramStyleProviderMap.put(NOMINAL_STYLE, new NominalVoltageDiagramStyleProvider(network));
+            nameToDiagramStyleProviderMap.put(TOPOLOGY_STYLE, new TopologicalStyleProvider(network));
+            // VoltageLevelLayouts
+            nameToVoltageLevelLayoutFactoryMap.put(SMART_VOLTAGELEVEL_LAYOUT, new SmartVoltageLevelLayoutFactory(network));
+            nameToVoltageLevelLayoutFactoryMap.put(CGMES_VOLTAGELEVEL_LAYOUT, new CgmesVoltageLevelLayoutFactory(network));
+            nameToSubstationLayoutFactoryMap.put(CGMES_SUBSTATION_LAYOUT, new CgmesSubstationLayoutFactory(network));
+            // CGMES-DL names
+            cgmesDLDiagramNames.setAll(NetworkDiagramData.getDiagramsNames(network));
+        }
         styleProviders.setAll(nameToDiagramStyleProviderMap.values());
         voltageLevelLayouts.setAll(nameToVoltageLevelLayoutFactoryMap.values());
         substationLayouts.setAll(nameToSubstationLayoutFactoryMap.values());
-        cgmesDLDiagramNames.setAll(NetworkDiagramData.getDiagramsNames(network));
     }
 
     public ComponentLibrary getComponentLibrary() {
@@ -178,7 +320,17 @@ public class SingleLineDiagramModel {
     }
 
     public VoltageLevelLayoutFactory getVoltageLevelLayoutFactory() {
-        return voltageLevelLayoutFactory.get();
+        VoltageLevelLayoutFactory layoutFactory = voltageLevelLayoutFactory.get();
+        if (layoutFactory instanceof PositionVoltageLevelLayoutFactory) {
+            // PositionVoltageLevelLayoutFactory
+            ((PositionVoltageLevelLayoutFactory)layoutFactory).setFeederStacked(stackFeeders.get());
+            ((PositionVoltageLevelLayoutFactory)layoutFactory).setExceptionIfPatternNotHandled(exceptionWhenPatternUnhandled.get());
+            ((PositionVoltageLevelLayoutFactory)layoutFactory).setHandleShunts(handleShunts.get());
+            ((PositionVoltageLevelLayoutFactory)layoutFactory).setRemoveUnnecessaryFictitiousNodes(removeFictitiousNodes.get());
+            ((PositionVoltageLevelLayoutFactory)layoutFactory).setSubstituteSingularFictitiousByFeederNode(substituteSingularFictitiousNodes.get());
+        }
+
+        return layoutFactory;
     }
 
     public SubstationLayoutFactory getSubstationLayoutFactory() {
@@ -191,8 +343,37 @@ public class SingleLineDiagramModel {
                         diagramPaddingTopBottom.get(),
                         diagramPaddingLeftRight.get(),
                         diagramPaddingTopBottom.get())
+                .setVoltageLevelPadding(voltagePaddingLeftRight.get(),
+                        voltagePaddingTopBottom.get(),
+                        voltagePaddingLeftRight.get(),
+                        voltagePaddingTopBottom.get())
                 .setUseName(showNames)
                 .setDiagramName(cgmesDLDiagramName.get())
+                .setVerticalSpaceBus(busbarVerticalSpace.get())
+                .setHorizontalBusPadding(busbarHorizontalSpace.get())
+                .setCellWidth(cellWidth.get())
+                .setExternCellHeight(externCellHeight.get())
+                .setInternCellHeight(internCellHeight.get())
+                .setStackHeight(stackHeight.get())
+                .setShowGrid(showGrid.get())
+                .setShowInternalNodes(showInternalNodes.get())
+                .setDrawStraightWires(drawStraightWires.get())
+                .setComponentsOnBusbars(disconnectorsOnBus.get() ? List.of(ComponentTypeName.DISCONNECTOR) : Collections.emptyList())
+                .setScaleFactor(scaleFactor.get())
+                .setAvoidSVGComponentsDuplication(avoidSVGComponentsDuplication.get())
+                .setAdaptCellHeightToContent(adaptCellHeightToContent.get())
+                .setMinSpaceBetweenComponents(minSpaceBetweenComponents.get())
+                .setMinExternCellHeight(minimumExternCellHeight.get())
+                .setBusbarsAlignment(busBarAlignment.get())
+                .setLabelCentered(centerLabel.get())
+                .setLabelDiagonal(labelDiagonal.get())
+                .setAngleLabelShift(angleLabel.get())
+                .setHighlightLineState(highLightLineState.get())
+                .setAddNodesInfos(addNodesInfos.get())
+                .setFeederInfoSymmetry(feederInfoSymmetry.get())
+                .setSpaceForFeederInfos(spaceForFeederInfos.get())
+                .setFeederInfosOuterMargin(feederInfosOuterMargin.get())
+                .setFeederInfosIntraMargin(feederInfosIntraMargin.get())
                 .setCssLocation(LayoutParameters.CssLocation.INSERTED_IN_SVG)
                 .setSvgWidthAndHeightAdded(true);
     }

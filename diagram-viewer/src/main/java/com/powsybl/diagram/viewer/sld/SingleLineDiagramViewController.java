@@ -8,11 +8,16 @@ package com.powsybl.diagram.viewer.sld;
 
 import com.powsybl.iidm.network.Container;
 import com.powsybl.iidm.network.Network;
+import com.powsybl.sld.layout.LayoutParameters;
+import com.powsybl.sld.layout.PositionVoltageLevelLayoutFactory;
 import com.powsybl.sld.layout.SubstationLayoutFactory;
+import com.powsybl.sld.layout.VoltageLevelLayoutFactory;
 import com.powsybl.sld.library.ComponentLibrary;
+import com.powsybl.sld.library.ComponentTypeName;
 import com.powsybl.sld.svg.DiagramStyleProvider;
 import javafx.beans.binding.Bindings;
-import javafx.beans.property.ReadOnlyBooleanProperty;
+import javafx.beans.binding.BooleanBinding;
+import javafx.beans.property.*;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXML;
@@ -35,19 +40,19 @@ public class SingleLineDiagramViewController {
     private static final Logger LOGGER = LoggerFactory.getLogger(SingleLineDiagramViewController.class);
 
     @FXML
-    public ComboBox<ComponentLibrary> componentLibraryChoice;
+    public ComboBox<ComponentLibrary> componentLibraryComboBox;
 
     @FXML
-    public ComboBox<DiagramStyleProvider> styleChoice;
+    public ComboBox<DiagramStyleProvider> styleComboBox;
 
     @FXML
-    public ComboBox<SubstationLayoutFactory> substationLayoutChoice;
+    public ComboBox<SubstationLayoutFactory> substationLayoutComboBox;
 
     @FXML
-    public ComboBox<com.powsybl.sld.layout.VoltageLevelLayoutFactory> voltageLevelLayoutChoice;
+    public ComboBox<VoltageLevelLayoutFactory> voltageLevelLayoutComboBox;
 
     @FXML
-    public ComboBox<String> cgmesDLDiagramsChoice;
+    public ComboBox<String> cgmesDLDiagramsComboBox;
 
     // Parameters
     @FXML
@@ -57,6 +62,102 @@ public class SingleLineDiagramViewController {
     public Spinner<Double> diagramPaddingLeftRightSpinner;
 
     @FXML
+    public Spinner<Double> voltagePaddingTopBottomSpinner;
+
+    @FXML
+    public Spinner<Double> voltagePaddingLeftRightSpinner;
+
+    @FXML
+    public Spinner<Double> busbarVerticalSpaceSpinner;
+
+    @FXML
+    public Spinner<Double> busbarHorizontalSpaceSpinner;
+
+    @FXML
+    public Spinner<Double> cellWidthSpinner;
+
+    @FXML
+    public Spinner<Double> externCellHeightSpinner;
+
+    @FXML
+    public Spinner<Double> internCellHeightSpinner;
+
+    @FXML
+    public Spinner<Double> stackHeightSpinner;
+
+    @FXML
+    public CheckBox showGridCheckBox;
+
+    @FXML
+    public CheckBox showInternalNodesCheckBox;
+
+    @FXML
+    public CheckBox drawStraightWiresCheckBox;
+
+    @FXML
+    public CheckBox disconnectorsOnBusCheckBox;
+
+    @FXML
+    public CheckBox stackFeedersCheckBox;
+
+    @FXML
+    public CheckBox exceptionWhenPatternUnhandledCheckBox;
+
+    @FXML
+    public CheckBox handleShuntsCheckBox;
+
+    @FXML
+    public CheckBox removeFictitiousNodesCheckBox;
+
+    @FXML
+    public CheckBox substituteSingularFictitiousNodesCheckBox;
+
+    @FXML
+    public Spinner<Double> scaleFactorSpinner;
+
+    @FXML
+    public CheckBox avoidSVGComponentsDuplicationCheckBox;
+
+    @FXML
+    public CheckBox adaptCellHeightToContentCheckBox;
+
+    @FXML
+    public Spinner<Double> minSpaceBetweenComponentsSpinner;
+
+    @FXML
+    public Spinner<Double> minimumExternCellHeightSpinner;
+
+    @FXML
+    public ChoiceBox<LayoutParameters.Alignment> busBarAlignmentChoice;
+
+    @FXML
+    public CheckBox centerLabelCheckBox;
+
+    @FXML
+    public CheckBox labelDiagonalCheckBox;
+
+    @FXML
+    public Spinner<Double> angleLabelSpinner;
+
+    @FXML
+    public CheckBox highLightLineStateCheckBox;
+
+    @FXML
+    public CheckBox addNodesInfosCheckBox;
+
+    @FXML
+    public CheckBox feederInfoSymmetryCheckBox;
+
+    @FXML
+    public Spinner<Double> spaceForFeederInfosSpinner;
+
+    @FXML
+    public Spinner<Double> feederInfosOuterMarginSpinner;
+
+    @FXML
+    public Spinner<Double> feederInfosIntraMarginSpinner;
+
+    @FXML
     public TabPane checkedTab;
     @FXML
     public BorderPane selectedDiagram;
@@ -64,7 +165,7 @@ public class SingleLineDiagramViewController {
     public TabPane checkedOrSelected;
 
     @FXML
-    private SingleLineDiagramController selectedDiagramController;
+    public SingleLineDiagramController selectedDiagramController;
 
     private final Map<Tab, SingleLineDiagramController> checkedDiagramControllers = new HashMap<>();
 
@@ -72,44 +173,152 @@ public class SingleLineDiagramViewController {
 
     @FXML
     private void initialize() {
-        model = new SingleLineDiagramModel(componentLibraryChoice.valueProperty(),
-                styleChoice.valueProperty(),
-                voltageLevelLayoutChoice.valueProperty(),
-                substationLayoutChoice.valueProperty(),
-                cgmesDLDiagramsChoice.valueProperty(),
+        model = new SingleLineDiagramModel(componentLibraryComboBox.valueProperty(),
+                styleComboBox.valueProperty(),
+                voltageLevelLayoutComboBox.valueProperty(),
+                substationLayoutComboBox.valueProperty(),
+                cgmesDLDiagramsComboBox.valueProperty(),
                 diagramPaddingTopBottomSpinner.valueProperty(),
-                diagramPaddingLeftRightSpinner.valueProperty());
+                diagramPaddingLeftRightSpinner.valueProperty(),
+                voltagePaddingTopBottomSpinner.valueProperty(),
+                voltagePaddingLeftRightSpinner.valueProperty(),
+                busbarVerticalSpaceSpinner.valueProperty(),
+                busbarHorizontalSpaceSpinner.valueProperty(),
+                cellWidthSpinner.valueProperty(),
+                externCellHeightSpinner.valueProperty(),
+                internCellHeightSpinner.valueProperty(),
+                stackHeightSpinner.valueProperty(),
+                showGridCheckBox.selectedProperty(),
+                showInternalNodesCheckBox.selectedProperty(),
+                drawStraightWiresCheckBox.selectedProperty(),
+                disconnectorsOnBusCheckBox.selectedProperty(),
+
+                stackFeedersCheckBox.selectedProperty(),
+                exceptionWhenPatternUnhandledCheckBox.selectedProperty(),
+                handleShuntsCheckBox.selectedProperty(),
+                removeFictitiousNodesCheckBox.selectedProperty(),
+                substituteSingularFictitiousNodesCheckBox.selectedProperty(),
+
+                scaleFactorSpinner.valueProperty(),
+                avoidSVGComponentsDuplicationCheckBox.selectedProperty(),
+                adaptCellHeightToContentCheckBox.selectedProperty(),
+                minSpaceBetweenComponentsSpinner.valueProperty(),
+                minimumExternCellHeightSpinner.valueProperty(),
+                busBarAlignmentChoice.valueProperty(),
+                centerLabelCheckBox.selectedProperty(),
+                labelDiagonalCheckBox.selectedProperty(),
+                angleLabelSpinner.getValueFactory().valueProperty(),
+                highLightLineStateCheckBox.selectedProperty(),
+                addNodesInfosCheckBox.selectedProperty(),
+                feederInfoSymmetryCheckBox.selectedProperty(),
+                spaceForFeederInfosSpinner.valueProperty(),
+                feederInfosOuterMarginSpinner.valueProperty(),
+                feederInfosIntraMarginSpinner.valueProperty()
+        );
 
         // Component library
-        componentLibraryChoice.itemsProperty().bind(Bindings.createObjectBinding(() -> model.getComponentLibraries()));
-        componentLibraryChoice.setConverter(model.getComponentLibraryStringConverter());
-        componentLibraryChoice.getSelectionModel().selectFirst();
+        componentLibraryComboBox.itemsProperty().bind(Bindings.createObjectBinding(() -> model.getComponentLibraries()));
+        componentLibraryComboBox.setConverter(model.getComponentLibraryStringConverter());
+        componentLibraryComboBox.getSelectionModel().selectFirst();
         // Style provider
-        styleChoice.itemsProperty().bind(Bindings.createObjectBinding(() -> model.getStyleProviders()));
-        styleChoice.setConverter(model.getDiagramStyleProviderStringConverter());
-        styleChoice.getSelectionModel().selectFirst();
+        styleComboBox.itemsProperty().bind(Bindings.createObjectBinding(() -> model.getStyleProviders()));
+        styleComboBox.setConverter(model.getDiagramStyleProviderStringConverter());
+        styleComboBox.getSelectionModel().selectFirst();
         // Substation layout
-        substationLayoutChoice.itemsProperty().bind(Bindings.createObjectBinding(() -> model.getSubstationLayouts()));
-        substationLayoutChoice.setConverter(model.getSubstationLayoutStringConverter());
-        substationLayoutChoice.getSelectionModel().selectFirst();
+        substationLayoutComboBox.itemsProperty().bind(Bindings.createObjectBinding(() -> model.getSubstationLayouts()));
+        substationLayoutComboBox.setConverter(model.getSubstationLayoutStringConverter());
+        substationLayoutComboBox.getSelectionModel().selectFirst();
         // VoltageLevel layout
-        voltageLevelLayoutChoice.itemsProperty().bind(Bindings.createObjectBinding(() -> model.getVoltageLevelLayouts()));
-        voltageLevelLayoutChoice.getSelectionModel().selectFirst();
-        voltageLevelLayoutChoice.setConverter(model.getVoltageLevelLayoutFactoryStringConverter());
+        voltageLevelLayoutComboBox.itemsProperty().bind(Bindings.createObjectBinding(() -> model.getVoltageLevelLayouts()));
+        voltageLevelLayoutComboBox.setConverter(model.getVoltageLevelLayoutFactoryStringConverter());
+        BooleanBinding disableBinding = Bindings.createBooleanBinding(() -> voltageLevelLayoutComboBox.getSelectionModel().getSelectedItem() instanceof PositionVoltageLevelLayoutFactory, voltageLevelLayoutComboBox.getSelectionModel().selectedItemProperty());
+        stackFeedersCheckBox.visibleProperty().bind(disableBinding);
+        exceptionWhenPatternUnhandledCheckBox.visibleProperty().bind(disableBinding);
+        handleShuntsCheckBox.visibleProperty().bind(disableBinding);
+        removeFictitiousNodesCheckBox.visibleProperty().bind(disableBinding);
+        substituteSingularFictitiousNodesCheckBox.visibleProperty().bind(disableBinding);
+        voltageLevelLayoutComboBox.getSelectionModel().selectFirst();
+
         // CGMES-DL Diagrams
-        cgmesDLDiagramsChoice.itemsProperty().bind(Bindings.createObjectBinding(() -> model.getCgmesDLDiagramNames()));
-        cgmesDLDiagramsChoice.getSelectionModel().selectFirst();
-    }
+        cgmesDLDiagramsComboBox.itemsProperty().bind(Bindings.createObjectBinding(() -> model.getCgmesDLDiagramNames()));
+        cgmesDLDiagramsComboBox.getSelectionModel().selectFirst();
+
+        LayoutParameters defaultParameters = new LayoutParameters();
+        diagramPaddingTopBottomSpinner.getValueFactory().setValue(defaultParameters.getDiagramPadding().getTop());
+        diagramPaddingLeftRightSpinner.getValueFactory().setValue(defaultParameters.getDiagramPadding().getLeft());
+        voltagePaddingTopBottomSpinner.getValueFactory().setValue(defaultParameters.getVoltageLevelPadding().getTop());
+        voltagePaddingLeftRightSpinner.getValueFactory().setValue(defaultParameters.getVoltageLevelPadding().getLeft());
+        busbarVerticalSpaceSpinner.getValueFactory().setValue(defaultParameters.getVerticalSpaceBus());
+        busbarHorizontalSpaceSpinner.getValueFactory().setValue(defaultParameters.getHorizontalBusPadding());
+        cellWidthSpinner.getValueFactory().setValue(defaultParameters.getCellWidth());
+        externCellHeightSpinner.getValueFactory().setValue(defaultParameters.getExternCellHeight());
+        internCellHeightSpinner.getValueFactory().setValue(defaultParameters.getInternCellHeight());
+        stackHeightSpinner.getValueFactory().setValue(defaultParameters.getStackHeight());
+        showGridCheckBox.setSelected(defaultParameters.isShowGrid());
+        showInternalNodesCheckBox.setSelected(defaultParameters.isShowInternalNodes());
+        drawStraightWiresCheckBox.setSelected(defaultParameters.isDrawStraightWires());
+        disconnectorsOnBusCheckBox.setSelected(defaultParameters.getComponentsOnBusbars().equals(List.of(ComponentTypeName.DISCONNECTOR)));
+        scaleFactorSpinner.getValueFactory().setValue(defaultParameters.getScaleFactor());
+        avoidSVGComponentsDuplicationCheckBox.setSelected(defaultParameters.isAvoidSVGComponentsDuplication());
+        adaptCellHeightToContentCheckBox.setSelected(defaultParameters.isAdaptCellHeightToContent());
+        minSpaceBetweenComponentsSpinner.getValueFactory().setValue(defaultParameters.getMinSpaceBetweenComponents());
+        minimumExternCellHeightSpinner.getValueFactory().setValue(defaultParameters.getMinExternCellHeight());
+        busBarAlignmentChoice.setValue(LayoutParameters.Alignment.FIRST);
+        centerLabelCheckBox.setSelected(defaultParameters.isLabelCentered());
+        labelDiagonalCheckBox.setSelected(defaultParameters.isLabelDiagonal());
+        angleLabelSpinner.getValueFactory().setValue(defaultParameters.getAngleLabelShift());
+        highLightLineStateCheckBox.setSelected(defaultParameters.isHighlightLineState());
+        addNodesInfosCheckBox.setSelected(defaultParameters.isAddNodesInfos());
+        feederInfoSymmetryCheckBox.setSelected(defaultParameters.isFeederInfoSymmetry());
+        spaceForFeederInfosSpinner.getValueFactory().setValue(defaultParameters.getSpaceForFeederInfos());
+        feederInfosOuterMarginSpinner.getValueFactory().setValue(defaultParameters.getFeederInfosOuterMargin());
+        feederInfosIntraMarginSpinner.getValueFactory().setValue(defaultParameters.getFeederInfosIntraMargin());
+     }
 
     public void addListener(ChangeListener<Object> changeListener) {
-        componentLibraryChoice.valueProperty().addListener(changeListener);
-        styleChoice.valueProperty().addListener(changeListener);
-        substationLayoutChoice.valueProperty().addListener(changeListener);
-        voltageLevelLayoutChoice.valueProperty().addListener(changeListener);
-        cgmesDLDiagramsChoice.valueProperty().addListener(changeListener);
+        componentLibraryComboBox.valueProperty().addListener(changeListener);
+        styleComboBox.valueProperty().addListener(changeListener);
+        substationLayoutComboBox.valueProperty().addListener(changeListener);
+        voltageLevelLayoutComboBox.valueProperty().addListener(changeListener);
+        cgmesDLDiagramsComboBox.valueProperty().addListener(changeListener);
 
+        // LayoutParameters
         diagramPaddingTopBottomSpinner.valueProperty().addListener(changeListener);
         diagramPaddingLeftRightSpinner.valueProperty().addListener(changeListener);
+        voltagePaddingTopBottomSpinner.valueProperty().addListener(changeListener);
+        voltagePaddingLeftRightSpinner.valueProperty().addListener(changeListener);
+        busbarVerticalSpaceSpinner.valueProperty().addListener(changeListener);
+        busbarHorizontalSpaceSpinner.valueProperty().addListener(changeListener);
+        cellWidthSpinner.valueProperty().addListener(changeListener);
+        externCellHeightSpinner.valueProperty().addListener(changeListener);
+        internCellHeightSpinner.valueProperty().addListener(changeListener);
+        stackHeightSpinner.valueProperty().addListener(changeListener);
+        showGridCheckBox.selectedProperty().addListener(changeListener);
+        showInternalNodesCheckBox.selectedProperty().addListener(changeListener);
+        drawStraightWiresCheckBox.selectedProperty().addListener(changeListener);
+        disconnectorsOnBusCheckBox.selectedProperty().addListener(changeListener);
+        scaleFactorSpinner.valueProperty().addListener(changeListener);
+        avoidSVGComponentsDuplicationCheckBox.selectedProperty().addListener(changeListener);
+        adaptCellHeightToContentCheckBox.selectedProperty().addListener(changeListener);
+        minSpaceBetweenComponentsSpinner.valueProperty().addListener(changeListener);
+        minimumExternCellHeightSpinner.valueProperty().addListener(changeListener);
+        busBarAlignmentChoice.valueProperty().addListener(changeListener);
+        centerLabelCheckBox.selectedProperty().addListener(changeListener);
+        labelDiagonalCheckBox.selectedProperty().addListener(changeListener);
+        angleLabelSpinner.valueProperty().addListener(changeListener);
+        highLightLineStateCheckBox.selectedProperty().addListener(changeListener);
+        addNodesInfosCheckBox.selectedProperty().addListener(changeListener);
+        feederInfoSymmetryCheckBox.selectedProperty().addListener(changeListener);
+        spaceForFeederInfosSpinner.valueProperty().addListener(changeListener);
+        feederInfosOuterMarginSpinner.valueProperty().addListener(changeListener);
+        feederInfosIntraMarginSpinner.valueProperty().addListener(changeListener);
+
+        // PositionVoltageLevelLayoutFactory
+        stackFeedersCheckBox.selectedProperty().addListener(changeListener);
+        exceptionWhenPatternUnhandledCheckBox.selectedProperty().addListener(changeListener);
+        handleShuntsCheckBox.selectedProperty().addListener(changeListener);
+        removeFictitiousNodesCheckBox.selectedProperty().addListener(changeListener);
+        substituteSingularFictitiousNodesCheckBox.selectedProperty().addListener(changeListener);
     }
 
     public void updateAllDiagrams(Network network, ReadOnlyBooleanProperty showNamesProperty, Container<?> selectedContainer) {

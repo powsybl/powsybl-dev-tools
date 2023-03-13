@@ -10,7 +10,7 @@
             prefHeight="900.0" prefWidth="1000.0"
             fx:controller="com.powsybl.diagram.viewer.nad.NetworkAreaDiagramViewController">
     <center>
-        <SplitPane dividerPositions="0.8, 0.2" style="-fx-box-border: transparent">
+        <SplitPane dividerPositions="0.7, 0.3" style="-fx-box-border: transparent">
             <BorderPane.margin>
                 <Insets topRightBottomLeft="5"/>
             </BorderPane.margin>
