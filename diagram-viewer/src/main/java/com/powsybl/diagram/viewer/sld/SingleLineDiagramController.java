@@ -59,8 +59,6 @@ public class SingleLineDiagramController {
 
     private String js;
 
-    private SingleLineDiagramJsHandler jsHandler;
-
     @FXML
     private void initialize() throws IOException {
         // Add Zoom management

@@ -6,6 +6,9 @@
  */
 package com.powsybl.diagram.viewer;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.powsybl.commons.json.JsonUtil;
 import com.powsybl.diagram.viewer.nad.NetworkAreaDiagramViewController;
 import com.powsybl.diagram.viewer.sld.SingleLineDiagramJsHandler;
 import com.powsybl.diagram.viewer.sld.SingleLineDiagramViewController;
@@ -27,6 +30,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
+import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.util.*;
 import java.util.function.Function;
 import java.util.prefs.Preferences;
@@ -40,10 +45,12 @@ public class MainViewController implements ChangeListener<Object> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MainViewController.class);
 
+    private static final String SELECTED_VOLTAGE_LEVEL_AND_SUBSTATION_IDS_PROPERTY = "selectedVoltageLevelAndSubstationIds";
     public static final String CASE_PATH_PROPERTY = "casePath";
     public static final String CASE_FOLDER_PROPERTY = "caseFolder";
 
     private final Preferences preferences = Preferences.userNodeForPackage(DiagramViewer.class);
+    private final ObjectMapper objectMapper = JsonUtil.createObjectMapper();
 
     @FXML
     public TextField filePath;
@@ -96,8 +103,8 @@ public class MainViewController implements ChangeListener<Object> {
         model = new Model(showNames.selectedProperty(), nadViewController.getModel(), sldViewController.getModel());
 
         model.networkProperty().addListener((observableValue, oldNetwork, newNetwork) -> {
+            sldViewController.updateFrom(newNetwork);
             initSubstationsTree(newNetwork);
-            sldViewController.getModel().updateFrom(newNetwork);
         });
 
         showNames.selectedProperty().addListener(this);
@@ -212,6 +219,7 @@ public class MainViewController implements ChangeListener<Object> {
     private void onClickLoadFlow(MouseEvent actionEvent) {
         LoadFlow.run(model.getNetwork());
         updateAllDiagrams(); // forces update -> better done with NetworkListener
+        actionEvent.consume();
     }
 
     @FXML
@@ -277,17 +285,20 @@ public class MainViewController implements ChangeListener<Object> {
                 .findFirst()
                 .ifPresentOrElse(item -> vlTree.getSelectionModel().select(item),
                     () -> vlTree.getSelectionModel().clearSelection());
+
+        loadSelectedContainersDiagrams();
+
         vlTree.setShowRoot(true);
     }
 
     private void initVoltageLevelsTree(TreeItem<Container<?>> rootItem, CheckBoxTreeItem<Container<?>> sItem,
-                                       Collection<VoltageLevel> voltageLevels, Set<String> checkecContainers) {
+                                       Collection<VoltageLevel> voltageLevels, Set<String> checkedContainers) {
 
         for (VoltageLevel v : voltageLevels) {
             if (!hideVoltageLevels.isSelected()) {
                 CheckBoxTreeItem<Container<?>> vItem = new CheckBoxTreeItem<>(v);
                 vItem.setIndependent(true);
-                if (checkecContainers.contains(v.getId())) {
+                if (checkedContainers.contains(v.getId())) {
                     vItem.setSelected(true);
                 }
                 (sItem != null ? sItem : rootItem).getChildren().add(vItem);
@@ -312,6 +323,7 @@ public class MainViewController implements ChangeListener<Object> {
             if (Boolean.TRUE.equals(newVal)) {
                 createCheckedTab(containerTreeItem);
             }
+            saveSelectedDiagrams();
         });
     }
 
@@ -320,5 +332,39 @@ public class MainViewController implements ChangeListener<Object> {
         String tabName = getIdentifiableStringSupplier().apply(container);
         nadViewController.createCheckedTab(model.getNetwork(), containerTreeItem, tabName);
         sldViewController.createCheckedTab(sldJsHandler, model.getNetwork(), model.showNamesProperty(), containerTreeItem, tabName);
+    }
+
+    private void saveSelectedDiagrams() {
+        try {
+            CheckBoxTreeItem<Container<?>> rootTreeItem = (CheckBoxTreeItem<Container<?>>) vlTree.getRoot();
+            Set<String> containersChecked = rootTreeItem.getChildren().stream()
+                    .flatMap(s -> Stream.concat(Stream.of(s), s.getChildren().stream()))
+                    .filter(CheckBoxTreeItem.class::isInstance).map(ti -> (CheckBoxTreeItem<Container<?>>) ti)
+                    .filter(CheckBoxTreeItem::isSelected)
+                    .map(item -> item.getValue().getId())
+                    .collect(Collectors.toSet());
+            String selectedVoltageLevelIdsPropertyValue = objectMapper.writeValueAsString(containersChecked);
+            preferences.put(SELECTED_VOLTAGE_LEVEL_AND_SUBSTATION_IDS_PROPERTY, selectedVoltageLevelIdsPropertyValue);
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        }
+    }
+
+    private void loadSelectedContainersDiagrams() {
+        String selectedIdsPropertyValue = preferences.get(SELECTED_VOLTAGE_LEVEL_AND_SUBSTATION_IDS_PROPERTY, null);
+        if (selectedIdsPropertyValue != null) {
+            try {
+                Set<String> selectedIds = new HashSet<>(objectMapper.readValue(selectedIdsPropertyValue, new TypeReference<List<String>>() {
+                }));
+                CheckBoxTreeItem<Container<?>> rootTreeItem = (CheckBoxTreeItem<Container<?>>) vlTree.getRoot();
+                rootTreeItem.getChildren().stream()
+                        .flatMap(s -> Stream.concat(Stream.of(s), s.getChildren().stream()))
+                        .filter(CheckBoxTreeItem.class::isInstance).map(ti -> (CheckBoxTreeItem<Container<?>>) ti)
+                        .filter(selectableObject -> selectedIds.contains(selectableObject.getValue().getId()))
+                        .forEach(i -> i.setSelected(true));
+            } catch (IOException e) {
+                throw new UncheckedIOException(e);
+            }
+        }
     }
 }

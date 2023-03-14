@@ -27,10 +27,10 @@
                     <VBox.margin>
                         <Insets topRightBottomLeft="10"/>
                     </VBox.margin>
-                    <GridPane hgap="5" vgap="5">
+                    <HBox spacing="5">
                         <Button onMouseClicked="#onClickFitToContent" text="Fit to content" GridPane.rowIndex="0"/>
                         <Button onMouseClicked="#onClickResetZoom" text="Reset zoom" GridPane.rowIndex="1"/>
-                    </GridPane>
+                    </HBox>
                     <Separator>
                         <VBox.margin>
                             <Insets topRightBottomLeft="10"/>
