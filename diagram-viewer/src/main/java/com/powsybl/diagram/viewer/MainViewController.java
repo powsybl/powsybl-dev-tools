@@ -9,6 +9,7 @@ package com.powsybl.diagram.viewer;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.powsybl.commons.json.JsonUtil;
+import com.powsybl.computation.local.LocalComputationManager;
 import com.powsybl.diagram.viewer.nad.NetworkAreaDiagramViewController;
 import com.powsybl.diagram.viewer.sld.SingleLineDiagramJsHandler;
 import com.powsybl.diagram.viewer.sld.SingleLineDiagramViewController;
@@ -173,7 +174,9 @@ public class MainViewController implements ChangeListener<Object> {
                     return new Task<>() {
                         @Override
                         protected Network call() {
-                            return Network.read(file.toPath());
+                            Properties properties = new Properties();
+                            properties.put("iidm.import.cgmes.post-processors", "cgmesDLImport");
+                            return Network.read(file.toPath(), LocalComputationManager.getDefault(), new ImportConfig(), properties);
                         }
                     };
                 }
