@@ -15,8 +15,6 @@ import com.powsybl.diagram.viewer.sld.SingleLineDiagramJsHandler;
 import com.powsybl.diagram.viewer.sld.SingleLineDiagramViewController;
 import com.powsybl.iidm.network.*;
 import com.powsybl.loadflow.LoadFlow;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
 import javafx.concurrent.Service;
 import javafx.concurrent.Task;
 import javafx.fxml.FXML;
@@ -42,7 +40,7 @@ import java.util.stream.Stream;
 /**
  * @author Florian Dupuy <florian.dupuy at rte-france.com>
  */
-public class MainViewController implements ChangeListener<Object> {
+public class MainViewController {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MainViewController.class);
 
@@ -108,7 +106,8 @@ public class MainViewController implements ChangeListener<Object> {
             initSubstationsTree(newNetwork);
         });
 
-        showNames.selectedProperty().addListener(this);
+        showNames.selectedProperty().addListener((observable, oldValue, newValue) -> updateSldDiagrams());
+
         vlTree.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
             if (newValue != null) {
                 Container<?> c = newValue.getValue();
@@ -140,18 +139,17 @@ public class MainViewController implements ChangeListener<Object> {
             });
             return treeCell;
         });
-        nadViewController.addListener(this);
-        sldViewController.addListener(this);
+
+        nadViewController.addListener((observable, oldValue, newValue) -> updateNadDiagrams());
+        sldViewController.addListener((observable, oldValue, newValue) -> updateSldDiagrams());
     }
 
-    @Override
-    public void changed(ObservableValue<?> observable, Object oldValue, Object newValue) {
-        updateAllDiagrams();
-    }
-
-    private void updateAllDiagrams() {
-        nadViewController.updateAllDiagrams(model.getNetwork(), model.getSelectedContainer());
+    private void updateSldDiagrams() {
         sldViewController.updateAllDiagrams(model.getNetwork(), model.showNamesProperty(), model.getSelectedContainer());
+    }
+
+    private void updateNadDiagrams() {
+        nadViewController.updateAllDiagrams(model.getNetwork(), model.getSelectedContainer());
     }
 
     @FXML
@@ -221,7 +219,9 @@ public class MainViewController implements ChangeListener<Object> {
     @FXML
     private void onClickLoadFlow(MouseEvent actionEvent) {
         LoadFlow.run(model.getNetwork());
-        updateAllDiagrams(); // forces update -> better done with NetworkListener
+        // forces update -> better done with NetworkListener
+        updateSldDiagrams();
+        updateNadDiagrams();
         actionEvent.consume();
     }
 
