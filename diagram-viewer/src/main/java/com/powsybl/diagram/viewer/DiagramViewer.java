@@ -26,7 +26,9 @@ public class DiagramViewer extends Application {
         loader.setLocation(Objects.requireNonNull(getClass().getResource("/mainView.fxml")));
         BorderPane root = loader.load();
         primaryStage.setTitle("Developer viewer for powsybl-diagram");
-        primaryStage.getIcons().add(new Image("/images/logo.png"));
+        // Logo not displayed for ubuntu users
+        // see https://bugs.openjdk.org/browse/JDK-8092837
+        primaryStage.getIcons().add(new Image(Objects.requireNonNull(getClass().getResourceAsStream("/images/logo.png"))));
         primaryStage.setScene(new Scene(root));
         primaryStage.show();
     }
