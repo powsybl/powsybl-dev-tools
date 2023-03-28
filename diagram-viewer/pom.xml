@@ -36,15 +36,16 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <java.version>11</java.version>
-        <javafx.version>17.0.1</javafx.version>
+        <javafx.version>19.0.2.1</javafx.version>
         <javafx-mvn-plugin.version>0.0.8</javafx-mvn-plugin.version>
-        <slf4j.version>1.7.22</slf4j.version>
+        <slf4j-api.version>2.0.7</slf4j-api.version>
+        <logback.version>1.4.6</logback.version>
         <junit.version>4.13.1</junit.version>
         <maven.compiler.source>17</maven.compiler.source>
         <maven.compiler.target>17</maven.compiler.target>
         <powsybl.diagram.version>3.2.0-SNAPSHOT</powsybl.diagram.version>
         <powsybl.core.version>5.1.1</powsybl.core.version>
-        <powsybl.open.loadflow.version>1.0.0</powsybl.open.loadflow.version>
+        <powsybl.open.loadflow.version>1.0.1</powsybl.open.loadflow.version>
     </properties>
 
     <build>
@@ -73,6 +74,9 @@
     </dependencyManagement>
 
     <dependencies>
+        <!-- __________________________________________________________________________ -->
+        <!-- POWSYBL                                                                    -->
+        <!-- __________________________________________________________________________ -->
         <dependency>
             <groupId>com.powsybl</groupId>
             <artifactId>powsybl-iidm-impl</artifactId>
@@ -130,7 +134,7 @@
             <version>${powsybl.diagram.version}</version>
         </dependency>
         <!-- __________________________________________________________________________ -->
-        <!-- Externals                                                                  -->
+        <!-- JavaFX                                                                     -->
         <!-- __________________________________________________________________________ -->
         <dependency>
             <groupId>org.openjfx</groupId>
@@ -147,10 +151,23 @@
             <artifactId>javafx-fxml</artifactId>
             <version>${javafx.version}</version>
         </dependency>
+        <!-- __________________________________________________________________________ -->
+        <!-- Logging                                                                    -->
+        <!-- __________________________________________________________________________ -->
         <dependency>
             <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-simple</artifactId>
-            <version>${slf4j.version}</version>
+            <artifactId>slf4j-api</artifactId>
+            <version>${slf4j-api.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-classic</artifactId>
+            <version>${logback.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-core</artifactId>
+            <version>${logback.version}</version>
         </dependency>
     </dependencies>
 </project>
