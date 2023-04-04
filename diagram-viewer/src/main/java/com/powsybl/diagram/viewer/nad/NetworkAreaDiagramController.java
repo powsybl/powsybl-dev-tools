@@ -34,7 +34,7 @@ public class NetworkAreaDiagramController extends AbstractDiagramController {
 
     @FXML
     private void initialize() throws IOException {
-        super.init();
+        super.init("nad");
 
         setUpListenerOnWebViewChanges(new NetworkAreaDiagramJsHandler());
     }

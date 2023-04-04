@@ -52,7 +52,7 @@ public abstract class AbstractDiagramController {
         });
     }
 
-    protected void init() throws IOException {
+    protected void init(String prefix) throws IOException {
         // Add Zoom management
         diagramWebView.addEventFilter(ScrollEvent.SCROLL, (ScrollEvent e) -> {
             if (e.isControlDown()) {
@@ -71,8 +71,8 @@ public abstract class AbstractDiagramController {
         // Avoid the useless right click on the image
         diagramWebView.setContextMenuEnabled(false);
 
-        html = new String(ByteStreams.toByteArray(Objects.requireNonNull(getClass().getResourceAsStream("/sld/svg.html"))));
-        js = new String(ByteStreams.toByteArray(Objects.requireNonNull(getClass().getResourceAsStream("/sld/svg.js"))));
+        html = new String(ByteStreams.toByteArray(Objects.requireNonNull(getClass().getResourceAsStream("/" + prefix + "/svg.html"))));
+        js = new String(ByteStreams.toByteArray(Objects.requireNonNull(getClass().getResourceAsStream("/" + prefix + "/svg.js"))));
     }
 
     public void createDiagram(Container<?> container,

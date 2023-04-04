@@ -41,7 +41,7 @@ public class SingleLineDiagramController extends AbstractDiagramController {
 
     @FXML
     private void initialize() throws IOException {
-        super.init();
+        super.init("sld");
     }
 
     public void createDiagram(SingleLineDiagramJsHandler jsHandler,
