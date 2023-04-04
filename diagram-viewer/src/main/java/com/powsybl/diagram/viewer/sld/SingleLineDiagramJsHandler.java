@@ -7,6 +7,7 @@
  */
 package com.powsybl.diagram.viewer.sld;
 
+import com.powsybl.diagram.viewer.common.JsHandler;
 import com.powsybl.iidm.network.Container;
 import com.powsybl.sld.svg.GraphMetadata;
 import javafx.scene.control.TreeItem;
@@ -17,7 +18,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Objects;
 import java.util.function.Consumer;
 
-public class SingleLineDiagramJsHandler {
+public class SingleLineDiagramJsHandler extends JsHandler {
 
     private final TreeView<Container<?>> substationsTree;
 

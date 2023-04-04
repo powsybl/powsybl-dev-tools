@@ -5,17 +5,14 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  * SPDX-License-Identifier: MPL-2.0
  */
-package com.powsybl.diagram.viewer.nad;
+package com.powsybl.diagram.viewer.common;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/**
- * @author Luma Zamarreño <zamarrenolm at aia.es>
- */
-public class NetworkAreaDiagramJsHandler {
+public class JsHandler {
 
-    private static final Logger LOG = LoggerFactory.getLogger(NetworkAreaDiagramJsHandler.class);
+    private static final Logger LOG = LoggerFactory.getLogger(JsHandler.class);
 
     // To be able to access the Java Logger from JavaScript
     public void log(String message) {

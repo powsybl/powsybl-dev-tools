@@ -8,6 +8,7 @@
 package com.powsybl.diagram.viewer.nad;
 
 import com.powsybl.diagram.viewer.common.AbstractDiagramController;
+import com.powsybl.diagram.viewer.common.JsHandler;
 import com.powsybl.iidm.network.Container;
 import com.powsybl.iidm.network.Network;
 import com.powsybl.iidm.network.Substation;
@@ -36,7 +37,7 @@ public class NetworkAreaDiagramController extends AbstractDiagramController {
     private void initialize() throws IOException {
         super.init("nad");
 
-        setUpListenerOnWebViewChanges(new NetworkAreaDiagramJsHandler());
+        setUpListenerOnWebViewChanges(new JsHandler());
     }
 
     public void createDiagram(Network network, NetworkAreaDiagramModel model, StringProperty modelSvgContent, Container<?> container) {
