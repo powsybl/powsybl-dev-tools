@@ -38,8 +38,7 @@ public class NetworkAreaDiagramModel {
     private final Map<Container<?>, StringProperty> containerToSvgMap = new HashMap<>();
 
     // Layout Parameters
-    private final BooleanProperty textNodesIncluded = new SimpleBooleanProperty();
-    private final DoubleProperty springRepulsionFactor = new SimpleDoubleProperty();
+    private final LayoutParametersBean layoutParameters;
 
     // SVG Parameters
     private final SvgParametersBean svgParameters;
@@ -55,7 +54,7 @@ public class NetworkAreaDiagramModel {
                                    ObjectProperty<String> layout,
 
                                    // Layout parameters
-                                   ReadOnlyObjectProperty<Double> springRepulsionFactor,
+                                   Property<Double> springRepulsionFactor,
                                    BooleanProperty textNodesIncluded,
 
                                    // SVG parameters
@@ -75,8 +74,8 @@ public class NetworkAreaDiagramModel {
         this.styleProvider.bind(style);
         this.layoutFactory.bind(layout);
 
-        this.springRepulsionFactor.bind(springRepulsionFactor);
-        this.textNodesIncluded.bind(textNodesIncluded);
+        // Layout parameters
+        layoutParameters = new LayoutParametersBean(textNodesIncluded, springRepulsionFactor);
 
         // SVG parameters
         svgParameters = new SvgParametersBean(infoAlongEdge,
@@ -100,9 +99,7 @@ public class NetworkAreaDiagramModel {
     }
 
     public LayoutParameters getLayoutParameters() {
-        return new LayoutParameters()
-                .setTextNodesForceLayout(textNodesIncluded.get())
-                .setSpringRepulsionFactorForceLayout(springRepulsionFactor.get());
+        return layoutParameters.getLayoutParameters();
     }
 
     public LabelProvider getLabelProvider(Network network) {
@@ -145,6 +142,6 @@ public class NetworkAreaDiagramModel {
 
     public void addListener(ChangeListener<Object> changeListener) {
         svgParameters.addListener(changeListener);
-        // FIXME : layoutParameters.addListener(changeListener);
+        layoutParameters.addListener(changeListener);
     }
 }

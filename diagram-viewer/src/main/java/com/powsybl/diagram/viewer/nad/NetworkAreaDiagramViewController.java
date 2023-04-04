@@ -85,7 +85,7 @@ public class NetworkAreaDiagramViewController extends AbstractDiagramViewControl
                 styleProviderChoice.valueProperty(),
                 layoutChoice.valueProperty(),
 
-                springRepulsionSpinner.valueProperty(),
+                springRepulsionSpinner.getValueFactory().valueProperty(),
                 layoutIncludeTextNodes.selectedProperty(),
 
                 infoAlongEdge.selectedProperty(),
@@ -116,7 +116,7 @@ public class NetworkAreaDiagramViewController extends AbstractDiagramViewControl
         layoutIncludeTextNodes.selectedProperty().addListener(changeListener);
         springRepulsionSpinner.valueProperty().addListener(changeListener);
 
-        // SvgParameters// FIXME : & layoutParameters
+        // SvgParameters & layoutParameters
         model.addListener(changeListener);
     }
 
