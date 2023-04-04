@@ -17,7 +17,6 @@ import javafx.beans.property.*;
  * @author Florian Dupuy <florian.dupuy at rte-france.com>
  */
 public class Model {
-    private final BooleanProperty showNames = new SimpleBooleanProperty();
     private final ObjectProperty<Network> network = new SimpleObjectProperty<>();
     private Container<?> selectedContainer = null;
 
@@ -26,9 +25,10 @@ public class Model {
     private final SingleLineDiagramModel sldModel;
 
     public Model(BooleanProperty showNames, NetworkAreaDiagramModel nadModel, SingleLineDiagramModel sldModel) {
-        this.showNames.bind(showNames);
         this.nadModel = nadModel;
         this.sldModel = sldModel;
+        this.nadModel.getSvgParametersBean().bind(showNames);
+        this.sldModel.getLayoutParametersBean().bind(showNames);
     }
 
     public void setNetwork(Network network) {
@@ -37,10 +37,6 @@ public class Model {
 
     public Network getNetwork() {
         return network.getValue();
-    }
-
-    public BooleanProperty showNamesProperty() {
-        return showNames;
     }
 
     public ObjectProperty<Network> networkProperty() {

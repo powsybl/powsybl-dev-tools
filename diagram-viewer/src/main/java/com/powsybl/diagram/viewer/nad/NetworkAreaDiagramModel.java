@@ -19,6 +19,7 @@ import com.powsybl.nad.svg.iidm.DefaultLabelProvider;
 import com.powsybl.nad.svg.iidm.NominalVoltageStyleProvider;
 import com.powsybl.nad.svg.iidm.TopologicalStyleProvider;
 import javafx.beans.property.*;
+import javafx.beans.value.ChangeListener;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -41,17 +42,7 @@ public class NetworkAreaDiagramModel {
     private final DoubleProperty springRepulsionFactor = new SimpleDoubleProperty();
 
     // SVG Parameters
-    private final BooleanProperty idDisplayed = new SimpleBooleanProperty();
-    private final BooleanProperty infoAlongEdge = new SimpleBooleanProperty();
-    private final BooleanProperty edgeNameDisplayed = new SimpleBooleanProperty();
-    private final BooleanProperty insertNameDesc = new SimpleBooleanProperty();
-    private final BooleanProperty substationDescriptionDisplayed = new SimpleBooleanProperty();
-    private final BooleanProperty busLegend = new SimpleBooleanProperty();
-    private final BooleanProperty vlDetails = new SimpleBooleanProperty();
-    // Diagram size
-    private final BooleanProperty widthHeightAdded = new SimpleBooleanProperty();
-    private final ObjectProperty<SvgParameters.SizeConstraint> sizeConstraint = new SimpleObjectProperty<>(this, "sizeConstraint", SvgParameters.SizeConstraint.NONE);
-    private final DoubleProperty fixedSize = new SimpleDoubleProperty();
+    private final SvgParametersBean svgParameters;
 
     private final IntegerProperty depth = new SimpleIntegerProperty();
     private final StringProperty labelProvider = new SimpleStringProperty();
@@ -68,7 +59,6 @@ public class NetworkAreaDiagramModel {
                                    BooleanProperty textNodesIncluded,
 
                                    // SVG parameters
-                                   BooleanProperty idDisplayed,
                                    BooleanProperty infoAlongEdge,
                                    BooleanProperty edgeNameDisplayed,
                                    BooleanProperty insertNameDesc,
@@ -77,8 +67,8 @@ public class NetworkAreaDiagramModel {
                                    BooleanProperty vlDetails,
                                    // Diagram size
                                    BooleanProperty widthHeightAdded,
-                                   ReadOnlyObjectProperty<SvgParameters.SizeConstraint> sizeConstraint,
-                                   ReadOnlyObjectProperty<Double> fixedSize
+                                   Property<SvgParameters.SizeConstraint> sizeConstraint,
+                                   Property<Double> fixedSize
     ) {
         this.depth.bind(depth);
         this.labelProvider.bind(label);
@@ -89,17 +79,16 @@ public class NetworkAreaDiagramModel {
         this.textNodesIncluded.bind(textNodesIncluded);
 
         // SVG parameters
-        this.idDisplayed.bind(idDisplayed);
-        this.infoAlongEdge.bind(infoAlongEdge);
-        this.edgeNameDisplayed.bind(edgeNameDisplayed);
-        this.insertNameDesc.bind(insertNameDesc);
-        this.substationDescriptionDisplayed.bind(substationDescriptionDisplayed);
-        this.busLegend.bind(busLegend);
-        this.vlDetails.bind(vlDetails);
-        // Diagram size
-        this.widthHeightAdded.bind(widthHeightAdded);
-        this.sizeConstraint.bind(sizeConstraint);
-        this.fixedSize.bind(fixedSize);
+        svgParameters = new SvgParametersBean(infoAlongEdge,
+                edgeNameDisplayed,
+                insertNameDesc,
+                substationDescriptionDisplayed,
+                busLegend,
+                vlDetails,
+                // Diagram size
+                widthHeightAdded,
+                sizeConstraint,
+                fixedSize);
     }
 
     public int getDepth() {
@@ -107,30 +96,7 @@ public class NetworkAreaDiagramModel {
     }
 
     public SvgParameters getSvgParameters() {
-        SvgParameters svgParameters = new SvgParameters()
-                .setIdDisplayed(idDisplayed.get())
-                .setInsertNameDesc(insertNameDesc.get())
-                .setSubstationDescriptionDisplayed(substationDescriptionDisplayed.get())
-                .setBusLegend(busLegend.get())
-                .setVoltageLevelDetails(vlDetails.get())
-                .setEdgeInfoAlongEdge(infoAlongEdge.get())
-                .setEdgeNameDisplayed(edgeNameDisplayed.get())
-                .setSvgWidthAndHeightAdded(widthHeightAdded.get())
-                .setSizeConstraint(sizeConstraint.get());
-        switch (sizeConstraint.get()) {
-            case FIXED_HEIGHT:
-                svgParameters.setFixedHeight((int) Math.round(fixedSize.get()));
-                break;
-            case FIXED_WIDTH:
-                svgParameters.setFixedWidth((int) Math.round(fixedSize.get()));
-                break;
-            case FIXED_SCALE:
-                svgParameters.setFixedScale(fixedSize.get());
-                break;
-            default:
-                break;
-        }
-        return svgParameters;
+        return svgParameters.getSvgParameters();
     }
 
     public LayoutParameters getLayoutParameters() {
@@ -171,5 +137,14 @@ public class NetworkAreaDiagramModel {
 
     public void clean() {
         svgContent.set("");
+    }
+
+    public SvgParametersBean getSvgParametersBean() {
+        return svgParameters;
+    }
+
+    public void addListener(ChangeListener<Object> changeListener) {
+        svgParameters.addListener(changeListener);
+        // FIXME : layoutParameters.addListener(changeListener);
     }
 }

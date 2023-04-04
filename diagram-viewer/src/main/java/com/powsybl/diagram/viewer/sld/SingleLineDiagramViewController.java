@@ -271,15 +271,15 @@ public class SingleLineDiagramViewController extends AbstractDiagramViewControll
         model.addListener(changeListener);
     }
 
-    public void updateAllDiagrams(Network network, ReadOnlyBooleanProperty showNamesProperty, Container<?> selectedContainer) {
+    public void updateAllDiagrams(Network network, Container<?> selectedContainer) {
         if (selectedContainer != null) {
-            SingleLineDiagramController.updateDiagram(network, showNamesProperty, model, model.getSelectedContainerResult(), selectedContainer);
+            SingleLineDiagramController.updateDiagram(network, model, model.getSelectedContainerResult(), selectedContainer);
         }
-        model.getCheckedContainerStream().forEach(container -> SingleLineDiagramController.updateDiagram(network, showNamesProperty, model, model.getCheckedContainerResult(container), container));
+        model.getCheckedContainerStream().forEach(container -> SingleLineDiagramController.updateDiagram(network, model, model.getCheckedContainerResult(container), container));
     }
 
-    public void createDiagram(SingleLineDiagramJsHandler jsHandler, Network network, ReadOnlyBooleanProperty showNamesProperty, Container<?> container) {
-        selectedDiagramController.createDiagram(jsHandler, network, showNamesProperty, model, model.getSelectedContainerResult(), container);
+    public void createDiagram(SingleLineDiagramJsHandler jsHandler, Network network, Container<?> container) {
+        selectedDiagramController.createDiagram(jsHandler, network, model, model.getSelectedContainerResult(), container);
     }
 
     public void clean() {
@@ -289,7 +289,6 @@ public class SingleLineDiagramViewController extends AbstractDiagramViewControll
 
     public void createCheckedTab(SingleLineDiagramJsHandler jsHandler,
                                  Network network,
-                                 ReadOnlyBooleanProperty showNamesProperty,
                                  CheckBoxTreeItem<Container<?>> containerTreeItem,
                                  String tabName) {
         Container<?> container = containerTreeItem.getValue();
@@ -301,7 +300,6 @@ public class SingleLineDiagramViewController extends AbstractDiagramViewControll
                 SingleLineDiagramController checkedDiagramController = fxmlLoader.getController();
                 checkedDiagramController.createDiagram(jsHandler,
                         network,
-                        showNamesProperty,
                         model,
                         model.getCheckedContainerResult(container),
                         container);

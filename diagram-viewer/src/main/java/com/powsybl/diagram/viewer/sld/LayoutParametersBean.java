@@ -19,6 +19,8 @@ import java.util.*;
  */
 public class LayoutParametersBean {
 
+    private final BooleanProperty useName = new SimpleBooleanProperty();
+
     // Layout Parameters
     private final ObjectProperty<Double> diagramPaddingTopBottom = new SimpleObjectProperty<>();
 
@@ -172,10 +174,14 @@ public class LayoutParametersBean {
         spaceForFeederInfos.setValue(defaultParameters.getSpaceForFeederInfos());
         feederInfosOuterMargin.setValue(defaultParameters.getFeederInfosOuterMargin());
         feederInfosIntraMargin.setValue(defaultParameters.getFeederInfosIntraMargin());
+    }
 
+    public void bind(BooleanProperty useName) {
+        this.useName.bind(useName);
     }
 
     public void addListener(ChangeListener<Object> changeListener) {
+        this.useName.addListener(changeListener);
         this.diagramPaddingTopBottom.addListener(changeListener);
         this.diagramPaddingTopBottom.addListener(changeListener);
         this.diagramPaddingLeftRight.addListener(changeListener);
@@ -208,7 +214,7 @@ public class LayoutParametersBean {
         this.feederInfosIntraMargin.addListener(changeListener);
     }
 
-    public LayoutParameters getLayoutParameters(boolean showNames, String diagramName) {
+    public LayoutParameters getLayoutParameters(String diagramName) {
         return new LayoutParameters()
                 .setDiagrammPadding(diagramPaddingLeftRight.get(),
                         diagramPaddingTopBottom.get(),
@@ -218,7 +224,7 @@ public class LayoutParametersBean {
                         voltagePaddingTopBottom.get(),
                         voltagePaddingLeftRight.get(),
                         voltagePaddingTopBottom.get())
-                .setUseName(showNames)
+                .setUseName(useName.get())
                 .setDiagramName(diagramName)
                 .setVerticalSpaceBus(busbarVerticalSpace.get())
                 .setHorizontalBusPadding(busbarHorizontalSpace.get())

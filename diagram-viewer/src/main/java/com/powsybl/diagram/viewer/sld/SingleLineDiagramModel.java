@@ -271,8 +271,12 @@ public class SingleLineDiagramModel {
         return currentSubstationLayoutFactory.get();
     }
 
-    public LayoutParameters getLayoutParameters(boolean showNames) {
-        return layoutParameters.getLayoutParameters(showNames, currentCgmesDLDiagramName.get());
+    public LayoutParameters getLayoutParameters() {
+        return layoutParameters.getLayoutParameters(currentCgmesDLDiagramName.get());
+    }
+
+    public LayoutParametersBean getLayoutParametersBean() {
+        return layoutParameters;
     }
 
     public ContainerResult getSelectedContainerResult() {

@@ -46,7 +46,6 @@ public class SingleLineDiagramController extends AbstractDiagramController {
 
     public void createDiagram(SingleLineDiagramJsHandler jsHandler,
                               Network network,
-                              ReadOnlyBooleanProperty showNamesProperty,
                               SingleLineDiagramModel model,
                               SingleLineDiagramModel.ContainerResult containerResult,
                               Container<?> container) {
@@ -59,7 +58,7 @@ public class SingleLineDiagramController extends AbstractDiagramController {
                 sw.setOpen(!sw.isOpen());
                 DiagramStyleProvider styleProvider = model.getStyleProvider();
                 styleProvider.reset();
-                updateDiagram(network, showNamesProperty, model, containerResult, container);
+                updateDiagram(network, model, containerResult, container);
             }
         });
         setUpListenerOnWebViewChanges(jsHandler);
@@ -69,11 +68,10 @@ public class SingleLineDiagramController extends AbstractDiagramController {
         metadataContent.textProperty().bind(containerResult.metadataContentProperty());
         graphContent.textProperty().bind(containerResult.jsonContentProperty());
 
-        updateDiagram(network, showNamesProperty, model, containerResult, container);
+        updateDiagram(network, model, containerResult, container);
     }
 
     public static void updateDiagram(Network network,
-                                     ReadOnlyBooleanProperty showNamesProperty,
                                      SingleLineDiagramModel model,
                                      SingleLineDiagramModel.ContainerResult containerResult,
                                      Container<?> container) {
@@ -89,7 +87,7 @@ public class SingleLineDiagramController extends AbstractDiagramController {
                              StringWriter jsonWriter = new StringWriter()) {
 
                             DiagramStyleProvider styleProvider = model.getStyleProvider();
-                            LayoutParameters diagramLayoutParameters = model.getLayoutParameters(showNamesProperty.get());
+                            LayoutParameters diagramLayoutParameters = model.getLayoutParameters();
 
                             DiagramLabelProvider initProvider = new DefaultDiagramLabelProvider(network,
                                     model.getComponentLibrary(),

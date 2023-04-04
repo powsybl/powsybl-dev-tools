@@ -107,14 +107,12 @@ public class MainViewController {
             initSubstationsTree(newNetwork);
         });
 
-        showNames.selectedProperty().addListener((observable, oldValue, newValue) -> updateSldDiagrams());
-
         vlTree.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
             if (newValue != null) {
                 Container<?> c = newValue.getValue();
                 model.setSelectedContainer(c);
                 nadViewController.createDiagram(model.getNetwork(), c);
-                sldViewController.createDiagram(sldJsHandler, model.getNetwork(), model.showNamesProperty(), c);
+                sldViewController.createDiagram(sldJsHandler, model.getNetwork(), c);
             } else {
                 clean();
             }
@@ -146,7 +144,7 @@ public class MainViewController {
     }
 
     private void updateSldDiagrams() {
-        sldViewController.updateAllDiagrams(model.getNetwork(), model.showNamesProperty(), model.getSelectedContainer());
+        sldViewController.updateAllDiagrams(model.getNetwork(), model.getSelectedContainer());
     }
 
     private void updateNadDiagrams() {
@@ -335,7 +333,7 @@ public class MainViewController {
         Container<?> container = containerTreeItem.getValue();
         String tabName = getIdentifiableStringSupplier().apply(container);
         nadViewController.createCheckedTab(model.getNetwork(), containerTreeItem, tabName);
-        sldViewController.createCheckedTab(sldJsHandler, model.getNetwork(), model.showNamesProperty(), containerTreeItem, tabName);
+        sldViewController.createCheckedTab(sldJsHandler, model.getNetwork(), containerTreeItem, tabName);
     }
 
     private void saveSelectedDiagrams() {

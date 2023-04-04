@@ -49,8 +49,6 @@ public class NetworkAreaDiagramViewController extends AbstractDiagramViewControl
 
     // SVG parameters
     @FXML
-    public CheckBox idDisplayed;
-    @FXML
     public CheckBox infoAlongEdge;
     @FXML
     public CheckBox edgeNameDisplayed;
@@ -90,7 +88,6 @@ public class NetworkAreaDiagramViewController extends AbstractDiagramViewControl
                 springRepulsionSpinner.valueProperty(),
                 layoutIncludeTextNodes.selectedProperty(),
 
-                idDisplayed.selectedProperty(),
                 infoAlongEdge.selectedProperty(),
                 edgeNameDisplayed.selectedProperty(),
                 insertNameDesc.selectedProperty(),
@@ -100,7 +97,7 @@ public class NetworkAreaDiagramViewController extends AbstractDiagramViewControl
                 // Diagram size
                 widthHeightAdded.selectedProperty(),
                 sizeConstraintChoice.valueProperty(),
-                fixedSizeSpinner.valueProperty()
+                fixedSizeSpinner.getValueFactory().valueProperty()
         );
         // Diagram size
         this.sizeConstraintChoice.disableProperty().bind(widthHeightAdded.selectedProperty().not());
@@ -119,17 +116,8 @@ public class NetworkAreaDiagramViewController extends AbstractDiagramViewControl
         layoutIncludeTextNodes.selectedProperty().addListener(changeListener);
         springRepulsionSpinner.valueProperty().addListener(changeListener);
 
-        idDisplayed.selectedProperty().addListener(changeListener);
-        infoAlongEdge.selectedProperty().addListener(changeListener);
-        edgeNameDisplayed.selectedProperty().addListener(changeListener);
-        insertNameDesc.selectedProperty().addListener(changeListener);
-        substationDescriptionDisplayed.selectedProperty().addListener(changeListener);
-        busLegend.selectedProperty().addListener(changeListener);
-        vlDetails.selectedProperty().addListener(changeListener);
-        // Diagram size
-        widthHeightAdded.selectedProperty().addListener(changeListener);
-        sizeConstraintChoice.valueProperty().addListener(changeListener);
-        fixedSizeSpinner.valueProperty().addListener(changeListener);
+        // SvgParameters// FIXME : & layoutParameters
+        model.addListener(changeListener);
     }
 
     public void updateAllDiagrams(Network network, Container<?> selectedContainer) {
