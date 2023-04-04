@@ -16,8 +16,6 @@ import javafx.scene.control.TextArea;
 import javafx.scene.input.ScrollEvent;
 import javafx.scene.web.WebView;
 import netscape.javascript.JSObject;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.Objects;
@@ -29,8 +27,6 @@ import java.util.regex.Pattern;
  * @author Thomas Adam <tadam at silicom.fr>
  */
 public abstract class AbstractDiagramController {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(AbstractDiagramController.class);
 
     @FXML
     public WebView diagramWebView;

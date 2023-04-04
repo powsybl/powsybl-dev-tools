@@ -3,9 +3,12 @@
  * This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ * SPDX-License-Identifier: MPL-2.0
  */
 package com.powsybl.diagram.viewer.nad;
 
+import com.powsybl.diagram.viewer.common.AbstractDiagramController;
+import com.powsybl.diagram.viewer.common.AbstractDiagramViewController;
 import com.powsybl.iidm.network.Container;
 import com.powsybl.iidm.network.Network;
 import com.powsybl.nad.svg.SvgParameters;
@@ -15,7 +18,6 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.control.*;
-import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.BorderPane;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,7 +28,7 @@ import java.util.*;
 /**
  * @author Florian Dupuy <florian.dupuy at rte-france.com>
  */
-public class NetworkAreaDiagramViewController {
+public class NetworkAreaDiagramViewController extends AbstractDiagramViewController {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(NetworkAreaDiagramViewController.class);
 
@@ -69,16 +71,13 @@ public class NetworkAreaDiagramViewController {
     public Spinner<Double> fixedSizeSpinner;
 
     @FXML
-    public TabPane checkedTab;
-    @FXML
     public BorderPane selectedDiagram;
-    @FXML
-    public TabPane checkedOrSelected;
 
     @FXML
-    private NetworkAreaDiagramController selectedDiagramController;
+    public NetworkAreaDiagramController selectedDiagramController;
 
     private final Map<Tab, NetworkAreaDiagramController> checkedDiagramControllers = new HashMap<>();
+
     private NetworkAreaDiagramModel model;
 
     @FXML
@@ -189,27 +188,17 @@ public class NetworkAreaDiagramViewController {
         };
     }
 
-    @FXML
-    public void onClickFitToContent(MouseEvent mouseEvent) {
-        getActiveTabController().onClickFitToContent();
-    }
-
-    @FXML
-    public void onClickResetZoom(MouseEvent mouseEvent) {
-        getActiveTabController().onClickResetZoom();
-    }
-
-    private NetworkAreaDiagramController getActiveTabController() {
-        Tab tab = checkedOrSelected.getSelectionModel().getSelectedItem();
-        if ("Selected".equals(tab.getText())) {
-            return selectedDiagramController;
-        } else {
-            Tab tabInChecked = checkedTab.getSelectionModel().getSelectedItem();
-            return checkedDiagramControllers.get(tabInChecked);
-        }
-    }
-
     public NetworkAreaDiagramModel getModel() {
         return model;
+    }
+
+    @Override
+    protected AbstractDiagramController getSelectedDiagramController() {
+        return selectedDiagramController;
+    }
+
+    @Override
+    protected AbstractDiagramController getCheckedDiagramController(Tab tabInChecked) {
+        return checkedDiagramControllers.get(tabInChecked);
     }
 }

@@ -6,6 +6,8 @@
  */
 package com.powsybl.diagram.viewer.sld;
 
+import com.powsybl.diagram.viewer.common.AbstractDiagramController;
+import com.powsybl.diagram.viewer.common.AbstractDiagramViewController;
 import com.powsybl.iidm.network.Container;
 import com.powsybl.iidm.network.Network;
 import com.powsybl.sld.cgmes.dl.iidm.extensions.NetworkDiagramData;
@@ -25,7 +27,6 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.control.*;
-import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.BorderPane;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,7 +37,7 @@ import java.util.*;
 /**
  * @author Thomas Adam <tadam at silicom.fr>
  */
-public class SingleLineDiagramViewController {
+public class SingleLineDiagramViewController extends AbstractDiagramViewController {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SingleLineDiagramViewController.class);
 
@@ -159,11 +160,7 @@ public class SingleLineDiagramViewController {
     public Spinner<Double> feederInfosIntraMarginSpinner;
 
     @FXML
-    public TabPane checkedTab;
-    @FXML
     public BorderPane selectedDiagram;
-    @FXML
-    public TabPane checkedOrSelected;
 
     @FXML
     public SingleLineDiagramController selectedDiagramController;
@@ -339,28 +336,6 @@ public class SingleLineDiagramViewController {
         };
     }
 
-    @FXML
-    public void onClickFitToContent(MouseEvent mouseEvent) {
-        getActiveTabController().onClickFitToContent();
-        mouseEvent.consume();
-    }
-
-    @FXML
-    public void onClickResetZoom(MouseEvent mouseEvent) {
-        getActiveTabController().onClickResetZoom();
-        mouseEvent.consume();
-    }
-
-    private SingleLineDiagramController getActiveTabController() {
-        Tab tab = checkedOrSelected.getSelectionModel().getSelectedItem();
-        if ("Selected".equals(tab.getText())) {
-            return selectedDiagramController;
-        } else {
-            Tab tabInChecked = checkedTab.getSelectionModel().getSelectedItem();
-            return checkedDiagramControllers.get(tabInChecked);
-        }
-    }
-
     public SingleLineDiagramModel getModel() {
         return model;
     }
@@ -381,5 +356,15 @@ public class SingleLineDiagramViewController {
         voltageLevelLayoutComboBox.getSelectionModel().selectLast();
         // CGMES-DL Diagrams first selection
         cgmesDLDiagramsComboBox.getSelectionModel().selectFirst();
+    }
+
+    @Override
+    protected AbstractDiagramController getSelectedDiagramController() {
+        return selectedDiagramController;
+    }
+
+    @Override
+    protected AbstractDiagramController getCheckedDiagramController(Tab tabInChecked) {
+        return checkedDiagramControllers.get(tabInChecked);
     }
 }

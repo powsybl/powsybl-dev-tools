@@ -3,6 +3,7 @@
  * This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ * SPDX-License-Identifier: MPL-2.0
  */
 package com.powsybl.diagram.viewer.sld;
 
@@ -23,21 +24,21 @@ public class LayoutParametersBean {
 
     private final ObjectProperty<Double> diagramPaddingLeftRight = new SimpleObjectProperty<>();
 
-    private final ObjectProperty<Double>voltagePaddingTopBottom = new SimpleObjectProperty<>();
+    private final ObjectProperty<Double> voltagePaddingTopBottom = new SimpleObjectProperty<>();
 
-    private final ObjectProperty<Double>voltagePaddingLeftRight = new SimpleObjectProperty<>();
+    private final ObjectProperty<Double> voltagePaddingLeftRight = new SimpleObjectProperty<>();
 
-    private final ObjectProperty<Double>busbarVerticalSpace = new SimpleObjectProperty<>();
+    private final ObjectProperty<Double> busbarVerticalSpace = new SimpleObjectProperty<>();
 
-    private final ObjectProperty<Double>busbarHorizontalSpace = new SimpleObjectProperty<>();
+    private final ObjectProperty<Double> busbarHorizontalSpace = new SimpleObjectProperty<>();
 
-    private final ObjectProperty<Double>cellWidth = new SimpleObjectProperty<>();
+    private final ObjectProperty<Double> cellWidth = new SimpleObjectProperty<>();
 
-    private final ObjectProperty<Double>externCellHeight = new SimpleObjectProperty<>();
+    private final ObjectProperty<Double> externCellHeight = new SimpleObjectProperty<>();
 
-    private final ObjectProperty<Double>internCellHeight = new SimpleObjectProperty<>();
+    private final ObjectProperty<Double> internCellHeight = new SimpleObjectProperty<>();
 
-    private final ObjectProperty<Double>stackHeight = new SimpleObjectProperty<>();
+    private final ObjectProperty<Double> stackHeight = new SimpleObjectProperty<>();
 
     private final BooleanProperty showGrid = new SimpleBooleanProperty();
 
@@ -47,7 +48,7 @@ public class LayoutParametersBean {
 
     private final BooleanProperty disconnectorsOnBus = new SimpleBooleanProperty();
 
-    private final ObjectProperty<Double>scaleFactor = new SimpleObjectProperty<>();
+    private final ObjectProperty<Double> scaleFactor = new SimpleObjectProperty<>();
 
     private final BooleanProperty avoidSVGComponentsDuplication = new SimpleBooleanProperty();
 
