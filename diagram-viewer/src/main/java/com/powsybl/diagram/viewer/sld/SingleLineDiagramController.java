@@ -16,10 +16,8 @@ import com.powsybl.sld.svg.DiagramStyleProvider;
 import javafx.beans.property.ReadOnlyBooleanProperty;
 import javafx.concurrent.Service;
 import javafx.concurrent.Task;
-import javafx.concurrent.Worker;
 import javafx.fxml.FXML;
 import javafx.scene.control.TextArea;
-import netscape.javascript.JSObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -43,20 +41,6 @@ public class SingleLineDiagramController extends AbstractDiagramController {
     @FXML
     private void initialize() throws IOException {
         super.init();
-    }
-
-    protected void setUpListenerOnWebViewChanges(java.lang.Object jsHandler) {
-        // Set up the listener on WebView changes
-        // A listener has to be added as loading takes time - execute once the content is successfully loaded
-        diagramWebView.getEngine().getLoadWorker().stateProperty().addListener((observable, oldValue, newValue) -> {
-            if (Worker.State.SUCCEEDED == newValue) {
-                JSObject window = (JSObject) diagramWebView.getEngine().executeScript("window");
-                window.setMember("jsHandler", jsHandler);
-                // For easier debugging, redirect the console.log to the jsHandler
-                diagramWebView.getEngine().executeScript("console.log = function(message) " +
-                        "{ jsHandler.log(message); };");
-            }
-        });
     }
 
     public void createDiagram(SingleLineDiagramJsHandler jsHandler,

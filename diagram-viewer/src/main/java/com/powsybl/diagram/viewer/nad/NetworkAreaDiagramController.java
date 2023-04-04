@@ -15,9 +15,7 @@ import com.powsybl.nad.NetworkAreaDiagram;
 import javafx.beans.property.StringProperty;
 import javafx.concurrent.Service;
 import javafx.concurrent.Task;
-import javafx.concurrent.Worker;
 import javafx.fxml.FXML;
-import netscape.javascript.JSObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -38,20 +36,6 @@ public class NetworkAreaDiagramController extends AbstractDiagramController {
         super.init();
 
         setUpListenerOnWebViewChanges(new NetworkAreaDiagramJsHandler());
-    }
-
-    protected void setUpListenerOnWebViewChanges(java.lang.Object jsHandler) {
-        // Set up the listener on WebView changes
-        // A listener has to be added as loading takes time - execute once the content is successfully loaded
-        diagramWebView.getEngine().getLoadWorker().stateProperty().addListener((observable, oldValue, newValue) -> {
-            if (Worker.State.SUCCEEDED == newValue) {
-                JSObject window = (JSObject) diagramWebView.getEngine().executeScript("window");
-                window.setMember("jsHandler", jsHandler);
-                // For easier debugging, redirect the console.log to the jsHandler
-                diagramWebView.getEngine().executeScript("console.log = function(message) " +
-                        "{ jsHandler.log(message); };");
-            }
-        });
     }
 
     public void createDiagram(Network network, NetworkAreaDiagramModel model, StringProperty modelSvgContent, Container<?> container) {
