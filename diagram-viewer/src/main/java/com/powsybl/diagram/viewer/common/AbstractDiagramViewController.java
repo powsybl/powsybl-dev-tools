@@ -7,10 +7,21 @@
  */
 package com.powsybl.diagram.viewer.common;
 
+import com.powsybl.iidm.network.Container;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXML;
+import javafx.scene.Parent;
+import javafx.scene.control.CheckBoxTreeItem;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
+import javafx.scene.control.Tooltip;
 import javafx.scene.input.MouseEvent;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 
 public abstract class AbstractDiagramViewController {
 
@@ -20,9 +31,55 @@ public abstract class AbstractDiagramViewController {
     @FXML
     public TabPane checkedOrSelected;
 
+    protected final Map<Tab, AbstractDiagramController> checkedDiagramControllers = new HashMap<>();
+
     protected abstract AbstractDiagramController getSelectedDiagramController();
 
     protected abstract AbstractDiagramController getCheckedDiagramController(Tab tabInChecked);
+
+    protected void removeCheckedDiagram(Tab tab, Container<?> container) {
+        Objects.requireNonNull(container);
+        checkedTab.getTabs().remove(tab);
+    }
+
+    protected ChangeListener<Boolean> createChangeListener(Tab tab, CheckBoxTreeItem<Container<?>> containerTreeItem) {
+        return new ChangeListener<>() {
+            @Override
+            public void changed(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) {
+                if (Boolean.FALSE.equals(newValue)) {
+                    containerTreeItem.selectedProperty().removeListener(this);
+                    removeCheckedDiagram(tab, containerTreeItem.getValue());
+                }
+            }
+        };
+    }
+
+    protected void createCheckedTab(CheckBoxTreeItem<Container<?>> containerTreeItem,
+                                    String tabName,
+                                    Parent diagram,
+                                    AbstractDiagramController checkedDiagramController) {
+        Container<?> container = containerTreeItem.getValue();
+        List<Tab> tabList = checkedTab.getTabs();
+        if (tabList.stream().map(Tab::getText).noneMatch(tabName::equals)) {
+            Tab newCheckedTab = new Tab(tabName, diagram);
+            checkedDiagramControllers.put(newCheckedTab, checkedDiagramController);
+            newCheckedTab.setId(container.getId());
+            newCheckedTab.setOnClosed(event -> {
+                containerTreeItem.setSelected(false);
+                checkedDiagramControllers.remove(newCheckedTab);
+            });
+            containerTreeItem.selectedProperty().addListener(createChangeListener(newCheckedTab, containerTreeItem));
+            newCheckedTab.setTooltip(new Tooltip(container.getNameOrId()));
+            tabList.add(newCheckedTab);
+            checkedOrSelected.getSelectionModel().selectLast();
+            checkedTab.getSelectionModel().selectLast();
+        }
+    }
+
+    public void clean() {
+        checkedTab.getTabs().clear();
+        getSelectedDiagramController().clean();
+    }
 
     private AbstractDiagramController getActiveTabController() {
         Tab tab = checkedOrSelected.getSelectionModel().getSelectedItem();

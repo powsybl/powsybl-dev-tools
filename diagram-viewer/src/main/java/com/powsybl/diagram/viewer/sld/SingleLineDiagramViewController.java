@@ -22,7 +22,6 @@ import com.powsybl.sld.svg.DiagramStyleProvider;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanBinding;
 import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -161,8 +160,6 @@ public class SingleLineDiagramViewController extends AbstractDiagramViewControll
     @FXML
     public SingleLineDiagramController selectedDiagramController;
 
-    private final Map<Tab, SingleLineDiagramController> checkedDiagramControllers = new HashMap<>();
-
     private SingleLineDiagramModel model;
 
     @FXML
@@ -277,57 +274,31 @@ public class SingleLineDiagramViewController extends AbstractDiagramViewControll
         selectedDiagramController.createDiagram(jsHandler, network, model, model.getSelectedContainerResult(), container);
     }
 
-    public void clean() {
-        checkedTab.getTabs().clear();
-        selectedDiagramController.clean();
-    }
-
     public void createCheckedTab(SingleLineDiagramJsHandler jsHandler,
                                  Network network,
                                  CheckBoxTreeItem<Container<?>> containerTreeItem,
                                  String tabName) {
-        Container<?> container = containerTreeItem.getValue();
-        List<Tab> tabList = checkedTab.getTabs();
-        if (tabList.stream().map(Tab::getText).noneMatch(tabName::equals)) {
-            try {
-                FXMLLoader fxmlLoader = new FXMLLoader();
-                Parent diagram = fxmlLoader.load(Objects.requireNonNull(getClass().getResourceAsStream("/sld/SingleLineDiagramView.fxml")));
-                SingleLineDiagramController checkedDiagramController = fxmlLoader.getController();
-                checkedDiagramController.createDiagram(jsHandler,
-                        network,
-                        model,
-                        model.getCheckedContainerResult(container),
-                        container);
-                Tab newCheckedTab = new Tab(tabName, diagram);
-                checkedDiagramControllers.put(newCheckedTab, checkedDiagramController);
-                newCheckedTab.setId(container.getId());
-                newCheckedTab.setOnClosed(event -> {
-                    containerTreeItem.setSelected(false);
-                    checkedDiagramControllers.remove(newCheckedTab);
-                });
-                containerTreeItem.selectedProperty().addListener(getChangeListener(newCheckedTab, containerTreeItem));
-                newCheckedTab.setTooltip(new Tooltip(container.getNameOrId()));
-                tabList.add(newCheckedTab);
-                checkedOrSelected.getSelectionModel().selectLast();
-                checkedTab.getSelectionModel().selectLast();
-            } catch (IOException e) {
-                LOGGER.error(e.toString(), e);
-            }
+        try {
+            Container<?> container = containerTreeItem.getValue();
+            FXMLLoader fxmlLoader = new FXMLLoader();
+            Parent diagram = fxmlLoader.load(Objects.requireNonNull(getClass().getResourceAsStream("/sld/singleLineDiagramView.fxml")));
+            SingleLineDiagramController checkedDiagramController = fxmlLoader.getController();
+            checkedDiagramController.createDiagram(jsHandler,
+                    network,
+                    model,
+                    model.getCheckedContainerResult(container),
+                    container);
+            super.createCheckedTab(containerTreeItem, tabName, diagram, checkedDiagramController);
+        } catch (IOException e) {
+            LOGGER.error(e.toString(), e);
         }
     }
 
-    private ChangeListener<Boolean> getChangeListener(Tab tab, CheckBoxTreeItem<Container<?>> containerTreeItem) {
-        return new ChangeListener<>() {
-            @Override
-            public void changed(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) {
-                if (Boolean.FALSE.equals(newValue)) {
-                    checkedTab.getTabs().remove(tab);
-                    containerTreeItem.selectedProperty().removeListener(this);
-                    model.removeCheckedContainerResult(containerTreeItem.getValue());
-                    checkedDiagramControllers.remove(tab);
-                }
-            }
-        };
+    @Override
+    protected void removeCheckedDiagram(Tab tab, Container<?> container) {
+        super.removeCheckedDiagram(tab, container);
+        checkedDiagramControllers.remove(tab);
+        model.removeCheckedContainerResult(container);
     }
 
     public SingleLineDiagramModel getModel() {
