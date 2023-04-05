@@ -7,8 +7,7 @@
  */
 package com.powsybl.diagram.viewer.nad;
 
-import com.powsybl.diagram.viewer.common.ContainerResult;
-import com.powsybl.iidm.network.Container;
+import com.powsybl.diagram.viewer.common.DiagramModel;
 import com.powsybl.iidm.network.Network;
 import com.powsybl.nad.layout.BasicForceLayoutFactory;
 import com.powsybl.nad.layout.LayoutFactory;
@@ -22,21 +21,13 @@ import com.powsybl.nad.svg.iidm.TopologicalStyleProvider;
 import javafx.beans.property.*;
 import javafx.beans.value.ChangeListener;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.stream.Stream;
-
 /**
  * @author Florian Dupuy <florian.dupuy at rte-france.com>
  */
-public class NetworkAreaDiagramModel {
+public class NetworkAreaDiagramModel extends DiagramModel {
     private static final String DEFAULT_LABEL_PROVIDER = "Default";
     private static final String BASIC_LAYOUT = "Basic";
     private static final String TOPOLOGICAL_STYLE_PROVIDER = "Topological";
-
-    private final ContainerResult selectedContainerResult = new ContainerResult();
-
-    private final Map<Container<?>, ContainerResult> containerToResultMap = new HashMap<>();
 
     // Layout Parameters
     private final LayoutParametersBean layoutParameters;
@@ -115,26 +106,6 @@ public class NetworkAreaDiagramModel {
 
     public LayoutFactory getLayoutFactory() {
         return BASIC_LAYOUT.equals(layoutFactory.getValue()) ? new BasicForceLayoutFactory() : null;
-    }
-
-    public ContainerResult getSelectedContainerResult() {
-        return selectedContainerResult;
-    }
-
-    public Stream<Container<?>> getCheckedContainerStream() {
-        return containerToResultMap.keySet().stream();
-    }
-
-    public ContainerResult getCheckedContainerResult(Container<?> container) {
-        return containerToResultMap.computeIfAbsent(container, c -> new ContainerResult());
-    }
-
-    public void removeCheckedContainerResult(Container<?> container) {
-        containerToResultMap.remove(container);
-    }
-
-    public void clean() {
-        selectedContainerResult.clean();
     }
 
     public SvgParametersBean getSvgParametersBean() {

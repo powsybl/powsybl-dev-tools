@@ -7,8 +7,7 @@
  */
 package com.powsybl.diagram.viewer.sld;
 
-import com.powsybl.diagram.viewer.common.ContainerResult;
-import com.powsybl.iidm.network.Container;
+import com.powsybl.diagram.viewer.common.DiagramModel;
 import com.powsybl.iidm.network.Network;
 import com.powsybl.sld.cgmes.dl.iidm.extensions.NetworkDiagramData;
 import com.powsybl.sld.cgmes.layout.CgmesSubstationLayoutFactory;
@@ -29,12 +28,11 @@ import javafx.collections.ObservableList;
 import javafx.util.StringConverter;
 
 import java.util.*;
-import java.util.stream.Stream;
 
 /**
  * @author Thomas Adam <tadam at silicom.fr>
  */
-public class SingleLineDiagramModel {
+public class SingleLineDiagramModel extends DiagramModel {
 
     private static final String UNKNOWN_ITEM = "???";
     private static final String BASIC_STYLE = "Basic";
@@ -49,10 +47,6 @@ public class SingleLineDiagramModel {
     private static final String AUTO_WITHOUT_EXTENSIONS_CLUSTERING_VOLTAGELEVEL_LAYOUT = "Auto without extensions Clustering";
     private static final String RANDOM_VOLTAGELEVEL_LAYOUT = "Random";
     private static final String CGMES_VOLTAGELEVEL_LAYOUT = "CGMES";
-
-    private final ContainerResult selectedContainerResult = new ContainerResult();
-
-    private final Map<Container<?>, ContainerResult> containerToResultMap = new HashMap<>();
 
     // Layout Parameters
     private final LayoutParametersBean layoutParameters;
@@ -246,26 +240,6 @@ public class SingleLineDiagramModel {
 
     public LayoutParametersBean getLayoutParametersBean() {
         return layoutParameters;
-    }
-
-    public ContainerResult getSelectedContainerResult() {
-        return selectedContainerResult;
-    }
-
-    public Stream<Container<?>> getCheckedContainerStream() {
-        return containerToResultMap.keySet().stream();
-    }
-
-    public ContainerResult getCheckedContainerResult(Container<?> container) {
-        return containerToResultMap.computeIfAbsent(container, c -> new ContainerResult());
-    }
-
-    public void removeCheckedContainerResult(Container<?> container) {
-        containerToResultMap.remove(container);
-    }
-
-    public void clean() {
-        selectedContainerResult.clean();
     }
 
     public ObservableList<ComponentLibrary> getComponentLibraries() {
