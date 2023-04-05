@@ -7,6 +7,7 @@
  */
 package com.powsybl.diagram.viewer.sld;
 
+import com.powsybl.diagram.viewer.common.ContainerResult;
 import com.powsybl.iidm.network.Container;
 import com.powsybl.iidm.network.Network;
 import com.powsybl.sld.cgmes.dl.iidm.extensions.NetworkDiagramData;
@@ -34,38 +35,6 @@ import java.util.stream.Stream;
  * @author Thomas Adam <tadam at silicom.fr>
  */
 public class SingleLineDiagramModel {
-
-    public static class ContainerResult {
-        private final StringProperty svgContent = new SimpleStringProperty();
-
-        private final StringProperty metadataContent = new SimpleStringProperty();
-
-        private final StringProperty jsonContent = new SimpleStringProperty();
-
-        public void clean() {
-            svgContent.set("");
-            metadataContent.set("");
-            jsonContent.set("");
-        }
-
-        public StringProperty svgContentProperty() {
-            return svgContent;
-        }
-
-        public StringProperty metadataContentProperty() {
-            return metadataContent;
-        }
-
-        public StringProperty jsonContentProperty() {
-            return jsonContent;
-        }
-
-        public void setValue(ContainerResult value) {
-            svgContent.setValue(value.svgContent.getValue());
-            metadataContent.setValue(value.metadataContent.getValue());
-            jsonContent.setValue(value.jsonContent.getValue());
-        }
-    }
 
     private static final String UNKNOWN_ITEM = "???";
     private static final String BASIC_STYLE = "Basic";

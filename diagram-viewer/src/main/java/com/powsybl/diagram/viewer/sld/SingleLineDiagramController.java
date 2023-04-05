@@ -8,6 +8,7 @@
 package com.powsybl.diagram.viewer.sld;
 
 import com.powsybl.diagram.viewer.common.AbstractDiagramController;
+import com.powsybl.diagram.viewer.common.ContainerResult;
 import com.powsybl.iidm.network.*;
 import com.powsybl.sld.SingleLineDiagram;
 import com.powsybl.sld.layout.LayoutParameters;
@@ -46,7 +47,7 @@ public class SingleLineDiagramController extends AbstractDiagramController {
     public void createDiagram(SingleLineDiagramJsHandler jsHandler,
                               Network network,
                               SingleLineDiagramModel model,
-                              SingleLineDiagramModel.ContainerResult containerResult,
+                              ContainerResult containerResult,
                               Container<?> container) {
         super.createDiagram(container, containerResult.svgContentProperty());
 
@@ -72,15 +73,15 @@ public class SingleLineDiagramController extends AbstractDiagramController {
 
     public static void updateDiagram(Network network,
                                      SingleLineDiagramModel model,
-                                     SingleLineDiagramModel.ContainerResult containerResult,
+                                     ContainerResult containerResult,
                                      Container<?> container) {
-        Service<SingleLineDiagramModel.ContainerResult> sldService = new Service<>() {
+        Service<ContainerResult> sldService = new Service<>() {
             @Override
-            protected Task<SingleLineDiagramModel.ContainerResult> createTask() {
+            protected Task<ContainerResult> createTask() {
                 return new Task<>() {
                     @Override
-                    protected SingleLineDiagramModel.ContainerResult call() {
-                        SingleLineDiagramModel.ContainerResult result = new SingleLineDiagramModel.ContainerResult();
+                    protected ContainerResult call() {
+                        ContainerResult result = new ContainerResult();
                         try (StringWriter svgWriter = new StringWriter();
                              StringWriter metadataWriter = new StringWriter();
                              StringWriter jsonWriter = new StringWriter()) {
@@ -117,7 +118,7 @@ public class SingleLineDiagramController extends AbstractDiagramController {
             }
         };
 
-        sldService.setOnSucceeded(event -> containerResult.setValue((SingleLineDiagramModel.ContainerResult) event.getSource().getValue()));
+        sldService.setOnSucceeded(event -> containerResult.setValue((ContainerResult) event.getSource().getValue()));
         sldService.setOnFailed(event -> {
             Throwable exception = event.getSource().getException();
             LOGGER.error(exception.toString(), exception);
