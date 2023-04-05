@@ -264,6 +264,10 @@ public class SingleLineDiagramModel {
         containerToResultMap.remove(container);
     }
 
+    public void clean() {
+        selectedContainerResult.clean();
+    }
+
     public ObservableList<ComponentLibrary> getComponentLibraries() {
         return componentLibraries;
     }
@@ -341,9 +345,5 @@ public class SingleLineDiagramModel {
                 return nameToVoltageLevelLayoutFactoryMap.get(item);
             }
         };
-    }
-
-    public void clean() {
-        selectedContainerResult.clean();
     }
 }

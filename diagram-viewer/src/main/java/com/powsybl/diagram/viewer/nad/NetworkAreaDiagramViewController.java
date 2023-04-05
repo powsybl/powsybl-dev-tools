@@ -122,13 +122,13 @@ public class NetworkAreaDiagramViewController extends AbstractDiagramViewControl
 
     public void updateAllDiagrams(Network network, Container<?> selectedContainer) {
         if (selectedContainer != null) {
-            NetworkAreaDiagramController.updateDiagram(network, model, model.getSvgContent(), selectedContainer);
+            NetworkAreaDiagramController.updateDiagram(network, model, model.getSelectedContainerResult(), selectedContainer);
         }
-        model.getCheckedContainerStream().forEach(container -> NetworkAreaDiagramController.updateDiagram(network, model, model.getCheckedSvgContent(container), container));
+        model.getCheckedContainerStream().forEach(container -> NetworkAreaDiagramController.updateDiagram(network, model, model.getCheckedContainerResult(container), container));
     }
 
     public void createDiagram(Network network, Container<?> container) {
-        selectedDiagramController.createDiagram(network, model, model.getSvgContent(), container);
+        selectedDiagramController.createDiagram(network, model, model.getSelectedContainerResult(), container);
     }
 
     public void clean() {
@@ -143,7 +143,7 @@ public class NetworkAreaDiagramViewController extends AbstractDiagramViewControl
                 FXMLLoader fxmlLoader = new FXMLLoader();
                 Parent diagram = fxmlLoader.load(Objects.requireNonNull(getClass().getResourceAsStream("/nad/networkAreaDiagramView.fxml")));
                 NetworkAreaDiagramController checkedDiagramController = fxmlLoader.getController();
-                checkedDiagramController.createDiagram(network, model, model.getCheckedSvgContent(container), container);
+                checkedDiagramController.createDiagram(network, model, model.getCheckedContainerResult(container), container);
                 Tab newCheckedTab = new Tab(tabName, diagram);
                 checkedDiagramControllers.put(newCheckedTab, checkedDiagramController);
                 newCheckedTab.setId(container.getId());
@@ -169,7 +169,7 @@ public class NetworkAreaDiagramViewController extends AbstractDiagramViewControl
                 if (Boolean.FALSE.equals(newValue)) {
                     checkedTab.getTabs().remove(tab);
                     containerTreeItem.selectedProperty().removeListener(this);
-                    model.removeSvgContent(containerTreeItem.getValue());
+                    model.removeCheckedContainerResult(containerTreeItem.getValue());
                     checkedDiagramControllers.remove(tab);
                 }
             }

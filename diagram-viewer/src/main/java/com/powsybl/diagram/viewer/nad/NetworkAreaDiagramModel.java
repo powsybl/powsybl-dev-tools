@@ -7,6 +7,7 @@
  */
 package com.powsybl.diagram.viewer.nad;
 
+import com.powsybl.diagram.viewer.common.ContainerResult;
 import com.powsybl.iidm.network.Container;
 import com.powsybl.iidm.network.Network;
 import com.powsybl.nad.layout.BasicForceLayoutFactory;
@@ -33,9 +34,9 @@ public class NetworkAreaDiagramModel {
     private static final String BASIC_LAYOUT = "Basic";
     private static final String TOPOLOGICAL_STYLE_PROVIDER = "Topological";
 
-    private final StringProperty svgContent = new SimpleStringProperty();
+    private final ContainerResult selectedContainerResult = new ContainerResult();
 
-    private final Map<Container<?>, StringProperty> containerToSvgMap = new HashMap<>();
+    private final Map<Container<?>, ContainerResult> containerToResultMap = new HashMap<>();
 
     // Layout Parameters
     private final LayoutParametersBean layoutParameters;
@@ -116,24 +117,24 @@ public class NetworkAreaDiagramModel {
         return BASIC_LAYOUT.equals(layoutFactory.getValue()) ? new BasicForceLayoutFactory() : null;
     }
 
-    public StringProperty getSvgContent() {
-        return svgContent;
-    }
-
-    public StringProperty getCheckedSvgContent(Container<?> container) {
-        return containerToSvgMap.computeIfAbsent(container, c -> new SimpleStringProperty());
+    public ContainerResult getSelectedContainerResult() {
+        return selectedContainerResult;
     }
 
     public Stream<Container<?>> getCheckedContainerStream() {
-        return containerToSvgMap.keySet().stream();
+        return containerToResultMap.keySet().stream();
     }
 
-    public void removeSvgContent(Container<?> container) {
-        containerToSvgMap.remove(container);
+    public ContainerResult getCheckedContainerResult(Container<?> container) {
+        return containerToResultMap.computeIfAbsent(container, c -> new ContainerResult());
+    }
+
+    public void removeCheckedContainerResult(Container<?> container) {
+        containerToResultMap.remove(container);
     }
 
     public void clean() {
-        svgContent.set("");
+        selectedContainerResult.clean();
     }
 
     public SvgParametersBean getSvgParametersBean() {

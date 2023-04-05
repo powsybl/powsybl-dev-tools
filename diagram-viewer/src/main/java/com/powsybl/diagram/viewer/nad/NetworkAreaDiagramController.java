@@ -8,13 +8,13 @@
 package com.powsybl.diagram.viewer.nad;
 
 import com.powsybl.diagram.viewer.common.AbstractDiagramController;
+import com.powsybl.diagram.viewer.common.ContainerResult;
 import com.powsybl.diagram.viewer.common.JsHandler;
 import com.powsybl.iidm.network.Container;
 import com.powsybl.iidm.network.Network;
 import com.powsybl.iidm.network.Substation;
 import com.powsybl.iidm.network.VoltageLevel;
 import com.powsybl.nad.NetworkAreaDiagram;
-import javafx.beans.property.StringProperty;
 import javafx.concurrent.Service;
 import javafx.concurrent.Task;
 import javafx.fxml.FXML;
@@ -40,13 +40,13 @@ public class NetworkAreaDiagramController extends AbstractDiagramController {
         setUpListenerOnWebViewChanges(new JsHandler());
     }
 
-    public void createDiagram(Network network, NetworkAreaDiagramModel model, StringProperty modelSvgContent, Container<?> container) {
-        super.createDiagram(container, modelSvgContent);
+    public void createDiagram(Network network, NetworkAreaDiagramModel model, ContainerResult containerResult, Container<?> container) {
+        super.createDiagram(container, containerResult.svgContentProperty());
 
-        updateDiagram(network, model, modelSvgContent, container);
+        updateDiagram(network, model, containerResult, container);
     }
 
-    public static void updateDiagram(Network network, NetworkAreaDiagramModel model, StringProperty modelSvgContent, Container<?> container) {
+    public static void updateDiagram(Network network, NetworkAreaDiagramModel model, ContainerResult containerResult, Container<?> container) {
         StringWriter writer = new StringWriter();
         Service<String> nadService = new Service<>() {
             @Override
@@ -67,7 +67,7 @@ public class NetworkAreaDiagramController extends AbstractDiagramController {
             }
         };
 
-        nadService.setOnSucceeded(event -> modelSvgContent.setValue((String) event.getSource().getValue()));
+        nadService.setOnSucceeded(event -> containerResult.svgContentProperty().setValue((String) event.getSource().getValue()));
         nadService.setOnFailed(event -> {
             Throwable exception = event.getSource().getException();
             LOGGER.error(exception.toString(), exception);
