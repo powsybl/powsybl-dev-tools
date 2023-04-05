@@ -18,7 +18,6 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.control.*;
-import javafx.scene.layout.BorderPane;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -67,9 +66,6 @@ public class NetworkAreaDiagramViewController extends AbstractDiagramViewControl
     public ChoiceBox<SvgParameters.SizeConstraint> sizeConstraintChoice;
     @FXML
     public Spinner<Double> fixedSizeSpinner;
-
-    @FXML
-    public BorderPane selectedDiagram;
 
     @FXML
     public NetworkAreaDiagramController selectedDiagramController;
@@ -133,6 +129,7 @@ public class NetworkAreaDiagramViewController extends AbstractDiagramViewControl
 
     public void clean() {
         checkedTab.getTabs().clear();
+        selectedDiagramController.clean();
     }
 
     public void createCheckedTab(Network network, CheckBoxTreeItem<Container<?>> containerTreeItem, String tabName) {

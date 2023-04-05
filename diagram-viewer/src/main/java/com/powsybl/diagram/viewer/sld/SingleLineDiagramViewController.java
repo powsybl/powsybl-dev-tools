@@ -21,14 +21,12 @@ import com.powsybl.sld.library.ComponentLibrary;
 import com.powsybl.sld.svg.DiagramStyleProvider;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanBinding;
-import javafx.beans.property.*;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.control.*;
-import javafx.scene.layout.BorderPane;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -159,9 +157,6 @@ public class SingleLineDiagramViewController extends AbstractDiagramViewControll
 
     @FXML
     public Spinner<Double> feederInfosIntraMarginSpinner;
-
-    @FXML
-    public BorderPane selectedDiagram;
 
     @FXML
     public SingleLineDiagramController selectedDiagramController;
