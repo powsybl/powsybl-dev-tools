@@ -43,5 +43,6 @@ public class DiagramModel {
 
     public void clean() {
         selectedContainerResult.clean();
+        containerToResultMap.clear();
     }
 }

@@ -14,7 +14,7 @@ import com.powsybl.sld.SingleLineDiagram;
 import com.powsybl.sld.layout.LayoutParameters;
 import com.powsybl.sld.svg.DefaultDiagramLabelProvider;
 import com.powsybl.sld.svg.DiagramLabelProvider;
-import com.powsybl.sld.svg.DiagramStyleProvider;
+import com.powsybl.sld.svg.styles.StyleProvider;
 import javafx.concurrent.Service;
 import javafx.concurrent.Task;
 import javafx.fxml.FXML;
@@ -56,7 +56,7 @@ public class SingleLineDiagramController extends AbstractDiagramController {
             Switch sw = network.getSwitch(swId);
             if (sw != null) {
                 sw.setOpen(!sw.isOpen());
-                DiagramStyleProvider styleProvider = model.getStyleProvider();
+                StyleProvider styleProvider = model.getStyleProvider(network);
                 styleProvider.reset();
                 updateDiagram(network, model, containerResult, container);
             }
@@ -86,7 +86,6 @@ public class SingleLineDiagramController extends AbstractDiagramController {
                              StringWriter metadataWriter = new StringWriter();
                              StringWriter jsonWriter = new StringWriter()) {
 
-                            DiagramStyleProvider styleProvider = model.getStyleProvider();
                             LayoutParameters diagramLayoutParameters = model.getLayoutParameters();
 
                             DiagramLabelProvider initProvider = new DefaultDiagramLabelProvider(network,
@@ -101,7 +100,7 @@ public class SingleLineDiagramController extends AbstractDiagramController {
                                     model.getSubstationLayoutFactory(),
                                     model.getVoltageLevelLayoutFactory(),
                                     initProvider,
-                                    styleProvider,
+                                    model.getStyleProvider(network),
                                     "");
 
                             svgWriter.flush();

@@ -40,8 +40,12 @@
                     <VBox spacing="5">
                         <Label text="Design:"/>
                         <ComboBox fx:id="componentLibraryComboBox"/>
-                        <Label text="Style:"/>
-                        <ComboBox fx:id="styleComboBox"/>
+                        <Label text="Styles:"/>
+                        <CheckBox fx:id="basicStyleProviderCheckBox" text="Basic"/>
+                        <CheckBox fx:id="nominalStyleProviderCheckBox" text="Nominal voltage"/>
+                        <CheckBox fx:id="animatedStyleProviderCheckBox" text="Animated"/>
+                        <CheckBox fx:id="highlightStyleProviderCheckBox" text="Highlight"/>
+                        <CheckBox fx:id="topologicalStyleProviderCheckBox" text="Topology (default)"/>
                         <Label text="Substation Layout:"/>
                         <ComboBox fx:id="substationLayoutComboBox"/>
                         <Label text="VoltageLevel Layout:"/>
@@ -153,7 +157,6 @@
                                 <SpinnerValueFactory.DoubleSpinnerValueFactory min="-360" max="360" amountToStepBy="1"/>
                             </valueFactory>
                         </Spinner>
-                        <CheckBox fx:id="highLightLineStateCheckBox" text="HighLight line state"/>
                         <CheckBox fx:id="addNodesInfosCheckBox" text="Add nodes infos"/>
                         <CheckBox fx:id="feederInfoSymmetryCheckBox" text="Feeder info symmetry"/>
                         <Label text="Space for feeder infos:"/>

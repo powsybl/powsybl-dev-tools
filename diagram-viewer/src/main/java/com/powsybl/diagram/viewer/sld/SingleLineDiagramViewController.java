@@ -18,9 +18,11 @@ import com.powsybl.sld.layout.PositionVoltageLevelLayoutFactory;
 import com.powsybl.sld.layout.SubstationLayoutFactory;
 import com.powsybl.sld.layout.VoltageLevelLayoutFactory;
 import com.powsybl.sld.library.ComponentLibrary;
-import com.powsybl.sld.svg.DiagramStyleProvider;
+import com.powsybl.sld.svg.styles.StyleProvider;
+import com.powsybl.sld.svg.styles.iidm.HighlightLineStateStyleProvider;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanBinding;
+import javafx.beans.property.ObjectProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -43,7 +45,19 @@ public class SingleLineDiagramViewController extends AbstractDiagramViewControll
     public ComboBox<ComponentLibrary> componentLibraryComboBox;
 
     @FXML
-    public ComboBox<DiagramStyleProvider> styleComboBox;
+    public CheckBox basicStyleProviderCheckBox;
+
+    @FXML
+    public CheckBox nominalStyleProviderCheckBox;
+
+    @FXML
+    public CheckBox animatedStyleProviderCheckBox;
+
+    @FXML
+    public CheckBox highlightStyleProviderCheckBox;
+
+    @FXML
+    public CheckBox topologicalStyleProviderCheckBox;
 
     @FXML
     public ComboBox<SubstationLayoutFactory> substationLayoutComboBox;
@@ -140,9 +154,6 @@ public class SingleLineDiagramViewController extends AbstractDiagramViewControll
     public Spinner<Double> angleLabelSpinner;
 
     @FXML
-    public CheckBox highLightLineStateCheckBox;
-
-    @FXML
     public CheckBox addNodesInfosCheckBox;
 
     @FXML
@@ -167,10 +178,15 @@ public class SingleLineDiagramViewController extends AbstractDiagramViewControll
         model = new SingleLineDiagramModel(
                 // Providers
                 componentLibraryComboBox.valueProperty(),
-                styleComboBox.valueProperty(),
                 voltageLevelLayoutComboBox.valueProperty(),
                 substationLayoutComboBox.valueProperty(),
                 cgmesDLDiagramsComboBox.valueProperty(),
+                // - Styles
+                basicStyleProviderCheckBox.selectedProperty(),
+                nominalStyleProviderCheckBox.selectedProperty(),
+                animatedStyleProviderCheckBox.selectedProperty(),
+                highlightStyleProviderCheckBox.selectedProperty(),
+                topologicalStyleProviderCheckBox.selectedProperty(),
                 // PositionVoltageLevelLayoutFactory
                 stackFeedersCheckBox.selectedProperty(),
                 exceptionWhenPatternUnhandledCheckBox.selectedProperty(),
@@ -201,7 +217,6 @@ public class SingleLineDiagramViewController extends AbstractDiagramViewControll
                 centerLabelCheckBox.selectedProperty(),
                 labelDiagonalCheckBox.selectedProperty(),
                 angleLabelSpinner.getValueFactory().valueProperty(),
-                highLightLineStateCheckBox.selectedProperty(),
                 addNodesInfosCheckBox.selectedProperty(),
                 feederInfoSymmetryCheckBox.selectedProperty(),
                 spaceForFeederInfosSpinner.getValueFactory().valueProperty(),
@@ -214,9 +229,7 @@ public class SingleLineDiagramViewController extends AbstractDiagramViewControll
         componentLibraryComboBox.setConverter(model.getComponentLibraryStringConverter());
         componentLibraryComboBox.getSelectionModel().selectLast(); // Flat selection
         // Style provider
-        styleComboBox.itemsProperty().bind(Bindings.createObjectBinding(() -> model.getStyleProviders()));
-        styleComboBox.setConverter(model.getDiagramStyleProviderStringConverter());
-        styleComboBox.getSelectionModel().selectFirst(); // Default selection without Network
+        nominalStyleProviderCheckBox.setSelected(true); // Default selection without Network
         // Substation layout
         substationLayoutComboBox.itemsProperty().bind(Bindings.createObjectBinding(() -> model.getSubstationLayouts()));
         substationLayoutComboBox.setConverter(model.getSubstationLayoutStringConverter());
@@ -247,10 +260,15 @@ public class SingleLineDiagramViewController extends AbstractDiagramViewControll
 
     public void addListener(ChangeListener<Object> changeListener) {
         componentLibraryComboBox.valueProperty().addListener(changeListener);
-        styleComboBox.valueProperty().addListener(changeListener);
         substationLayoutComboBox.valueProperty().addListener(changeListener);
         voltageLevelLayoutComboBox.valueProperty().addListener(changeListener);
         cgmesDLDiagramsComboBox.valueProperty().addListener(changeListener);
+
+        basicStyleProviderCheckBox.selectedProperty().addListener(changeListener);
+        nominalStyleProviderCheckBox.selectedProperty().addListener(changeListener);
+        animatedStyleProviderCheckBox.selectedProperty().addListener(changeListener);
+        highlightStyleProviderCheckBox.selectedProperty().addListener(changeListener);
+        topologicalStyleProviderCheckBox.selectedProperty().addListener(changeListener);
 
         // PositionVoltageLevelLayoutFactory
         stackFeedersCheckBox.selectedProperty().addListener(changeListener);
@@ -305,16 +323,26 @@ public class SingleLineDiagramViewController extends AbstractDiagramViewControll
         return model;
     }
 
-    public void updateFrom(final Network network) {
-        getModel().updateFrom(network);
+    public void updateFrom(final ObjectProperty<Network> networkProperty) {
+        getModel().updateFrom(networkProperty.get());
         cgmesDLDiagramsComboBox.disableProperty().unbind();
         cgmesDLDiagramsComboBox.disableProperty().bind(Bindings.createBooleanBinding(() -> {
             boolean cgmesSelected = voltageLevelLayoutComboBox.getSelectionModel().getSelectedItem() instanceof CgmesVoltageLevelLayoutFactory;
-            return cgmesSelected && NetworkDiagramData.checkNetworkDiagramData(network);
+            return cgmesSelected && NetworkDiagramData.checkNetworkDiagramData(networkProperty.get());
         }, voltageLevelLayoutComboBox.getSelectionModel().selectedItemProperty()).not());
 
-        // Topology selection
-        styleComboBox.getSelectionModel().selectLast();
+        // Topology selection by default
+        basicStyleProviderCheckBox.setSelected(false);
+        nominalStyleProviderCheckBox.setSelected(false);
+        animatedStyleProviderCheckBox.setSelected(false);
+        highlightStyleProviderCheckBox.setSelected(false);
+        topologicalStyleProviderCheckBox.setSelected(true);
+        // Only available if network
+        highlightStyleProviderCheckBox.disableProperty().unbind();
+        highlightStyleProviderCheckBox.disableProperty().bind(Bindings.createBooleanBinding(() -> networkProperty.get() != null, networkProperty).not());
+        topologicalStyleProviderCheckBox.disableProperty().unbind();
+        topologicalStyleProviderCheckBox.disableProperty().bind(Bindings.createBooleanBinding(() -> networkProperty.get() != null, networkProperty).not());
+
         // Horizontal selection
         substationLayoutComboBox.getSelectionModel().select(1);
         // Smart selection

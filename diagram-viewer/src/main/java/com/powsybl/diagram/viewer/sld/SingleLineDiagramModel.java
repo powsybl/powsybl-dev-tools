@@ -17,10 +17,8 @@ import com.powsybl.sld.layout.*;
 import com.powsybl.sld.layout.positionbyclustering.PositionByClustering;
 import com.powsybl.sld.layout.positionfromextension.PositionFromExtension;
 import com.powsybl.sld.library.ComponentLibrary;
-import com.powsybl.sld.svg.BasicStyleProvider;
-import com.powsybl.sld.svg.DiagramStyleProvider;
-import com.powsybl.sld.util.NominalVoltageDiagramStyleProvider;
-import com.powsybl.sld.util.TopologicalStyleProvider;
+import com.powsybl.sld.svg.styles.*;
+import com.powsybl.sld.svg.styles.iidm.*;
 import javafx.beans.property.*;
 import javafx.beans.value.ChangeListener;
 import javafx.collections.FXCollections;
@@ -35,9 +33,6 @@ import java.util.*;
 public class SingleLineDiagramModel extends DiagramModel {
 
     private static final String UNKNOWN_ITEM = "???";
-    private static final String BASIC_STYLE = "Basic";
-    private static final String NOMINAL_STYLE = "Nominal voltage";
-    private static final String TOPOLOGY_STYLE = "Topology (default)";
 
     private static final String HORIZONTAL_SUBSTATION_LAYOUT = "Horizontal";
     private static final String VERTICAL_SUBSTATION_LAYOUT = "Vertical";
@@ -57,11 +52,11 @@ public class SingleLineDiagramModel extends DiagramModel {
     private final ObjectProperty<ComponentLibrary> currentComponentLibrary = new SimpleObjectProperty<>();
 
     // Style provider
-    private final Map<String, DiagramStyleProvider> nameToDiagramStyleProviderMap = new TreeMap<>(); // ordered
-
-    private final ObservableList<DiagramStyleProvider> styleProviders = FXCollections.observableArrayList();
-
-    private final ObjectProperty<DiagramStyleProvider> currentStyleProvider = new SimpleObjectProperty<>();
+    private final BooleanProperty basicStyleProvider = new SimpleBooleanProperty();
+    private final BooleanProperty nominalStyleProvider = new SimpleBooleanProperty();
+    private final BooleanProperty animatedStyleProvider = new SimpleBooleanProperty();
+    private final BooleanProperty highlightStyleProvider = new SimpleBooleanProperty();
+    private final BooleanProperty topologicalStyleProvider = new SimpleBooleanProperty();
 
     // VoltageLevel layout provider
     private final Map<String, VoltageLevelLayoutFactory> nameToVoltageLevelLayoutFactoryMap = new TreeMap<>(); // ordered
@@ -84,10 +79,15 @@ public class SingleLineDiagramModel extends DiagramModel {
 
     public SingleLineDiagramModel(// Providers
                                   ReadOnlyObjectProperty<ComponentLibrary> componentLibrary,
-                                  ReadOnlyObjectProperty<DiagramStyleProvider> styleProvider,
                                   ReadOnlyObjectProperty<VoltageLevelLayoutFactory> voltageLevelLayoutFactory,
                                   ReadOnlyObjectProperty<SubstationLayoutFactory> substationLayoutFactory,
                                   ReadOnlyObjectProperty<String> cgmesDLDiagramName,
+                                  // Styles
+                                  BooleanProperty basicStyleProvider,
+                                  BooleanProperty nominalStyleProvider,
+                                  BooleanProperty animatedStyleProvider,
+                                  BooleanProperty highlightStyleProvider,
+                                  BooleanProperty topologicalStyleProvider,
                                   // PositionVoltageLevelLayoutFactory
                                   BooleanProperty stackFeeders,
                                   BooleanProperty exceptionWhenPatternUnhandled,
@@ -118,7 +118,6 @@ public class SingleLineDiagramModel extends DiagramModel {
                                   BooleanProperty centerLabel,
                                   BooleanProperty labelDiagonal,
                                   Property<Double> angleLabel,
-                                  BooleanProperty highLightLineState,
                                   BooleanProperty addNodesInfos,
                                   BooleanProperty feederInfoSymmetry,
                                   Property<Double> spaceForFeederInfos,
@@ -130,7 +129,6 @@ public class SingleLineDiagramModel extends DiagramModel {
 
         // Providers
         this.currentComponentLibrary.bind(componentLibrary);
-        this.currentStyleProvider.bind(styleProvider);
         this.currentSubstationLayoutFactory.bind(substationLayoutFactory);
         this.currentCgmesDLDiagramName.bind(cgmesDLDiagramName);
         this.voltageLevelLayoutFactory = new VoltageLevelLayoutFactoryBean(voltageLevelLayoutFactory,
@@ -139,6 +137,12 @@ public class SingleLineDiagramModel extends DiagramModel {
                 handleShunts,
                 removeFictitiousNodes,
                 substituteSingularFictitiousNodes);
+        // Styles
+        this.basicStyleProvider.bindBidirectional(basicStyleProvider);
+        this.nominalStyleProvider.bindBidirectional(nominalStyleProvider);
+        this.animatedStyleProvider.bindBidirectional(animatedStyleProvider);
+        this.highlightStyleProvider.bindBidirectional(highlightStyleProvider);
+        this.topologicalStyleProvider.bindBidirectional(topologicalStyleProvider);
 
         // Layout Parameters
         this.layoutParameters = new LayoutParametersBean(diagramPaddingTopBottom,
@@ -164,7 +168,6 @@ public class SingleLineDiagramModel extends DiagramModel {
                 centerLabel,
                 labelDiagonal,
                 angleLabel,
-                highLightLineState,
                 addNodesInfos,
                 feederInfoSymmetry,
                 spaceForFeederInfos,
@@ -173,8 +176,6 @@ public class SingleLineDiagramModel extends DiagramModel {
     }
 
     public void initProviders() {
-        // StyleProviders
-        nameToDiagramStyleProviderMap.put(BASIC_STYLE, new BasicStyleProvider());
         // VoltageLevelLayouts
         nameToVoltageLevelLayoutFactoryMap.put(AUTO_EXTENSIONS_VOLTAGELEVEL_LAYOUT, new PositionVoltageLevelLayoutFactory(new PositionFromExtension()));
         nameToVoltageLevelLayoutFactoryMap.put(AUTO_WITHOUT_EXTENSIONS_CLUSTERING_VOLTAGELEVEL_LAYOUT, new PositionVoltageLevelLayoutFactory(new PositionByClustering()));
@@ -185,16 +186,12 @@ public class SingleLineDiagramModel extends DiagramModel {
 
         // Set all providers list
         componentLibraries.setAll(ComponentLibrary.findAll());
-        styleProviders.setAll(nameToDiagramStyleProviderMap.values());
         substationLayouts.setAll(nameToSubstationLayoutFactoryMap.values());
         voltageLevelLayouts.setAll(nameToVoltageLevelLayoutFactoryMap.values());
     }
 
     public void updateFrom(Network network) {
         if (network != null) {
-            // Styles
-            nameToDiagramStyleProviderMap.put(NOMINAL_STYLE, new NominalVoltageDiagramStyleProvider(network));
-            nameToDiagramStyleProviderMap.put(TOPOLOGY_STYLE, new TopologicalStyleProvider(network));
             // VoltageLevelLayouts
             nameToVoltageLevelLayoutFactoryMap.put(SMART_VOLTAGELEVEL_LAYOUT, new SmartVoltageLevelLayoutFactory(network));
             nameToVoltageLevelLayoutFactoryMap.put(CGMES_VOLTAGELEVEL_LAYOUT, new CgmesVoltageLevelLayoutFactory(network));
@@ -208,7 +205,6 @@ public class SingleLineDiagramModel extends DiagramModel {
             }
         }
         // Set all providers list
-        styleProviders.setAll(nameToDiagramStyleProviderMap.values());
         substationLayouts.setAll(nameToSubstationLayoutFactoryMap.values());
         voltageLevelLayouts.setAll(nameToVoltageLevelLayoutFactoryMap.values());
     }
@@ -222,8 +218,28 @@ public class SingleLineDiagramModel extends DiagramModel {
         return currentComponentLibrary.getValue();
     }
 
-    public DiagramStyleProvider getStyleProvider() {
-        return currentStyleProvider.get();
+    public StyleProvider getStyleProvider(Network network) {
+        List<StyleProvider> styles = new ArrayList<>();
+        if (this.basicStyleProvider.get()) {
+            styles.add(new BasicStyleProvider());
+        }
+        if (this.nominalStyleProvider.get()) {
+            styles.add(new NominalVoltageStyleProvider());
+        }
+        if (this.animatedStyleProvider.get()) {
+            // FIXME : add parameters for thresholds
+            styles.add(new AnimatedFeederInfoStyleProvider(1, 2));
+        }
+        if (this.highlightStyleProvider.get()) {
+            styles.add(new HighlightLineStateStyleProvider(network));
+        }
+        if (this.topologicalStyleProvider.get()) {
+            styles.add(new TopologicalStyleProvider(network));
+        }
+        if (styles.isEmpty()) {
+            styles.add(new EmptyStyleProvider());
+        }
+        return new StyleProvidersList(styles);
     }
 
     public VoltageLevelLayoutFactory getVoltageLevelLayoutFactory() {
@@ -244,10 +260,6 @@ public class SingleLineDiagramModel extends DiagramModel {
 
     public ObservableList<ComponentLibrary> getComponentLibraries() {
         return componentLibraries;
-    }
-
-    public ObservableList<DiagramStyleProvider> getStyleProviders() {
-        return styleProviders;
     }
 
     public ObservableList<VoltageLevelLayoutFactory> getVoltageLevelLayouts() {
@@ -272,21 +284,6 @@ public class SingleLineDiagramModel extends DiagramModel {
             @Override
             public ComponentLibrary fromString(String label) {
                 return componentLibraries.stream().filter(c -> c.getName().compareTo(label) == 0).findAny().orElse(null);
-            }
-        };
-    }
-
-    StringConverter<DiagramStyleProvider> getDiagramStyleProviderStringConverter() {
-        return new StringConverter<>() {
-            @Override
-            public String toString(DiagramStyleProvider object) {
-                Optional<String> label = nameToDiagramStyleProviderMap.keySet().stream().filter(name -> nameToDiagramStyleProviderMap.get(name) == object).findFirst();
-                return label.orElse(UNKNOWN_ITEM);
-            }
-
-            @Override
-            public DiagramStyleProvider fromString(String item) {
-                return nameToDiagramStyleProviderMap.get(item);
             }
         };
     }

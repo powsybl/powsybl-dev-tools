@@ -103,7 +103,7 @@ public class MainViewController {
         model = new Model(showNames.selectedProperty(), nadViewController.getModel(), sldViewController.getModel());
 
         model.networkProperty().addListener((observableValue, oldNetwork, newNetwork) -> {
-            sldViewController.updateFrom(newNetwork);
+            sldViewController.updateFrom(model.networkProperty());
             initSubstationsTree(newNetwork);
         });
 

@@ -68,8 +68,6 @@ public class LayoutParametersBean {
 
     private final ObjectProperty<Double>angleLabel = new SimpleObjectProperty<>();
 
-    private final BooleanProperty highLightLineState = new SimpleBooleanProperty();
-
     private final BooleanProperty addNodesInfos = new SimpleBooleanProperty();
 
     private final BooleanProperty feederInfoSymmetry = new SimpleBooleanProperty();
@@ -103,7 +101,6 @@ public class LayoutParametersBean {
                                 BooleanProperty centerLabel,
                                 BooleanProperty labelDiagonal,
                                 Property<Double> angleLabel,
-                                BooleanProperty highLightLineState,
                                 BooleanProperty addNodesInfos,
                                 BooleanProperty feederInfoSymmetry,
                                 Property<Double> spaceForFeederInfos,
@@ -134,7 +131,6 @@ public class LayoutParametersBean {
         this.centerLabel.bindBidirectional(centerLabel);
         this.labelDiagonal.bindBidirectional(labelDiagonal);
         this.angleLabel.bindBidirectional(angleLabel);
-        this.highLightLineState.bindBidirectional(highLightLineState);
         this.addNodesInfos.bindBidirectional(addNodesInfos);
         this.feederInfoSymmetry.bindBidirectional(feederInfoSymmetry);
         this.spaceForFeederInfos.bindBidirectional(spaceForFeederInfos);
@@ -168,7 +164,6 @@ public class LayoutParametersBean {
         centerLabel.setValue(defaultParameters.isLabelCentered());
         labelDiagonal.setValue(defaultParameters.isLabelDiagonal());
         angleLabel.setValue(defaultParameters.getAngleLabelShift());
-        highLightLineState.setValue(defaultParameters.isHighlightLineState());
         addNodesInfos.setValue(defaultParameters.isAddNodesInfos());
         feederInfoSymmetry.setValue(defaultParameters.isFeederInfoSymmetry());
         spaceForFeederInfos.setValue(defaultParameters.getSpaceForFeederInfos());
@@ -206,7 +201,6 @@ public class LayoutParametersBean {
         this.centerLabel.addListener(changeListener);
         this.labelDiagonal.addListener(changeListener);
         this.angleLabel.addListener(changeListener);
-        this.highLightLineState.addListener(changeListener);
         this.addNodesInfos.addListener(changeListener);
         this.feederInfoSymmetry.addListener(changeListener);
         this.spaceForFeederInfos.addListener(changeListener);
@@ -245,7 +239,6 @@ public class LayoutParametersBean {
                 .setLabelCentered(centerLabel.get())
                 .setLabelDiagonal(labelDiagonal.get())
                 .setAngleLabelShift(angleLabel.get())
-                .setHighlightLineState(highLightLineState.get())
                 .setAddNodesInfos(addNodesInfos.get())
                 .setFeederInfoSymmetry(feederInfoSymmetry.get())
                 .setSpaceForFeederInfos(spaceForFeederInfos.get())
