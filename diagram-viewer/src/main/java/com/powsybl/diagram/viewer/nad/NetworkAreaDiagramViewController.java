@@ -142,6 +142,7 @@ public class NetworkAreaDiagramViewController extends AbstractDiagramViewControl
         }
     }
 
+    @Override
     protected void removeCheckedDiagram(Tab tab, Container<?> container) {
         super.removeCheckedDiagram(tab, container);
         checkedDiagramControllers.remove(tab);
