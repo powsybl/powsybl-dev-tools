@@ -55,6 +55,8 @@ public class SingleLineDiagramModel extends DiagramModel {
     private final BooleanProperty basicStyleProvider = new SimpleBooleanProperty();
     private final BooleanProperty nominalStyleProvider = new SimpleBooleanProperty();
     private final BooleanProperty animatedStyleProvider = new SimpleBooleanProperty();
+    private final Property<Double> animationThreshold1 = new SimpleObjectProperty<>();
+    private final Property<Double> animationThreshold2 = new SimpleObjectProperty<>();
     private final BooleanProperty highlightStyleProvider = new SimpleBooleanProperty();
     private final BooleanProperty topologicalStyleProvider = new SimpleBooleanProperty();
 
@@ -86,6 +88,8 @@ public class SingleLineDiagramModel extends DiagramModel {
                                   BooleanProperty basicStyleProvider,
                                   BooleanProperty nominalStyleProvider,
                                   BooleanProperty animatedStyleProvider,
+                                  Property<Double> animationThreshold1,
+                                  Property<Double> animationThreshold2,
                                   BooleanProperty highlightStyleProvider,
                                   BooleanProperty topologicalStyleProvider,
                                   // PositionVoltageLevelLayoutFactory
@@ -141,6 +145,8 @@ public class SingleLineDiagramModel extends DiagramModel {
         this.basicStyleProvider.bindBidirectional(basicStyleProvider);
         this.nominalStyleProvider.bindBidirectional(nominalStyleProvider);
         this.animatedStyleProvider.bindBidirectional(animatedStyleProvider);
+        this.animationThreshold1.bindBidirectional(animationThreshold1);
+        this.animationThreshold2.bindBidirectional(animationThreshold2);
         this.highlightStyleProvider.bindBidirectional(highlightStyleProvider);
         this.topologicalStyleProvider.bindBidirectional(topologicalStyleProvider);
 
@@ -227,8 +233,7 @@ public class SingleLineDiagramModel extends DiagramModel {
             styles.add(new NominalVoltageStyleProvider());
         }
         if (this.animatedStyleProvider.get()) {
-            // FIXME : add parameters for thresholds
-            styles.add(new AnimatedFeederInfoStyleProvider(1, 2));
+            styles.add(new AnimatedFeederInfoStyleProvider(this.animationThreshold1.getValue(), this.animationThreshold2.getValue()));
         }
         if (this.highlightStyleProvider.get()) {
             styles.add(new HighlightLineStateStyleProvider(network));

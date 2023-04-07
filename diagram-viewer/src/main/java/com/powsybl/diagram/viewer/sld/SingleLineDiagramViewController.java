@@ -54,6 +54,12 @@ public class SingleLineDiagramViewController extends AbstractDiagramViewControll
     public CheckBox animatedStyleProviderCheckBox;
 
     @FXML
+    public Spinner<Double> animationThreshold1Spinner;
+
+    @FXML
+    public Spinner<Double> animationThreshold2Spinner;
+
+    @FXML
     public CheckBox highlightStyleProviderCheckBox;
 
     @FXML
@@ -185,6 +191,8 @@ public class SingleLineDiagramViewController extends AbstractDiagramViewControll
                 basicStyleProviderCheckBox.selectedProperty(),
                 nominalStyleProviderCheckBox.selectedProperty(),
                 animatedStyleProviderCheckBox.selectedProperty(),
+                animationThreshold1Spinner.getValueFactory().valueProperty(),
+                animationThreshold2Spinner.getValueFactory().valueProperty(),
                 highlightStyleProviderCheckBox.selectedProperty(),
                 topologicalStyleProviderCheckBox.selectedProperty(),
                 // PositionVoltageLevelLayoutFactory
@@ -230,6 +238,8 @@ public class SingleLineDiagramViewController extends AbstractDiagramViewControll
         componentLibraryComboBox.getSelectionModel().selectLast(); // Flat selection
         // Style provider
         nominalStyleProviderCheckBox.setSelected(true); // Default selection without Network
+        animationThreshold1Spinner.disableProperty().bind(animatedStyleProviderCheckBox.selectedProperty().not());
+        animationThreshold2Spinner.disableProperty().bind(animatedStyleProviderCheckBox.selectedProperty().not());
         // Substation layout
         substationLayoutComboBox.itemsProperty().bind(Bindings.createObjectBinding(() -> model.getSubstationLayouts()));
         substationLayoutComboBox.setConverter(model.getSubstationLayoutStringConverter());

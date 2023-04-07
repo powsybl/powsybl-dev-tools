@@ -43,9 +43,24 @@
                         <Label text="Styles:"/>
                         <CheckBox fx:id="basicStyleProviderCheckBox" text="Basic"/>
                         <CheckBox fx:id="nominalStyleProviderCheckBox" text="Nominal voltage"/>
-                        <CheckBox fx:id="animatedStyleProviderCheckBox" text="Animated"/>
                         <CheckBox fx:id="highlightStyleProviderCheckBox" text="Highlight"/>
                         <CheckBox fx:id="topologicalStyleProviderCheckBox" text="Topology (default)"/>
+                        <CheckBox fx:id="animatedStyleProviderCheckBox" text="Animated"/>
+                        <HBox spacing="5">
+                            <VBox.margin>
+                                <Insets topRightBottomLeft="10,0,0,0" />
+                            </VBox.margin>
+                            <Spinner fx:id="animationThreshold1Spinner" maxWidth="80" editable="true">
+                                <valueFactory>
+                                    <SpinnerValueFactory.DoubleSpinnerValueFactory min="0" max="300" amountToStepBy="5"/>
+                                </valueFactory>
+                            </Spinner>
+                            <Spinner fx:id="animationThreshold2Spinner" maxWidth="80" editable="true">
+                                <valueFactory>
+                                    <SpinnerValueFactory.DoubleSpinnerValueFactory min="0" max="300" amountToStepBy="5"/>
+                                </valueFactory>
+                            </Spinner>
+                        </HBox>
                         <Label text="Substation Layout:"/>
                         <ComboBox fx:id="substationLayoutComboBox"/>
                         <Label text="VoltageLevel Layout:"/>
