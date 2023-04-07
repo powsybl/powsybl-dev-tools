@@ -343,10 +343,10 @@ public class SingleLineDiagramViewController extends AbstractDiagramViewControll
 
         // Topology selection by default
         basicStyleProviderCheckBox.setSelected(false);
-        nominalStyleProviderCheckBox.setSelected(false);
         animatedStyleProviderCheckBox.setSelected(false);
         highlightStyleProviderCheckBox.setSelected(false);
-        topologicalStyleProviderCheckBox.setSelected(true);
+        nominalStyleProviderCheckBox.setSelected(networkProperty.get() == null);
+        topologicalStyleProviderCheckBox.setSelected(networkProperty.get() != null);
         // Only available if network
         highlightStyleProviderCheckBox.disableProperty().unbind();
         highlightStyleProviderCheckBox.disableProperty().bind(Bindings.createBooleanBinding(() -> networkProperty.get() != null, networkProperty).not());
