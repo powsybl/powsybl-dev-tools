@@ -48,7 +48,7 @@
                         <CheckBox fx:id="animatedStyleProviderCheckBox" text="Animated"/>
                         <HBox spacing="5">
                             <VBox.margin>
-                                <Insets topRightBottomLeft="10,0,0,0" />
+                                <Insets left="10"/>
                             </VBox.margin>
                             <Spinner fx:id="animationThreshold1Spinner" maxWidth="80" editable="true">
                                 <valueFactory>
