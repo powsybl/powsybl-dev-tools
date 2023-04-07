@@ -19,6 +19,7 @@ import javafx.concurrent.Service;
 import javafx.concurrent.Task;
 import javafx.fxml.FXML;
 import javafx.scene.control.TextArea;
+import javafx.scene.layout.VBox;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -33,15 +34,19 @@ public class SingleLineDiagramController extends AbstractDiagramController {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SingleLineDiagramController.class);
 
-    @FXML
-    public TextArea metadataContent;
-
-    @FXML
-    public TextArea graphContent;
+    private final TextArea metadataContent = new TextArea();
+    private final TextArea graphContent = new TextArea();
 
     @FXML
     private void initialize() throws IOException {
         super.init("sld");
+
+        VBox metadataArea = new VBox();
+        VBox jsonArea = new VBox();
+        createArea("JSON file", "*.json", metadataContent, metadataArea);
+        createArea("JSON file", "*.json", graphContent, jsonArea);
+        diagramTabPane.getTabs().add(createNonClosableTab("Metadata", metadataArea));
+        diagramTabPane.getTabs().add(createNonClosableTab("Graph", jsonArea));
     }
 
     public void createDiagram(SingleLineDiagramJsHandler jsHandler,

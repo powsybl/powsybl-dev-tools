@@ -11,12 +11,9 @@
             prefHeight="900.0" prefWidth="1000.0"
             fx:controller="com.powsybl.diagram.viewer.nad.NetworkAreaDiagramController">
     <center>
-        <TabPane side="BOTTOM">
+        <TabPane fx:id="diagramTabPane" side="BOTTOM">
             <Tab text="Diagram" closable="false">
                 <WebView fx:id="diagramWebView"/>
-            </Tab>
-            <Tab text="SVG content" closable="false">
-                <TextArea fx:id="svgContent" editable="false"/>
             </Tab>
         </TabPane>
     </center>
