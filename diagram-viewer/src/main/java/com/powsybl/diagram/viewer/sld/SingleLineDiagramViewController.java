@@ -18,8 +18,6 @@ import com.powsybl.sld.layout.PositionVoltageLevelLayoutFactory;
 import com.powsybl.sld.layout.SubstationLayoutFactory;
 import com.powsybl.sld.layout.VoltageLevelLayoutFactory;
 import com.powsybl.sld.library.ComponentLibrary;
-import com.powsybl.sld.svg.styles.StyleProvider;
-import com.powsybl.sld.svg.styles.iidm.HighlightLineStateStyleProvider;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanBinding;
 import javafx.beans.property.ObjectProperty;
