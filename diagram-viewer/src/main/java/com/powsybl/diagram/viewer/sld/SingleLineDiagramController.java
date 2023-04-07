@@ -15,11 +15,10 @@ import com.powsybl.sld.layout.LayoutParameters;
 import com.powsybl.sld.svg.DefaultDiagramLabelProvider;
 import com.powsybl.sld.svg.DiagramLabelProvider;
 import com.powsybl.sld.svg.styles.StyleProvider;
+import javafx.beans.property.StringProperty;
 import javafx.concurrent.Service;
 import javafx.concurrent.Task;
 import javafx.fxml.FXML;
-import javafx.scene.control.TextArea;
-import javafx.scene.layout.VBox;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -34,19 +33,15 @@ public class SingleLineDiagramController extends AbstractDiagramController {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SingleLineDiagramController.class);
 
-    private final TextArea metadataContent = new TextArea();
-    private final TextArea graphContent = new TextArea();
+    private StringProperty metadataContent;
+    private StringProperty graphContent;
 
     @FXML
     private void initialize() throws IOException {
         super.init("sld");
 
-        VBox metadataArea = new VBox();
-        VBox jsonArea = new VBox();
-        createArea("JSON file", "*.json", metadataContent, metadataArea);
-        createArea("JSON file", "*.json", graphContent, jsonArea);
-        diagramTabPane.getTabs().add(createNonClosableTab("Metadata", metadataArea));
-        diagramTabPane.getTabs().add(createNonClosableTab("Graph", jsonArea));
+        metadataContent = addAdditionalTab("Metadata", "JSON file", "*.json");
+        graphContent = addAdditionalTab("Graph", "JSON file", "*.json");
     }
 
     public void createDiagram(SingleLineDiagramJsHandler jsHandler,
@@ -70,8 +65,8 @@ public class SingleLineDiagramController extends AbstractDiagramController {
         containerResult.metadataContentProperty().addListener((obs, oldV, newV) -> jsHandler.setMetadata(containerResult.metadataContentProperty().get()));
 
         // Metadata & Graph binding
-        metadataContent.textProperty().bind(containerResult.metadataContentProperty());
-        graphContent.textProperty().bind(containerResult.jsonContentProperty());
+        metadataContent.bind(containerResult.metadataContentProperty());
+        graphContent.bind(containerResult.jsonContentProperty());
 
         updateDiagram(network, model, containerResult, container);
     }

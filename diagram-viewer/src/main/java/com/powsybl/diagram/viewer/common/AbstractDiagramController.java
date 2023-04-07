@@ -12,26 +12,16 @@ import com.powsybl.iidm.network.*;
 import javafx.beans.property.StringProperty;
 import javafx.concurrent.Worker;
 import javafx.fxml.FXML;
-import javafx.geometry.Insets;
-import javafx.scene.Node;
+import javafx.fxml.FXMLLoader;
 import javafx.scene.control.*;
-import javafx.scene.image.Image;
-import javafx.scene.image.ImageView;
 import javafx.scene.input.ScrollEvent;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.scene.web.WebView;
-import javafx.stage.FileChooser;
 import netscape.javascript.JSObject;
 
-import java.io.File;
 import java.io.IOException;
-import java.io.PrintWriter;
-import java.io.UncheckedIOException;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.concurrent.atomic.AtomicReference;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -43,7 +33,8 @@ public abstract class AbstractDiagramController {
     @FXML
     public WebView diagramWebView;
 
-    public final TextArea svgContent = new TextArea();
+    public StringProperty svgContent;
+
     @FXML
     public TextArea info;
     @FXML
@@ -88,9 +79,7 @@ public abstract class AbstractDiagramController {
         html = new String(ByteStreams.toByteArray(Objects.requireNonNull(getClass().getResourceAsStream("/" + prefix + "/svg.html"))));
         js = new String(ByteStreams.toByteArray(Objects.requireNonNull(getClass().getResourceAsStream("/" + prefix + "/svg.js"))));
 
-        VBox svgArea = new VBox();
-        createArea("SVG file", "*.svg", svgContent, svgArea);
-        diagramTabPane.getTabs().add(createNonClosableTab("SVG", svgArea));
+        svgContent = addAdditionalTab("SVG", "SVG file", "*.svg");
     }
 
     public void createDiagram(Container<?> container,
@@ -99,7 +88,7 @@ public abstract class AbstractDiagramController {
 
         // SVG content listener & binding
         svgContentProperty.addListener((obs, oldV, newV) -> updateSVGContent(newV));
-        svgContent.textProperty().bind(svgContentProperty);
+        svgContent.bind(svgContentProperty);
     }
 
     protected void updateSVGContent(String newContent) {
@@ -108,7 +97,7 @@ public abstract class AbstractDiagramController {
     }
 
     public void onClickFitToContent() {
-        String svgData = svgContent.getText();
+        String svgData = svgContent.get();
         Optional<String> svgLine = svgData.lines().filter(l -> l.contains("<svg")).findAny();
         if (svgLine.isPresent()) {
             String valuePattern = "\"([^\"]*)\"";
@@ -136,82 +125,15 @@ public abstract class AbstractDiagramController {
         info.setText("");
     }
 
-    protected void createArea(String descrSave, String extensionSave, TextArea textArea, VBox area) {
-        TextField searchField = new TextField();
-        double wh = 16.0;
-        ImageView save = new ImageView("images/save.png");
-        save.setFitWidth(wh);
-        save.setFitHeight(wh);
-        ImageView search = new ImageView("images/search.png");
-        search.setFitWidth(wh);
-        search.setFitHeight(wh);
-        Button searchButton = new Button("Search", search);
-        Button saveButton = new Button("Save...", save);
-        searchButton.setContentDisplay(ContentDisplay.GRAPHIC_ONLY);
-        saveButton.setContentDisplay(ContentDisplay.GRAPHIC_ONLY);
-        searchButton.setTooltip(new Tooltip("Search"));
-        saveButton.setTooltip(new Tooltip("Save..."));
-        HBox searchBox = new HBox();
-        searchBox.setSpacing(5);
-        searchBox.setPadding(new Insets(5, 0, 0, 0));
-        searchField.setPrefColumnCount(35);
-        searchBox.getChildren().add(searchField);
-        searchBox.getChildren().add(searchButton);
-        searchBox.getChildren().add(saveButton);
-
-        AtomicReference<Integer> searchStart = new AtomicReference<>(0);
-        searchStart.set(0);
-        searchButton.setOnAction(evh -> {
-            String txtPattern = searchField.getText();
-            Pattern pattern = Pattern.compile(txtPattern);
-            Matcher matcher = pattern.matcher(textArea.getText());
-            boolean found = matcher.find(searchStart.get());
-            if (found) {
-                textArea.selectRange(matcher.start(), matcher.end());
-                searchStart.set(matcher.end());
-            } else {
-                textArea.deselect();
-                searchStart.set(0);
-                found = matcher.find(searchStart.get());
-                if (found) {
-                    textArea.selectRange(matcher.start(), matcher.end());
-                    searchStart.set(matcher.end());
-                }
-            }
-        });
-        searchField.textProperty().addListener((observable, oldValue, newValue) ->
-                searchStart.set(0)
-        );
-
-        saveButton.setOnAction(evh -> {
-            FileChooser fileChooser = new FileChooser();
-            FileChooser.ExtensionFilter extFilter = new FileChooser.ExtensionFilter(descrSave, extensionSave);
-            fileChooser.getExtensionFilters().add(extFilter);
-            File file = fileChooser.showSaveDialog(area.getScene().getWindow());
-
-            if (file != null) {
-                try {
-                    PrintWriter writer;
-                    writer = new PrintWriter(file);
-                    writer.println(textArea.getText());
-                    writer.close();
-                } catch (IOException ex) {
-                    throw new UncheckedIOException(ex);
-                }
-            }
-        });
-
-        area.setSpacing(5);
-        area.getChildren().add(searchBox);
-        area.getChildren().add(textArea);
-        VBox.setVgrow(searchBox, Priority.NEVER);
-        VBox.setVgrow(textArea, Priority.ALWAYS);
-        textArea.setEditable(false);
-    }
-
-    protected Tab createNonClosableTab(String name, Node node) {
-        Tab tab = new Tab(name, node);
+    protected StringProperty addAdditionalTab(String name, String descrSave, String extensionSave) throws IOException {
+        FXMLLoader loader = new FXMLLoader();
+        loader.setLocation(Objects.requireNonNull(getClass().getResource("/areaView.fxml")));
+        VBox metadataArea = loader.load();
+        AreaViewController viewController = loader.getController();
+        StringProperty result = viewController.init(descrSave, extensionSave);
+        Tab tab = new Tab(name, metadataArea);
         tab.setClosable(false);
-        return tab;
+        diagramTabPane.getTabs().add(tab);
+        return result;
     }
 }

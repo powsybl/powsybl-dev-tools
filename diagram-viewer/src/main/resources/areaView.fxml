@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.image.Image?>
+<VBox xmlns="http://javafx.com/javafx/17.0.1" xmlns:fx="http://javafx.com/fxml/1"
+      prefHeight="900.0" prefWidth="1000.0"
+      fx:controller="com.powsybl.diagram.viewer.common.AreaViewController"
+      spacing="5">
+    <HBox fx:id="searchBox" spacing="5">
+        <HBox.margin>
+            <Insets top="5"/>
+        </HBox.margin>
+        <TextField fx:id="searchTextField"/>
+        <Button fx:id="searchButton" contentDisplay="GRAPHIC_ONLY">
+            <tooltip><Tooltip text="Search" /></tooltip>
+            <graphic>
+                <ImageView fitHeight="16.0" fitWidth="16.0" pickOnBounds="true" preserveRatio="true">
+                    <Image url="images/search.png"/>
+                </ImageView>
+            </graphic>
+        </Button>
+        <Button fx:id="saveButton" contentDisplay="GRAPHIC_ONLY">
+            <tooltip><Tooltip text="Save..." /></tooltip>
+            <graphic>
+                <ImageView fitHeight="16.0" fitWidth="16.0" pickOnBounds="true" preserveRatio="true">
+                    <Image url="images/save.png"/>
+                </ImageView>
+            </graphic>
+        </Button>
+    </HBox>
+    <TextArea fx:id="content" editable="false"/>
+</VBox>
