@@ -13,12 +13,6 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout powsybl-diagram latest sources
-        uses: actions/checkout@v1
-        with:
-          repository: powsybl/powsybl-diagram
-          ref: refs/heads/main
-
       - name: Checkout sources
         uses: actions/checkout@v2.3.4
 
@@ -27,9 +21,6 @@ jobs:
         with:
           distribution: 'zulu'
           java-version: 11
-
-      - name: Build and install powsybl-diagram with Maven
-        run: mvn --batch-mode -DskipTests=true --file ../powsybl-diagram/pom.xml install
 
       - name: Build diagram viewer with Maven
         run: mvn --file diagram-viewer --batch-mode -P jacoco,checks package

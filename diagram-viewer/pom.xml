@@ -43,9 +43,7 @@
         <junit.version>4.13.1</junit.version>
         <maven.compiler.source>17</maven.compiler.source>
         <maven.compiler.target>17</maven.compiler.target>
-        <powsybl.diagram.version>4.0.0-SNAPSHOT</powsybl.diagram.version>
-        <powsybl.core.version>5.1.1</powsybl.core.version>
-        <powsybl.open.loadflow.version>1.0.1</powsybl.open.loadflow.version>
+        <powsybl.dependencies.version>2023.2.0</powsybl.dependencies.version>
     </properties>
 
     <build>
@@ -65,8 +63,8 @@
         <dependencies>
             <dependency>
                 <groupId>com.powsybl</groupId>
-                <artifactId>powsybl-core</artifactId>
-                <version>${powsybl.core.version}</version>
+                <artifactId>powsybl-dependencies</artifactId>
+                <version>${powsybl.dependencies.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
@@ -80,32 +78,26 @@
         <dependency>
             <groupId>com.powsybl</groupId>
             <artifactId>powsybl-iidm-impl</artifactId>
-            <version>${powsybl.core.version}</version>
         </dependency>
         <dependency>
             <groupId>com.powsybl</groupId>
             <artifactId>powsybl-ieee-cdf-converter</artifactId>
-            <version>${powsybl.core.version}</version>
         </dependency>
         <dependency>
             <groupId>com.powsybl</groupId>
             <artifactId>powsybl-cgmes-conversion</artifactId>
-            <version>${powsybl.core.version}</version>
         </dependency>
         <dependency>
             <groupId>com.powsybl</groupId>
             <artifactId>powsybl-triple-store-impl-rdf4j</artifactId>
-            <version>${powsybl.core.version}</version>
         </dependency>
         <dependency>
             <groupId>com.powsybl</groupId>
             <artifactId>powsybl-ucte-converter</artifactId>
-            <version>${powsybl.core.version}</version>
         </dependency>
         <dependency>
             <groupId>com.powsybl</groupId>
             <artifactId>powsybl-open-loadflow</artifactId>
-            <version>${powsybl.open.loadflow.version}</version>
         </dependency>
         <!-- __________________________________________________________________________ -->
         <!-- NAD                                                                        -->
@@ -113,7 +105,6 @@
         <dependency>
             <groupId>com.powsybl</groupId>
             <artifactId>powsybl-network-area-diagram</artifactId>
-            <version>${powsybl.diagram.version}</version>
         </dependency>
         <!-- __________________________________________________________________________ -->
         <!-- SLD                                                                        -->
@@ -121,17 +112,14 @@
         <dependency>
             <groupId>com.powsybl</groupId>
             <artifactId>powsybl-single-line-diagram-core</artifactId>
-            <version>${powsybl.diagram.version}</version>
         </dependency>
         <dependency>
             <groupId>com.powsybl</groupId>
             <artifactId>powsybl-single-line-diagram-cgmes-dl-conversion</artifactId>
-            <version>${powsybl.diagram.version}</version>
         </dependency>
         <dependency>
             <groupId>com.powsybl</groupId>
             <artifactId>powsybl-single-line-diagram-cgmes-layout</artifactId>
-            <version>${powsybl.diagram.version}</version>
         </dependency>
         <!-- __________________________________________________________________________ -->
         <!-- JavaFX                                                                     -->
