@@ -1,0 +1,161 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    Copyright (c) 2023, RTE (http://www.rte-france.com)
+    This Source Code Form is subject to the terms of the Mozilla Public
+    License, v. 2.0. If a copy of the MPL was not distributed with this
+    file, You can obtain one at http://mozilla.org/MPL/2.0/.
+
+-->
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>com.powsybl</groupId>
+        <artifactId>powsybl-parent</artifactId>
+        <version>4</version>
+        <relativePath/>
+    </parent>
+
+    <artifactId>powsybl-diagram-viewer</artifactId>
+    <name>Diagram JavaFX viewer</name>
+    <version>1.0.0-SNAPSHOT</version>
+    <description>A JavaFX application for single line and network area diagrams visualization and debugging</description>
+
+    <developers>
+        <developer>
+            <name>Florian DUPUY</name>
+            <email>florian.dupuy@rte-france.com</email>
+            <organization>RTE</organization>
+            <organizationUrl>http://www.rte-france.com</organizationUrl>
+        </developer>
+    </developers>
+
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <java.version>11</java.version>
+        <javafx.version>19.0.2.1</javafx.version>
+        <javafx-mvn-plugin.version>0.0.8</javafx-mvn-plugin.version>
+        <slf4j-api.version>2.0.7</slf4j-api.version>
+        <logback.version>1.4.6</logback.version>
+        <junit.version>4.13.1</junit.version>
+        <maven.compiler.source>17</maven.compiler.source>
+        <maven.compiler.target>17</maven.compiler.target>
+        <powsybl.dependencies.version>2023.2.0</powsybl.dependencies.version>
+    </properties>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.openjfx</groupId>
+                <artifactId>javafx-maven-plugin</artifactId>
+                <version>${javafx-mvn-plugin.version}</version>
+                <configuration>
+                    <mainClass>com.powsybl.diagram.viewer.DiagramViewer</mainClass>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>com.powsybl</groupId>
+                <artifactId>powsybl-dependencies</artifactId>
+                <version>${powsybl.dependencies.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
+    <dependencies>
+        <!-- __________________________________________________________________________ -->
+        <!-- POWSYBL                                                                    -->
+        <!-- __________________________________________________________________________ -->
+        <dependency>
+            <groupId>com.powsybl</groupId>
+            <artifactId>powsybl-iidm-impl</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.powsybl</groupId>
+            <artifactId>powsybl-ieee-cdf-converter</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.powsybl</groupId>
+            <artifactId>powsybl-cgmes-conversion</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.powsybl</groupId>
+            <artifactId>powsybl-triple-store-impl-rdf4j</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.powsybl</groupId>
+            <artifactId>powsybl-ucte-converter</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.powsybl</groupId>
+            <artifactId>powsybl-open-loadflow</artifactId>
+        </dependency>
+        <!-- __________________________________________________________________________ -->
+        <!-- NAD                                                                        -->
+        <!-- __________________________________________________________________________ -->
+        <dependency>
+            <groupId>com.powsybl</groupId>
+            <artifactId>powsybl-network-area-diagram</artifactId>
+        </dependency>
+        <!-- __________________________________________________________________________ -->
+        <!-- SLD                                                                        -->
+        <!-- __________________________________________________________________________ -->
+        <dependency>
+            <groupId>com.powsybl</groupId>
+            <artifactId>powsybl-single-line-diagram-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.powsybl</groupId>
+            <artifactId>powsybl-single-line-diagram-cgmes-dl-conversion</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.powsybl</groupId>
+            <artifactId>powsybl-single-line-diagram-cgmes-layout</artifactId>
+        </dependency>
+        <!-- __________________________________________________________________________ -->
+        <!-- JavaFX                                                                     -->
+        <!-- __________________________________________________________________________ -->
+        <dependency>
+            <groupId>org.openjfx</groupId>
+            <artifactId>javafx-controls</artifactId>
+            <version>${javafx.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.openjfx</groupId>
+            <artifactId>javafx-web</artifactId>
+            <version>${javafx.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.openjfx</groupId>
+            <artifactId>javafx-fxml</artifactId>
+            <version>${javafx.version}</version>
+        </dependency>
+        <!-- __________________________________________________________________________ -->
+        <!-- Logging                                                                    -->
+        <!-- __________________________________________________________________________ -->
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+            <version>${slf4j-api.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-classic</artifactId>
+            <version>${logback.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-core</artifactId>
+            <version>${logback.version}</version>
+        </dependency>
+    </dependencies>
+</project>

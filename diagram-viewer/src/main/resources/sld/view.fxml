@@ -1,0 +1,203 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import com.powsybl.diagram.viewer.common.EnumChoiceBox?>
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<BorderPane xmlns="http://javafx.com/javafx/17.0.1" xmlns:fx="http://javafx.com/fxml/1"
+            prefHeight="900.0" prefWidth="1000.0"
+            fx:controller="com.powsybl.diagram.viewer.sld.SingleLineDiagramViewController">
+    <center>
+        <SplitPane dividerPositions="0.65, 0.35" style="-fx-box-border: transparent">
+            <BorderPane.margin>
+                <Insets topRightBottomLeft="5"/>
+            </BorderPane.margin>
+            <TabPane fx:id="checkedOrSelected">
+                <Tab text="Selected" closable="false">
+                    <fx:include fx:id="selectedDiagram" source="singleLineDiagramView.fxml"/>
+                </Tab>
+                <Tab text="Checked" closable="false">
+                    <TabPane fx:id="checkedTab"/>
+                </Tab>
+            </TabPane>
+            <VBox>
+                <HBox spacing="5">
+                    <VBox.margin>
+                        <Insets topRightBottomLeft="5"/>
+                    </VBox.margin>
+                    <Button onMouseClicked="#onClickFitToContent" text="Fit to content"/>
+                    <Button onMouseClicked="#onClickResetZoom" text="Reset zoom"/>
+                </HBox>
+                <Separator>
+                    <VBox.margin>
+                        <Insets topRightBottomLeft="5"/>
+                    </VBox.margin>
+                </Separator>
+                <ScrollPane vbarPolicy="ALWAYS" hbarPolicy="NEVER" fitToHeight="true" fitToWidth="true">
+                    <VBox.margin>
+                        <Insets topRightBottomLeft="5"/>
+                    </VBox.margin>
+                    <VBox spacing="5">
+                        <Label text="Design:"/>
+                        <ComboBox fx:id="componentLibraryComboBox"/>
+                        <Label text="Styles:"/>
+                        <CheckBox fx:id="basicStyleProviderCheckBox" text="Basic"/>
+                        <CheckBox fx:id="nominalStyleProviderCheckBox" text="Nominal voltage"/>
+                        <CheckBox fx:id="highlightStyleProviderCheckBox" text="Highlight"/>
+                        <CheckBox fx:id="topologicalStyleProviderCheckBox" text="Topology (default)"/>
+                        <CheckBox fx:id="animatedStyleProviderCheckBox" text="Animated"/>
+                        <HBox spacing="5">
+                            <VBox.margin>
+                                <Insets left="10"/>
+                            </VBox.margin>
+                            <Spinner fx:id="animationThreshold1Spinner" maxWidth="80" editable="true">
+                                <valueFactory>
+                                    <SpinnerValueFactory.DoubleSpinnerValueFactory min="0" max="300" amountToStepBy="5"/>
+                                </valueFactory>
+                            </Spinner>
+                            <Spinner fx:id="animationThreshold2Spinner" maxWidth="80" editable="true">
+                                <valueFactory>
+                                    <SpinnerValueFactory.DoubleSpinnerValueFactory min="0" max="300" amountToStepBy="5"/>
+                                </valueFactory>
+                            </Spinner>
+                        </HBox>
+                        <Label text="Substation Layout:"/>
+                        <ComboBox fx:id="substationLayoutComboBox"/>
+                        <Label text="VoltageLevel Layout:"/>
+                        <ComboBox fx:id="voltageLevelLayoutComboBox"/>
+                        <CheckBox fx:id="stackFeedersCheckBox" text="Stack feeders"/>
+                        <CheckBox fx:id="exceptionWhenPatternUnhandledCheckBox" text="Exception when pattern unhandled"/>
+                        <CheckBox fx:id="handleShuntsCheckBox" text="Handle shunts"/>
+                        <CheckBox fx:id="removeFictitiousNodesCheckBox" text="Remove fictitious nodes"/>
+                        <CheckBox fx:id="substituteSingularFictitiousNodesCheckBox" text="Substitute singular fictitious nodes"/>
+                        <Label text="CGMES-DL Diagrams:"/>
+                        <ComboBox fx:id="cgmesDLDiagramsComboBox"/>
+                        <Separator>
+                            <VBox.margin>
+                                <Insets topRightBottomLeft="5"/>
+                            </VBox.margin>
+                        </Separator>
+                        <Label text="Layout parameters:" style="-fx-font-weight: bold"/>
+                        <Label text="Diagram padding top/bottom:"/>
+                        <Spinner fx:id="diagramPaddingTopBottomSpinner" editable="true">
+                            <valueFactory>
+                                <SpinnerValueFactory.DoubleSpinnerValueFactory min="0" max="300" amountToStepBy="5"/>
+                            </valueFactory>
+                        </Spinner>
+                        <Label text="Diagram padding left/right:"/>
+                        <Spinner fx:id="diagramPaddingLeftRightSpinner" editable="true">
+                            <valueFactory>
+                                <SpinnerValueFactory.DoubleSpinnerValueFactory min="0" max="300" amountToStepBy="5"/>
+                            </valueFactory>
+                        </Spinner>
+                        <Label text="Voltage padding top/bottom:"/>
+                        <Spinner fx:id="voltagePaddingTopBottomSpinner" editable="true">
+                            <valueFactory>
+                                <SpinnerValueFactory.DoubleSpinnerValueFactory min="0" max="300" amountToStepBy="5"/>
+                            </valueFactory>
+                        </Spinner>
+                        <Label text="Voltage padding left/right:"/>
+                        <Spinner fx:id="voltagePaddingLeftRightSpinner" editable="true">
+                            <valueFactory>
+                                <SpinnerValueFactory.DoubleSpinnerValueFactory min="0" max="300" amountToStepBy="5"/>
+                            </valueFactory>
+                        </Spinner>
+                        <Label text="Busbar vertical space:"/>
+                        <Spinner fx:id="busbarVerticalSpaceSpinner" editable="true">
+                            <valueFactory>
+                                <SpinnerValueFactory.DoubleSpinnerValueFactory min="10" max="100" amountToStepBy="5"/>
+                            </valueFactory>
+                        </Spinner>
+                        <Label text="Busbar horizontal space:"/>
+                        <Spinner fx:id="busbarHorizontalSpaceSpinner" editable="true">
+                            <valueFactory>
+                                <SpinnerValueFactory.DoubleSpinnerValueFactory min="10" max="100" amountToStepBy="5"/>
+                            </valueFactory>
+                        </Spinner>
+                        <Label text="Cell width:"/>
+                        <Spinner fx:id="cellWidthSpinner" editable="true">
+                            <valueFactory>
+                                <SpinnerValueFactory.DoubleSpinnerValueFactory min="10" max="100" amountToStepBy="5"/>
+                            </valueFactory>
+                        </Spinner>
+                        <Label text="Extern cell height"/>
+                        <Spinner fx:id="externCellHeightSpinner" editable="true">
+                            <valueFactory>
+                                <SpinnerValueFactory.DoubleSpinnerValueFactory min="100" max="500" amountToStepBy="10"/>
+                            </valueFactory>
+                        </Spinner>
+                        <Label text="Intern cell height"/>
+                        <Spinner fx:id="internCellHeightSpinner" editable="true">
+                            <valueFactory>
+                                <SpinnerValueFactory.DoubleSpinnerValueFactory min="10" max="100" amountToStepBy="5"/>
+                            </valueFactory>
+                        </Spinner>
+                        <Label text="Stack height:"/>
+                        <Spinner fx:id="stackHeightSpinner" editable="true">
+                            <valueFactory>
+                                <SpinnerValueFactory.DoubleSpinnerValueFactory min="10" max="100" amountToStepBy="5"/>
+                            </valueFactory>
+                        </Spinner>
+                        <CheckBox fx:id="showGridCheckBox" text="Show grid" selected="true"/>
+                        <CheckBox fx:id="showInternalNodesCheckBox" text="Show internal nodes"/>
+                        <CheckBox fx:id="drawStraightWiresCheckBox" text="Draw straight wires"/>
+                        <CheckBox fx:id="disconnectorsOnBusCheckBox" text="Disconnectors on bus"/>
+                        <Label text="Scale factor:"/>
+                        <Spinner fx:id="scaleFactorSpinner" editable="true">
+                            <valueFactory>
+                                <SpinnerValueFactory.DoubleSpinnerValueFactory min="1" max="20" amountToStepBy="1"/>
+                            </valueFactory>
+                        </Spinner>
+                        <CheckBox fx:id="avoidSVGComponentsDuplicationCheckBox" text="Avoid SVG components duplication"/>
+                        <CheckBox fx:id="adaptCellHeightToContentCheckBox" text="Adapt cell height to content" selected="true"/>
+                        <Label text="Min space between components:"/>
+                        <Spinner fx:id="minSpaceBetweenComponentsSpinner" editable="true">
+                            <valueFactory>
+                                <SpinnerValueFactory.DoubleSpinnerValueFactory min="8" max="60" amountToStepBy="1"/>
+                            </valueFactory>
+                        </Spinner>
+                        <Label text="Minimum extern cell height:"/>
+                        <Spinner fx:id="minimumExternCellHeightSpinner" editable="true">
+                            <valueFactory>
+                                <SpinnerValueFactory.DoubleSpinnerValueFactory min="80" max="300" amountToStepBy="10"/>
+                            </valueFactory>
+                        </Spinner>
+                        <Label text="BusBar alignment:"/>
+                        <EnumChoiceBox enumType="com.powsybl.sld.layout.LayoutParameters$Alignment" fx:id="busBarAlignmentChoice" initialValue="FIRST"/>
+                        <CheckBox fx:id="centerLabelCheckBox" text="Center label"/>
+                        <CheckBox fx:id="labelDiagonalCheckBox" text="Label diagonal"/>
+                        <Label text="Angle label:"/>
+                        <Spinner fx:id="angleLabelSpinner" editable="true">
+                            <valueFactory>
+                                <SpinnerValueFactory.DoubleSpinnerValueFactory min="-360" max="360" amountToStepBy="1"/>
+                            </valueFactory>
+                        </Spinner>
+                        <CheckBox fx:id="addNodesInfosCheckBox" text="Add nodes infos"/>
+                        <CheckBox fx:id="feederInfoSymmetryCheckBox" text="Feeder info symmetry"/>
+                        <Label text="Space for feeder infos:"/>
+                        <Spinner fx:id="spaceForFeederInfosSpinner" editable="true">
+                            <valueFactory>
+                                <SpinnerValueFactory.DoubleSpinnerValueFactory min="0" max="200" amountToStepBy="1"/>
+                            </valueFactory>
+                        </Spinner>
+                        <Label text="Feeder infos outer margin:"/>
+                        <Spinner fx:id="feederInfosOuterMarginSpinner" editable="true">
+                            <valueFactory>
+                                <SpinnerValueFactory.DoubleSpinnerValueFactory min="0" max="200" amountToStepBy="1"/>
+                            </valueFactory>
+                        </Spinner>
+                        <Label text="Feeder infos intra margin:"/>
+                        <Spinner fx:id="feederInfosIntraMarginSpinner" editable="true">
+                            <valueFactory>
+                                <SpinnerValueFactory.DoubleSpinnerValueFactory min="0" max="200" amountToStepBy="1"/>
+                            </valueFactory>
+                        </Spinner>
+                    </VBox>
+                </ScrollPane>
+            </VBox>
+        </SplitPane>
+    </center>
+    <padding>
+        <Insets topRightBottomLeft="5"/>
+    </padding>
+</BorderPane>
