@@ -33,7 +33,7 @@ public abstract class AbstractDiagramController {
     @FXML
     public WebView diagramWebView;
 
-    public StringProperty svgContent;
+    private StringProperty svgContent;
 
     @FXML
     public TextArea info;
