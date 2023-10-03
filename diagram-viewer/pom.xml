@@ -43,7 +43,7 @@
         <junit.version>4.13.1</junit.version>
         <maven.compiler.source>17</maven.compiler.source>
         <maven.compiler.target>17</maven.compiler.target>
-        <powsybl.dependencies.version>2023.2.0</powsybl.dependencies.version>
+        <powsybl.dependencies.version>2023.3.0</powsybl.dependencies.version>
     </properties>
 
     <build>

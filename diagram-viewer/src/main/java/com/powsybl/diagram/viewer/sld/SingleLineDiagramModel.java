@@ -9,6 +9,7 @@ package com.powsybl.diagram.viewer.sld;
 
 import com.powsybl.diagram.viewer.common.DiagramModel;
 import com.powsybl.iidm.network.Network;
+import com.powsybl.sld.SldParameters;
 import com.powsybl.sld.cgmes.dl.iidm.extensions.NetworkDiagramData;
 import com.powsybl.sld.cgmes.layout.CgmesSubstationLayoutFactory;
 import com.powsybl.sld.cgmes.layout.CgmesVoltageLevelLayoutFactory;
@@ -44,7 +45,7 @@ public class SingleLineDiagramModel extends DiagramModel {
     private static final String CGMES_VOLTAGELEVEL_LAYOUT = "CGMES";
 
     // Layout Parameters
-    private final LayoutParametersBean layoutParameters;
+    private final SldParametersBean sldParametersBean;
 
     // Component library provider
     private final ObservableList<ComponentLibrary> componentLibraries = FXCollections.observableArrayList();
@@ -151,7 +152,7 @@ public class SingleLineDiagramModel extends DiagramModel {
         this.topologicalStyleProvider.bindBidirectional(topologicalStyleProvider);
 
         // Layout Parameters
-        this.layoutParameters = new LayoutParametersBean(diagramPaddingTopBottom,
+        this.sldParametersBean = new SldParametersBean(diagramPaddingTopBottom,
                 diagramPaddingLeftRight,
                 voltagePaddingTopBottom,
                 voltagePaddingLeftRight,
@@ -216,7 +217,7 @@ public class SingleLineDiagramModel extends DiagramModel {
     }
 
     public void addListener(ChangeListener<Object> changeListener) {
-        layoutParameters.addListener(changeListener);
+        sldParametersBean.addListener(changeListener);
         voltageLevelLayoutFactory.addListener(changeListener);
     }
 
@@ -255,12 +256,12 @@ public class SingleLineDiagramModel extends DiagramModel {
         return currentSubstationLayoutFactory.get();
     }
 
-    public LayoutParameters getLayoutParameters() {
-        return layoutParameters.getLayoutParameters(currentCgmesDLDiagramName.get());
+    public SldParameters getSldParameters() {
+        return sldParametersBean.getParameters(currentCgmesDLDiagramName.get());
     }
 
-    public LayoutParametersBean getLayoutParametersBean() {
-        return layoutParameters;
+    public SldParametersBean getSldParametersBean() {
+        return sldParametersBean;
     }
 
     public ObservableList<ComponentLibrary> getComponentLibraries() {

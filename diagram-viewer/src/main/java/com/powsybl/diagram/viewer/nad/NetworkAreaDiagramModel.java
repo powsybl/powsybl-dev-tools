@@ -30,7 +30,7 @@ public class NetworkAreaDiagramModel extends DiagramModel {
     private static final String TOPOLOGICAL_STYLE_PROVIDER = "Topological";
 
     // Layout Parameters
-    private final LayoutParametersBean layoutParameters;
+    private final LayoutParametersBean layoutParametersBean;
 
     // SVG Parameters
     private final SvgParametersBean svgParameters;
@@ -67,7 +67,7 @@ public class NetworkAreaDiagramModel extends DiagramModel {
         this.layoutFactory.bind(layout);
 
         // Layout parameters
-        layoutParameters = new LayoutParametersBean(textNodesIncluded, springRepulsionFactor);
+        layoutParametersBean = new LayoutParametersBean(textNodesIncluded, springRepulsionFactor);
 
         // SVG parameters
         svgParameters = new SvgParametersBean(infoAlongEdge,
@@ -91,7 +91,7 @@ public class NetworkAreaDiagramModel extends DiagramModel {
     }
 
     public LayoutParameters getLayoutParameters() {
-        return layoutParameters.getLayoutParameters();
+        return layoutParametersBean.getLayoutParameters();
     }
 
     public LabelProvider getLabelProvider(Network network) {
@@ -114,6 +114,6 @@ public class NetworkAreaDiagramModel extends DiagramModel {
 
     public void addListener(ChangeListener<Object> changeListener) {
         svgParameters.addListener(changeListener);
-        layoutParameters.addListener(changeListener);
+        layoutParametersBean.addListener(changeListener);
     }
 }
