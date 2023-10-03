@@ -15,7 +15,7 @@
     <parent>
         <groupId>com.powsybl</groupId>
         <artifactId>powsybl-parent</artifactId>
-        <version>4</version>
+        <version>15</version>
         <relativePath/>
     </parent>
 
@@ -35,7 +35,7 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <java.version>11</java.version>
+        <java.version>17</java.version>
         <javafx.version>19.0.2.1</javafx.version>
         <javafx-mvn-plugin.version>0.0.8</javafx-mvn-plugin.version>
         <slf4j-api.version>2.0.7</slf4j-api.version>
