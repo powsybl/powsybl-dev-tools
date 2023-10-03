@@ -7,8 +7,10 @@
  */
 package com.powsybl.diagram.viewer.sld;
 
+import com.powsybl.sld.SldParameters;
 import com.powsybl.sld.layout.*;
 import com.powsybl.sld.library.ComponentTypeName;
+import com.powsybl.sld.svg.SvgParameters;
 import javafx.beans.property.*;
 import javafx.beans.value.ChangeListener;
 
@@ -17,7 +19,7 @@ import java.util.*;
 /**
  * @author Thomas Adam <tadam at silicom.fr>
  */
-public class LayoutParametersBean {
+public class SldParametersBean {
 
     private final BooleanProperty useName = new SimpleBooleanProperty();
 
@@ -78,34 +80,34 @@ public class LayoutParametersBean {
 
     private final ObjectProperty<Double>feederInfosIntraMargin = new SimpleObjectProperty<>();
 
-    public LayoutParametersBean(Property<Double> diagramPaddingTopBottom,
-                                Property<Double> diagramPaddingLeftRight,
-                                Property<Double> voltagePaddingTopBottom,
-                                Property<Double> voltagePaddingLeftRight,
-                                Property<Double> busbarVerticalSpace,
-                                Property<Double> busbarHorizontalSpace,
-                                Property<Double> cellWidth,
-                                Property<Double> externCellHeight,
-                                Property<Double> internCellHeight,
-                                Property<Double> stackHeight,
-                                BooleanProperty showGrid,
-                                BooleanProperty showInternalNodes,
-                                BooleanProperty drawStraightWires,
-                                BooleanProperty disconnectorsOnBus,
-                                Property<Double> scaleFactor,
-                                BooleanProperty avoidSVGComponentsDuplication,
-                                BooleanProperty adaptCellHeightToContent,
-                                Property<Double> minSpaceBetweenComponents,
-                                Property<Double> minimumExternCellHeight,
-                                Property<LayoutParameters.Alignment> busBarAlignment,
-                                BooleanProperty centerLabel,
-                                BooleanProperty labelDiagonal,
-                                Property<Double> angleLabel,
-                                BooleanProperty addNodesInfos,
-                                BooleanProperty feederInfoSymmetry,
-                                Property<Double> spaceForFeederInfos,
-                                Property<Double> feederInfosOuterMargin,
-                                Property<Double> feederInfosIntraMargin) {
+    public SldParametersBean(Property<Double> diagramPaddingTopBottom,
+                             Property<Double> diagramPaddingLeftRight,
+                             Property<Double> voltagePaddingTopBottom,
+                             Property<Double> voltagePaddingLeftRight,
+                             Property<Double> busbarVerticalSpace,
+                             Property<Double> busbarHorizontalSpace,
+                             Property<Double> cellWidth,
+                             Property<Double> externCellHeight,
+                             Property<Double> internCellHeight,
+                             Property<Double> stackHeight,
+                             BooleanProperty showGrid,
+                             BooleanProperty showInternalNodes,
+                             BooleanProperty drawStraightWires,
+                             BooleanProperty disconnectorsOnBus,
+                             Property<Double> scaleFactor,
+                             BooleanProperty avoidSVGComponentsDuplication,
+                             BooleanProperty adaptCellHeightToContent,
+                             Property<Double> minSpaceBetweenComponents,
+                             Property<Double> minimumExternCellHeight,
+                             Property<LayoutParameters.Alignment> busBarAlignment,
+                             BooleanProperty centerLabel,
+                             BooleanProperty labelDiagonal,
+                             Property<Double> angleLabel,
+                             BooleanProperty addNodesInfos,
+                             BooleanProperty feederInfoSymmetry,
+                             Property<Double> spaceForFeederInfos,
+                             Property<Double> feederInfosOuterMargin,
+                             Property<Double> feederInfosIntraMargin) {
         // bind
         this.diagramPaddingTopBottom.bindBidirectional(diagramPaddingTopBottom);
         this.diagramPaddingTopBottom.bindBidirectional(diagramPaddingTopBottom);
@@ -138,37 +140,43 @@ public class LayoutParametersBean {
         this.feederInfosIntraMargin.bindBidirectional(feederInfosIntraMargin);
 
         // Initialize
-        LayoutParameters defaultParameters = new LayoutParameters()
-                .setShowGrid(true)
+        SldParameters sldParameters = new SldParameters();
+        LayoutParameters defaultLayoutParameters = sldParameters.getLayoutParameters();
+        SvgParameters defaultSvgParameters = sldParameters.getSvgParameters();
+        defaultSvgParameters
+                .setShowGrid(true);
+        defaultLayoutParameters
                 .setAdaptCellHeightToContent(true);
-        diagramPaddingTopBottom.setValue(defaultParameters.getDiagramPadding().getTop());
-        diagramPaddingLeftRight.setValue(defaultParameters.getDiagramPadding().getLeft());
-        voltagePaddingTopBottom.setValue(defaultParameters.getVoltageLevelPadding().getTop());
-        voltagePaddingLeftRight.setValue(defaultParameters.getVoltageLevelPadding().getLeft());
-        busbarVerticalSpace.setValue(defaultParameters.getVerticalSpaceBus());
-        busbarHorizontalSpace.setValue(defaultParameters.getHorizontalBusPadding());
-        cellWidth.setValue(defaultParameters.getCellWidth());
-        externCellHeight.setValue(defaultParameters.getExternCellHeight());
-        internCellHeight.setValue(defaultParameters.getInternCellHeight());
-        stackHeight.setValue(defaultParameters.getStackHeight());
-        showGrid.setValue(defaultParameters.isShowGrid());
-        showInternalNodes.setValue(defaultParameters.isShowInternalNodes());
-        drawStraightWires.setValue(defaultParameters.isDrawStraightWires());
-        disconnectorsOnBus.setValue(defaultParameters.getComponentsOnBusbars().equals(List.of(ComponentTypeName.DISCONNECTOR)));
-        scaleFactor.setValue(defaultParameters.getScaleFactor());
-        avoidSVGComponentsDuplication.setValue(defaultParameters.isAvoidSVGComponentsDuplication());
-        adaptCellHeightToContent.setValue(defaultParameters.isAdaptCellHeightToContent());
-        minSpaceBetweenComponents.setValue(defaultParameters.getMinSpaceBetweenComponents());
-        minimumExternCellHeight.setValue(defaultParameters.getMinExternCellHeight());
-        busBarAlignment.setValue(defaultParameters.getBusbarsAlignment());
-        centerLabel.setValue(defaultParameters.isLabelCentered());
-        labelDiagonal.setValue(defaultParameters.isLabelDiagonal());
-        angleLabel.setValue(defaultParameters.getAngleLabelShift());
-        addNodesInfos.setValue(defaultParameters.isAddNodesInfos());
-        feederInfoSymmetry.setValue(defaultParameters.isFeederInfoSymmetry());
-        spaceForFeederInfos.setValue(defaultParameters.getSpaceForFeederInfos());
-        feederInfosOuterMargin.setValue(defaultParameters.getFeederInfosOuterMargin());
-        feederInfosIntraMargin.setValue(defaultParameters.getFeederInfosIntraMargin());
+        diagramPaddingTopBottom.setValue(defaultLayoutParameters.getDiagramPadding().getTop());
+        diagramPaddingLeftRight.setValue(defaultLayoutParameters.getDiagramPadding().getLeft());
+        voltagePaddingTopBottom.setValue(defaultLayoutParameters.getVoltageLevelPadding().getTop());
+        voltagePaddingLeftRight.setValue(defaultLayoutParameters.getVoltageLevelPadding().getLeft());
+        busbarVerticalSpace.setValue(defaultLayoutParameters.getVerticalSpaceBus());
+        busbarHorizontalSpace.setValue(defaultLayoutParameters.getHorizontalBusPadding());
+        cellWidth.setValue(defaultLayoutParameters.getCellWidth());
+        externCellHeight.setValue(defaultLayoutParameters.getExternCellHeight());
+        internCellHeight.setValue(defaultLayoutParameters.getInternCellHeight());
+        stackHeight.setValue(defaultLayoutParameters.getStackHeight());
+        disconnectorsOnBus.setValue(defaultLayoutParameters.getComponentsOnBusbars().equals(List.of(ComponentTypeName.DISCONNECTOR)));
+        adaptCellHeightToContent.setValue(defaultLayoutParameters.isAdaptCellHeightToContent());
+        minSpaceBetweenComponents.setValue(defaultLayoutParameters.getMinSpaceBetweenComponents());
+        minimumExternCellHeight.setValue(defaultLayoutParameters.getMinExternCellHeight());
+        busBarAlignment.setValue(defaultLayoutParameters.getBusbarsAlignment());
+
+        spaceForFeederInfos.setValue(defaultLayoutParameters.getSpaceForFeederInfos());
+        scaleFactor.setValue(defaultLayoutParameters.getCgmesScaleFactor());
+
+        showGrid.setValue(defaultSvgParameters.isShowGrid());
+        showInternalNodes.setValue(defaultSvgParameters.isShowInternalNodes());
+        drawStraightWires.setValue(defaultSvgParameters.isDrawStraightWires());
+        avoidSVGComponentsDuplication.setValue(defaultSvgParameters.isAvoidSVGComponentsDuplication());
+        centerLabel.setValue(defaultSvgParameters.isLabelCentered());
+        labelDiagonal.setValue(defaultSvgParameters.isLabelDiagonal());
+        angleLabel.setValue(defaultSvgParameters.getAngleLabelShift());
+        addNodesInfos.setValue(defaultSvgParameters.isAddNodesInfos());
+        feederInfoSymmetry.setValue(defaultSvgParameters.isFeederInfoSymmetry());
+        feederInfosOuterMargin.setValue(defaultSvgParameters.getFeederInfosOuterMargin());
+        feederInfosIntraMargin.setValue(defaultSvgParameters.getFeederInfosIntraMargin());
     }
 
     public void bind(BooleanProperty useName) {
@@ -208,8 +216,9 @@ public class LayoutParametersBean {
         this.feederInfosIntraMargin.addListener(changeListener);
     }
 
-    public LayoutParameters getLayoutParameters(String diagramName) {
-        return new LayoutParameters()
+    public SldParameters getParameters(String diagramName) {
+        SldParameters sldParameters = new SldParameters();
+        sldParameters.getLayoutParameters()
                 .setDiagrammPadding(diagramPaddingLeftRight.get(),
                         diagramPaddingTopBottom.get(),
                         diagramPaddingLeftRight.get(),
@@ -218,34 +227,36 @@ public class LayoutParametersBean {
                         voltagePaddingTopBottom.get(),
                         voltagePaddingLeftRight.get(),
                         voltagePaddingTopBottom.get())
-                .setUseName(useName.get())
-                .setDiagramName(diagramName)
+                .setCgmesUseNames(useName.get())
+                .setCgmesDiagramName(diagramName)
                 .setVerticalSpaceBus(busbarVerticalSpace.get())
                 .setHorizontalBusPadding(busbarHorizontalSpace.get())
                 .setCellWidth(cellWidth.get())
                 .setExternCellHeight(externCellHeight.get())
                 .setInternCellHeight(internCellHeight.get())
                 .setStackHeight(stackHeight.get())
-                .setShowGrid(showGrid.get())
-                .setShowInternalNodes(showInternalNodes.get())
-                .setDrawStraightWires(drawStraightWires.get())
                 .setComponentsOnBusbars(disconnectorsOnBus.get() ? List.of(ComponentTypeName.DISCONNECTOR) : Collections.emptyList())
-                .setScaleFactor(scaleFactor.get())
-                .setAvoidSVGComponentsDuplication(avoidSVGComponentsDuplication.get())
+                .setCgmesScaleFactor(scaleFactor.get())
                 .setAdaptCellHeightToContent(adaptCellHeightToContent.get())
                 .setMinSpaceBetweenComponents(minSpaceBetweenComponents.get())
                 .setMinExternCellHeight(minimumExternCellHeight.get())
                 .setBusbarsAlignment(busBarAlignment.get())
+                .setSpaceForFeederInfos(spaceForFeederInfos.get());
+        sldParameters.getSvgParameters()
+                .setShowGrid(showGrid.get())
+                .setShowInternalNodes(showInternalNodes.get())
+                .setDrawStraightWires(drawStraightWires.get())
+                .setAvoidSVGComponentsDuplication(avoidSVGComponentsDuplication.get())
                 .setLabelCentered(centerLabel.get())
                 .setLabelDiagonal(labelDiagonal.get())
                 .setAngleLabelShift(angleLabel.get())
                 .setAddNodesInfos(addNodesInfos.get())
                 .setFeederInfoSymmetry(feederInfoSymmetry.get())
-                .setSpaceForFeederInfos(spaceForFeederInfos.get())
                 .setFeederInfosOuterMargin(feederInfosOuterMargin.get())
                 .setFeederInfosIntraMargin(feederInfosIntraMargin.get())
                 // Forced values
-                .setCssLocation(LayoutParameters.CssLocation.INSERTED_IN_SVG)
+                .setCssLocation(SvgParameters.CssLocation.INSERTED_IN_SVG)
                 .setSvgWidthAndHeightAdded(true);
+        return sldParameters;
     }
 }
