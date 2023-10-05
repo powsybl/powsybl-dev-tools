@@ -35,21 +35,14 @@ public class SingleLineDiagramModel extends DiagramModel {
 
     private static final String UNKNOWN_ITEM = "???";
 
-    private static final String HORIZONTAL_SUBSTATION_LAYOUT = "Horizontal";
-    private static final String VERTICAL_SUBSTATION_LAYOUT = "Vertical";
-    private static final String CGMES_SUBSTATION_LAYOUT = "CGMES";
-    private static final String SMART_VOLTAGELEVEL_LAYOUT = "Smart";
-    private static final String AUTO_EXTENSIONS_VOLTAGELEVEL_LAYOUT = "Auto extensions";
-    private static final String AUTO_WITHOUT_EXTENSIONS_CLUSTERING_VOLTAGELEVEL_LAYOUT = "Auto without extensions Clustering";
-    private static final String RANDOM_VOLTAGELEVEL_LAYOUT = "Random";
-    private static final String CGMES_VOLTAGELEVEL_LAYOUT = "CGMES";
+    // LayoutParameters
+    private final LayoutParametersBean layoutParametersBean;
 
-    // Layout Parameters
-    private final SldParametersBean sldParametersBean;
+    // SvgParameters
+    private final SvgParametersBean svgParametersBean;
 
     // Component library provider
     private final ObservableList<ComponentLibrary> componentLibraries = FXCollections.observableArrayList();
-
     private final ObjectProperty<ComponentLibrary> currentComponentLibrary = new SimpleObjectProperty<>();
 
     // Style provider
@@ -61,23 +54,28 @@ public class SingleLineDiagramModel extends DiagramModel {
     private final BooleanProperty highlightStyleProvider = new SimpleBooleanProperty();
     private final BooleanProperty topologicalStyleProvider = new SimpleBooleanProperty();
 
+    private static final String SMART_VOLTAGELEVEL_LAYOUT = "Smart";
+    private static final String AUTO_EXTENSIONS_VOLTAGELEVEL_LAYOUT = "Auto extensions";
+    private static final String AUTO_WITHOUT_EXTENSIONS_CLUSTERING_VOLTAGELEVEL_LAYOUT = "Auto without extensions Clustering";
+    private static final String RANDOM_VOLTAGELEVEL_LAYOUT = "Random";
+    private static final String CGMES_VOLTAGELEVEL_LAYOUT = "CGMES";
+
     // VoltageLevel layout provider
     private final Map<String, VoltageLevelLayoutFactory> nameToVoltageLevelLayoutFactoryMap = new TreeMap<>(); // ordered
-
     private final ObservableList<VoltageLevelLayoutFactory> voltageLevelLayouts = FXCollections.observableArrayList();
-
     private final VoltageLevelLayoutFactoryBean voltageLevelLayoutFactory;
+
+    private static final String HORIZONTAL_SUBSTATION_LAYOUT = "Horizontal";
+    private static final String VERTICAL_SUBSTATION_LAYOUT = "Vertical";
+    private static final String CGMES_SUBSTATION_LAYOUT = "CGMES";
 
     // Substation layout provider
     private final Map<String, SubstationLayoutFactory> nameToSubstationLayoutFactoryMap = new TreeMap<>(); // ordered
-
     private final ObservableList<SubstationLayoutFactory> substationLayouts = FXCollections.observableArrayList();
-
     private final ObjectProperty<SubstationLayoutFactory> currentSubstationLayoutFactory = new SimpleObjectProperty<>();
 
     // CGMES-DL names
     private final ObservableList<String> cgmesDLDiagramNames = FXCollections.observableArrayList();
-
     private final StringProperty currentCgmesDLDiagramName = new SimpleStringProperty();
 
     public SingleLineDiagramModel(// Providers
@@ -110,22 +108,24 @@ public class SingleLineDiagramModel extends DiagramModel {
                                   Property<Double> externCellHeight,
                                   Property<Double> internCellHeight,
                                   Property<Double> stackHeight,
-                                  BooleanProperty showGrid,
-                                  BooleanProperty showInternalNodes,
-                                  BooleanProperty drawStraightWires,
                                   BooleanProperty disconnectorsOnBus,
                                   Property<Double> scaleFactor,
-                                  BooleanProperty avoidSVGComponentsDuplication,
                                   BooleanProperty adaptCellHeightToContent,
                                   Property<Double> minSpaceBetweenComponents,
                                   Property<Double> minimumExternCellHeight,
                                   Property<LayoutParameters.Alignment> busBarAlignment,
+                                  Property<Double> spaceForFeederInfos,
+                                  //SvgParameters
+                                  BooleanProperty useName,
+                                  BooleanProperty showGrid,
+                                  BooleanProperty showInternalNodes,
+                                  BooleanProperty drawStraightWires,
                                   BooleanProperty centerLabel,
                                   BooleanProperty labelDiagonal,
                                   Property<Double> angleLabel,
                                   BooleanProperty addNodesInfos,
                                   BooleanProperty feederInfoSymmetry,
-                                  Property<Double> spaceForFeederInfos,
+                                  BooleanProperty avoidSVGComponentsDuplication,
                                   Property<Double> feederInfosOuterMargin,
                                   Property<Double> feederInfosIntraMargin
     ) {
@@ -151,8 +151,8 @@ public class SingleLineDiagramModel extends DiagramModel {
         this.highlightStyleProvider.bindBidirectional(highlightStyleProvider);
         this.topologicalStyleProvider.bindBidirectional(topologicalStyleProvider);
 
-        // Layout Parameters
-        this.sldParametersBean = new SldParametersBean(diagramPaddingTopBottom,
+        // LayoutParameters
+        this.layoutParametersBean = new LayoutParametersBean(diagramPaddingTopBottom,
                 diagramPaddingLeftRight,
                 voltagePaddingTopBottom,
                 voltagePaddingLeftRight,
@@ -162,22 +162,23 @@ public class SingleLineDiagramModel extends DiagramModel {
                 externCellHeight,
                 internCellHeight,
                 stackHeight,
-                showGrid,
-                showInternalNodes,
-                drawStraightWires,
                 disconnectorsOnBus,
                 scaleFactor,
-                avoidSVGComponentsDuplication,
                 adaptCellHeightToContent,
                 minSpaceBetweenComponents,
                 minimumExternCellHeight,
                 busBarAlignment,
+                spaceForFeederInfos);
+        // SvgParameters
+        this.svgParametersBean = new SvgParametersBean(showGrid,
+                showInternalNodes,
+                drawStraightWires,
+                avoidSVGComponentsDuplication,
                 centerLabel,
                 labelDiagonal,
                 angleLabel,
                 addNodesInfos,
                 feederInfoSymmetry,
-                spaceForFeederInfos,
                 feederInfosOuterMargin,
                 feederInfosIntraMargin);
     }
