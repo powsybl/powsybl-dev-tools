@@ -53,6 +53,7 @@ public class SvgParametersBean {
 
         // Initialize
         SvgParameters defaultParameters = new SvgParameters();
+        idDisplayed.setValue(defaultParameters.getIdDisplayed());
         edgeInfoAlongEdge.setValue(defaultParameters.isEdgeInfoAlongEdge());
         edgeNameDisplayed.setValue(defaultParameters.isEdgeNameDisplayed());
         insertNameDesc.setValue(defaultParameters.isInsertNameDesc());
