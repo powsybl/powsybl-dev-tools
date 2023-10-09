@@ -57,7 +57,7 @@ public class SvgParametersBean {
 
         // Initialize
         SvgParameters defaultSvgParameters = new SvgParameters()
-                .setshowGrid(true);
+                .setShowGrid(true);
 
         useName.setValue(defaultSvgParameters.isUseName());
         showGrid.setValue(defaultSvgParameters.isShowGrid());

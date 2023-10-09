@@ -7,10 +7,8 @@
  */
 package com.powsybl.diagram.viewer.sld;
 
-import com.powsybl.sld.SldParameters;
 import com.powsybl.sld.layout.*;
 import com.powsybl.sld.library.ComponentTypeName;
-import com.powsybl.sld.svg.SvgParameters;
 import javafx.beans.property.*;
 import javafx.beans.value.ChangeListener;
 

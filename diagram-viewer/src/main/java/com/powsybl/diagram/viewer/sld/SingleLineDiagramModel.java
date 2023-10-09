@@ -9,7 +9,6 @@ package com.powsybl.diagram.viewer.sld;
 
 import com.powsybl.diagram.viewer.common.DiagramModel;
 import com.powsybl.iidm.network.Network;
-import com.powsybl.sld.SldParameters;
 import com.powsybl.sld.cgmes.dl.iidm.extensions.NetworkDiagramData;
 import com.powsybl.sld.cgmes.layout.CgmesSubstationLayoutFactory;
 import com.powsybl.sld.cgmes.layout.CgmesVoltageLevelLayoutFactory;
@@ -18,6 +17,7 @@ import com.powsybl.sld.layout.*;
 import com.powsybl.sld.layout.positionbyclustering.PositionByClustering;
 import com.powsybl.sld.layout.positionfromextension.PositionFromExtension;
 import com.powsybl.sld.library.ComponentLibrary;
+import com.powsybl.sld.svg.SvgParameters;
 import com.powsybl.sld.svg.styles.*;
 import com.powsybl.sld.svg.styles.iidm.*;
 import javafx.beans.property.*;
@@ -116,7 +116,6 @@ public class SingleLineDiagramModel extends DiagramModel {
                                   Property<LayoutParameters.Alignment> busBarAlignment,
                                   Property<Double> spaceForFeederInfos,
                                   //SvgParameters
-                                  BooleanProperty useName,
                                   BooleanProperty showGrid,
                                   BooleanProperty showInternalNodes,
                                   BooleanProperty drawStraightWires,
@@ -218,8 +217,19 @@ public class SingleLineDiagramModel extends DiagramModel {
     }
 
     public void addListener(ChangeListener<Object> changeListener) {
-        sldParametersBean.addListener(changeListener);
         voltageLevelLayoutFactory.addListener(changeListener);
+    }
+
+    public LayoutParameters getLayoutParameters() {
+        return layoutParametersBean.getLayoutParameters();
+    }
+
+    public SvgParameters getSvgParameters() {
+        return svgParametersBean.getSvgParameters(currentCgmesDLDiagramName.get());
+    }
+
+    public SvgParametersBean getSvgParametersBean() {
+        return svgParametersBean;
     }
 
     public ComponentLibrary getComponentLibrary() {
@@ -255,14 +265,6 @@ public class SingleLineDiagramModel extends DiagramModel {
 
     public SubstationLayoutFactory getSubstationLayoutFactory() {
         return currentSubstationLayoutFactory.get();
-    }
-
-    public SldParameters getSldParameters() {
-        return sldParametersBean.getParameters(currentCgmesDLDiagramName.get());
-    }
-
-    public SldParametersBean getSldParametersBean() {
-        return sldParametersBean;
     }
 
     public ObservableList<ComponentLibrary> getComponentLibraries() {

@@ -84,8 +84,12 @@ public class SingleLineDiagramController extends AbstractDiagramController {
                              StringWriter metadataWriter = new StringWriter();
                              StringWriter jsonWriter = new StringWriter()) {
 
-                            SldParameters sldParameters = model.getSldParameters();
-                            sldParameters.setComponentLibrary(model.getComponentLibrary());
+                            SldParameters sldParameters = new SldParameters()
+                                    .setLayoutParameters(model.getLayoutParameters())
+                                    .setSvgParameters(model.getSvgParameters())
+                                    .setComponentLibrary(model.getComponentLibrary())
+                                    .setSubstationLayoutFactory(model.getSubstationLayoutFactory())
+                                    .setStyleProviderFactory(network -> model.getStyleProvider(network));
 
                             SingleLineDiagram.draw(network, container.getId(),
                                     svgWriter,
