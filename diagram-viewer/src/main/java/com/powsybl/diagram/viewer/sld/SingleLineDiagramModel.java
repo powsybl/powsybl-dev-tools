@@ -218,6 +218,8 @@ public class SingleLineDiagramModel extends DiagramModel {
 
     public void addListener(ChangeListener<Object> changeListener) {
         voltageLevelLayoutFactory.addListener(changeListener);
+        layoutParametersBean.addListener(changeListener);
+        svgParametersBean.addListener(changeListener);
     }
 
     public LayoutParameters getLayoutParameters() {
