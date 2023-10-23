@@ -15,7 +15,6 @@ import com.powsybl.sld.cgmes.layout.CgmesVoltageLevelLayoutFactory;
 import com.powsybl.sld.layout.*;
 
 import com.powsybl.sld.layout.positionbyclustering.PositionByClustering;
-import com.powsybl.sld.layout.positionfromextension.PositionFromExtension;
 import com.powsybl.sld.library.ComponentLibrary;
 import com.powsybl.sld.svg.SvgParameters;
 import com.powsybl.sld.svg.styles.*;
@@ -61,10 +60,9 @@ public class SingleLineDiagramModel extends DiagramModel {
     private static final String CGMES_VOLTAGELEVEL_LAYOUT = "CGMES";
 
     // VoltageLevel layout provider
-    private final Map<String, VoltageLevelLayoutFactory> nameToVoltageLevelLayoutFactoryMap = new TreeMap<>(); // ordered
     private final Map<String, VoltageLevelLayoutFactoryCreator> nameToVoltageLevelLayoutFactoryCreatorMap = new TreeMap<>(); // ordered
-    private final ObservableList<VoltageLevelLayoutFactory> voltageLevelLayouts = FXCollections.observableArrayList();
-    private final VoltageLevelLayoutFactoryBean voltageLevelLayoutFactory;
+    private final ObservableList<VoltageLevelLayoutFactoryCreator> voltageLevelLayouts = FXCollections.observableArrayList();
+    private final ObjectProperty<VoltageLevelLayoutFactoryCreator> currentVoltageLevelLayoutFactoryCreator = new SimpleObjectProperty<>();
 
     private static final String HORIZONTAL_SUBSTATION_LAYOUT = "Horizontal";
     private static final String VERTICAL_SUBSTATION_LAYOUT = "Vertical";
@@ -81,7 +79,7 @@ public class SingleLineDiagramModel extends DiagramModel {
 
     public SingleLineDiagramModel(// Providers
                                   ReadOnlyObjectProperty<ComponentLibrary> componentLibrary,
-                                  ReadOnlyObjectProperty<VoltageLevelLayoutFactory> voltageLevelLayoutFactory,
+                                  ReadOnlyObjectProperty<VoltageLevelLayoutFactoryCreator> voltageLevelLayoutFactoryCreator,
                                   ReadOnlyObjectProperty<SubstationLayoutFactory> substationLayoutFactory,
                                   ReadOnlyObjectProperty<String> cgmesDLDiagramName,
                                   // Styles
@@ -134,14 +132,10 @@ public class SingleLineDiagramModel extends DiagramModel {
 
         // Providers
         this.currentComponentLibrary.bind(componentLibrary);
+        this.currentVoltageLevelLayoutFactoryCreator.bind(voltageLevelLayoutFactoryCreator);
         this.currentSubstationLayoutFactory.bind(substationLayoutFactory);
         this.currentCgmesDLDiagramName.bind(cgmesDLDiagramName);
-        this.voltageLevelLayoutFactory = new VoltageLevelLayoutFactoryBean(voltageLevelLayoutFactory,
-                stackFeeders,
-                exceptionWhenPatternUnhandled,
-                handleShunts,
-                removeFictitiousNodes,
-                substituteSingularFictitiousNodes);
+
         // Styles
         this.basicStyleProvider.bindBidirectional(basicStyleProvider);
         this.nominalStyleProvider.bindBidirectional(nominalStyleProvider);
@@ -185,13 +179,8 @@ public class SingleLineDiagramModel extends DiagramModel {
 
     public void initProviders() {
         // VoltageLevelLayouts
-        nameToVoltageLevelLayoutFactoryMap.put(AUTO_EXTENSIONS_VOLTAGELEVEL_LAYOUT, new PositionVoltageLevelLayoutFactory(new PositionFromExtension()));
         nameToVoltageLevelLayoutFactoryCreatorMap.put(AUTO_EXTENSIONS_VOLTAGELEVEL_LAYOUT, VoltageLevelLayoutFactoryCreator.newPositionVoltageLevelLayoutFactoryCreator());
-
-        nameToVoltageLevelLayoutFactoryMap.put(AUTO_WITHOUT_EXTENSIONS_CLUSTERING_VOLTAGELEVEL_LAYOUT, new PositionVoltageLevelLayoutFactory(new PositionByClustering()));
         nameToVoltageLevelLayoutFactoryCreatorMap.put(AUTO_WITHOUT_EXTENSIONS_CLUSTERING_VOLTAGELEVEL_LAYOUT, VoltageLevelLayoutFactoryCreator.newPositionVoltageLevelLayoutFactoryCreator(new PositionByClustering()));
-
-        nameToVoltageLevelLayoutFactoryMap.put(RANDOM_VOLTAGELEVEL_LAYOUT, new RandomVoltageLevelLayoutFactory(500, 500));
         nameToVoltageLevelLayoutFactoryCreatorMap.put(RANDOM_VOLTAGELEVEL_LAYOUT, i -> new RandomVoltageLevelLayoutFactory(500, 500));
         // SubstationLayouts
         nameToSubstationLayoutFactoryMap.put(HORIZONTAL_SUBSTATION_LAYOUT, new HorizontalSubstationLayoutFactory());
@@ -200,16 +189,13 @@ public class SingleLineDiagramModel extends DiagramModel {
         // Set all providers list
         componentLibraries.setAll(ComponentLibrary.findAll());
         substationLayouts.setAll(nameToSubstationLayoutFactoryMap.values());
-        voltageLevelLayouts.setAll(nameToVoltageLevelLayoutFactoryMap.values());
+        voltageLevelLayouts.setAll(nameToVoltageLevelLayoutFactoryCreatorMap.values());
     }
 
     public void updateFrom(Network network) {
         if (network != null) {
             // VoltageLevelLayouts
-            nameToVoltageLevelLayoutFactoryMap.put(SMART_VOLTAGELEVEL_LAYOUT, new SmartVoltageLevelLayoutFactory(network));
             nameToVoltageLevelLayoutFactoryCreatorMap.put(SMART_VOLTAGELEVEL_LAYOUT, VoltageLevelLayoutFactoryCreator.newSmartVoltageLevelLayoutFactoryCreator());
-
-            nameToVoltageLevelLayoutFactoryMap.put(CGMES_VOLTAGELEVEL_LAYOUT, new CgmesVoltageLevelLayoutFactory(network));
             nameToVoltageLevelLayoutFactoryCreatorMap.put(CGMES_VOLTAGELEVEL_LAYOUT, CgmesVoltageLevelLayoutFactory::new);
             // SubstationLayouts
             nameToSubstationLayoutFactoryMap.put(CGMES_SUBSTATION_LAYOUT, new CgmesSubstationLayoutFactory(network));
@@ -222,11 +208,10 @@ public class SingleLineDiagramModel extends DiagramModel {
         }
         // Set all providers list
         substationLayouts.setAll(nameToSubstationLayoutFactoryMap.values());
-        voltageLevelLayouts.setAll(nameToVoltageLevelLayoutFactoryMap.values());
+        voltageLevelLayouts.setAll(nameToVoltageLevelLayoutFactoryCreatorMap.values());
     }
 
     public void addListener(ChangeListener<Object> changeListener) {
-        voltageLevelLayoutFactory.addListener(changeListener);
         layoutParametersBean.addListener(changeListener);
         svgParametersBean.addListener(changeListener);
     }
@@ -270,13 +255,8 @@ public class SingleLineDiagramModel extends DiagramModel {
         return new StyleProvidersList(styles);
     }
 
-    public VoltageLevelLayoutFactory getVoltageLevelLayoutFactory() {
-        return voltageLevelLayoutFactory.getVoltageLevelLayoutFactory();
-    }
-
     public VoltageLevelLayoutFactoryCreator getVoltageLevelLayoutFactoryCreator() {
-        String voltageLevelFactoryCreatorKey = nameToVoltageLevelLayoutFactoryMap.keySet().stream().filter(name -> nameToVoltageLevelLayoutFactoryMap.get(name) == getVoltageLevelLayoutFactory()).findFirst().orElse(SMART_VOLTAGELEVEL_LAYOUT);
-        return nameToVoltageLevelLayoutFactoryCreatorMap.get(voltageLevelFactoryCreatorKey);
+        return currentVoltageLevelLayoutFactoryCreator.get();
     }
 
     public SubstationLayoutFactory getSubstationLayoutFactory() {
@@ -287,7 +267,7 @@ public class SingleLineDiagramModel extends DiagramModel {
         return componentLibraries;
     }
 
-    public ObservableList<VoltageLevelLayoutFactory> getVoltageLevelLayouts() {
+    public ObservableList<VoltageLevelLayoutFactoryCreator> getVoltageLevelLayouts() {
         return voltageLevelLayouts;
     }
 
@@ -328,17 +308,17 @@ public class SingleLineDiagramModel extends DiagramModel {
         };
     }
 
-    public StringConverter<VoltageLevelLayoutFactory> getVoltageLevelLayoutFactoryStringConverter() {
+    public StringConverter<VoltageLevelLayoutFactoryCreator> getVoltageLevelLayoutFactoryCreatorStringConverter() {
         return new StringConverter<>() {
             @Override
-            public String toString(VoltageLevelLayoutFactory object) {
-                Optional<String> label = nameToVoltageLevelLayoutFactoryMap.keySet().stream().filter(name -> nameToVoltageLevelLayoutFactoryMap.get(name) == object).findFirst();
+            public String toString(VoltageLevelLayoutFactoryCreator object) {
+                Optional<String> label = nameToVoltageLevelLayoutFactoryCreatorMap.keySet().stream().filter(name -> nameToVoltageLevelLayoutFactoryCreatorMap.get(name) == object).findFirst();
                 return label.orElse(UNKNOWN_ITEM);
             }
 
             @Override
-            public VoltageLevelLayoutFactory fromString(String item) {
-                return nameToVoltageLevelLayoutFactoryMap.get(item);
+            public VoltageLevelLayoutFactoryCreator fromString(String item) {
+                return nameToVoltageLevelLayoutFactoryCreatorMap.get(item);
             }
         };
     }
