@@ -11,8 +11,6 @@ import com.powsybl.sld.svg.SvgParameters;
 import javafx.beans.property.*;
 import javafx.beans.value.ChangeListener;
 
-import java.util.*;
-
 /**
  * @author Sophie Frasnedo <sophie.frasnedo at rte-france.com>
  */
