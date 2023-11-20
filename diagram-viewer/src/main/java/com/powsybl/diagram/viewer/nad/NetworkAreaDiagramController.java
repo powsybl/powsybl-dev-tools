@@ -14,7 +14,9 @@ import com.powsybl.iidm.network.Container;
 import com.powsybl.iidm.network.Network;
 import com.powsybl.iidm.network.Substation;
 import com.powsybl.iidm.network.VoltageLevel;
+import com.powsybl.nad.NadParameters;
 import com.powsybl.nad.NetworkAreaDiagram;
+import com.powsybl.nad.build.iidm.VoltageLevelFilter;
 import javafx.concurrent.Service;
 import javafx.concurrent.Task;
 import javafx.fxml.FXML;
@@ -24,6 +26,7 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.util.List;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 /**
@@ -54,13 +57,11 @@ public class NetworkAreaDiagramController extends AbstractDiagramController {
                 return new Task<>() {
                     @Override
                     protected String call() {
-                        NetworkAreaDiagram nad = getNetworkAreaDiagram(network, model, container);
-                        nad.draw(writer,
-                                model.getSvgParameters(),
-                                model.getLayoutParameters(),
-                                model.getStyleProvider(network),
-                                model.getLabelProvider(network),
-                                model.getLayoutFactory());
+                        Predicate<VoltageLevel> vls = getVoltageLevelFilter(network, model, container);
+                        NadParameters nadParameters = new NadParameters();
+                        nadParameters.setLayoutParameters(model.getLayoutParameters());
+                        nadParameters.setSvgParameters(model.getSvgParameters());
+                        NetworkAreaDiagram.draw(network, writer, nadParameters, vls);
                         return writer.toString();
                     }
                 };
@@ -75,15 +76,15 @@ public class NetworkAreaDiagramController extends AbstractDiagramController {
         nadService.start();
     }
 
-    private static NetworkAreaDiagram getNetworkAreaDiagram(Network network, NetworkAreaDiagramModel model, Container<?> container) {
+    private static Predicate<VoltageLevel> getVoltageLevelFilter(Network network, NetworkAreaDiagramModel model, Container<?> container) {
         switch (container.getContainerType()) {
             case NETWORK:
-                return new NetworkAreaDiagram((Network) container);
+                return VoltageLevelFilter.NO_FILTER;
             case SUBSTATION:
                 List<String> vls = ((Substation) container).getVoltageLevelStream().map(VoltageLevel::getId).collect(Collectors.toList());
-                return new NetworkAreaDiagram(network, vls, model.getDepth());
+                return VoltageLevelFilter.createVoltageLevelsDepthFilter(network, vls, model.getDepth());
             case VOLTAGE_LEVEL:
-                return new NetworkAreaDiagram(network, container.getId(), model.getDepth());
+                return VoltageLevelFilter.createVoltageLevelDepthFilter(network, container.getId(), model.getDepth());
             default:
                 throw new AssertionError();
         }

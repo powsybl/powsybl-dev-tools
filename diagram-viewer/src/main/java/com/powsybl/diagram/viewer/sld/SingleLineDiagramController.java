@@ -11,9 +11,7 @@ import com.powsybl.diagram.viewer.common.AbstractDiagramController;
 import com.powsybl.diagram.viewer.common.ContainerResult;
 import com.powsybl.iidm.network.*;
 import com.powsybl.sld.SingleLineDiagram;
-import com.powsybl.sld.layout.LayoutParameters;
-import com.powsybl.sld.svg.DefaultDiagramLabelProvider;
-import com.powsybl.sld.svg.DiagramLabelProvider;
+import com.powsybl.sld.SldParameters;
 import com.powsybl.sld.svg.styles.StyleProvider;
 import javafx.beans.property.StringProperty;
 import javafx.concurrent.Service;
@@ -86,22 +84,18 @@ public class SingleLineDiagramController extends AbstractDiagramController {
                              StringWriter metadataWriter = new StringWriter();
                              StringWriter jsonWriter = new StringWriter()) {
 
-                            LayoutParameters diagramLayoutParameters = model.getLayoutParameters();
-
-                            DiagramLabelProvider initProvider = new DefaultDiagramLabelProvider(network,
-                                    model.getComponentLibrary(),
-                                    diagramLayoutParameters);
+                            SldParameters sldParameters = new SldParameters()
+                                    .setLayoutParameters(model.getLayoutParameters())
+                                    .setSvgParameters(model.getSvgParameters())
+                                    .setComponentLibrary(model.getComponentLibrary())
+                                    .setSubstationLayoutFactory(model.getSubstationLayoutFactory())
+                                    .setStyleProviderFactory(model::getStyleProvider)
+                                    .setVoltageLevelLayoutFactoryCreator(model.getVoltageLevelLayoutFactoryCreator());
 
                             SingleLineDiagram.draw(network, container.getId(),
                                     svgWriter,
                                     metadataWriter,
-                                    diagramLayoutParameters,
-                                    model.getComponentLibrary(),
-                                    model.getSubstationLayoutFactory(),
-                                    model.getVoltageLevelLayoutFactory(),
-                                    initProvider,
-                                    model.getStyleProvider(network),
-                                    "");
+                                    sldParameters);
 
                             svgWriter.flush();
                             metadataWriter.flush();

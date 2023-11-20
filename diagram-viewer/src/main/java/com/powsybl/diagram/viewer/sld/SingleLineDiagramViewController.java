@@ -15,8 +15,8 @@ import com.powsybl.sld.cgmes.dl.iidm.extensions.NetworkDiagramData;
 import com.powsybl.sld.cgmes.layout.CgmesVoltageLevelLayoutFactory;
 import com.powsybl.sld.layout.LayoutParameters;
 import com.powsybl.sld.layout.PositionVoltageLevelLayoutFactory;
+import com.powsybl.sld.layout.VoltageLevelLayoutFactoryCreator;
 import com.powsybl.sld.layout.SubstationLayoutFactory;
-import com.powsybl.sld.layout.VoltageLevelLayoutFactory;
 import com.powsybl.sld.library.ComponentLibrary;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanBinding;
@@ -67,7 +67,7 @@ public class SingleLineDiagramViewController extends AbstractDiagramViewControll
     public ComboBox<SubstationLayoutFactory> substationLayoutComboBox;
 
     @FXML
-    public ComboBox<VoltageLevelLayoutFactory> voltageLevelLayoutComboBox;
+    public ComboBox<VoltageLevelLayoutFactoryCreator> voltageLevelLayoutComboBox;
 
     @FXML
     public ComboBox<String> cgmesDLDiagramsComboBox;
@@ -210,22 +210,24 @@ public class SingleLineDiagramViewController extends AbstractDiagramViewControll
                 externCellHeightSpinner.getValueFactory().valueProperty(),
                 internCellHeightSpinner.getValueFactory().valueProperty(),
                 stackHeightSpinner.getValueFactory().valueProperty(),
-                showGridCheckBox.selectedProperty(),
-                showInternalNodesCheckBox.selectedProperty(),
-                drawStraightWiresCheckBox.selectedProperty(),
                 disconnectorsOnBusCheckBox.selectedProperty(),
                 scaleFactorSpinner.getValueFactory().valueProperty(),
-                avoidSVGComponentsDuplicationCheckBox.selectedProperty(),
                 adaptCellHeightToContentCheckBox.selectedProperty(),
                 minSpaceBetweenComponentsSpinner.getValueFactory().valueProperty(),
                 minimumExternCellHeightSpinner.getValueFactory().valueProperty(),
                 busBarAlignmentChoice.valueProperty(),
+                spaceForFeederInfosSpinner.getValueFactory().valueProperty(),
+
+                //SvgParameters
+                showGridCheckBox.selectedProperty(),
+                showInternalNodesCheckBox.selectedProperty(),
+                drawStraightWiresCheckBox.selectedProperty(),
                 centerLabelCheckBox.selectedProperty(),
                 labelDiagonalCheckBox.selectedProperty(),
                 angleLabelSpinner.getValueFactory().valueProperty(),
                 addNodesInfosCheckBox.selectedProperty(),
                 feederInfoSymmetryCheckBox.selectedProperty(),
-                spaceForFeederInfosSpinner.getValueFactory().valueProperty(),
+                avoidSVGComponentsDuplicationCheckBox.selectedProperty(),
                 feederInfosOuterMarginSpinner.getValueFactory().valueProperty(),
                 feederInfosIntraMarginSpinner.getValueFactory().valueProperty()
         );
@@ -244,7 +246,7 @@ public class SingleLineDiagramViewController extends AbstractDiagramViewControll
         substationLayoutComboBox.getSelectionModel().selectFirst(); // Default selection without Network
         // VoltageLevel layout
         voltageLevelLayoutComboBox.itemsProperty().bind(Bindings.createObjectBinding(() -> model.getVoltageLevelLayouts()));
-        voltageLevelLayoutComboBox.setConverter(model.getVoltageLevelLayoutFactoryStringConverter());
+        voltageLevelLayoutComboBox.setConverter(model.getVoltageLevelLayoutFactoryCreatorStringConverter());
         voltageLevelLayoutComboBox.getSelectionModel().selectFirst(); // Default selection without Network
 
         // CGMES-DL Diagrams

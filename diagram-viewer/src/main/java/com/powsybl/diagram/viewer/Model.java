@@ -28,7 +28,7 @@ public class Model {
         this.nadModel = nadModel;
         this.sldModel = sldModel;
         this.nadModel.getSvgParametersBean().bind(showNames);
-        this.sldModel.getLayoutParametersBean().bind(showNames);
+        this.sldModel.getSvgParametersBean().bind(showNames);
     }
 
     public void setNetwork(Network network) {

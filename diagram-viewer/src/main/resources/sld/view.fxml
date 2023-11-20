@@ -138,9 +138,6 @@
                                 <SpinnerValueFactory.DoubleSpinnerValueFactory min="10" max="100" amountToStepBy="5"/>
                             </valueFactory>
                         </Spinner>
-                        <CheckBox fx:id="showGridCheckBox" text="Show grid" selected="true"/>
-                        <CheckBox fx:id="showInternalNodesCheckBox" text="Show internal nodes"/>
-                        <CheckBox fx:id="drawStraightWiresCheckBox" text="Draw straight wires"/>
                         <CheckBox fx:id="disconnectorsOnBusCheckBox" text="Disconnectors on bus"/>
                         <Label text="Scale factor:"/>
                         <Spinner fx:id="scaleFactorSpinner" editable="true">
@@ -148,7 +145,6 @@
                                 <SpinnerValueFactory.DoubleSpinnerValueFactory min="1" max="20" amountToStepBy="1"/>
                             </valueFactory>
                         </Spinner>
-                        <CheckBox fx:id="avoidSVGComponentsDuplicationCheckBox" text="Avoid SVG components duplication"/>
                         <CheckBox fx:id="adaptCellHeightToContentCheckBox" text="Adapt cell height to content" selected="true"/>
                         <Label text="Min space between components:"/>
                         <Spinner fx:id="minSpaceBetweenComponentsSpinner" editable="true">
@@ -164,6 +160,21 @@
                         </Spinner>
                         <Label text="BusBar alignment:"/>
                         <EnumChoiceBox enumType="com.powsybl.sld.layout.LayoutParameters$Alignment" fx:id="busBarAlignmentChoice" initialValue="FIRST"/>
+                        <Label text="Space for feeder infos:"/>
+                        <Spinner fx:id="spaceForFeederInfosSpinner" editable="true">
+                            <valueFactory>
+                                <SpinnerValueFactory.DoubleSpinnerValueFactory min="0" max="200" amountToStepBy="1"/>
+                            </valueFactory>
+                        </Spinner>
+                        <Separator>
+                            <VBox.margin>
+                                <Insets topRightBottomLeft="5"/>
+                            </VBox.margin>
+                        </Separator>
+                        <Label text="Svg parameters:" style="-fx-font-weight: bold"/>
+                        <CheckBox fx:id="showGridCheckBox" text="Show grid" selected="true"/>
+                        <CheckBox fx:id="showInternalNodesCheckBox" text="Show internal nodes"/>
+                        <CheckBox fx:id="drawStraightWiresCheckBox" text="Draw straight wires"/>
                         <CheckBox fx:id="centerLabelCheckBox" text="Center label"/>
                         <CheckBox fx:id="labelDiagonalCheckBox" text="Label diagonal"/>
                         <Label text="Angle label:"/>
@@ -174,12 +185,7 @@
                         </Spinner>
                         <CheckBox fx:id="addNodesInfosCheckBox" text="Add nodes infos"/>
                         <CheckBox fx:id="feederInfoSymmetryCheckBox" text="Feeder info symmetry"/>
-                        <Label text="Space for feeder infos:"/>
-                        <Spinner fx:id="spaceForFeederInfosSpinner" editable="true">
-                            <valueFactory>
-                                <SpinnerValueFactory.DoubleSpinnerValueFactory min="0" max="200" amountToStepBy="1"/>
-                            </valueFactory>
-                        </Spinner>
+                        <CheckBox fx:id="avoidSVGComponentsDuplicationCheckBox" text="Avoid SVG components duplication"/>
                         <Label text="Feeder infos outer margin:"/>
                         <Spinner fx:id="feederInfosOuterMarginSpinner" editable="true">
                             <valueFactory>
