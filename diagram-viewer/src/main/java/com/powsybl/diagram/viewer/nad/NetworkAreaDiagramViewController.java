@@ -65,6 +65,8 @@ public class NetworkAreaDiagramViewController extends AbstractDiagramViewControl
     public ChoiceBox<SvgParameters.SizeConstraint> sizeConstraintChoice;
     @FXML
     public Spinner<Double> fixedSizeSpinner;
+    @FXML
+    public Spinner<Double> fixedScaleSpinner;
 
     @FXML
     public NetworkAreaDiagramController selectedDiagramController;
@@ -90,13 +92,19 @@ public class NetworkAreaDiagramViewController extends AbstractDiagramViewControl
                 // Diagram size
                 widthHeightAdded.selectedProperty(),
                 sizeConstraintChoice.valueProperty(),
-                fixedSizeSpinner.getValueFactory().valueProperty()
+                fixedSizeSpinner.getValueFactory().valueProperty(),
+                fixedScaleSpinner.getValueFactory().valueProperty()
         );
         // Diagram size
         this.sizeConstraintChoice.disableProperty().bind(widthHeightAdded.selectedProperty().not());
-        this.fixedSizeSpinner.disableProperty().bind(
-                widthHeightAdded.selectedProperty().not()
-                        .or(this.sizeConstraintChoice.valueProperty().isEqualTo(SvgParameters.SizeConstraint.NONE))
+        this.fixedSizeSpinner.visibleProperty().bind(
+                widthHeightAdded.selectedProperty().and(
+                        this.sizeConstraintChoice.valueProperty().isEqualTo(SvgParameters.SizeConstraint.FIXED_HEIGHT)
+                                .or(this.sizeConstraintChoice.valueProperty().isEqualTo(SvgParameters.SizeConstraint.FIXED_WIDTH)))
+        );
+        this.fixedScaleSpinner.visibleProperty().bind(
+                widthHeightAdded.selectedProperty().and(
+                        this.sizeConstraintChoice.valueProperty().isEqualTo(SvgParameters.SizeConstraint.FIXED_SCALE))
         );
     }
 

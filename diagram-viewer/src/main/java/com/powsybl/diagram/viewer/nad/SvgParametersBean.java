@@ -27,6 +27,7 @@ public class SvgParametersBean {
     private final BooleanProperty widthHeightAdded = new SimpleBooleanProperty();
     private final ObjectProperty<SvgParameters.SizeConstraint> sizeConstraint = new SimpleObjectProperty<>(this, "sizeConstraint", SvgParameters.SizeConstraint.NONE);
     private final ObjectProperty<Double> fixedSize = new SimpleObjectProperty<>();
+    private final ObjectProperty<Double> fixedScale = new SimpleObjectProperty<>();
 
     public SvgParametersBean(// SVG parameters
                              BooleanProperty edgeInfoAlongEdge,
@@ -38,7 +39,8 @@ public class SvgParametersBean {
                              // Diagram size
                              BooleanProperty widthHeightAdded,
                              Property<SvgParameters.SizeConstraint> sizeConstraint,
-                             Property<Double> fixedSize) {
+                             Property<Double> fixedSize,
+                             Property<Double> fixedScale) {
         // bind
         this.edgeInfoAlongEdge.bindBidirectional(edgeInfoAlongEdge);
         this.edgeNameDisplayed.bindBidirectional(edgeNameDisplayed);
@@ -50,6 +52,7 @@ public class SvgParametersBean {
         this.widthHeightAdded.bindBidirectional(widthHeightAdded);
         this.sizeConstraint.bindBidirectional(sizeConstraint);
         this.fixedSize.bindBidirectional(fixedSize);
+        this.fixedScale.bindBidirectional(fixedScale);
 
         // Initialize
         SvgParameters defaultParameters = new SvgParameters();
@@ -71,7 +74,7 @@ public class SvgParametersBean {
                 fixedSize.setValue((double) defaultParameters.getFixedWidth());
                 break;
             case FIXED_SCALE:
-                fixedSize.setValue(defaultParameters.getFixedScale());
+                fixedScale.setValue(defaultParameters.getFixedScale());
                 break;
             default:
                 break;
@@ -94,6 +97,7 @@ public class SvgParametersBean {
         this.widthHeightAdded.addListener(changeListener);
         this.sizeConstraint.addListener(changeListener);
         this.fixedSize.addListener(changeListener);
+        this.fixedScale.addListener(changeListener);
     }
 
     public SvgParameters getSvgParameters() {
@@ -115,7 +119,7 @@ public class SvgParametersBean {
                 svgParameters.setFixedWidth((int) Math.round(fixedSize.get()));
                 break;
             case FIXED_SCALE:
-                svgParameters.setFixedScale(fixedSize.get());
+                svgParameters.setFixedScale(fixedScale.get());
                 break;
             default:
                 break;
