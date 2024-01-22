@@ -91,6 +91,9 @@ public class SingleLineDiagramModel extends DiagramModel {
                                   BooleanProperty handleShunts,
                                   BooleanProperty removeFictitiousNodes,
                                   BooleanProperty substituteSingularFictitiousNodes,
+                                  // RandomVoltageLevelLayoutFactory
+                                  Property<Double> width,
+                                  Property<Double> height,
                                   // LayoutParameters
                                   Property<Double> diagramPaddingTopBottom,
                                   Property<Double> diagramPaddingLeftRight,
@@ -134,7 +137,9 @@ public class SingleLineDiagramModel extends DiagramModel {
                 exceptionWhenPatternUnhandled,
                 handleShunts,
                 removeFictitiousNodes,
-                substituteSingularFictitiousNodes);
+                substituteSingularFictitiousNodes,
+                width,
+                height);
         this.currentSubstationLayoutFactory.bind(substationLayoutFactory);
         this.currentCgmesDLDiagramName.bind(cgmesDLDiagramName);
 
@@ -202,6 +207,7 @@ public class SingleLineDiagramModel extends DiagramModel {
                 cgmesDLDiagramNames.clear();
             }
         }
+
         // Set all providers list
         substationLayouts.setAll(nameToSubstationLayoutFactoryMap.values());
     }

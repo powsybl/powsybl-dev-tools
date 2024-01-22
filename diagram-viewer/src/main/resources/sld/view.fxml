@@ -46,7 +46,7 @@
                         <CheckBox fx:id="highlightStyleProviderCheckBox" text="Highlight"/>
                         <CheckBox fx:id="topologicalStyleProviderCheckBox" text="Topology (default)"/>
                         <CheckBox fx:id="animatedStyleProviderCheckBox" text="Animated"/>
-                        <HBox spacing="5">
+                        <HBox fx:id="animationHBox" spacing="5">
                             <VBox.margin>
                                 <Insets left="10"/>
                             </VBox.margin>
@@ -70,6 +70,21 @@
                         <CheckBox fx:id="handleShuntsCheckBox" text="Handle shunts"/>
                         <CheckBox fx:id="removeFictitiousNodesCheckBox" text="Remove fictitious nodes"/>
                         <CheckBox fx:id="substituteSingularFictitiousNodesCheckBox" text="Substitute singular fictitious nodes"/>
+                        <HBox fx:id="randomHBox" spacing="5">
+                            <VBox.margin>
+                                <Insets left="10"/>
+                            </VBox.margin>
+                            <Spinner fx:id="randomWidthSpinner" editable="true">
+                                <valueFactory>
+                                    <SpinnerValueFactory.DoubleSpinnerValueFactory min="100" max="1000" amountToStepBy="5"/>
+                                </valueFactory>
+                            </Spinner>
+                            <Spinner fx:id="randomHeightSpinner" editable="true">
+                                <valueFactory>
+                                    <SpinnerValueFactory.DoubleSpinnerValueFactory min="100" max="1000" amountToStepBy="5"/>
+                                </valueFactory>
+                            </Spinner>
+                        </HBox>
                         <Label text="CGMES-DL Diagrams:"/>
                         <ComboBox fx:id="cgmesDLDiagramsComboBox"/>
                         <Separator>

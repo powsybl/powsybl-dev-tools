@@ -30,13 +30,20 @@ public class VoltageLevelLayoutFactoryBean {
     // PositionVoltageLevelLayoutFactory
     private final EnumMap<VoltageLevelLayoutFactoryType, PositionVoltageLevelLayoutBean> positionLayoutParametersByType = new EnumMap<>(VoltageLevelLayoutFactoryType.class);
 
+    // RandomVoltageLevelLayoutFactory
+    private final ObjectProperty<Double> width = new SimpleObjectProperty<>(500.0);
+    private final ObjectProperty<Double> height = new SimpleObjectProperty<>(500.0);
+
     public VoltageLevelLayoutFactoryBean(Property<VoltageLevelLayoutFactoryType> type,
                                          // PositionVoltageLevelLayoutFactory
                                          BooleanProperty stackFeeders,
                                          BooleanProperty exceptionWhenPatternUnhandled,
                                          BooleanProperty handleShunts,
                                          BooleanProperty removeFictitiousNodes,
-                                         BooleanProperty substituteSingularFictitiousNodes) {
+                                         BooleanProperty substituteSingularFictitiousNodes,
+                                         // RandomVoltageLevelLayoutFactory
+                                         Property<Double> width,
+                                         Property<Double> height) {
         // Current selection
         this.factoryType.bindBidirectional(type);
 
@@ -61,12 +68,19 @@ public class VoltageLevelLayoutFactoryBean {
                 substituteSingularFictitiousNodes.bindBidirectional(newParameters.substituteSingularFictitiousNodesProperty());
             }
         });
+
+        // RandomVoltageLevelLayoutFactory
+        width.bindBidirectional(this.width); // Keep this binding order in order to initialize with Bean value
+        height.bindBidirectional(this.height); // Keep this binding order in order to initialize with Bean value
     }
 
     public void addListener(ChangeListener<Object> changeListener) {
         // PositionVoltageLevelLayoutFactory
         this.factoryType.addListener(changeListener);
         this.positionLayoutParametersByType.forEach((k, v) -> v.addListener(changeListener));
+        // RandomVoltageLevelLayoutFactory
+        this.width.addListener(changeListener);
+        this.height.addListener(changeListener);
     }
 
     public VoltageLevelLayoutFactoryCreator getVoltageLevelLayoutFactoryCreator(Network network) {
@@ -82,7 +96,7 @@ public class VoltageLevelLayoutFactoryBean {
                 return VoltageLevelLayoutFactoryCreator.newPositionVoltageLevelLayoutFactoryCreator(positionLayoutParametersByType.get(type).getParameters());
             }
             case RANDOM -> {
-                return i -> new RandomVoltageLevelLayoutFactory(500.0, 500.0);
+                return i -> new RandomVoltageLevelLayoutFactory(this.width.get(), this.height.get());
             }
             case CGMES -> {
                 return i -> new CgmesVoltageLevelLayoutFactory(network);

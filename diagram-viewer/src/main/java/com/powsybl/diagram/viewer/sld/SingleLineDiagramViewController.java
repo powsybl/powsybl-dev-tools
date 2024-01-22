@@ -50,6 +50,9 @@ public class SingleLineDiagramViewController extends AbstractDiagramViewControll
     public CheckBox animatedStyleProviderCheckBox;
 
     @FXML
+    public HBox animationHBox;
+
+    @FXML
     public Spinner<Double> animationThreshold1Spinner;
 
     @FXML
@@ -129,6 +132,15 @@ public class SingleLineDiagramViewController extends AbstractDiagramViewControll
     public CheckBox substituteSingularFictitiousNodesCheckBox;
 
     @FXML
+    public HBox randomHBox;
+
+    @FXML
+    public Spinner<Double> randomWidthSpinner;
+
+    @FXML
+    public Spinner<Double> randomHeightSpinner;
+
+    @FXML
     public Spinner<Double> scaleFactorSpinner;
 
     @FXML
@@ -203,6 +215,9 @@ public class SingleLineDiagramViewController extends AbstractDiagramViewControll
                 handleShuntsCheckBox.selectedProperty(),
                 removeFictitiousNodesCheckBox.selectedProperty(),
                 substituteSingularFictitiousNodesCheckBox.selectedProperty(),
+                // RandomVoltageLevelLayoutFactory
+                randomWidthSpinner.getValueFactory().valueProperty(),
+                randomHeightSpinner.getValueFactory().valueProperty(),
                 // LayoutParameters
                 diagramPaddingTopBottomSpinner.getValueFactory().valueProperty(),
                 diagramPaddingLeftRightSpinner.getValueFactory().valueProperty(),
@@ -244,8 +259,8 @@ public class SingleLineDiagramViewController extends AbstractDiagramViewControll
         componentLibraryComboBox.getSelectionModel().selectLast(); // Flat selection
         // Style provider
         nominalStyleProviderCheckBox.setSelected(true); // Default selection without Network
-        animationThreshold1Spinner.disableProperty().bind(animatedStyleProviderCheckBox.selectedProperty().not());
-        animationThreshold2Spinner.disableProperty().bind(animatedStyleProviderCheckBox.selectedProperty().not());
+        animationHBox.visibleProperty().bind(animatedStyleProviderCheckBox.selectedProperty());
+        animationHBox.managedProperty().bind(animationHBox.visibleProperty());
         // Substation layout
         substationLayoutComboBox.itemsProperty().bind(Bindings.createObjectBinding(() -> model.getSubstationLayouts()));
         substationLayoutComboBox.setConverter(model.getSubstationLayoutStringConverter());
@@ -257,6 +272,11 @@ public class SingleLineDiagramViewController extends AbstractDiagramViewControll
         // CGMES-DL Diagrams
         cgmesDLDiagramsComboBox.itemsProperty().bind(Bindings.createObjectBinding(() -> model.getCgmesDLDiagramNames()));
         cgmesDLDiagramsComboBox.getSelectionModel().selectFirst(); // Default selection without Network
+
+        // RandomVoltageLevelLayoutFactory
+        BooleanBinding randomSelectionBinding = Bindings.createBooleanBinding(() -> voltageLevelLayoutComboBox.getSelectionModel().getSelectedItem() == VoltageLevelLayoutFactoryBean.VoltageLevelLayoutFactoryType.RANDOM, voltageLevelLayoutComboBox.getSelectionModel().selectedItemProperty());
+        randomHBox.visibleProperty().bind(randomSelectionBinding);
+        randomHBox.managedProperty().bind(randomHBox.visibleProperty());
 
         // PositionVoltageLevelLayoutFactory
         BooleanBinding disableBinding = Bindings.createBooleanBinding(() -> voltageLevelLayoutComboBox.getSelectionModel().getSelectedItem() == VoltageLevelLayoutFactoryBean.VoltageLevelLayoutFactoryType.AUTO_EXTENSIONS || voltageLevelLayoutComboBox.getSelectionModel().getSelectedItem() == VoltageLevelLayoutFactoryBean.VoltageLevelLayoutFactoryType.AUTO_WITHOUT_EXTENSIONS_CLUSTERING, voltageLevelLayoutComboBox.getSelectionModel().selectedItemProperty());
