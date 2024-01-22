@@ -138,8 +138,8 @@ public class MainViewController {
 
                 private String getString(Container<?> value) {
                     String cNameOrId = showNames.isSelected() ? value.getNameOrId() : value.getId();
-                    if (value instanceof Substation && hideVoltageLevels.isSelected()) {
-                        long nbVoltageLevels = ((Substation) value).getVoltageLevelStream().count();
+                    if (value instanceof Substation substation && hideVoltageLevels.isSelected()) {
+                        long nbVoltageLevels = substation.getVoltageLevelStream().count();
                         return cNameOrId + " [" + nbVoltageLevels + "]";
                     }
                     return cNameOrId;
@@ -346,7 +346,7 @@ public class MainViewController {
             boolean sFilterOk = testPassed(filter, s);
             List<VoltageLevel> voltageLevels = s.getVoltageLevelStream()
                     .filter(v -> sFilterOk || testPassed(filter, v))
-                    .collect(Collectors.toList());
+                    .toList();
             if ((sFilterOk || !voltageLevels.isEmpty()) && !hideSubstations.isSelected()) {
                 CheckBoxTreeItem<Container<?>> sItem = new CheckBoxTreeItem<>(s);
                 sItem.setIndependent(true);
@@ -365,7 +365,7 @@ public class MainViewController {
         List<VoltageLevel> emptySubstationVoltageLevels = network.getVoltageLevelStream()
                 .filter(v -> v.getSubstation().isEmpty())
                 .filter(v -> testPassed(filter, v))
-                .collect(Collectors.toList());
+                .toList();
         initVoltageLevelsTree(rootTreeItem, emptySubstationVoltageLevels, containersChecked);
 
         rootTreeItem.getChildren().stream()
