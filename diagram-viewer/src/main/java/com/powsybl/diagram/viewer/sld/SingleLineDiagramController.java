@@ -90,7 +90,7 @@ public class SingleLineDiagramController extends AbstractDiagramController {
                                     .setComponentLibrary(model.getComponentLibrary())
                                     .setSubstationLayoutFactory(model.getSubstationLayoutFactory())
                                     .setStyleProviderFactory(model::getStyleProvider)
-                                    .setVoltageLevelLayoutFactoryCreator(model.getVoltageLevelLayoutFactoryCreator());
+                                    .setVoltageLevelLayoutFactoryCreator(model.getVoltageLevelLayoutFactoryCreator(network));
 
                             SingleLineDiagram.draw(network, container.getId(),
                                     svgWriter,

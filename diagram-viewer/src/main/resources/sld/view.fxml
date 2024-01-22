@@ -64,7 +64,7 @@
                         <Label text="Substation Layout:"/>
                         <ComboBox fx:id="substationLayoutComboBox"/>
                         <Label text="VoltageLevel Layout:"/>
-                        <ComboBox fx:id="voltageLevelLayoutComboBox"/>
+                        <EnumChoiceBox enumType="com.powsybl.diagram.viewer.sld.VoltageLevelLayoutFactoryBean$VoltageLevelLayoutFactoryType" fx:id="voltageLevelLayoutComboBox" initialValue="SMART"/>
                         <CheckBox fx:id="stackFeedersCheckBox" text="Stack feeders"/>
                         <CheckBox fx:id="exceptionWhenPatternUnhandledCheckBox" text="Exception when pattern unhandled"/>
                         <CheckBox fx:id="handleShuntsCheckBox" text="Handle shunts"/>
