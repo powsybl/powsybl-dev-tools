@@ -15,8 +15,6 @@ import com.powsybl.diagram.viewer.nad.NetworkAreaDiagramViewController;
 import com.powsybl.diagram.viewer.sld.SingleLineDiagramJsHandler;
 import com.powsybl.diagram.viewer.sld.SingleLineDiagramViewController;
 import com.powsybl.iidm.network.*;
-import com.powsybl.iidm.network.test.*;
-import com.powsybl.iidm.network.util.*;
 import com.powsybl.loadflow.LoadFlow;
 import javafx.application.*;
 import javafx.concurrent.Service;
@@ -30,14 +28,14 @@ import javafx.scene.input.MouseEvent;
 import javafx.stage.FileChooser;
 import javafx.util.StringConverter;
 import org.apache.commons.lang3.StringUtils;
+import org.reflections.*;
+import org.reflections.scanners.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import java.io.*;
-import java.net.*;
+import java.lang.reflect.*;
 import java.util.*;
 import java.util.function.Function;
-import java.util.jar.*;
 import java.util.prefs.Preferences;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -162,15 +160,22 @@ public class MainViewController {
     }
 
     private void initMenuBar() {
-        // Add EurostagTutorialExample1Factory
-        MenuItem eurostagTutorialItem = new MenuItem("EurostagTutorial");
-        eurostagTutorialItem.setOnAction(event -> {
-            clean();
-            loadingStatus.setStyle("-fx-background-color: yellow");
-            filePath.setText("");
-            model.setNetwork(EurostagTutorialExample1Factory.create());
-        });
-        menuNetworks.getItems().add(eurostagTutorialItem);
+        // Add menu item for all classes from powsybl-iidm-test
+        String packageName = "com.powsybl.iidm.network.test";
+        // Get all classes using reflections
+        Reflections reflections = new Reflections(packageName, new SubTypesScanner(false));
+        Set<Class<?>> testClasses = reflections.getSubTypesOf(Object.class);
+        List<MenuItem> items = new ArrayList<>();
+        for (Class<?> clazz : testClasses) {
+            // Keep only classes with create() method
+            if (Arrays.stream(clazz.getDeclaredMethods()).anyMatch(method -> method.getName().equals("create") && method.getParameterCount() == 0)) {
+                // Build menu item
+                MenuItem item = new MenuItem(clazz.getSimpleName());
+                item.setOnAction(event -> loadFactory(clazz));
+                items.add(item);
+            }
+        }
+        menuNetworks.getItems().addAll(items);
     }
 
     private void updateSldDiagrams() {
@@ -212,12 +217,39 @@ public class MainViewController {
                     };
                 }
             };
-            handleLoadingResult(file, networkService);
+            handleLoadingFileResult(file, networkService);
             networkService.start();
         }
     }
 
-    private void handleLoadingResult(File file, Service<Network> networkService) {
+    public void loadFactory(Class<?> clazz) {
+        if (clazz != null) {
+            Service<Network> networkService = new Service<>() {
+                @Override
+                protected Task<Network> createTask() {
+                    return new Task<>() {
+                        @Override
+                        protected Network call() throws InstantiationException, IllegalAccessException, IllegalArgumentException, java.lang.reflect.InvocationTargetException, NoSuchMethodException, SecurityException {
+                            // Get constructor
+                            Constructor<?> constructor = clazz.getDeclaredConstructor();
+                            constructor.trySetAccessible();
+                            // Make new instance
+                            Object instance = constructor.newInstance();
+                            // Get create() method using refection
+                            Method createMethod = instance.getClass().getDeclaredMethod("create");
+                            createMethod.trySetAccessible();
+                            // Get Network instance
+                            return (Network) createMethod.invoke(instance);
+                        }
+                    };
+                }
+            };
+            handleLoadingFactoryResult(clazz, networkService);
+            networkService.start();
+        }
+    }
+
+    private void handleLoadingFileResult(File file, Service<Network> networkService) {
         networkService.setOnRunning(event -> {
             loadingStatus.setStyle("-fx-background-color: yellow");
             filePath.setText(file.getAbsolutePath());
@@ -229,6 +261,27 @@ public class MainViewController {
             model.setNetwork((Network) event.getSource().getValue());
             loadingStatus.setStyle("-fx-background-color: green");
             preferences.put(CASE_PATH_PROPERTY, file.getAbsolutePath());
+        });
+
+        networkService.setOnFailed(event -> {
+            Throwable exception = event.getSource().getException();
+            LOGGER.error(exception.toString(), exception);
+            filePath.setText("");
+            loadingStatus.setStyle("-fx-background-color: red");
+        });
+    }
+
+    private void handleLoadingFactoryResult(Class<?> clazz, Service<Network> networkService) {
+        networkService.setOnRunning(event -> {
+            loadingStatus.setStyle("-fx-background-color: yellow");
+            filePath.setText(clazz.getSimpleName());
+        });
+
+        networkService.setOnSucceeded(event -> {
+            clean();
+            Network network = (Network) event.getSource().getValue();
+            model.setNetwork(network);
+            loadingStatus.setStyle("-fx-background-color: green");
         });
 
         networkService.setOnFailed(event -> {
