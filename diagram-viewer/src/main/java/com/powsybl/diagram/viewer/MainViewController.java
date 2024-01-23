@@ -15,9 +15,13 @@ import com.powsybl.diagram.viewer.nad.NetworkAreaDiagramViewController;
 import com.powsybl.diagram.viewer.sld.SingleLineDiagramJsHandler;
 import com.powsybl.diagram.viewer.sld.SingleLineDiagramViewController;
 import com.powsybl.iidm.network.*;
+import com.powsybl.iidm.network.test.*;
+import com.powsybl.iidm.network.util.*;
 import com.powsybl.loadflow.LoadFlow;
+import javafx.application.*;
 import javafx.concurrent.Service;
 import javafx.concurrent.Task;
+import javafx.event.*;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
 import javafx.scene.control.*;
@@ -29,11 +33,11 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.UncheckedIOException;
+import java.io.*;
+import java.net.*;
 import java.util.*;
 import java.util.function.Function;
+import java.util.jar.*;
 import java.util.prefs.Preferences;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -73,6 +77,9 @@ public class MainViewController {
     @FXML
     private Node loadingStatus;
 
+    @FXML
+    private Menu menuNetworks;
+
     private Model model;
 
     /**
@@ -93,6 +100,8 @@ public class MainViewController {
 
     @FXML
     private void initialize() {
+        initMenuBar();
+
         sldJsHandler = new SingleLineDiagramJsHandler(vlTree);
 
         String casePathPropertyValue = preferences.get(CASE_PATH_PROPERTY, null);
@@ -152,6 +161,18 @@ public class MainViewController {
         sldViewController.addListener((observable, oldValue, newValue) -> updateSldDiagrams());
     }
 
+    private void initMenuBar() {
+        // Add EurostagTutorialExample1Factory
+        MenuItem eurostagTutorialItem = new MenuItem("EurostagTutorial");
+        eurostagTutorialItem.setOnAction(event -> {
+            clean();
+            loadingStatus.setStyle("-fx-background-color: yellow");
+            filePath.setText("");
+            model.setNetwork(EurostagTutorialExample1Factory.create());
+        });
+        menuNetworks.getItems().add(eurostagTutorialItem);
+    }
+
     private void updateSldDiagrams() {
         sldViewController.updateAllDiagrams(model.getNetwork(), model.getSelectedContainer());
     }
@@ -162,14 +183,18 @@ public class MainViewController {
 
     @FXML
     private void onClickLoadFile(MouseEvent event) {
+        event.consume();
+        loadFile(selectFile());
+    }
+
+    private File selectFile() {
         FileChooser fileChooser = new FileChooser();
         String caseFolderPropertyValue = preferences.get(CASE_FOLDER_PROPERTY, null);
         if (caseFolderPropertyValue != null) {
             fileChooser.setInitialDirectory(new File(caseFolderPropertyValue));
         }
         fileChooser.setTitle("Open case File");
-        loadFile(fileChooser.showOpenDialog(loadingStatus.getScene().getWindow()));
-        event.consume();
+        return fileChooser.showOpenDialog(loadingStatus.getScene().getWindow());
     }
 
     public void loadFile(File file) {
@@ -295,7 +320,7 @@ public class MainViewController {
                 .filter(item -> item.getValue().getId().equals(selectedContainerId))
                 .findFirst()
                 .ifPresentOrElse(item -> vlTree.getSelectionModel().select(item),
-                    () -> vlTree.getSelectionModel().clearSelection());
+                        () -> vlTree.getSelectionModel().clearSelection());
 
         loadSelectedContainersDiagrams();
 
@@ -376,5 +401,15 @@ public class MainViewController {
                 throw new UncheckedIOException(e);
             }
         }
+    }
+
+    public void processExit(ActionEvent actionEvent) {
+        actionEvent.consume();
+        Platform.exit();
+    }
+
+    public void processOpen(ActionEvent actionEvent) {
+        actionEvent.consume();
+        loadFile(selectFile());
     }
 }

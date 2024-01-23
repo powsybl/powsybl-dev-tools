@@ -7,44 +7,56 @@
             prefHeight="900.0" prefWidth="1000.0"
             fx:controller="com.powsybl.diagram.viewer.MainViewController">
     <top>
-        <HBox>
-            <BorderPane.margin>
-                <Insets topRightBottomLeft="5"/>
-            </BorderPane.margin>
-            <Button fx:id="loadingStatus" minWidth="28" style="-fx-background-color: red"/>
-            <TextField fx:id="filePath" prefWidth="900" HBox.hgrow="ALWAYS" maxWidth="Infinity"/>
-            <Button onMouseClicked="#onClickLoadFile" text="..."/>
-        </HBox>
+        <MenuBar>
+            <Menu text="File">
+                <MenuItem text="Open" onAction="#processOpen"/>
+                <SeparatorMenuItem/>
+                <MenuItem text="Exit" onAction="#processExit"/>
+            </Menu>
+            <Menu text="Test">
+                <Menu fx:id="menuNetworks" text="Networks"/>
+            </Menu>
+        </MenuBar>
     </top>
     <center>
-        <SplitPane dividerPositions="0.25, 0.8" style="-fx-box-border: transparent">
-            <BorderPane.margin>
-                <Insets topRightBottomLeft="5"/>
-            </BorderPane.margin>
-            <SplitPane orientation="VERTICAL">
-                <GridPane hgap="5" vgap="5">
-                    <Button onMouseClicked="#onClickLoadFlow" text="Run powsybl open-loadflow" GridPane.rowIndex="0"/>
-                    <CheckBox fx:id="showNames" onMouseClicked="#initSubstationsTree" text="Show names" selected="true" GridPane.rowIndex="1"/>
-                    <CheckBox fx:id="hideSubstations" onMouseClicked="#initSubstationsTree" text="Hide substations" GridPane.rowIndex="2"/>
-                    <CheckBox fx:id="hideVoltageLevels" onMouseClicked="#initSubstationsTree" text="Hide voltage levels" GridPane.rowIndex="3"/>
-                    <Label text="Filter:" GridPane.rowIndex="4"/>
-                    <TextField fx:id="filterField" onKeyTyped="#initSubstationsTree" minWidth="40" GridPane.rowIndex="5"/>
-                </GridPane>
-                <VBox minHeight="700">
-                    <TreeView VBox.vgrow="ALWAYS" maxHeight="Infinity" fx:id="vlTree"/>
-                </VBox>
+        <VBox>
+            <HBox>
+                <BorderPane.margin>
+                    <Insets topRightBottomLeft="5"/>
+                </BorderPane.margin>
+                <Button fx:id="loadingStatus" minWidth="28" style="-fx-background-color: red"/>
+                <TextField fx:id="filePath" prefWidth="900" HBox.hgrow="ALWAYS" maxWidth="Infinity"/>
+                <Button onMouseClicked="#onClickLoadFile" text="..."/>
+            </HBox>
+            <SplitPane dividerPositions="0.25, 0.8" style="-fx-box-border: transparent">
+                <BorderPane.margin>
+                    <Insets topRightBottomLeft="5"/>
+                </BorderPane.margin>
+                <SplitPane orientation="VERTICAL">
+                    <GridPane hgap="5" vgap="5">
+                        <Button onMouseClicked="#onClickLoadFlow" text="Run powsybl open-loadflow" GridPane.rowIndex="0"/>
+                        <CheckBox fx:id="showNames" onMouseClicked="#initSubstationsTree" text="Show names" selected="true" GridPane.rowIndex="1"/>
+                        <CheckBox fx:id="hideSubstations" onMouseClicked="#initSubstationsTree" text="Hide substations" GridPane.rowIndex="2"/>
+                        <CheckBox fx:id="hideVoltageLevels" onMouseClicked="#initSubstationsTree" text="Hide voltage levels" GridPane.rowIndex="3"/>
+                        <Label text="Filter:" GridPane.rowIndex="4"/>
+                        <TextField fx:id="filterField" onKeyTyped="#initSubstationsTree" minWidth="40" GridPane.rowIndex="5"/>
+                    </GridPane>
+                    <VBox minHeight="700">
+                        <TreeView VBox.vgrow="ALWAYS" maxHeight="Infinity" fx:id="vlTree"/>
+                    </VBox>
+                </SplitPane>
+                <TabPane fx:id="sldOrNad">
+                    <Tab text="Single Line" closable="false">
+                        <fx:include fx:id="sldView" source="sld/view.fxml"/>
+                    </Tab>
+                    <Tab text="Network Area" closable="false">
+                        <fx:include fx:id="nadView" source="nad/view.fxml"/>
+                    </Tab>
+                </TabPane>
             </SplitPane>
-            <TabPane fx:id="sldOrNad">
-                <Tab text="Single Line" closable="false">
-                    <fx:include fx:id="sldView" source="sld/view.fxml"/>
-                </Tab>
-                <Tab text="Network Area" closable="false">
-                    <fx:include fx:id="nadView" source="nad/view.fxml"/>
-                </Tab>
-            </TabPane>
-        </SplitPane>
+        </VBox>
     </center>
     <padding>
-        <Insets topRightBottomLeft="5"/>
+        <Insets right="5" bottom="5" left="5"/>
     </padding>
 </BorderPane>
