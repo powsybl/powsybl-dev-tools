@@ -76,7 +76,7 @@ public class MainViewController {
     private Node loadingStatus;
 
     @FXML
-    private Menu menuNetworks;
+    private MenuButton networkFactoryMenuButton;
 
     private Model model;
 
@@ -98,7 +98,7 @@ public class MainViewController {
 
     @FXML
     private void initialize() {
-        initMenuBar();
+        initializeNetworkFactories();
 
         sldJsHandler = new SingleLineDiagramJsHandler(vlTree);
 
@@ -159,7 +159,7 @@ public class MainViewController {
         sldViewController.addListener((observable, oldValue, newValue) -> updateSldDiagrams());
     }
 
-    private void initMenuBar() {
+    private void initializeNetworkFactories() {
         // Add menu item for all classes from powsybl-iidm-test
         String packageName = "com.powsybl.iidm.network.test";
         // Get all classes using reflections
@@ -175,7 +175,7 @@ public class MainViewController {
                 items.add(item);
             }
         }
-        menuNetworks.getItems().addAll(items);
+        networkFactoryMenuButton.getItems().addAll(items);
     }
 
     private void updateSldDiagrams() {
