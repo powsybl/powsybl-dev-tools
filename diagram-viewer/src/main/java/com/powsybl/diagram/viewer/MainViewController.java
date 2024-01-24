@@ -56,6 +56,10 @@ public class MainViewController {
     public TextField filePath;
     @FXML
     public TextField filterField;
+
+    @FXML
+    public ChoiceBox<IdentifiableType> componentTypeFilterChoice;
+
     @FXML
     public TreeView<Container<?>> vlTree;
     @FXML
@@ -127,10 +131,10 @@ public class MainViewController {
             treeCell.setConverter(new StringConverter<>() {
                 @Override
                 public String toString(TreeItem<Container<?>> c) {
-                    if (c.getValue().getContainerType() == ContainerType.NETWORK) {
-                        return "Full Network";
-                    }
                     if (c.getValue() != null) {
+                        if (c.getValue().getContainerType() == ContainerType.NETWORK) {
+                            return "Full Network";
+                        }
                         return getString(c.getValue());
                     }
                     return "";
@@ -320,15 +324,15 @@ public class MainViewController {
         if (network == null) {
             return;
         }
-
+        // Create root item if needed
         CheckBoxTreeItem<Container<?>> rootTreeItem = (CheckBoxTreeItem<Container<?>>) vlTree.getRoot();
         if (rootTreeItem == null) {
-            rootTreeItem = new CheckBoxTreeItem<>(network);
+            rootTreeItem = new CheckBoxTreeItem<>();
             rootTreeItem.setIndependent(true);
             rootTreeItem.setExpanded(true);
             vlTree.setRoot(rootTreeItem);
         }
-
+        // Store previous selection
         Set<String> containersChecked = rootTreeItem.getChildren().stream()
                 .flatMap(s -> Stream.concat(Stream.of(s), s.getChildren().stream()))
                 .filter(CheckBoxTreeItem.class::isInstance).map(ti -> (CheckBoxTreeItem<Container<?>>) ti)
@@ -338,14 +342,17 @@ public class MainViewController {
         TreeItem<Container<?>> selectedItem = vlTree.getSelectionModel().getSelectedItem();
         String selectedContainerId = selectedItem == null ? null : selectedItem.getValue().getId();
 
+        // Set root item to current Network instance
         rootTreeItem.getChildren().clear();
         rootTreeItem.setValue(network);
 
+        // Filter parameters
+        IdentifiableType idType = componentTypeFilterChoice.getValue();
         String filter = filterField.getText();
         for (Substation s : network.getSubstations()) {
-            boolean sFilterOk = testPassed(filter, s);
+            boolean sFilterOk = testPassed(filter, s) && testComponent(idType, s);
             List<VoltageLevel> voltageLevels = s.getVoltageLevelStream()
-                    .filter(v -> sFilterOk || testPassed(filter, v))
+                    .filter(v -> (sFilterOk || testPassed(filter, v)) && testComponent(idType, v))
                     .toList();
             if ((sFilterOk || !voltageLevels.isEmpty()) && !hideSubstations.isSelected()) {
                 CheckBoxTreeItem<Container<?>> sItem = new CheckBoxTreeItem<>(s);
@@ -378,6 +385,26 @@ public class MainViewController {
         loadSelectedContainersDiagrams();
 
         vlTree.setShowRoot(true);
+    }
+
+    private boolean testComponent(IdentifiableType type, Substation s) {
+        boolean result;
+        if (type == IdentifiableType.NETWORK || type == IdentifiableType.SUBSTATION || type == IdentifiableType.VOLTAGE_LEVEL) {
+            result = true;
+        } else {
+            result = s.getVoltageLevelStream().anyMatch(v -> v.getConnectableStream().anyMatch(c -> c.getType() == type));
+        }
+        return result;
+    }
+
+    private boolean testComponent(IdentifiableType type, VoltageLevel v) {
+        boolean result;
+        if (type == IdentifiableType.NETWORK || type == IdentifiableType.SUBSTATION || type == IdentifiableType.VOLTAGE_LEVEL) {
+            result = true;
+        } else {
+            result = v.getConnectableStream().anyMatch(c -> c.getType() == type);
+        }
+        return result;
     }
 
     private void initVoltageLevelsTree(TreeItem<Container<?>> parentItem, Collection<VoltageLevel> voltageLevels, Set<String> checkedContainers) {
