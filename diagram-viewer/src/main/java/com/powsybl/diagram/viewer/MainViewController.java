@@ -387,22 +387,16 @@ public class MainViewController {
         vlTree.setShowRoot(true);
     }
 
-    private boolean testComponent(IdentifiableType type, Substation s) {
-        boolean result;
+    private boolean testComponent(IdentifiableType type, Identifiable<?> identifiable) {
+        boolean result = false;
         if (type == IdentifiableType.NETWORK || type == IdentifiableType.SUBSTATION || type == IdentifiableType.VOLTAGE_LEVEL) {
             result = true;
         } else {
-            result = s.getVoltageLevelStream().anyMatch(v -> v.getConnectableStream().anyMatch(c -> c.getType() == type));
-        }
-        return result;
-    }
-
-    private boolean testComponent(IdentifiableType type, VoltageLevel v) {
-        boolean result;
-        if (type == IdentifiableType.NETWORK || type == IdentifiableType.SUBSTATION || type == IdentifiableType.VOLTAGE_LEVEL) {
-            result = true;
-        } else {
-            result = v.getConnectableStream().anyMatch(c -> c.getType() == type);
+            if (identifiable instanceof Substation s) {
+                result = s.getVoltageLevelStream().anyMatch(v -> testComponent(type, v));
+            } else if (identifiable instanceof VoltageLevel v) {
+                result = v.getConnectableStream().anyMatch(c -> c.getType() == type);
+            }
         }
         return result;
     }
