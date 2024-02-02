@@ -47,6 +47,7 @@ public class NetworkAreaDiagramModel extends DiagramModel {
 
                                    // Layout parameters
                                    Property<Double> springRepulsionFactor,
+                                   Property<Integer> nbMaxSteps,
                                    BooleanProperty textNodesIncluded,
 
                                    // SVG parameters
@@ -67,7 +68,7 @@ public class NetworkAreaDiagramModel extends DiagramModel {
         this.layoutFactory.bind(layout);
 
         // Layout parameters
-        layoutParametersBean = new LayoutParametersBean(textNodesIncluded, springRepulsionFactor);
+        layoutParametersBean = new LayoutParametersBean(textNodesIncluded, springRepulsionFactor, nbMaxSteps);
 
         // SVG parameters
         svgParameters = new SvgParametersBean(infoAlongEdge,
