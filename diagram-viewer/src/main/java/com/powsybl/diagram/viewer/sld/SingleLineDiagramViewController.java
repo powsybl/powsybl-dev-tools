@@ -20,7 +20,7 @@ import com.powsybl.sld.layout.SubstationLayoutFactory;
 import com.powsybl.sld.library.ComponentLibrary;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanBinding;
-import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.*;
 import javafx.beans.value.ChangeListener;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -155,6 +155,12 @@ public class SingleLineDiagramViewController extends AbstractDiagramViewControll
     public CheckBox labelDiagonalCheckBox;
 
     @FXML
+    public CheckBox displayEquipmentNodesLabelCheckBox;
+
+    @FXML
+    public CheckBox displayConnectivityNodesIdCheckBox;
+
+    @FXML
     public Spinner<Double> angleLabelSpinner;
 
     @FXML
@@ -224,6 +230,8 @@ public class SingleLineDiagramViewController extends AbstractDiagramViewControll
                 drawStraightWiresCheckBox.selectedProperty(),
                 centerLabelCheckBox.selectedProperty(),
                 labelDiagonalCheckBox.selectedProperty(),
+                displayEquipmentNodesLabelCheckBox.selectedProperty(),
+                displayConnectivityNodesIdCheckBox.selectedProperty(),
                 angleLabelSpinner.getValueFactory().valueProperty(),
                 addNodesInfosCheckBox.selectedProperty(),
                 feederInfoSymmetryCheckBox.selectedProperty(),
