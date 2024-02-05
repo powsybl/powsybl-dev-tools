@@ -177,6 +177,8 @@
                         <CheckBox fx:id="drawStraightWiresCheckBox" text="Draw straight wires"/>
                         <CheckBox fx:id="centerLabelCheckBox" text="Center label"/>
                         <CheckBox fx:id="labelDiagonalCheckBox" text="Label diagonal"/>
+                        <CheckBox fx:id="displayEquipmentNodesLabelCheckBox" text="Show equipement node labels"/>
+                        <CheckBox fx:id="displayConnectivityNodesIdCheckBox" text="Show connectivity node ids"/>
                         <Label text="Angle label:"/>
                         <Spinner fx:id="angleLabelSpinner" editable="true">
                             <valueFactory>

@@ -23,6 +23,9 @@ public class SvgParametersBean {
     private final BooleanProperty avoidSVGComponentsDuplication = new SimpleBooleanProperty();
     private final BooleanProperty centerLabel = new SimpleBooleanProperty();
     private final BooleanProperty labelDiagonal = new SimpleBooleanProperty();
+    private final BooleanProperty displayEquipmentNodesLabel = new SimpleBooleanProperty();
+    private final BooleanProperty displayConnectivityNodesId = new SimpleBooleanProperty();
+
     private final ObjectProperty<Double>angleLabel = new SimpleObjectProperty<>();
     private final BooleanProperty addNodesInfos = new SimpleBooleanProperty();
     private final BooleanProperty feederInfoSymmetry = new SimpleBooleanProperty();
@@ -35,6 +38,8 @@ public class SvgParametersBean {
                              BooleanProperty avoidSVGComponentsDuplication,
                              BooleanProperty centerLabel,
                              BooleanProperty labelDiagonal,
+                             BooleanProperty displayEquipmentNodesLabel,
+                             BooleanProperty displayConnectivityNodesId,
                              Property<Double> angleLabel,
                              BooleanProperty addNodesInfos,
                              BooleanProperty feederInfoSymmetry,
@@ -47,6 +52,8 @@ public class SvgParametersBean {
         this.avoidSVGComponentsDuplication.bindBidirectional(avoidSVGComponentsDuplication);
         this.centerLabel.bindBidirectional(centerLabel);
         this.labelDiagonal.bindBidirectional(labelDiagonal);
+        this.displayEquipmentNodesLabel.bindBidirectional(displayEquipmentNodesLabel);
+        this.displayConnectivityNodesId.bindBidirectional(displayConnectivityNodesId);
         this.angleLabel.bindBidirectional(angleLabel);
         this.addNodesInfos.bindBidirectional(addNodesInfos);
         this.feederInfoSymmetry.bindBidirectional(feederInfoSymmetry);
@@ -64,6 +71,8 @@ public class SvgParametersBean {
         avoidSVGComponentsDuplication.setValue(defaultSvgParameters.isAvoidSVGComponentsDuplication());
         centerLabel.setValue(defaultSvgParameters.isLabelCentered());
         labelDiagonal.setValue(defaultSvgParameters.isLabelDiagonal());
+        displayEquipmentNodesLabel.setValue(defaultSvgParameters.isDisplayEquipmentNodesLabel());
+        displayConnectivityNodesId.setValue(defaultSvgParameters.isDisplayConnectivityNodesId());
         angleLabel.setValue(defaultSvgParameters.getAngleLabelShift());
         addNodesInfos.setValue(defaultSvgParameters.isAddNodesInfos());
         feederInfoSymmetry.setValue(defaultSvgParameters.isFeederInfoSymmetry());
@@ -83,6 +92,8 @@ public class SvgParametersBean {
         this.avoidSVGComponentsDuplication.addListener(changeListener);
         this.centerLabel.addListener(changeListener);
         this.labelDiagonal.addListener(changeListener);
+        this.displayEquipmentNodesLabel.addListener(changeListener);
+        this.displayConnectivityNodesId.addListener(changeListener);
         this.angleLabel.addListener(changeListener);
         this.addNodesInfos.addListener(changeListener);
         this.feederInfoSymmetry.addListener(changeListener);
@@ -98,6 +109,8 @@ public class SvgParametersBean {
                 .setAvoidSVGComponentsDuplication(avoidSVGComponentsDuplication.get())
                 .setLabelCentered(centerLabel.get())
                 .setLabelDiagonal(labelDiagonal.get())
+                .setDisplayEquipmentNodesLabel(displayEquipmentNodesLabel.get())
+                .setDisplayConnectivityNodesId(displayConnectivityNodesId.get())
                 .setAngleLabelShift(angleLabel.get())
                 .setAddNodesInfos(addNodesInfos.get())
                 .setFeederInfoSymmetry(feederInfoSymmetry.get())
