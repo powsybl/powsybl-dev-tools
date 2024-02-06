@@ -12,8 +12,9 @@ import com.powsybl.diagram.viewer.common.AbstractDiagramViewController;
 import com.powsybl.iidm.network.Container;
 import com.powsybl.iidm.network.Network;
 import com.powsybl.sld.cgmes.dl.iidm.extensions.*;
-import com.powsybl.sld.layout.LayoutParameters;
-import com.powsybl.sld.layout.SubstationLayoutFactory;
+import com.powsybl.sld.cgmes.layout.*;
+import com.powsybl.sld.layout.*;
+import com.powsybl.sld.layout.positionbyclustering.*;
 import com.powsybl.sld.library.ComponentLibrary;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanBinding;
@@ -68,7 +69,7 @@ public class SingleLineDiagramViewController extends AbstractDiagramViewControll
     public ComboBox<SubstationLayoutFactory> substationLayoutComboBox;
 
     @FXML
-    public ChoiceBox<VoltageLevelLayoutFactoryBean.VoltageLevelLayoutFactoryType> voltageLevelLayoutComboBox;
+    public ChoiceBox<SingleLineDiagramModel.VoltageLevelLayoutFactoryType> voltageLevelLayoutComboBox;
 
     @FXML
     public ComboBox<String> cgmesDLDiagramsComboBox;
@@ -132,15 +133,6 @@ public class SingleLineDiagramViewController extends AbstractDiagramViewControll
     public CheckBox substituteSingularFictitiousNodesCheckBox;
 
     @FXML
-    public HBox randomHBox;
-
-    @FXML
-    public Spinner<Double> randomWidthSpinner;
-
-    @FXML
-    public Spinner<Double> randomHeightSpinner;
-
-    @FXML
     public Spinner<Double> scaleFactorSpinner;
 
     @FXML
@@ -198,7 +190,6 @@ public class SingleLineDiagramViewController extends AbstractDiagramViewControll
         model = new SingleLineDiagramModel(
                 // Providers
                 componentLibraryComboBox.valueProperty(),
-                voltageLevelLayoutComboBox.valueProperty(),
                 substationLayoutComboBox.valueProperty(),
                 cgmesDLDiagramsComboBox.valueProperty(),
                 // - Styles
@@ -209,15 +200,6 @@ public class SingleLineDiagramViewController extends AbstractDiagramViewControll
                 animationThreshold2Spinner.getValueFactory().valueProperty(),
                 highlightStyleProviderCheckBox.selectedProperty(),
                 topologicalStyleProviderCheckBox.selectedProperty(),
-                // PositionVoltageLevelLayoutFactory
-                stackFeedersCheckBox.selectedProperty(),
-                exceptionWhenPatternUnhandledCheckBox.selectedProperty(),
-                handleShuntsCheckBox.selectedProperty(),
-                removeFictitiousNodesCheckBox.selectedProperty(),
-                substituteSingularFictitiousNodesCheckBox.selectedProperty(),
-                // RandomVoltageLevelLayoutFactory
-                randomWidthSpinner.getValueFactory().valueProperty(),
-                randomHeightSpinner.getValueFactory().valueProperty(),
                 // LayoutParameters
                 diagramPaddingTopBottomSpinner.getValueFactory().valueProperty(),
                 diagramPaddingLeftRightSpinner.getValueFactory().valueProperty(),
@@ -266,20 +248,12 @@ public class SingleLineDiagramViewController extends AbstractDiagramViewControll
         substationLayoutComboBox.setConverter(model.getSubstationLayoutStringConverter());
         substationLayoutComboBox.getSelectionModel().selectFirst(); // Default selection without Network
 
-        // VoltageLevel layout
-        voltageLevelLayoutComboBox.setConverter(model.getVoltageLevelLayoutFactoryCreatorStringConverter());
-
         // CGMES-DL Diagrams
         cgmesDLDiagramsComboBox.itemsProperty().bind(Bindings.createObjectBinding(() -> model.getCgmesDLDiagramNames()));
         cgmesDLDiagramsComboBox.getSelectionModel().selectFirst(); // Default selection without Network
 
-        // RandomVoltageLevelLayoutFactory
-        BooleanBinding randomSelectionBinding = Bindings.createBooleanBinding(() -> voltageLevelLayoutComboBox.getSelectionModel().getSelectedItem() == VoltageLevelLayoutFactoryBean.VoltageLevelLayoutFactoryType.RANDOM, voltageLevelLayoutComboBox.getSelectionModel().selectedItemProperty());
-        randomHBox.visibleProperty().bind(randomSelectionBinding);
-        randomHBox.managedProperty().bind(randomHBox.visibleProperty());
-
         // PositionVoltageLevelLayoutFactory
-        BooleanBinding disableBinding = Bindings.createBooleanBinding(() -> voltageLevelLayoutComboBox.getSelectionModel().getSelectedItem() == VoltageLevelLayoutFactoryBean.VoltageLevelLayoutFactoryType.AUTO_EXTENSIONS || voltageLevelLayoutComboBox.getSelectionModel().getSelectedItem() == VoltageLevelLayoutFactoryBean.VoltageLevelLayoutFactoryType.AUTO_WITHOUT_EXTENSIONS_CLUSTERING, voltageLevelLayoutComboBox.getSelectionModel().selectedItemProperty());
+        BooleanBinding disableBinding = Bindings.createBooleanBinding(() -> voltageLevelLayoutComboBox.getSelectionModel().getSelectedItem() == SingleLineDiagramModel.VoltageLevelLayoutFactoryType.AUTO_EXTENSIONS || voltageLevelLayoutComboBox.getSelectionModel().getSelectedItem() == SingleLineDiagramModel.VoltageLevelLayoutFactoryType.AUTO_WITHOUT_EXTENSIONS_CLUSTERING, voltageLevelLayoutComboBox.getSelectionModel().selectedItemProperty());
         stackFeedersCheckBox.visibleProperty().bind(disableBinding);
         exceptionWhenPatternUnhandledCheckBox.visibleProperty().bind(disableBinding);
         handleShuntsCheckBox.visibleProperty().bind(disableBinding);
@@ -304,19 +278,27 @@ public class SingleLineDiagramViewController extends AbstractDiagramViewControll
         highlightStyleProviderCheckBox.selectedProperty().addListener(changeListener);
         topologicalStyleProviderCheckBox.selectedProperty().addListener(changeListener);
 
+        voltageLevelLayoutComboBox.valueProperty().addListener(changeListener);
+        stackFeedersCheckBox.selectedProperty().addListener(changeListener);
+        exceptionWhenPatternUnhandledCheckBox.selectedProperty().addListener(changeListener);
+        handleShuntsCheckBox.selectedProperty().addListener(changeListener);
+        removeFictitiousNodesCheckBox.selectedProperty().addListener(changeListener);
+        substituteSingularFictitiousNodesCheckBox.selectedProperty().addListener(changeListener);
+
         // LayoutParameters
         model.addListener(changeListener);
     }
 
     public void updateAllDiagrams(Network network, Container<?> selectedContainer) {
         if (selectedContainer != null) {
-            SingleLineDiagramController.updateDiagram(network, model, model.getSelectedContainerResult(), selectedContainer);
+            SingleLineDiagramController.updateDiagram(network, model, model.getSelectedContainerResult(), selectedContainer,
+                    getVoltageLevelLayoutFactoryCreator());
         }
-        model.getCheckedContainerStream().forEach(container -> SingleLineDiagramController.updateDiagram(network, model, model.getCheckedContainerResult(container), container));
+        model.getCheckedContainerStream().forEach(container -> SingleLineDiagramController.updateDiagram(network, model, model.getCheckedContainerResult(container), container, getVoltageLevelLayoutFactoryCreator()));
     }
 
     public void createDiagram(SingleLineDiagramJsHandler jsHandler, Network network, Container<?> container) {
-        selectedDiagramController.createDiagram(jsHandler, network, model, model.getSelectedContainerResult(), container);
+        selectedDiagramController.createDiagram(jsHandler, network, model, model.getSelectedContainerResult(), container, getVoltageLevelLayoutFactoryCreator());
     }
 
     public void createCheckedTab(SingleLineDiagramJsHandler jsHandler,
@@ -332,7 +314,8 @@ public class SingleLineDiagramViewController extends AbstractDiagramViewControll
                     network,
                     model,
                     model.getCheckedContainerResult(container),
-                    container);
+                    container,
+                    getVoltageLevelLayoutFactoryCreator());
             super.createCheckedTab(containerTreeItem, tabName, diagram, checkedDiagramController);
         } catch (IOException e) {
             LOGGER.error(e.toString(), e);
@@ -354,7 +337,7 @@ public class SingleLineDiagramViewController extends AbstractDiagramViewControll
         getModel().updateFrom(networkProperty.get());
         cgmesDLDiagramsComboBox.disableProperty().unbind();
         cgmesDLDiagramsComboBox.disableProperty().bind(Bindings.createBooleanBinding(() -> {
-            boolean cgmesSelected = voltageLevelLayoutComboBox.getSelectionModel().getSelectedItem() == VoltageLevelLayoutFactoryBean.VoltageLevelLayoutFactoryType.CGMES;
+            boolean cgmesSelected = voltageLevelLayoutComboBox.getSelectionModel().getSelectedItem() == SingleLineDiagramModel.VoltageLevelLayoutFactoryType.CGMES;
             return cgmesSelected && NetworkDiagramData.checkNetworkDiagramData(networkProperty.get());
         }, voltageLevelLayoutComboBox.getSelectionModel().selectedItemProperty()).not());
 
@@ -369,18 +352,6 @@ public class SingleLineDiagramViewController extends AbstractDiagramViewControll
         highlightStyleProviderCheckBox.disableProperty().bind(Bindings.createBooleanBinding(() -> networkProperty.get() != null, networkProperty).not());
         topologicalStyleProviderCheckBox.disableProperty().unbind();
         topologicalStyleProviderCheckBox.disableProperty().bind(Bindings.createBooleanBinding(() -> networkProperty.get() != null, networkProperty).not());
-        // Hide SMART & CGMES if no network available
-        if (networkProperty.get() == null) {
-            voltageLevelLayoutComboBox.getItems().remove(VoltageLevelLayoutFactoryBean.VoltageLevelLayoutFactoryType.SMART);
-            voltageLevelLayoutComboBox.getItems().remove(VoltageLevelLayoutFactoryBean.VoltageLevelLayoutFactoryType.CGMES);
-        } else {
-            if (!voltageLevelLayoutComboBox.getItems().contains(VoltageLevelLayoutFactoryBean.VoltageLevelLayoutFactoryType.SMART)) {
-                voltageLevelLayoutComboBox.getItems().add(VoltageLevelLayoutFactoryBean.VoltageLevelLayoutFactoryType.SMART.ordinal(), VoltageLevelLayoutFactoryBean.VoltageLevelLayoutFactoryType.SMART);
-            }
-            if (!voltageLevelLayoutComboBox.getItems().contains(VoltageLevelLayoutFactoryBean.VoltageLevelLayoutFactoryType.CGMES)) {
-                voltageLevelLayoutComboBox.getItems().add(VoltageLevelLayoutFactoryBean.VoltageLevelLayoutFactoryType.CGMES.ordinal(), VoltageLevelLayoutFactoryBean.VoltageLevelLayoutFactoryType.CGMES);
-            }
-        }
         // Horizontal selection
         substationLayoutComboBox.getSelectionModel().select(1);
         // CGMES-DL Diagrams first selection
@@ -395,5 +366,22 @@ public class SingleLineDiagramViewController extends AbstractDiagramViewControll
     @Override
     protected AbstractDiagramController getCheckedDiagramController(Tab tabInChecked) {
         return checkedDiagramControllers.get(tabInChecked);
+    }
+
+    public VoltageLevelLayoutFactoryCreator getVoltageLevelLayoutFactoryCreator() {
+        PositionVoltageLevelLayoutFactoryParameters parameters = new PositionVoltageLevelLayoutFactoryParameters();
+        parameters.setFeederStacked(stackFeedersCheckBox.isSelected())
+                .setExceptionIfPatternNotHandled(exceptionWhenPatternUnhandledCheckBox.isSelected())
+                .setHandleShunts(handleShuntsCheckBox.isSelected())
+                .setRemoveUnnecessaryFictitiousNodes(removeFictitiousNodesCheckBox.isSelected())
+                .setSubstituteSingularFictitiousByFeederNode(substituteSingularFictitiousNodesCheckBox.isSelected());
+        SingleLineDiagramModel.VoltageLevelLayoutFactoryType type = voltageLevelLayoutComboBox.getValue();
+        return switch (type) {
+            case SMART -> SmartVoltageLevelLayoutFactory::new;
+            case AUTO_EXTENSIONS -> network -> new PositionVoltageLevelLayoutFactory(new PositionByClustering(), parameters);
+            case AUTO_WITHOUT_EXTENSIONS_CLUSTERING -> network -> new PositionVoltageLevelLayoutFactory(parameters);
+            case RANDOM -> network -> new RandomVoltageLevelLayoutFactory(500.0, 500.0);
+            case CGMES -> CgmesVoltageLevelLayoutFactory::new;
+        };
     }
 }

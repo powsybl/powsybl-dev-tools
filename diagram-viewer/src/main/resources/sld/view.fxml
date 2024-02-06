@@ -65,26 +65,11 @@
                         <ComboBox fx:id="substationLayoutComboBox"/>
                         <Label text="VoltageLevel Layout:"/>
                         <EnumChoiceBox enumType="com.powsybl.diagram.viewer.sld.VoltageLevelLayoutFactoryBean$VoltageLevelLayoutFactoryType" fx:id="voltageLevelLayoutComboBox" initialValue="SMART"/>
-                        <CheckBox fx:id="stackFeedersCheckBox" text="Stack feeders"/>
+                        <CheckBox fx:id="stackFeedersCheckBox" text="Stack feeders" selected="true"/>
                         <CheckBox fx:id="exceptionWhenPatternUnhandledCheckBox" text="Exception when pattern unhandled"/>
                         <CheckBox fx:id="handleShuntsCheckBox" text="Handle shunts"/>
                         <CheckBox fx:id="removeFictitiousNodesCheckBox" text="Remove fictitious nodes"/>
                         <CheckBox fx:id="substituteSingularFictitiousNodesCheckBox" text="Substitute singular fictitious nodes"/>
-                        <HBox fx:id="randomHBox" spacing="5">
-                            <VBox.margin>
-                                <Insets left="10"/>
-                            </VBox.margin>
-                            <Spinner fx:id="randomWidthSpinner" editable="true">
-                                <valueFactory>
-                                    <SpinnerValueFactory.DoubleSpinnerValueFactory min="100" max="1000" amountToStepBy="5"/>
-                                </valueFactory>
-                            </Spinner>
-                            <Spinner fx:id="randomHeightSpinner" editable="true">
-                                <valueFactory>
-                                    <SpinnerValueFactory.DoubleSpinnerValueFactory min="100" max="1000" amountToStepBy="5"/>
-                                </valueFactory>
-                            </Spinner>
-                        </HBox>
                         <Label text="CGMES-DL Diagrams:"/>
                         <ComboBox fx:id="cgmesDLDiagramsComboBox"/>
                         <Separator>

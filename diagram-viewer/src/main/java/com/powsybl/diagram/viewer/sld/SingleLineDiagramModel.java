@@ -10,7 +10,7 @@ package com.powsybl.diagram.viewer.sld;
 import com.powsybl.diagram.viewer.common.DiagramModel;
 import com.powsybl.iidm.network.Network;
 import com.powsybl.sld.cgmes.dl.iidm.extensions.*;
-import com.powsybl.sld.cgmes.layout.CgmesSubstationLayoutFactory;
+import com.powsybl.sld.cgmes.layout.*;
 import com.powsybl.sld.layout.*;
 
 import com.powsybl.sld.library.ComponentLibrary;
@@ -29,6 +29,21 @@ import java.util.*;
  * @author Thomas Adam <tadam at silicom.fr>
  */
 public class SingleLineDiagramModel extends DiagramModel {
+
+    public enum VoltageLevelLayoutFactoryType {
+        AUTO_EXTENSIONS, AUTO_WITHOUT_EXTENSIONS_CLUSTERING, CGMES, RANDOM, SMART;
+
+        @Override
+        public String toString() {
+            return switch (this) {
+                case SMART -> "Smart";
+                case AUTO_EXTENSIONS -> "Auto extensions";
+                case AUTO_WITHOUT_EXTENSIONS_CLUSTERING -> "Auto without extensions Clustering";
+                case RANDOM -> "Random";
+                case CGMES -> "CGMES";
+            };
+        }
+    }
 
     private static final String UNKNOWN_ITEM = "???";
 
@@ -51,15 +66,6 @@ public class SingleLineDiagramModel extends DiagramModel {
     private final BooleanProperty highlightStyleProvider = new SimpleBooleanProperty();
     private final BooleanProperty topologicalStyleProvider = new SimpleBooleanProperty();
 
-    private static final String SMART_VOLTAGELEVEL_LAYOUT = "Smart";
-    private static final String AUTO_EXTENSIONS_VOLTAGELEVEL_LAYOUT = "Auto extensions";
-    private static final String AUTO_WITHOUT_EXTENSIONS_CLUSTERING_VOLTAGELEVEL_LAYOUT = "Auto without extensions Clustering";
-    private static final String RANDOM_VOLTAGELEVEL_LAYOUT = "Random";
-    private static final String CGMES_VOLTAGELEVEL_LAYOUT = "CGMES";
-
-    // VoltageLevel layout provider
-    private final VoltageLevelLayoutFactoryBean voltageLevelLayoutFactoryBean;
-
     // Substation layout provider
     private static final String HORIZONTAL_SUBSTATION_LAYOUT = "Horizontal";
     private static final String VERTICAL_SUBSTATION_LAYOUT = "Vertical";
@@ -74,7 +80,6 @@ public class SingleLineDiagramModel extends DiagramModel {
 
     public SingleLineDiagramModel(// Providers
                                   ReadOnlyObjectProperty<ComponentLibrary> componentLibrary,
-                                  Property<VoltageLevelLayoutFactoryBean.VoltageLevelLayoutFactoryType> voltageLevelLayoutFactoryType,
                                   ReadOnlyObjectProperty<SubstationLayoutFactory> substationLayoutFactory,
                                   ReadOnlyObjectProperty<String> cgmesDLDiagramName,
                                   // Styles
@@ -85,15 +90,6 @@ public class SingleLineDiagramModel extends DiagramModel {
                                   Property<Double> animationThreshold2,
                                   BooleanProperty highlightStyleProvider,
                                   BooleanProperty topologicalStyleProvider,
-                                  // PositionVoltageLevelLayoutFactory
-                                  BooleanProperty stackFeeders,
-                                  BooleanProperty exceptionWhenPatternUnhandled,
-                                  BooleanProperty handleShunts,
-                                  BooleanProperty removeFictitiousNodes,
-                                  BooleanProperty substituteSingularFictitiousNodes,
-                                  // RandomVoltageLevelLayoutFactory
-                                  Property<Double> width,
-                                  Property<Double> height,
                                   // LayoutParameters
                                   Property<Double> diagramPaddingTopBottom,
                                   Property<Double> diagramPaddingLeftRight,
@@ -132,14 +128,6 @@ public class SingleLineDiagramModel extends DiagramModel {
 
         // Providers
         this.currentComponentLibrary.bind(componentLibrary);
-        this.voltageLevelLayoutFactoryBean = new VoltageLevelLayoutFactoryBean(voltageLevelLayoutFactoryType,
-                stackFeeders,
-                exceptionWhenPatternUnhandled,
-                handleShunts,
-                removeFictitiousNodes,
-                substituteSingularFictitiousNodes,
-                width,
-                height);
         this.currentSubstationLayoutFactory.bind(substationLayoutFactory);
         this.currentCgmesDLDiagramName.bind(cgmesDLDiagramName);
 
@@ -215,7 +203,6 @@ public class SingleLineDiagramModel extends DiagramModel {
     public void addListener(ChangeListener<Object> changeListener) {
         layoutParametersBean.addListener(changeListener);
         svgParametersBean.addListener(changeListener);
-        voltageLevelLayoutFactoryBean.addListener(changeListener);
     }
 
     public LayoutParameters getLayoutParameters() {
@@ -255,10 +242,6 @@ public class SingleLineDiagramModel extends DiagramModel {
             styles.add(new EmptyStyleProvider());
         }
         return new StyleProvidersList(styles);
-    }
-
-    public VoltageLevelLayoutFactoryCreator getVoltageLevelLayoutFactoryCreator(Network network) {
-        return voltageLevelLayoutFactoryBean.getVoltageLevelLayoutFactoryCreator(network);
     }
 
     public SubstationLayoutFactory getSubstationLayoutFactory() {
@@ -302,55 +285,6 @@ public class SingleLineDiagramModel extends DiagramModel {
             @Override
             public SubstationLayoutFactory fromString(String item) {
                 return nameToSubstationLayoutFactoryMap.get(item);
-            }
-        };
-    }
-
-    public StringConverter<VoltageLevelLayoutFactoryBean.VoltageLevelLayoutFactoryType> getVoltageLevelLayoutFactoryCreatorStringConverter() {
-        return new StringConverter<>() {
-            @Override
-            public String toString(VoltageLevelLayoutFactoryBean.VoltageLevelLayoutFactoryType type) {
-                switch (type) {
-                    case SMART -> {
-                        return SMART_VOLTAGELEVEL_LAYOUT;
-                    }
-                    case AUTO_EXTENSIONS -> {
-                        return AUTO_EXTENSIONS_VOLTAGELEVEL_LAYOUT;
-                    }
-                    case AUTO_WITHOUT_EXTENSIONS_CLUSTERING -> {
-                        return AUTO_WITHOUT_EXTENSIONS_CLUSTERING_VOLTAGELEVEL_LAYOUT;
-                    }
-                    case RANDOM -> {
-                        return RANDOM_VOLTAGELEVEL_LAYOUT;
-                    }
-                    case CGMES -> {
-                        return CGMES_VOLTAGELEVEL_LAYOUT;
-                    }
-                    default -> throw new UnsupportedOperationException("This code cannot be reach, missing case '" + type.name() + "'");
-                }
-            }
-
-            @Override
-            public VoltageLevelLayoutFactoryBean.VoltageLevelLayoutFactoryType fromString(String item) {
-
-                switch (item) {
-                    case SMART_VOLTAGELEVEL_LAYOUT -> {
-                        return VoltageLevelLayoutFactoryBean.VoltageLevelLayoutFactoryType.SMART;
-                    }
-                    case AUTO_EXTENSIONS_VOLTAGELEVEL_LAYOUT -> {
-                        return VoltageLevelLayoutFactoryBean.VoltageLevelLayoutFactoryType.AUTO_EXTENSIONS;
-                    }
-                    case AUTO_WITHOUT_EXTENSIONS_CLUSTERING_VOLTAGELEVEL_LAYOUT -> {
-                        return VoltageLevelLayoutFactoryBean.VoltageLevelLayoutFactoryType.AUTO_WITHOUT_EXTENSIONS_CLUSTERING;
-                    }
-                    case RANDOM_VOLTAGELEVEL_LAYOUT -> {
-                        return VoltageLevelLayoutFactoryBean.VoltageLevelLayoutFactoryType.RANDOM;
-                    }
-                    case CGMES_VOLTAGELEVEL_LAYOUT -> {
-                        return VoltageLevelLayoutFactoryBean.VoltageLevelLayoutFactoryType.CGMES;
-                    }
-                    default -> throw new UnsupportedOperationException("This code cannot be reach, missing case '" + item + "'");
-                }
             }
         };
     }
