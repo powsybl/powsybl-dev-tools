@@ -32,10 +32,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import java.io.*;
 import java.lang.reflect.*;
-import java.net.*;
 import java.util.*;
 import java.util.function.Function;
-import java.util.jar.*;
 import java.util.prefs.Preferences;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -98,11 +96,7 @@ public class MainViewController {
 
     @FXML
     private void initialize() {
-        try {
-            initializeNetworkFactories();
-        } catch (IOException | ClassNotFoundException e) {
-            LOGGER.error(e.toString(), e);
-        }
+        initializeNetworkFactories();
 
         sldJsHandler = new SingleLineDiagramJsHandler(vlTree);
 
@@ -163,37 +157,38 @@ public class MainViewController {
         sldViewController.addListener((observable, oldValue, newValue) -> updateSldDiagrams());
     }
 
-    private void initializeNetworkFactories() throws IOException, ClassNotFoundException {
-        // Add menu item for all classes from powsybl-iidm-test
-        String packageName = "com.powsybl.iidm.network.test";
-        // Get actual classloader
-        ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
-        // Get Maven URL dependencies
-        Enumeration<URL> resources = classLoader.getResources(packageName.replace(".", "/"));
-        List<String> classNames = new ArrayList<>();
-        // List all classname for each URL for specified package name
-        while (resources.hasMoreElements()) {
-            URL url = resources.nextElement();
-            if (url.getProtocol().equals("jar")) {
-                JarURLConnection jarConn = (JarURLConnection) url.openConnection();
-                try (JarFile jarFile = jarConn.getJarFile()) {
-                    Enumeration<JarEntry> entries = jarFile.entries();
-                    while (entries.hasMoreElements()) {
-                        JarEntry entry = entries.nextElement();
-                        String name = entry.getName();
-                        if (name.endsWith(".class") && name.startsWith(jarConn.getEntryName())) {
-                            classNames.add(name.replace("/", ".").substring(0, name.length() - 6));
-                        }
-                    }
-                }
-            }
-        }
-        // Sort in alpha order
-        Collections.sort(classNames);
+    private void initializeNetworkFactories() {
+        List<Class<?>> classes = new ArrayList<>();
+        classes.add(com.powsybl.iidm.network.test.BatteryNetworkFactory.class);
+        classes.add(com.powsybl.iidm.network.test.BusbarSectionExt.class);
+        classes.add(com.powsybl.iidm.network.test.DanglingLineNetworkFactory.class);
+        classes.add(com.powsybl.iidm.network.test.EuropeanLvTestFeederFactory.class);
+        classes.add(com.powsybl.iidm.network.test.EurostagTutorialExample1Factory.class);
+        classes.add(com.powsybl.iidm.network.test.FictitiousSwitchFactory.class);
+        classes.add(com.powsybl.iidm.network.test.FourSubstationsNodeBreakerFactory.class);
+        classes.add(com.powsybl.iidm.network.test.FourSubstationsNodeBreakerWithExtensionsFactory.class);
+        classes.add(com.powsybl.iidm.network.test.HvdcTestNetwork.class);
+        classes.add(com.powsybl.iidm.network.test.LoadBarExt.class);
+        classes.add(com.powsybl.iidm.network.test.LoadFooExt.class);
+        classes.add(com.powsybl.iidm.network.test.LoadMockExt.class);
+        classes.add(com.powsybl.iidm.network.test.LoadQuxExt.class);
+        classes.add(com.powsybl.iidm.network.test.LoadZipModel.class);
+        classes.add(com.powsybl.iidm.network.test.MultipleExtensionsTestNetworkFactory.class);
+        classes.add(com.powsybl.iidm.network.test.NetworkBusBreakerTest1Factory.class);
+        classes.add(com.powsybl.iidm.network.test.NetworkTest1Factory.class);
+        classes.add(com.powsybl.iidm.network.test.NoEquipmentNetworkFactory.class);
+        classes.add(com.powsybl.iidm.network.test.PhaseShifterTestCaseFactory.class);
+        classes.add(com.powsybl.iidm.network.test.ReactiveLimitsTestNetworkFactory.class);
+        classes.add(com.powsybl.iidm.network.test.ScadaNetworkFactory.class);
+        classes.add(com.powsybl.iidm.network.test.SecurityAnalysisTestNetworkFactory.class);
+        classes.add(com.powsybl.iidm.network.test.ShuntTestCaseFactory.class);
+        classes.add(com.powsybl.iidm.network.test.SvcTestCaseFactory.class);
+        classes.add(com.powsybl.iidm.network.test.TerminalMockExt.class);
+        classes.add(com.powsybl.iidm.network.test.ThreeWindingsTransformerNetworkFactory.class);
+        classes.add(com.powsybl.iidm.network.test.TwoVoltageLevelNetworkFactory.class);
         // Populate Networks list
         List<MenuItem> items = new ArrayList<>();
-        for (String className : classNames) {
-            Class<?> clazz = Class.forName(className);
+        for (Class<?> clazz : classes) {
             // Keep only classes with create() method
             if (Arrays.stream(clazz.getDeclaredMethods()).anyMatch(method -> method.getName().equals("create") && method.getParameterCount() == 0)) {
                 // Build menu item
