@@ -49,11 +49,11 @@ public class PositionVoltageLevelLayoutBean {
 
     public PositionVoltageLevelLayoutFactoryParameters getParameters() {
         PositionVoltageLevelLayoutFactoryParameters parameters = new PositionVoltageLevelLayoutFactoryParameters();
-        parameters.setFeederStacked(stackFeeders.get());
-        parameters.setExceptionIfPatternNotHandled(exceptionWhenPatternUnhandled.get());
-        parameters.setHandleShunts(handleShunts.get());
-        parameters.setRemoveUnnecessaryFictitiousNodes(removeFictitiousNodes.get());
-        parameters.setSubstituteSingularFictitiousByFeederNode(substituteSingularFictitiousNodes.get());
+        parameters.setFeederStacked(stackFeeders.get())
+                .setExceptionIfPatternNotHandled(exceptionWhenPatternUnhandled.get())
+                .setHandleShunts(handleShunts.get())
+                .setRemoveUnnecessaryFictitiousNodes(removeFictitiousNodes.get())
+                .setSubstituteSingularFictitiousByFeederNode(substituteSingularFictitiousNodes.get());
         return parameters;
     }
 
