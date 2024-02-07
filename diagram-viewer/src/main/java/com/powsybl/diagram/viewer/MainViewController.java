@@ -395,6 +395,10 @@ public class MainViewController {
             if (identifiable instanceof Substation s) {
                 result = s.getVoltageLevelStream().anyMatch(v -> testComponent(type, v));
             } else if (identifiable instanceof VoltageLevel v) {
+
+                // Switch case
+                // Bus case
+                // Default
                 result = v.getConnectableStream().anyMatch(c -> c.getType() == type);
             }
         }

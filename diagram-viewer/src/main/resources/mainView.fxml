@@ -26,9 +26,12 @@
                     <CheckBox fx:id="showNames" onMouseClicked="#initSubstationsTree" text="Show names" selected="true" GridPane.rowIndex="1"/>
                     <CheckBox fx:id="hideSubstations" onMouseClicked="#initSubstationsTree" text="Hide substations" GridPane.rowIndex="2"/>
                     <CheckBox fx:id="hideVoltageLevels" onMouseClicked="#initSubstationsTree" text="Hide voltage levels" GridPane.rowIndex="3"/>
-                    <Label text="Filter:" GridPane.rowIndex="4"/>
-                    <HBox GridPane.rowIndex="5" spacing="5">
+                    <HBox GridPane.rowIndex="4" spacing="5">
+                        <Label text="Filter by name/id:" minWidth="120"/>
                         <TextField fx:id="filterField" onKeyTyped="#initSubstationsTree" minWidth="40"/>
+                    </HBox>
+                    <HBox GridPane.rowIndex="5" spacing="5">
+                        <Label text="Filter by component:" minWidth="120"/>
                         <EnumChoiceBox enumType="com.powsybl.iidm.network.IdentifiableType" fx:id="componentTypeFilterChoice" initialValue="All" onAction="#initSubstationsTree"/>
                     </HBox>
                 </GridPane>
