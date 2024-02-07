@@ -31,9 +31,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import java.io.*;
-import java.lang.reflect.*;
 import java.util.*;
-import java.util.function.Function;
+import java.util.function.*;
 import java.util.prefs.Preferences;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -158,46 +157,34 @@ public class MainViewController {
     }
 
     private void initializeNetworkFactories() {
-        List<Class<?>> classes = new ArrayList<>();
-        classes.add(com.powsybl.iidm.network.test.BatteryNetworkFactory.class);
-        classes.add(com.powsybl.iidm.network.test.BusbarSectionExt.class);
-        classes.add(com.powsybl.iidm.network.test.DanglingLineNetworkFactory.class);
-        classes.add(com.powsybl.iidm.network.test.EuropeanLvTestFeederFactory.class);
-        classes.add(com.powsybl.iidm.network.test.EurostagTutorialExample1Factory.class);
-        classes.add(com.powsybl.iidm.network.test.FictitiousSwitchFactory.class);
-        classes.add(com.powsybl.iidm.network.test.FourSubstationsNodeBreakerFactory.class);
-        classes.add(com.powsybl.iidm.network.test.FourSubstationsNodeBreakerWithExtensionsFactory.class);
-        classes.add(com.powsybl.iidm.network.test.HvdcTestNetwork.class);
-        classes.add(com.powsybl.iidm.network.test.LoadBarExt.class);
-        classes.add(com.powsybl.iidm.network.test.LoadFooExt.class);
-        classes.add(com.powsybl.iidm.network.test.LoadMockExt.class);
-        classes.add(com.powsybl.iidm.network.test.LoadQuxExt.class);
-        classes.add(com.powsybl.iidm.network.test.LoadZipModel.class);
-        classes.add(com.powsybl.iidm.network.test.MultipleExtensionsTestNetworkFactory.class);
-        classes.add(com.powsybl.iidm.network.test.NetworkBusBreakerTest1Factory.class);
-        classes.add(com.powsybl.iidm.network.test.NetworkTest1Factory.class);
-        classes.add(com.powsybl.iidm.network.test.NoEquipmentNetworkFactory.class);
-        classes.add(com.powsybl.iidm.network.test.PhaseShifterTestCaseFactory.class);
-        classes.add(com.powsybl.iidm.network.test.ReactiveLimitsTestNetworkFactory.class);
-        classes.add(com.powsybl.iidm.network.test.ScadaNetworkFactory.class);
-        classes.add(com.powsybl.iidm.network.test.SecurityAnalysisTestNetworkFactory.class);
-        classes.add(com.powsybl.iidm.network.test.ShuntTestCaseFactory.class);
-        classes.add(com.powsybl.iidm.network.test.SvcTestCaseFactory.class);
-        classes.add(com.powsybl.iidm.network.test.TerminalMockExt.class);
-        classes.add(com.powsybl.iidm.network.test.ThreeWindingsTransformerNetworkFactory.class);
-        classes.add(com.powsybl.iidm.network.test.TwoVoltageLevelNetworkFactory.class);
+        Map<String, Supplier<Network>> suppliers = new HashMap<>();
+        suppliers.put("BatteryNetwork", com.powsybl.iidm.network.test.BatteryNetworkFactory::create);
+        suppliers.put("DanglingLineNetwork", com.powsybl.iidm.network.test.DanglingLineNetworkFactory::create);
+        suppliers.put("EuropeanLvTestFeeder", com.powsybl.iidm.network.test.EuropeanLvTestFeederFactory::create);
+        suppliers.put("EurostagTutorialExample1", com.powsybl.iidm.network.test.EurostagTutorialExample1Factory::create);
+        suppliers.put("FictitiousSwitch", com.powsybl.iidm.network.test.FictitiousSwitchFactory::create);
+        suppliers.put("FourSubstationsNodeBreaker", com.powsybl.iidm.network.test.FourSubstationsNodeBreakerFactory::create);
+        suppliers.put("FourSubstationsNodeBreakerWithExtensions", com.powsybl.iidm.network.test.FourSubstationsNodeBreakerWithExtensionsFactory::create);
+        suppliers.put("MultipleExtensionsTestNetwork", com.powsybl.iidm.network.test.MultipleExtensionsTestNetworkFactory::create);
+        suppliers.put("NetworkBusBreakerTest1", com.powsybl.iidm.network.test.NetworkBusBreakerTest1Factory::create);
+        suppliers.put("NetworkTest1", com.powsybl.iidm.network.test.NetworkTest1Factory::create);
+        suppliers.put("NoEquipmentNetwork", com.powsybl.iidm.network.test.NoEquipmentNetworkFactory::create);
+        suppliers.put("PhaseShifterTestCase", com.powsybl.iidm.network.test.PhaseShifterTestCaseFactory::create);
+        suppliers.put("ReactiveLimitsTestNetwork", com.powsybl.iidm.network.test.ReactiveLimitsTestNetworkFactory::create);
+        suppliers.put("ScadaNetwork", com.powsybl.iidm.network.test.ScadaNetworkFactory::create);
+        suppliers.put("SecurityAnalysisTestNetwork", com.powsybl.iidm.network.test.SecurityAnalysisTestNetworkFactory::create);
+        suppliers.put("ShuntTestCase", com.powsybl.iidm.network.test.ShuntTestCaseFactory::create);
+        suppliers.put("SvcTestCase", com.powsybl.iidm.network.test.SvcTestCaseFactory::create);
+        suppliers.put("ThreeWindingsTransformerNetwork", com.powsybl.iidm.network.test.ThreeWindingsTransformerNetworkFactory::create);
+        suppliers.put("TwoVoltageLevelNetwork", com.powsybl.iidm.network.test.TwoVoltageLevelNetworkFactory::create);
+
         // Populate Networks list
-        List<MenuItem> items = new ArrayList<>();
-        for (Class<?> clazz : classes) {
-            // Keep only classes with create() method
-            if (Arrays.stream(clazz.getDeclaredMethods()).anyMatch(method -> method.getName().equals("create") && method.getParameterCount() == 0)) {
-                // Build menu item
-                MenuItem item = new MenuItem(clazz.getSimpleName());
-                item.setOnAction(event -> loadFactory(clazz));
-                items.add(item);
-            }
+        for (Map.Entry<String, Supplier<Network>> entry : suppliers.entrySet()) {
+            // Build menu item
+            MenuItem item = new MenuItem(entry.getKey());
+            item.setOnAction(event -> loadFactory(entry.getKey(), entry.getValue()));
+            networkFactoryMenuButton.getItems().add(item);
         }
-        networkFactoryMenuButton.getItems().addAll(items);
     }
 
     private void updateSldDiagrams() {
@@ -244,31 +231,21 @@ public class MainViewController {
         }
     }
 
-    public void loadFactory(Class<?> clazz) {
-        if (clazz != null) {
-            Service<Network> networkService = new Service<>() {
-                @Override
-                protected Task<Network> createTask() {
-                    return new Task<>() {
-                        @Override
-                        protected Network call() throws InstantiationException, IllegalAccessException, IllegalArgumentException, java.lang.reflect.InvocationTargetException, NoSuchMethodException, SecurityException {
-                            // Get constructor
-                            Constructor<?> constructor = clazz.getDeclaredConstructor();
-                            constructor.trySetAccessible();
-                            // Make new instance
-                            Object instance = constructor.newInstance();
-                            // Get create() method using refection
-                            Method createMethod = instance.getClass().getDeclaredMethod("create");
-                            createMethod.trySetAccessible();
-                            // Get Network instance
-                            return (Network) createMethod.invoke(instance);
-                        }
-                    };
-                }
-            };
-            handleLoadingFactoryResult(clazz, networkService);
-            networkService.start();
-        }
+    public void loadFactory(String name, Supplier<Network> supplier) {
+        Service<Network> networkService = new Service<>() {
+            @Override
+            protected Task<Network> createTask() {
+                return new Task<>() {
+                    @Override
+                    protected Network call() {
+                        // Get Network instance
+                        return supplier.get();
+                    }
+                };
+            }
+        };
+        handleLoadingFactoryResult(name, networkService);
+        networkService.start();
     }
 
     private void handleLoadingFileResult(File file, Service<Network> networkService) {
@@ -293,10 +270,10 @@ public class MainViewController {
         });
     }
 
-    private void handleLoadingFactoryResult(Class<?> clazz, Service<Network> networkService) {
+    private void handleLoadingFactoryResult(String name, Service<Network> networkService) {
         networkService.setOnRunning(event -> {
             loadingStatus.setStyle("-fx-background-color: yellow");
-            filePath.setText(clazz.getSimpleName());
+            filePath.setText(name);
         });
 
         networkService.setOnSucceeded(event -> {
