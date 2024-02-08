@@ -31,14 +31,14 @@ import java.util.*;
 public class SingleLineDiagramModel extends DiagramModel {
 
     public enum VoltageLevelLayoutFactoryType {
-        AUTO_EXTENSIONS, AUTO_WITHOUT_EXTENSIONS_CLUSTERING, CGMES, RANDOM, SMART;
+        POSITION_WITH_EXTENSIONS, POSITION_BY_CLUSTERING, CGMES, RANDOM, SMART;
 
         @Override
         public String toString() {
             return switch (this) {
                 case SMART -> "Smart";
-                case AUTO_EXTENSIONS -> "Auto extensions";
-                case AUTO_WITHOUT_EXTENSIONS_CLUSTERING -> "Auto without extensions Clustering";
+                case POSITION_WITH_EXTENSIONS -> "Position with extensions";
+                case POSITION_BY_CLUSTERING -> "Position by clustering";
                 case RANDOM -> "Random";
                 case CGMES -> "CGMES";
             };

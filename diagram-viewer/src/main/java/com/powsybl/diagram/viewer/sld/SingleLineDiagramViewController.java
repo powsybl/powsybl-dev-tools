@@ -253,7 +253,7 @@ public class SingleLineDiagramViewController extends AbstractDiagramViewControll
         cgmesDLDiagramsComboBox.getSelectionModel().selectFirst(); // Default selection without Network
 
         // PositionVoltageLevelLayoutFactory
-        BooleanBinding disableBinding = Bindings.createBooleanBinding(() -> voltageLevelLayoutComboBox.getSelectionModel().getSelectedItem() == SingleLineDiagramModel.VoltageLevelLayoutFactoryType.AUTO_EXTENSIONS || voltageLevelLayoutComboBox.getSelectionModel().getSelectedItem() == SingleLineDiagramModel.VoltageLevelLayoutFactoryType.AUTO_WITHOUT_EXTENSIONS_CLUSTERING, voltageLevelLayoutComboBox.getSelectionModel().selectedItemProperty());
+        BooleanBinding disableBinding = Bindings.createBooleanBinding(() -> voltageLevelLayoutComboBox.getSelectionModel().getSelectedItem() == SingleLineDiagramModel.VoltageLevelLayoutFactoryType.POSITION_WITH_EXTENSIONS || voltageLevelLayoutComboBox.getSelectionModel().getSelectedItem() == SingleLineDiagramModel.VoltageLevelLayoutFactoryType.POSITION_BY_CLUSTERING, voltageLevelLayoutComboBox.getSelectionModel().selectedItemProperty());
         stackFeedersCheckBox.visibleProperty().bind(disableBinding);
         exceptionWhenPatternUnhandledCheckBox.visibleProperty().bind(disableBinding);
         handleShuntsCheckBox.visibleProperty().bind(disableBinding);
@@ -378,8 +378,8 @@ public class SingleLineDiagramViewController extends AbstractDiagramViewControll
         SingleLineDiagramModel.VoltageLevelLayoutFactoryType type = voltageLevelLayoutComboBox.getValue();
         return switch (type) {
             case SMART -> SmartVoltageLevelLayoutFactory::new;
-            case AUTO_EXTENSIONS -> network -> new PositionVoltageLevelLayoutFactory(new PositionByClustering(), parameters);
-            case AUTO_WITHOUT_EXTENSIONS_CLUSTERING -> network -> new PositionVoltageLevelLayoutFactory(parameters);
+            case POSITION_WITH_EXTENSIONS -> network -> new PositionVoltageLevelLayoutFactory(new PositionByClustering(), parameters);
+            case POSITION_BY_CLUSTERING -> network -> new PositionVoltageLevelLayoutFactory(parameters);
             case RANDOM -> network -> new RandomVoltageLevelLayoutFactory(500.0, 500.0);
             case CGMES -> CgmesVoltageLevelLayoutFactory::new;
         };
