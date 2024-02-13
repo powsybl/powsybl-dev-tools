@@ -32,7 +32,7 @@
                     </HBox>
                     <HBox GridPane.rowIndex="5" spacing="5">
                         <Label text="Filter by component:" minWidth="120"/>
-                        <EnumChoiceBox enumType="com.powsybl.iidm.network.IdentifiableType" fx:id="componentTypeFilterChoice" initialValue="All" onAction="#initSubstationsTree"/>
+                        <EnumChoiceBox enumType="com.powsybl.diagram.viewer.MainViewController$ComponentFilterType" fx:id="componentTypeFilterChoice" initialValue="All" onAction="#initSubstationsTree"/>
                     </HBox>
                 </GridPane>
                 <VBox minHeight="700">
