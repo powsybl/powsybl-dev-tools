@@ -462,12 +462,11 @@ public class MainViewController {
             result = s.getVoltageLevelStream().anyMatch(v -> testComponent(type, v));
         } else if (identifiable instanceof VoltageLevel v) {
             result = switch (type) {
-                case HVDC_LINE, BUSBAR_SECTION, LINE, TIE_LINE, TWO_WINDINGS_TRANSFORMER, THREE_WINDINGS_TRANSFORMER, GENERATOR, BATTERY, LOAD, SHUNT_COMPENSATOR, DANGLING_LINE, STATIC_VAR_COMPENSATOR -> v.getConnectableStream().anyMatch(c -> c.getType() == type.toIidm());
+                case HVDC_LINE, BUSBAR_SECTION, LINE, TIE_LINE, TWO_WINDINGS_TRANSFORMER, THREE_WINDINGS_TRANSFORMER, GENERATOR, BATTERY, LOAD, SHUNT_COMPENSATOR, DANGLING_LINE, STATIC_VAR_COMPENSATOR, GROUND -> v.getConnectableStream().anyMatch(c -> c.getType() == type.toIidm());
                 case LCC_CONVERTER_STATION -> v.getLccConverterStationCount() != 0;
                 case VSC_CONVERTER_STATION -> v.getVscConverterStationCount() != 0;
                 case BUS -> v.getBusView().getBusStream().findAny().isPresent();
                 case SWITCH -> v.getSwitchCount() != 0;
-                case GROUND -> v.getGroundCount() != 0;
                 case ALL -> true;
             };
         }
