@@ -14,6 +14,7 @@
             <Button fx:id="loadingStatus" minWidth="28" style="-fx-background-color: red"/>
             <TextField fx:id="filePath" prefWidth="900" HBox.hgrow="ALWAYS" maxWidth="Infinity"/>
             <Button onMouseClicked="#onClickLoadFile" text="..."/>
+            <MenuButton fx:id="networkFactoryMenuButton" text="Sample networks" minWidth="130"/>
         </HBox>
     </top>
     <center>
@@ -45,6 +46,6 @@
         </SplitPane>
     </center>
     <padding>
-        <Insets topRightBottomLeft="5"/>
+        <Insets right="5" bottom="5" left="5"/>
     </padding>
 </BorderPane>

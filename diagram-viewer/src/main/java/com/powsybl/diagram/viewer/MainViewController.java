@@ -15,9 +15,12 @@ import com.powsybl.diagram.viewer.nad.NetworkAreaDiagramViewController;
 import com.powsybl.diagram.viewer.sld.SingleLineDiagramJsHandler;
 import com.powsybl.diagram.viewer.sld.SingleLineDiagramViewController;
 import com.powsybl.iidm.network.*;
+import com.powsybl.iidm.network.test.*;
 import com.powsybl.loadflow.LoadFlow;
+import javafx.application.*;
 import javafx.concurrent.Service;
 import javafx.concurrent.Task;
+import javafx.event.*;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
 import javafx.scene.control.*;
@@ -28,12 +31,9 @@ import javafx.util.StringConverter;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.File;
-import java.io.IOException;
-import java.io.UncheckedIOException;
+import java.io.*;
 import java.util.*;
-import java.util.function.Function;
+import java.util.function.*;
 import java.util.prefs.Preferences;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -73,6 +73,9 @@ public class MainViewController {
     @FXML
     private Node loadingStatus;
 
+    @FXML
+    private MenuButton networkFactoryMenuButton;
+
     private Model model;
 
     /**
@@ -93,6 +96,8 @@ public class MainViewController {
 
     @FXML
     private void initialize() {
+        initializeNetworkFactories();
+
         sldJsHandler = new SingleLineDiagramJsHandler(vlTree);
 
         String casePathPropertyValue = preferences.get(CASE_PATH_PROPERTY, null);
@@ -152,6 +157,37 @@ public class MainViewController {
         sldViewController.addListener((observable, oldValue, newValue) -> updateSldDiagrams());
     }
 
+    private void initializeNetworkFactories() {
+        Map<String, Supplier<Network>> suppliers = new HashMap<>();
+        suppliers.put("BatteryNetwork", BatteryNetworkFactory::create);
+        suppliers.put("DanglingLineNetwork", DanglingLineNetworkFactory::create);
+        suppliers.put("EuropeanLvTestFeeder", EuropeanLvTestFeederFactory::create);
+        suppliers.put("EurostagTutorialExample1", EurostagTutorialExample1Factory::create);
+        suppliers.put("FictitiousSwitch", FictitiousSwitchFactory::create);
+        suppliers.put("FourSubstationsNodeBreaker", FourSubstationsNodeBreakerFactory::create);
+        suppliers.put("FourSubstationsNodeBreakerWithExtensions", FourSubstationsNodeBreakerWithExtensionsFactory::create);
+        suppliers.put("MultipleExtensionsTestNetwork", MultipleExtensionsTestNetworkFactory::create);
+        suppliers.put("NetworkBusBreakerTest1", NetworkBusBreakerTest1Factory::create);
+        suppliers.put("NetworkTest1", NetworkTest1Factory::create);
+        suppliers.put("NoEquipmentNetwork", NoEquipmentNetworkFactory::create);
+        suppliers.put("PhaseShifterTestCase", PhaseShifterTestCaseFactory::create);
+        suppliers.put("ReactiveLimitsTestNetwork", ReactiveLimitsTestNetworkFactory::create);
+        suppliers.put("ScadaNetwork", ScadaNetworkFactory::create);
+        suppliers.put("SecurityAnalysisTestNetwork", SecurityAnalysisTestNetworkFactory::create);
+        suppliers.put("ShuntTestCase", ShuntTestCaseFactory::create);
+        suppliers.put("SvcTestCase", SvcTestCaseFactory::create);
+        suppliers.put("ThreeWindingsTransformerNetwork", ThreeWindingsTransformerNetworkFactory::create);
+        suppliers.put("TwoVoltageLevelNetwork", TwoVoltageLevelNetworkFactory::create);
+
+        // Populate Networks list
+        for (Map.Entry<String, Supplier<Network>> entry : suppliers.entrySet()) {
+            // Build menu item
+            MenuItem item = new MenuItem(entry.getKey());
+            item.setOnAction(event -> loadFactory(entry.getKey(), entry.getValue()));
+            networkFactoryMenuButton.getItems().add(item);
+        }
+    }
+
     private void updateSldDiagrams() {
         sldViewController.updateAllDiagrams(model.getNetwork(), model.getSelectedContainer());
     }
@@ -162,14 +198,18 @@ public class MainViewController {
 
     @FXML
     private void onClickLoadFile(MouseEvent event) {
+        event.consume();
+        loadFile(selectFile());
+    }
+
+    private File selectFile() {
         FileChooser fileChooser = new FileChooser();
         String caseFolderPropertyValue = preferences.get(CASE_FOLDER_PROPERTY, null);
         if (caseFolderPropertyValue != null) {
             fileChooser.setInitialDirectory(new File(caseFolderPropertyValue));
         }
         fileChooser.setTitle("Open case File");
-        loadFile(fileChooser.showOpenDialog(loadingStatus.getScene().getWindow()));
-        event.consume();
+        return fileChooser.showOpenDialog(loadingStatus.getScene().getWindow());
     }
 
     public void loadFile(File file) {
@@ -187,12 +227,29 @@ public class MainViewController {
                     };
                 }
             };
-            handleLoadingResult(file, networkService);
+            handleLoadingFileResult(file, networkService);
             networkService.start();
         }
     }
 
-    private void handleLoadingResult(File file, Service<Network> networkService) {
+    public void loadFactory(String name, Supplier<Network> supplier) {
+        Service<Network> networkService = new Service<>() {
+            @Override
+            protected Task<Network> createTask() {
+                return new Task<>() {
+                    @Override
+                    protected Network call() {
+                        // Get Network instance
+                        return supplier.get();
+                    }
+                };
+            }
+        };
+        handleLoadingFactoryResult(name, networkService);
+        networkService.start();
+    }
+
+    private void handleLoadingFileResult(File file, Service<Network> networkService) {
         networkService.setOnRunning(event -> {
             loadingStatus.setStyle("-fx-background-color: yellow");
             filePath.setText(file.getAbsolutePath());
@@ -204,6 +261,27 @@ public class MainViewController {
             model.setNetwork((Network) event.getSource().getValue());
             loadingStatus.setStyle("-fx-background-color: green");
             preferences.put(CASE_PATH_PROPERTY, file.getAbsolutePath());
+        });
+
+        networkService.setOnFailed(event -> {
+            Throwable exception = event.getSource().getException();
+            LOGGER.error(exception.toString(), exception);
+            filePath.setText("");
+            loadingStatus.setStyle("-fx-background-color: red");
+        });
+    }
+
+    private void handleLoadingFactoryResult(String name, Service<Network> networkService) {
+        networkService.setOnRunning(event -> {
+            loadingStatus.setStyle("-fx-background-color: yellow");
+            filePath.setText(name);
+        });
+
+        networkService.setOnSucceeded(event -> {
+            clean();
+            Network network = (Network) event.getSource().getValue();
+            model.setNetwork(network);
+            loadingStatus.setStyle("-fx-background-color: green");
         });
 
         networkService.setOnFailed(event -> {
@@ -295,7 +373,7 @@ public class MainViewController {
                 .filter(item -> item.getValue().getId().equals(selectedContainerId))
                 .findFirst()
                 .ifPresentOrElse(item -> vlTree.getSelectionModel().select(item),
-                    () -> vlTree.getSelectionModel().clearSelection());
+                        () -> vlTree.getSelectionModel().clearSelection());
 
         loadSelectedContainersDiagrams();
 
@@ -376,5 +454,15 @@ public class MainViewController {
                 throw new UncheckedIOException(e);
             }
         }
+    }
+
+    public void processExit(ActionEvent actionEvent) {
+        actionEvent.consume();
+        Platform.exit();
+    }
+
+    public void processOpen(ActionEvent actionEvent) {
+        actionEvent.consume();
+        loadFile(selectFile());
     }
 }
