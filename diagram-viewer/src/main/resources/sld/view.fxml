@@ -46,7 +46,7 @@
                         <CheckBox fx:id="highlightStyleProviderCheckBox" text="Highlight"/>
                         <CheckBox fx:id="topologicalStyleProviderCheckBox" text="Topology (default)"/>
                         <CheckBox fx:id="animatedStyleProviderCheckBox" text="Animated"/>
-                        <HBox spacing="5">
+                        <HBox fx:id="animationHBox" spacing="5">
                             <VBox.margin>
                                 <Insets left="10"/>
                             </VBox.margin>
@@ -64,12 +64,12 @@
                         <Label text="Substation Layout:"/>
                         <ComboBox fx:id="substationLayoutComboBox"/>
                         <Label text="VoltageLevel Layout:"/>
-                        <ComboBox fx:id="voltageLevelLayoutComboBox"/>
-                        <CheckBox fx:id="stackFeedersCheckBox" text="Stack feeders"/>
+                        <EnumChoiceBox enumType="com.powsybl.diagram.viewer.sld.SingleLineDiagramModel$VoltageLevelLayoutFactoryType" fx:id="voltageLevelLayoutComboBox" initialValue="SMART"/>
+                        <CheckBox fx:id="stackFeedersCheckBox" text="Stack feeders" selected="true"/>
                         <CheckBox fx:id="exceptionWhenPatternUnhandledCheckBox" text="Exception when pattern unhandled"/>
                         <CheckBox fx:id="handleShuntsCheckBox" text="Handle shunts"/>
-                        <CheckBox fx:id="removeFictitiousNodesCheckBox" text="Remove fictitious nodes"/>
-                        <CheckBox fx:id="substituteSingularFictitiousNodesCheckBox" text="Substitute singular fictitious nodes"/>
+                        <CheckBox fx:id="removeFictitiousNodesCheckBox" text="Remove fictitious nodes" selected="true"/>
+                        <CheckBox fx:id="substituteSingularFictitiousNodesCheckBox" text="Substitute singular fictitious nodes" selected="true"/>
                         <Label text="CGMES-DL Diagrams:"/>
                         <ComboBox fx:id="cgmesDLDiagramsComboBox"/>
                         <Separator>

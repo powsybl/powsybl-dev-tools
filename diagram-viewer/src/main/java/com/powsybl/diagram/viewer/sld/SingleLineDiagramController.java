@@ -12,8 +12,9 @@ import com.powsybl.diagram.viewer.common.ContainerResult;
 import com.powsybl.iidm.network.*;
 import com.powsybl.sld.SingleLineDiagram;
 import com.powsybl.sld.SldParameters;
+import com.powsybl.sld.layout.*;
 import com.powsybl.sld.svg.styles.StyleProvider;
-import javafx.beans.property.StringProperty;
+import javafx.beans.property.*;
 import javafx.concurrent.Service;
 import javafx.concurrent.Task;
 import javafx.fxml.FXML;
@@ -46,7 +47,8 @@ public class SingleLineDiagramController extends AbstractDiagramController {
                               Network network,
                               SingleLineDiagramModel model,
                               ContainerResult containerResult,
-                              Container<?> container) {
+                              Container<?> container,
+                              VoltageLevelLayoutFactoryCreator voltageLevelLayoutFactoryCreator) {
         super.createDiagram(container, containerResult.svgContentProperty());
 
         // JSHandler management
@@ -56,7 +58,7 @@ public class SingleLineDiagramController extends AbstractDiagramController {
                 sw.setOpen(!sw.isOpen());
                 StyleProvider styleProvider = model.getStyleProvider(network);
                 styleProvider.reset();
-                updateDiagram(network, model, containerResult, container);
+                updateDiagram(network, model, containerResult, container, voltageLevelLayoutFactoryCreator);
             }
         });
         setUpListenerOnWebViewChanges(jsHandler);
@@ -66,13 +68,15 @@ public class SingleLineDiagramController extends AbstractDiagramController {
         metadataContent.bind(containerResult.metadataContentProperty());
         graphContent.bind(containerResult.jsonContentProperty());
 
-        updateDiagram(network, model, containerResult, container);
+        updateDiagram(network, model, containerResult, container, voltageLevelLayoutFactoryCreator);
     }
 
     public static void updateDiagram(Network network,
                                      SingleLineDiagramModel model,
                                      ContainerResult containerResult,
-                                     Container<?> container) {
+                                     Container<?> container,
+                                     // PositionVoltageLevelLayoutFactory
+                                     VoltageLevelLayoutFactoryCreator voltageLevelLayoutFactoryCreator) {
         Service<ContainerResult> sldService = new Service<>() {
             @Override
             protected Task<ContainerResult> createTask() {
@@ -90,7 +94,7 @@ public class SingleLineDiagramController extends AbstractDiagramController {
                                     .setComponentLibrary(model.getComponentLibrary())
                                     .setSubstationLayoutFactory(model.getSubstationLayoutFactory())
                                     .setStyleProviderFactory(model::getStyleProvider)
-                                    .setVoltageLevelLayoutFactoryCreator(model.getVoltageLevelLayoutFactoryCreator());
+                                    .setVoltageLevelLayoutFactoryCreator(voltageLevelLayoutFactoryCreator);
 
                             SingleLineDiagram.draw(network, container.getId(),
                                     svgWriter,

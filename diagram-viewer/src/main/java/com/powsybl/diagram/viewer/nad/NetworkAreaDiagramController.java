@@ -25,9 +25,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.io.StringWriter;
-import java.util.List;
 import java.util.function.Predicate;
-import java.util.stream.Collectors;
 
 /**
  * @author Florian Dupuy <florian.dupuy at rte-france.com>
@@ -77,16 +75,10 @@ public class NetworkAreaDiagramController extends AbstractDiagramController {
     }
 
     private static Predicate<VoltageLevel> getVoltageLevelFilter(Network network, NetworkAreaDiagramModel model, Container<?> container) {
-        switch (container.getContainerType()) {
-            case NETWORK:
-                return VoltageLevelFilter.NO_FILTER;
-            case SUBSTATION:
-                List<String> vls = ((Substation) container).getVoltageLevelStream().map(VoltageLevel::getId).collect(Collectors.toList());
-                return VoltageLevelFilter.createVoltageLevelsDepthFilter(network, vls, model.getDepth());
-            case VOLTAGE_LEVEL:
-                return VoltageLevelFilter.createVoltageLevelDepthFilter(network, container.getId(), model.getDepth());
-            default:
-                throw new AssertionError();
-        }
+        return switch (container.getContainerType()) {
+            case NETWORK -> VoltageLevelFilter.NO_FILTER;
+            case SUBSTATION -> VoltageLevelFilter.createVoltageLevelsDepthFilter(network, ((Substation) container).getVoltageLevelStream().map(VoltageLevel::getId).toList(), model.getDepth());
+            case VOLTAGE_LEVEL -> VoltageLevelFilter.createVoltageLevelDepthFilter(network, container.getId(), model.getDepth());
+        };
     }
 }

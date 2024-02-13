@@ -9,12 +9,10 @@ package com.powsybl.diagram.viewer.sld;
 
 import com.powsybl.diagram.viewer.common.DiagramModel;
 import com.powsybl.iidm.network.Network;
-import com.powsybl.sld.cgmes.dl.iidm.extensions.NetworkDiagramData;
-import com.powsybl.sld.cgmes.layout.CgmesSubstationLayoutFactory;
-import com.powsybl.sld.cgmes.layout.CgmesVoltageLevelLayoutFactory;
+import com.powsybl.sld.cgmes.dl.iidm.extensions.*;
+import com.powsybl.sld.cgmes.layout.*;
 import com.powsybl.sld.layout.*;
 
-import com.powsybl.sld.layout.positionbyclustering.PositionByClustering;
 import com.powsybl.sld.library.ComponentLibrary;
 import com.powsybl.sld.svg.SvgParameters;
 import com.powsybl.sld.svg.styles.*;
@@ -31,6 +29,21 @@ import java.util.*;
  * @author Thomas Adam <tadam at silicom.fr>
  */
 public class SingleLineDiagramModel extends DiagramModel {
+
+    public enum VoltageLevelLayoutFactoryType {
+        POSITION_WITH_EXTENSIONS, POSITION_BY_CLUSTERING, CGMES, RANDOM, SMART;
+
+        @Override
+        public String toString() {
+            return switch (this) {
+                case SMART -> "'Smart' choice";
+                case POSITION_WITH_EXTENSIONS -> "Position with extensions";
+                case POSITION_BY_CLUSTERING -> "Position by clustering";
+                case RANDOM -> "Random";
+                case CGMES -> "CGMES";
+            };
+        }
+    }
 
     private static final String UNKNOWN_ITEM = "???";
 
@@ -53,22 +66,10 @@ public class SingleLineDiagramModel extends DiagramModel {
     private final BooleanProperty highlightStyleProvider = new SimpleBooleanProperty();
     private final BooleanProperty topologicalStyleProvider = new SimpleBooleanProperty();
 
-    private static final String SMART_VOLTAGELEVEL_LAYOUT = "Smart";
-    private static final String AUTO_EXTENSIONS_VOLTAGELEVEL_LAYOUT = "Auto extensions";
-    private static final String AUTO_WITHOUT_EXTENSIONS_CLUSTERING_VOLTAGELEVEL_LAYOUT = "Auto without extensions Clustering";
-    private static final String RANDOM_VOLTAGELEVEL_LAYOUT = "Random";
-    private static final String CGMES_VOLTAGELEVEL_LAYOUT = "CGMES";
-
-    // VoltageLevel layout provider
-    private final Map<String, VoltageLevelLayoutFactoryCreator> nameToVoltageLevelLayoutFactoryCreatorMap = new TreeMap<>(); // ordered
-    private final ObservableList<VoltageLevelLayoutFactoryCreator> voltageLevelLayouts = FXCollections.observableArrayList();
-    private final ObjectProperty<VoltageLevelLayoutFactoryCreator> currentVoltageLevelLayoutFactoryCreator = new SimpleObjectProperty<>();
-
+    // Substation layout provider
     private static final String HORIZONTAL_SUBSTATION_LAYOUT = "Horizontal";
     private static final String VERTICAL_SUBSTATION_LAYOUT = "Vertical";
     private static final String CGMES_SUBSTATION_LAYOUT = "CGMES";
-
-    // Substation layout provider
     private final Map<String, SubstationLayoutFactory> nameToSubstationLayoutFactoryMap = new TreeMap<>(); // ordered
     private final ObservableList<SubstationLayoutFactory> substationLayouts = FXCollections.observableArrayList();
     private final ObjectProperty<SubstationLayoutFactory> currentSubstationLayoutFactory = new SimpleObjectProperty<>();
@@ -79,7 +80,6 @@ public class SingleLineDiagramModel extends DiagramModel {
 
     public SingleLineDiagramModel(// Providers
                                   ReadOnlyObjectProperty<ComponentLibrary> componentLibrary,
-                                  ReadOnlyObjectProperty<VoltageLevelLayoutFactoryCreator> voltageLevelLayoutFactoryCreator,
                                   ReadOnlyObjectProperty<SubstationLayoutFactory> substationLayoutFactory,
                                   ReadOnlyObjectProperty<String> cgmesDLDiagramName,
                                   // Styles
@@ -90,12 +90,6 @@ public class SingleLineDiagramModel extends DiagramModel {
                                   Property<Double> animationThreshold2,
                                   BooleanProperty highlightStyleProvider,
                                   BooleanProperty topologicalStyleProvider,
-                                  // PositionVoltageLevelLayoutFactory
-                                  BooleanProperty stackFeeders,
-                                  BooleanProperty exceptionWhenPatternUnhandled,
-                                  BooleanProperty handleShunts,
-                                  BooleanProperty removeFictitiousNodes,
-                                  BooleanProperty substituteSingularFictitiousNodes,
                                   // LayoutParameters
                                   Property<Double> diagramPaddingTopBottom,
                                   Property<Double> diagramPaddingLeftRight,
@@ -134,7 +128,6 @@ public class SingleLineDiagramModel extends DiagramModel {
 
         // Providers
         this.currentComponentLibrary.bind(componentLibrary);
-        this.currentVoltageLevelLayoutFactoryCreator.bind(voltageLevelLayoutFactoryCreator);
         this.currentSubstationLayoutFactory.bind(substationLayoutFactory);
         this.currentCgmesDLDiagramName.bind(cgmesDLDiagramName);
 
@@ -182,10 +175,6 @@ public class SingleLineDiagramModel extends DiagramModel {
     }
 
     public void initProviders() {
-        // VoltageLevelLayouts
-        nameToVoltageLevelLayoutFactoryCreatorMap.put(AUTO_EXTENSIONS_VOLTAGELEVEL_LAYOUT, VoltageLevelLayoutFactoryCreator.newPositionVoltageLevelLayoutFactoryCreator());
-        nameToVoltageLevelLayoutFactoryCreatorMap.put(AUTO_WITHOUT_EXTENSIONS_CLUSTERING_VOLTAGELEVEL_LAYOUT, VoltageLevelLayoutFactoryCreator.newPositionVoltageLevelLayoutFactoryCreator(new PositionByClustering()));
-        nameToVoltageLevelLayoutFactoryCreatorMap.put(RANDOM_VOLTAGELEVEL_LAYOUT, i -> new RandomVoltageLevelLayoutFactory(500, 500));
         // SubstationLayouts
         nameToSubstationLayoutFactoryMap.put(HORIZONTAL_SUBSTATION_LAYOUT, new HorizontalSubstationLayoutFactory());
         nameToSubstationLayoutFactoryMap.put(VERTICAL_SUBSTATION_LAYOUT, new VerticalSubstationLayoutFactory());
@@ -193,14 +182,10 @@ public class SingleLineDiagramModel extends DiagramModel {
         // Set all providers list
         componentLibraries.setAll(ComponentLibrary.findAll());
         substationLayouts.setAll(nameToSubstationLayoutFactoryMap.values());
-        voltageLevelLayouts.setAll(nameToVoltageLevelLayoutFactoryCreatorMap.values());
     }
 
     public void updateFrom(Network network) {
         if (network != null) {
-            // VoltageLevelLayouts
-            nameToVoltageLevelLayoutFactoryCreatorMap.put(SMART_VOLTAGELEVEL_LAYOUT, VoltageLevelLayoutFactoryCreator.newSmartVoltageLevelLayoutFactoryCreator());
-            nameToVoltageLevelLayoutFactoryCreatorMap.put(CGMES_VOLTAGELEVEL_LAYOUT, CgmesVoltageLevelLayoutFactory::new);
             // SubstationLayouts
             nameToSubstationLayoutFactoryMap.put(CGMES_SUBSTATION_LAYOUT, new CgmesSubstationLayoutFactory(network));
             // CGMES-DL names
@@ -210,9 +195,9 @@ public class SingleLineDiagramModel extends DiagramModel {
                 cgmesDLDiagramNames.clear();
             }
         }
+
         // Set all providers list
         substationLayouts.setAll(nameToSubstationLayoutFactoryMap.values());
-        voltageLevelLayouts.setAll(nameToVoltageLevelLayoutFactoryCreatorMap.values());
     }
 
     public void addListener(ChangeListener<Object> changeListener) {
@@ -259,20 +244,12 @@ public class SingleLineDiagramModel extends DiagramModel {
         return new StyleProvidersList(styles);
     }
 
-    public VoltageLevelLayoutFactoryCreator getVoltageLevelLayoutFactoryCreator() {
-        return currentVoltageLevelLayoutFactoryCreator.get();
-    }
-
     public SubstationLayoutFactory getSubstationLayoutFactory() {
         return currentSubstationLayoutFactory.get();
     }
 
     public ObservableList<ComponentLibrary> getComponentLibraries() {
         return componentLibraries;
-    }
-
-    public ObservableList<VoltageLevelLayoutFactoryCreator> getVoltageLevelLayouts() {
-        return voltageLevelLayouts;
     }
 
     public ObservableList<SubstationLayoutFactory> getSubstationLayouts() {
@@ -308,21 +285,6 @@ public class SingleLineDiagramModel extends DiagramModel {
             @Override
             public SubstationLayoutFactory fromString(String item) {
                 return nameToSubstationLayoutFactoryMap.get(item);
-            }
-        };
-    }
-
-    public StringConverter<VoltageLevelLayoutFactoryCreator> getVoltageLevelLayoutFactoryCreatorStringConverter() {
-        return new StringConverter<>() {
-            @Override
-            public String toString(VoltageLevelLayoutFactoryCreator object) {
-                Optional<String> label = nameToVoltageLevelLayoutFactoryCreatorMap.keySet().stream().filter(name -> nameToVoltageLevelLayoutFactoryCreatorMap.get(name) == object).findFirst();
-                return label.orElse(UNKNOWN_ITEM);
-            }
-
-            @Override
-            public VoltageLevelLayoutFactoryCreator fromString(String item) {
-                return nameToVoltageLevelLayoutFactoryCreatorMap.get(item);
             }
         };
     }
