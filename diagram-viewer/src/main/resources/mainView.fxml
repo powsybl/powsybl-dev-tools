@@ -14,7 +14,7 @@
             <Button fx:id="loadingStatus" minWidth="28" style="-fx-background-color: red"/>
             <TextField fx:id="filePath" prefWidth="900" HBox.hgrow="ALWAYS" maxWidth="Infinity"/>
             <Button onMouseClicked="#onClickLoadFile" text="..."/>
-            <MenuButton fx:id="networkFactoryMenuButton" text="Networks" minWidth="100"/>
+            <MenuButton fx:id="networkFactoryMenuButton" text="Sample networks" minWidth="130"/>
         </HBox>
     </top>
     <center>

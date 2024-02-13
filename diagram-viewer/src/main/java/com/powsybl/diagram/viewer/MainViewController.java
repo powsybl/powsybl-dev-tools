@@ -15,6 +15,7 @@ import com.powsybl.diagram.viewer.nad.NetworkAreaDiagramViewController;
 import com.powsybl.diagram.viewer.sld.SingleLineDiagramJsHandler;
 import com.powsybl.diagram.viewer.sld.SingleLineDiagramViewController;
 import com.powsybl.iidm.network.*;
+import com.powsybl.iidm.network.test.*;
 import com.powsybl.loadflow.LoadFlow;
 import javafx.application.*;
 import javafx.concurrent.Service;
@@ -158,25 +159,25 @@ public class MainViewController {
 
     private void initializeNetworkFactories() {
         Map<String, Supplier<Network>> suppliers = new HashMap<>();
-        suppliers.put("BatteryNetwork", com.powsybl.iidm.network.test.BatteryNetworkFactory::create);
-        suppliers.put("DanglingLineNetwork", com.powsybl.iidm.network.test.DanglingLineNetworkFactory::create);
-        suppliers.put("EuropeanLvTestFeeder", com.powsybl.iidm.network.test.EuropeanLvTestFeederFactory::create);
-        suppliers.put("EurostagTutorialExample1", com.powsybl.iidm.network.test.EurostagTutorialExample1Factory::create);
-        suppliers.put("FictitiousSwitch", com.powsybl.iidm.network.test.FictitiousSwitchFactory::create);
-        suppliers.put("FourSubstationsNodeBreaker", com.powsybl.iidm.network.test.FourSubstationsNodeBreakerFactory::create);
-        suppliers.put("FourSubstationsNodeBreakerWithExtensions", com.powsybl.iidm.network.test.FourSubstationsNodeBreakerWithExtensionsFactory::create);
-        suppliers.put("MultipleExtensionsTestNetwork", com.powsybl.iidm.network.test.MultipleExtensionsTestNetworkFactory::create);
-        suppliers.put("NetworkBusBreakerTest1", com.powsybl.iidm.network.test.NetworkBusBreakerTest1Factory::create);
-        suppliers.put("NetworkTest1", com.powsybl.iidm.network.test.NetworkTest1Factory::create);
-        suppliers.put("NoEquipmentNetwork", com.powsybl.iidm.network.test.NoEquipmentNetworkFactory::create);
-        suppliers.put("PhaseShifterTestCase", com.powsybl.iidm.network.test.PhaseShifterTestCaseFactory::create);
-        suppliers.put("ReactiveLimitsTestNetwork", com.powsybl.iidm.network.test.ReactiveLimitsTestNetworkFactory::create);
-        suppliers.put("ScadaNetwork", com.powsybl.iidm.network.test.ScadaNetworkFactory::create);
-        suppliers.put("SecurityAnalysisTestNetwork", com.powsybl.iidm.network.test.SecurityAnalysisTestNetworkFactory::create);
-        suppliers.put("ShuntTestCase", com.powsybl.iidm.network.test.ShuntTestCaseFactory::create);
-        suppliers.put("SvcTestCase", com.powsybl.iidm.network.test.SvcTestCaseFactory::create);
-        suppliers.put("ThreeWindingsTransformerNetwork", com.powsybl.iidm.network.test.ThreeWindingsTransformerNetworkFactory::create);
-        suppliers.put("TwoVoltageLevelNetwork", com.powsybl.iidm.network.test.TwoVoltageLevelNetworkFactory::create);
+        suppliers.put("BatteryNetwork", BatteryNetworkFactory::create);
+        suppliers.put("DanglingLineNetwork", DanglingLineNetworkFactory::create);
+        suppliers.put("EuropeanLvTestFeeder", EuropeanLvTestFeederFactory::create);
+        suppliers.put("EurostagTutorialExample1", EurostagTutorialExample1Factory::create);
+        suppliers.put("FictitiousSwitch", FictitiousSwitchFactory::create);
+        suppliers.put("FourSubstationsNodeBreaker", FourSubstationsNodeBreakerFactory::create);
+        suppliers.put("FourSubstationsNodeBreakerWithExtensions", FourSubstationsNodeBreakerWithExtensionsFactory::create);
+        suppliers.put("MultipleExtensionsTestNetwork", MultipleExtensionsTestNetworkFactory::create);
+        suppliers.put("NetworkBusBreakerTest1", NetworkBusBreakerTest1Factory::create);
+        suppliers.put("NetworkTest1", NetworkTest1Factory::create);
+        suppliers.put("NoEquipmentNetwork", NoEquipmentNetworkFactory::create);
+        suppliers.put("PhaseShifterTestCase", PhaseShifterTestCaseFactory::create);
+        suppliers.put("ReactiveLimitsTestNetwork", ReactiveLimitsTestNetworkFactory::create);
+        suppliers.put("ScadaNetwork", ScadaNetworkFactory::create);
+        suppliers.put("SecurityAnalysisTestNetwork", SecurityAnalysisTestNetworkFactory::create);
+        suppliers.put("ShuntTestCase", ShuntTestCaseFactory::create);
+        suppliers.put("SvcTestCase", SvcTestCaseFactory::create);
+        suppliers.put("ThreeWindingsTransformerNetwork", ThreeWindingsTransformerNetworkFactory::create);
+        suppliers.put("TwoVoltageLevelNetwork", TwoVoltageLevelNetworkFactory::create);
 
         // Populate Networks list
         for (Map.Entry<String, Supplier<Network>> entry : suppliers.entrySet()) {
