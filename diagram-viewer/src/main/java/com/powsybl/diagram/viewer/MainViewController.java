@@ -467,7 +467,7 @@ public class MainViewController {
                 case VSC_CONVERTER_STATION -> v.getVscConverterStationCount() != 0;
                 case BUS -> v.getBusView().getBusStream().findAny().isPresent();
                 case SWITCH -> v.getSwitchCount() != 0;
-                case GROUND -> v.getGeneratorCount() != 0;
+                case GROUND -> v.getGroundCount() != 0;
                 case ALL -> true;
             };
         }
