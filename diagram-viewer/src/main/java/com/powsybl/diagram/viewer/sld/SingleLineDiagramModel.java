@@ -36,7 +36,7 @@ public class SingleLineDiagramModel extends DiagramModel {
         @Override
         public String toString() {
             return switch (this) {
-                case SMART -> "Smart";
+                case SMART -> "'Smart' choice";
                 case POSITION_WITH_EXTENSIONS -> "Position with extensions";
                 case POSITION_BY_CLUSTERING -> "Position by clustering";
                 case RANDOM -> "Random";
