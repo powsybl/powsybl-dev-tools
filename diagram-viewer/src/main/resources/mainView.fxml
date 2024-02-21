@@ -3,14 +3,12 @@
 <?import javafx.geometry.*?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
+<?import com.powsybl.diagram.viewer.common.EnumChoiceBox?>
 <BorderPane xmlns="http://javafx.com/javafx/17.0.1" xmlns:fx="http://javafx.com/fxml/1"
             prefHeight="900.0" prefWidth="1000.0"
             fx:controller="com.powsybl.diagram.viewer.MainViewController">
     <top>
         <HBox>
-            <BorderPane.margin>
-                <Insets topRightBottomLeft="5"/>
-            </BorderPane.margin>
             <Button fx:id="loadingStatus" minWidth="28" style="-fx-background-color: red"/>
             <TextField fx:id="filePath" prefWidth="900" HBox.hgrow="ALWAYS" maxWidth="Infinity"/>
             <Button onMouseClicked="#onClickLoadFile" text="..."/>
@@ -28,8 +26,14 @@
                     <CheckBox fx:id="showNames" onMouseClicked="#initSubstationsTree" text="Show names" selected="true" GridPane.rowIndex="1"/>
                     <CheckBox fx:id="hideSubstations" onMouseClicked="#initSubstationsTree" text="Hide substations" GridPane.rowIndex="2"/>
                     <CheckBox fx:id="hideVoltageLevels" onMouseClicked="#initSubstationsTree" text="Hide voltage levels" GridPane.rowIndex="3"/>
-                    <Label text="Filter:" GridPane.rowIndex="4"/>
-                    <TextField fx:id="filterField" onKeyTyped="#initSubstationsTree" minWidth="40" GridPane.rowIndex="5"/>
+                    <HBox GridPane.rowIndex="4" spacing="5">
+                        <Label text="Filter by name/id:" minWidth="120"/>
+                        <TextField fx:id="filterField" onKeyTyped="#initSubstationsTree" minWidth="40"/>
+                    </HBox>
+                    <HBox GridPane.rowIndex="5" spacing="5">
+                        <Label text="Filter by component:" minWidth="120"/>
+                        <EnumChoiceBox enumType="com.powsybl.diagram.viewer.MainViewController$ComponentFilterType" fx:id="componentTypeFilterChoice" initialValue="All" onAction="#initSubstationsTree"/>
+                    </HBox>
                 </GridPane>
                 <VBox minHeight="700">
                     <TreeView VBox.vgrow="ALWAYS" maxHeight="Infinity" fx:id="vlTree"/>

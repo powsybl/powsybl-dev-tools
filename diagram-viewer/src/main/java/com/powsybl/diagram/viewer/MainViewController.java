@@ -43,6 +43,70 @@ import java.util.stream.Stream;
  */
 public class MainViewController {
 
+    public enum ComponentFilterType {
+        ALL,
+        HVDC_LINE,
+        SWITCH,
+        BUSBAR_SECTION,
+        LINE,
+        TIE_LINE,
+        TWO_WINDINGS_TRANSFORMER,
+        THREE_WINDINGS_TRANSFORMER,
+        GENERATOR,
+        BATTERY,
+        LOAD,
+        SHUNT_COMPENSATOR,
+        DANGLING_LINE,
+        STATIC_VAR_COMPENSATOR,
+        LCC_CONVERTER_STATION,
+        VSC_CONVERTER_STATION,
+        GROUND;
+
+        IdentifiableType toIidm() {
+            return switch (this) {
+                case ALL -> null;
+                case HVDC_LINE -> IdentifiableType.HVDC_LINE;
+                case SWITCH -> IdentifiableType.SWITCH;
+                case BUSBAR_SECTION -> IdentifiableType.BUSBAR_SECTION;
+                case LINE -> IdentifiableType.LINE;
+                case TIE_LINE -> IdentifiableType.TIE_LINE;
+                case TWO_WINDINGS_TRANSFORMER -> IdentifiableType.TWO_WINDINGS_TRANSFORMER;
+                case THREE_WINDINGS_TRANSFORMER -> IdentifiableType.THREE_WINDINGS_TRANSFORMER;
+                case GENERATOR -> IdentifiableType.GENERATOR;
+                case BATTERY -> IdentifiableType.BATTERY;
+                case LOAD -> IdentifiableType.LOAD;
+                case SHUNT_COMPENSATOR -> IdentifiableType.SHUNT_COMPENSATOR;
+                case DANGLING_LINE -> IdentifiableType.DANGLING_LINE;
+                case STATIC_VAR_COMPENSATOR -> IdentifiableType.STATIC_VAR_COMPENSATOR;
+                case VSC_CONVERTER_STATION, LCC_CONVERTER_STATION -> IdentifiableType.HVDC_CONVERTER_STATION;
+                case GROUND -> IdentifiableType.GROUND;
+            };
+        }
+
+        @Override
+        public String toString() {
+            return switch (this) {
+                case ALL -> "All";
+                case HVDC_LINE -> "HVDC line";
+                case SWITCH -> "Switch";
+                case BUSBAR_SECTION -> "Busbar section";
+                case LINE -> "Line";
+                case TIE_LINE -> "Tie line";
+                case TWO_WINDINGS_TRANSFORMER -> " Two-winding transformer";
+                case THREE_WINDINGS_TRANSFORMER -> "Three-winding transformer";
+                case GENERATOR -> "Generator";
+                case BATTERY -> "Battery";
+                case LOAD -> "Load";
+                case SHUNT_COMPENSATOR -> "Shunt compensator";
+                case DANGLING_LINE -> "Dangling line";
+                case STATIC_VAR_COMPENSATOR -> "SVC";
+                case LCC_CONVERTER_STATION -> "LCC";
+                case VSC_CONVERTER_STATION -> "VSC";
+                case GROUND -> "Ground";
+            };
+        }
+    }
+
     private static final Logger LOGGER = LoggerFactory.getLogger(MainViewController.class);
 
     private static final String SELECTED_VOLTAGE_LEVEL_AND_SUBSTATION_IDS_PROPERTY = "selectedVoltageLevelAndSubstationIds";
@@ -56,6 +120,10 @@ public class MainViewController {
     public TextField filePath;
     @FXML
     public TextField filterField;
+
+    @FXML
+    public ChoiceBox<ComponentFilterType> componentTypeFilterChoice;
+
     @FXML
     public TreeView<Container<?>> vlTree;
     @FXML
@@ -127,10 +195,10 @@ public class MainViewController {
             treeCell.setConverter(new StringConverter<>() {
                 @Override
                 public String toString(TreeItem<Container<?>> c) {
-                    if (c.getValue().getContainerType() == ContainerType.NETWORK) {
-                        return "Full Network";
-                    }
                     if (c.getValue() != null) {
+                        if (c.getValue().getContainerType() == ContainerType.NETWORK) {
+                            return "Full Network";
+                        }
                         return getString(c.getValue());
                     }
                     return "";
@@ -320,15 +388,15 @@ public class MainViewController {
         if (network == null) {
             return;
         }
-
+        // Create root item if needed
         CheckBoxTreeItem<Container<?>> rootTreeItem = (CheckBoxTreeItem<Container<?>>) vlTree.getRoot();
         if (rootTreeItem == null) {
-            rootTreeItem = new CheckBoxTreeItem<>(network);
+            rootTreeItem = new CheckBoxTreeItem<>();
             rootTreeItem.setIndependent(true);
             rootTreeItem.setExpanded(true);
             vlTree.setRoot(rootTreeItem);
         }
-
+        // Store previous selection
         Set<String> containersChecked = rootTreeItem.getChildren().stream()
                 .flatMap(s -> Stream.concat(Stream.of(s), s.getChildren().stream()))
                 .filter(CheckBoxTreeItem.class::isInstance).map(ti -> (CheckBoxTreeItem<Container<?>>) ti)
@@ -338,14 +406,17 @@ public class MainViewController {
         TreeItem<Container<?>> selectedItem = vlTree.getSelectionModel().getSelectedItem();
         String selectedContainerId = selectedItem == null ? null : selectedItem.getValue().getId();
 
+        // Set root item to current Network instance
         rootTreeItem.getChildren().clear();
         rootTreeItem.setValue(network);
 
+        // Filter parameters
+        ComponentFilterType idType = componentTypeFilterChoice.getValue();
         String filter = filterField.getText();
         for (Substation s : network.getSubstations()) {
-            boolean sFilterOk = testPassed(filter, s);
+            boolean sFilterOk = testPassed(filter, s) && containsComponentType(idType, s);
             List<VoltageLevel> voltageLevels = s.getVoltageLevelStream()
-                    .filter(v -> sFilterOk || testPassed(filter, v))
+                    .filter(v -> (sFilterOk || testPassed(filter, v)) && containsComponentType(idType, v))
                     .toList();
             if ((sFilterOk || !voltageLevels.isEmpty()) && !hideSubstations.isSelected()) {
                 CheckBoxTreeItem<Container<?>> sItem = new CheckBoxTreeItem<>(s);
@@ -378,6 +449,22 @@ public class MainViewController {
         loadSelectedContainersDiagrams();
 
         vlTree.setShowRoot(true);
+    }
+
+    private static boolean containsComponentType(ComponentFilterType type, Container<?> container) {
+        boolean result = false;
+        if (container instanceof Substation s) {
+            result = s.getVoltageLevelStream().anyMatch(v -> containsComponentType(type, v));
+        } else if (container instanceof VoltageLevel v) {
+            result = switch (type) {
+                case HVDC_LINE, BUSBAR_SECTION, LINE, TIE_LINE, TWO_WINDINGS_TRANSFORMER, THREE_WINDINGS_TRANSFORMER, GENERATOR, BATTERY, LOAD, SHUNT_COMPENSATOR, DANGLING_LINE, STATIC_VAR_COMPENSATOR, GROUND -> v.getConnectableStream().anyMatch(c -> c.getType() == type.toIidm());
+                case LCC_CONVERTER_STATION -> v.getLccConverterStationCount() != 0;
+                case VSC_CONVERTER_STATION -> v.getVscConverterStationCount() != 0;
+                case SWITCH -> v.getSwitchCount() != 0;
+                case ALL -> true;
+            };
+        }
+        return result;
     }
 
     private void initVoltageLevelsTree(TreeItem<Container<?>> parentItem, Collection<VoltageLevel> voltageLevels, Set<String> checkedContainers) {
