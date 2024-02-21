@@ -46,7 +46,6 @@ public class MainViewController {
     public enum ComponentFilterType {
         ALL,
         HVDC_LINE,
-        BUS,
         SWITCH,
         BUSBAR_SECTION,
         LINE,
@@ -67,7 +66,6 @@ public class MainViewController {
             return switch (this) {
                 case ALL -> null;
                 case HVDC_LINE -> IdentifiableType.HVDC_LINE;
-                case BUS -> IdentifiableType.BUS;
                 case SWITCH -> IdentifiableType.SWITCH;
                 case BUSBAR_SECTION -> IdentifiableType.BUSBAR_SECTION;
                 case LINE -> IdentifiableType.LINE;
@@ -85,20 +83,17 @@ public class MainViewController {
             };
         }
 
-        ComponentFilterType() { /* compiled code */ }
-
         @Override
         public String toString() {
             return switch (this) {
                 case ALL -> "All";
                 case HVDC_LINE -> "HVDC line";
-                case BUS -> "Bus";
                 case SWITCH -> "Switch";
                 case BUSBAR_SECTION -> "Busbar section";
                 case LINE -> "Line";
                 case TIE_LINE -> "Tie line";
-                case TWO_WINDINGS_TRANSFORMER -> " Two winding transformer";
-                case THREE_WINDINGS_TRANSFORMER -> "Three winding transformer";
+                case TWO_WINDINGS_TRANSFORMER -> " Two-winding transformer";
+                case THREE_WINDINGS_TRANSFORMER -> "Three-winding transformer";
                 case GENERATOR -> "Generator";
                 case BATTERY -> "Battery";
                 case LOAD -> "Load";
@@ -419,9 +414,9 @@ public class MainViewController {
         ComponentFilterType idType = componentTypeFilterChoice.getValue();
         String filter = filterField.getText();
         for (Substation s : network.getSubstations()) {
-            boolean sFilterOk = testPassed(filter, s) && testComponent(idType, s);
+            boolean sFilterOk = testPassed(filter, s) && containsComponentType(idType, s);
             List<VoltageLevel> voltageLevels = s.getVoltageLevelStream()
-                    .filter(v -> (sFilterOk || testPassed(filter, v)) && testComponent(idType, v))
+                    .filter(v -> (sFilterOk || testPassed(filter, v)) && containsComponentType(idType, v))
                     .toList();
             if ((sFilterOk || !voltageLevels.isEmpty()) && !hideSubstations.isSelected()) {
                 CheckBoxTreeItem<Container<?>> sItem = new CheckBoxTreeItem<>(s);
@@ -456,16 +451,15 @@ public class MainViewController {
         vlTree.setShowRoot(true);
     }
 
-    private boolean testComponent(ComponentFilterType type, Identifiable<?> identifiable) {
+    private static boolean containsComponentType(ComponentFilterType type, Container<?> container) {
         boolean result = false;
-        if (identifiable instanceof Substation s) {
-            result = s.getVoltageLevelStream().anyMatch(v -> testComponent(type, v));
-        } else if (identifiable instanceof VoltageLevel v) {
+        if (container instanceof Substation s) {
+            result = s.getVoltageLevelStream().anyMatch(v -> containsComponentType(type, v));
+        } else if (container instanceof VoltageLevel v) {
             result = switch (type) {
                 case HVDC_LINE, BUSBAR_SECTION, LINE, TIE_LINE, TWO_WINDINGS_TRANSFORMER, THREE_WINDINGS_TRANSFORMER, GENERATOR, BATTERY, LOAD, SHUNT_COMPENSATOR, DANGLING_LINE, STATIC_VAR_COMPENSATOR, GROUND -> v.getConnectableStream().anyMatch(c -> c.getType() == type.toIidm());
                 case LCC_CONVERTER_STATION -> v.getLccConverterStationCount() != 0;
                 case VSC_CONVERTER_STATION -> v.getVscConverterStationCount() != 0;
-                case BUS -> v.getBusView().getBusStream().findAny().isPresent();
                 case SWITCH -> v.getSwitchCount() != 0;
                 case ALL -> true;
             };
