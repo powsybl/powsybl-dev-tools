@@ -8,16 +8,11 @@
 package com.powsybl.diagram.viewer.nad;
 
 import com.powsybl.diagram.viewer.common.DiagramModel;
-import com.powsybl.iidm.network.Network;
 import com.powsybl.nad.layout.BasicForceLayoutFactory;
 import com.powsybl.nad.layout.LayoutFactory;
 import com.powsybl.nad.layout.LayoutParameters;
-import com.powsybl.nad.svg.LabelProvider;
-import com.powsybl.nad.svg.StyleProvider;
 import com.powsybl.nad.svg.SvgParameters;
-import com.powsybl.nad.svg.iidm.DefaultLabelProvider;
-import com.powsybl.nad.svg.iidm.NominalVoltageStyleProvider;
-import com.powsybl.nad.svg.iidm.TopologicalStyleProvider;
+import com.powsybl.nad.svg.iidm.*;
 import javafx.beans.property.*;
 import javafx.beans.value.ChangeListener;
 
@@ -94,12 +89,12 @@ public class NetworkAreaDiagramModel extends DiagramModel {
         return layoutParametersBean.getLayoutParameters();
     }
 
-    public LabelProvider getLabelProvider(Network network) {
-        return DEFAULT_LABEL_PROVIDER.equals(labelProvider.getValue()) ? new DefaultLabelProvider(network, getSvgParameters()) : null;
+    public LabelProviderFactory getLabelProviderFactory() {
+        return (network, svgParameters) -> DEFAULT_LABEL_PROVIDER.equals(labelProvider.getValue()) ? new DefaultLabelProvider(network, svgParameters) : null;
     }
 
-    public StyleProvider getStyleProvider(Network network) {
-        return TOPOLOGICAL_STYLE_PROVIDER.equals(styleProvider.getValue())
+    public StyleProviderFactory getStyleProviderFactory() {
+        return network -> TOPOLOGICAL_STYLE_PROVIDER.equals(styleProvider.getValue())
                 ? new TopologicalStyleProvider(network)
                 : new NominalVoltageStyleProvider(network);
     }
