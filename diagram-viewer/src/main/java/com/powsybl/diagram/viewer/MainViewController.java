@@ -418,11 +418,6 @@ public class MainViewController {
         containersChecked = readSavedSelection();
 
         ObservableList<TreeItem<Container<?>>> substationItems = FXCollections.observableArrayList();
-//                item -> new Observable[] {
-//                        filterField.textProperty(),
-//                        componentTypeFilterChoice.valueProperty()
-//                }
-//        );
         for (Substation s : network.getSubstations()) {
             var sItem = createSubLevelCheckBoxTreeItem(s, substationItems, containersChecked);
             s.getVoltageLevelStream().forEach(v -> createSubLevelCheckBoxTreeItem(v, sItem.getChildren(), containersChecked));
