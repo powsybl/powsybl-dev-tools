@@ -28,7 +28,7 @@ public class SvgParametersBean {
     // Diagram size
     private final BooleanProperty widthHeightAdded;
     private final Property<SvgParameters.SizeConstraint> sizeConstraint;
-    private final Property<Double> fixedSize;
+    private final Property<Integer> fixedSize;
     private final Property<Double> fixedScale;
 
     public SvgParametersBean(// SVG parameters
@@ -41,7 +41,7 @@ public class SvgParametersBean {
                              // Diagram size
                              BooleanProperty widthHeightAdded,
                              Property<SvgParameters.SizeConstraint> sizeConstraint,
-                             Property<Double> fixedSize,
+                             Property<Integer> fixedSize,
                              Property<Double> fixedScale) {
         // bind
         this.edgeInfoAlongEdge = edgeInfoAlongEdge;
@@ -88,8 +88,8 @@ public class SvgParametersBean {
                 .setSvgWidthAndHeightAdded(widthHeightAdded.get())
                 .setSizeConstraint(sizeConstraint.getValue());
         switch (sizeConstraint.getValue()) {
-            case FIXED_HEIGHT -> svgParameters.setFixedHeight((int) Math.round(fixedSize.getValue()));
-            case FIXED_WIDTH -> svgParameters.setFixedWidth((int) Math.round(fixedSize.getValue()));
+            case FIXED_HEIGHT -> svgParameters.setFixedHeight(fixedSize.getValue());
+            case FIXED_WIDTH -> svgParameters.setFixedWidth(fixedSize.getValue());
             case FIXED_SCALE -> svgParameters.setFixedScale(fixedScale.getValue());
             case NONE -> svgParameters.setSizeConstraint(SvgParameters.SizeConstraint.NONE);
         }

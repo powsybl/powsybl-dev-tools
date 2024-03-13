@@ -6,6 +6,7 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 <?import java.lang.String?>
+<?import javafx.scene.control.SpinnerValueFactory.IntegerSpinnerValueFactory?>
 <BorderPane xmlns="http://javafx.com/javafx/17.0.1" xmlns:fx="http://javafx.com/fxml/1"
             prefHeight="900.0" prefWidth="1000.0"
             fx:controller="com.powsybl.diagram.viewer.nad.NetworkAreaDiagramViewController">
@@ -114,7 +115,7 @@
                         <EnumChoiceBox enumType="com.powsybl.nad.svg.SvgParameters$SizeConstraint" fx:id="sizeConstraintChoice" initialValue="FIXED_SCALE" GridPane.rowIndex="9"/>
                         <Spinner fx:id="fixedSizeSpinner" GridPane.rowIndex="10">
                             <valueFactory>
-                                <SpinnerValueFactory.DoubleSpinnerValueFactory min="1" max="2000" amountToStepBy="100" initialValue="200"/>
+                                <SpinnerValueFactory.IntegerSpinnerValueFactory min="1" max="2000" amountToStepBy="100" initialValue="200"/>
                             </valueFactory>
                         </Spinner>
                         <Spinner fx:id="fixedScaleSpinner" GridPane.rowIndex="10">

@@ -59,7 +59,7 @@ public class NetworkAreaDiagramModel extends DiagramModel {
                                    // Diagram size
                                    BooleanProperty widthHeightAdded,
                                    Property<SvgParameters.SizeConstraint> sizeConstraint,
-                                   Property<Double> fixedSize,
+                                   Property<Integer> fixedSize,
                                    Property<Double> fixedScale
     ) {
         this.depth.bind(depth);

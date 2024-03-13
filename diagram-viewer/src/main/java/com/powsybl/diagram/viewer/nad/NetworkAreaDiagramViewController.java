@@ -64,7 +64,7 @@ public class NetworkAreaDiagramViewController extends AbstractDiagramViewControl
     @FXML
     public ChoiceBox<SvgParameters.SizeConstraint> sizeConstraintChoice;
     @FXML
-    public Spinner<Double> fixedSizeSpinner;
+    public Spinner<Integer> fixedSizeSpinner;
     @FXML
     public Spinner<Double> fixedScaleSpinner;
 
