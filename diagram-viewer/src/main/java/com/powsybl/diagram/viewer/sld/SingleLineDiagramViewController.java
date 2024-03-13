@@ -18,7 +18,6 @@ import com.powsybl.sld.layout.positionbyclustering.PositionByClustering;
 import com.powsybl.sld.layout.positionfromextension.PositionFromExtension;
 import com.powsybl.sld.library.ComponentLibrary;
 import javafx.beans.binding.Bindings;
-import javafx.beans.binding.BooleanBinding;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.fxml.FXML;
@@ -26,6 +25,7 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.control.*;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.VBox;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -119,6 +119,9 @@ public class SingleLineDiagramViewController extends AbstractDiagramViewControll
     public CheckBox disconnectorsOnBusCheckBox;
 
     @FXML
+    public VBox positionVoltageLevelLayoutFactoryParameters;
+
+    @FXML
     public CheckBox stackFeedersCheckBox;
 
     @FXML
@@ -132,6 +135,8 @@ public class SingleLineDiagramViewController extends AbstractDiagramViewControll
 
     @FXML
     public CheckBox substituteSingularFictitiousNodesCheckBox;
+    @FXML
+    public CheckBox substituteInternalMiddle2wtByEquipmentNodesCheckBox;
 
     @FXML
     public Spinner<Double> scaleFactorSpinner;
@@ -254,18 +259,15 @@ public class SingleLineDiagramViewController extends AbstractDiagramViewControll
         cgmesDLDiagramsComboBox.getSelectionModel().selectFirst(); // Default selection without Network
 
         // PositionVoltageLevelLayoutFactory
-        BooleanBinding disableBinding = Bindings.createBooleanBinding(() -> voltageLevelLayoutComboBox.getSelectionModel().getSelectedItem() == SingleLineDiagramModel.VoltageLevelLayoutFactoryType.POSITION_WITH_EXTENSIONS || voltageLevelLayoutComboBox.getSelectionModel().getSelectedItem() == SingleLineDiagramModel.VoltageLevelLayoutFactoryType.POSITION_BY_CLUSTERING, voltageLevelLayoutComboBox.getSelectionModel().selectedItemProperty());
-        stackFeedersCheckBox.visibleProperty().bind(disableBinding);
-        exceptionWhenPatternUnhandledCheckBox.visibleProperty().bind(disableBinding);
-        handleShuntsCheckBox.visibleProperty().bind(disableBinding);
-        removeFictitiousNodesCheckBox.visibleProperty().bind(disableBinding);
-        substituteSingularFictitiousNodesCheckBox.visibleProperty().bind(disableBinding);
-        // Force layout calculations when nodes are shown or hidden
-        stackFeedersCheckBox.managedProperty().bind(stackFeedersCheckBox.visibleProperty());
-        exceptionWhenPatternUnhandledCheckBox.managedProperty().bind(exceptionWhenPatternUnhandledCheckBox.visibleProperty());
-        handleShuntsCheckBox.managedProperty().bind(handleShuntsCheckBox.visibleProperty());
-        removeFictitiousNodesCheckBox.managedProperty().bind(removeFictitiousNodesCheckBox.visibleProperty());
-        substituteSingularFictitiousNodesCheckBox.managedProperty().bind(substituteSingularFictitiousNodesCheckBox.visibleProperty());
+        positionVoltageLevelLayoutFactoryParameters.visibleProperty().bind(Bindings.createBooleanBinding(
+                () -> voltageLevelLayoutFactoryParametersEnabled(voltageLevelLayoutComboBox.getSelectionModel().getSelectedItem()),
+                voltageLevelLayoutComboBox.getSelectionModel().selectedItemProperty()));
+        positionVoltageLevelLayoutFactoryParameters.managedProperty().bind(positionVoltageLevelLayoutFactoryParameters.visibleProperty()); // Force view layout calculations when nodes are shown or hidden
+    }
+
+    private boolean voltageLevelLayoutFactoryParametersEnabled(SingleLineDiagramModel.VoltageLevelLayoutFactoryType selectedItem) {
+        return selectedItem == SingleLineDiagramModel.VoltageLevelLayoutFactoryType.POSITION_WITH_EXTENSIONS
+                || selectedItem == SingleLineDiagramModel.VoltageLevelLayoutFactoryType.POSITION_BY_CLUSTERING;
     }
 
     public void addListener(ChangeListener<Object> changeListener) {
@@ -285,6 +287,7 @@ public class SingleLineDiagramViewController extends AbstractDiagramViewControll
         handleShuntsCheckBox.selectedProperty().addListener(changeListener);
         removeFictitiousNodesCheckBox.selectedProperty().addListener(changeListener);
         substituteSingularFictitiousNodesCheckBox.selectedProperty().addListener(changeListener);
+        substituteInternalMiddle2wtByEquipmentNodesCheckBox.selectedProperty().addListener(changeListener);
 
         // LayoutParameters
         model.addListener(changeListener);
@@ -375,7 +378,8 @@ public class SingleLineDiagramViewController extends AbstractDiagramViewControll
                 .setExceptionIfPatternNotHandled(exceptionWhenPatternUnhandledCheckBox.isSelected())
                 .setHandleShunts(handleShuntsCheckBox.isSelected())
                 .setRemoveUnnecessaryFictitiousNodes(removeFictitiousNodesCheckBox.isSelected())
-                .setSubstituteSingularFictitiousByFeederNode(substituteSingularFictitiousNodesCheckBox.isSelected());
+                .setSubstituteSingularFictitiousByFeederNode(substituteSingularFictitiousNodesCheckBox.isSelected())
+                .setSubstituteInternalMiddle2wtByEquipmentNodes(substituteInternalMiddle2wtByEquipmentNodesCheckBox.isSelected());
         SingleLineDiagramModel.VoltageLevelLayoutFactoryType type = voltageLevelLayoutComboBox.getValue();
         return switch (type) {
             case SMART -> SmartVoltageLevelLayoutFactory::new;
