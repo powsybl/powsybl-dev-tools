@@ -57,6 +57,8 @@ public class MainViewController {
         LINE,
         TIE_LINE,
         TWO_WINDINGS_TRANSFORMER,
+        PHASE_SHIFT_TRANSFORMER,
+        RATIO_TAP_CHANGER_TRANSFORMER,
         THREE_WINDINGS_TRANSFORMER,
         GENERATOR,
         BATTERY,
@@ -76,7 +78,7 @@ public class MainViewController {
                 case BUSBAR_SECTION -> IdentifiableType.BUSBAR_SECTION;
                 case LINE -> IdentifiableType.LINE;
                 case TIE_LINE -> IdentifiableType.TIE_LINE;
-                case TWO_WINDINGS_TRANSFORMER -> IdentifiableType.TWO_WINDINGS_TRANSFORMER;
+                case TWO_WINDINGS_TRANSFORMER, PHASE_SHIFT_TRANSFORMER, RATIO_TAP_CHANGER_TRANSFORMER -> IdentifiableType.TWO_WINDINGS_TRANSFORMER;
                 case THREE_WINDINGS_TRANSFORMER -> IdentifiableType.THREE_WINDINGS_TRANSFORMER;
                 case GENERATOR -> IdentifiableType.GENERATOR;
                 case BATTERY -> IdentifiableType.BATTERY;
@@ -98,7 +100,9 @@ public class MainViewController {
                 case BUSBAR_SECTION -> "Busbar section";
                 case LINE -> "Line";
                 case TIE_LINE -> "Tie line";
-                case TWO_WINDINGS_TRANSFORMER -> " Two-winding transformer";
+                case TWO_WINDINGS_TRANSFORMER -> "Two-winding transformer";
+                case PHASE_SHIFT_TRANSFORMER -> "Phase-shift transformer";
+                case RATIO_TAP_CHANGER_TRANSFORMER -> "Ratio-tap changer transformer";
                 case THREE_WINDINGS_TRANSFORMER -> "Three-winding transformer";
                 case GENERATOR -> "Generator";
                 case BATTERY -> "Battery";
@@ -469,7 +473,11 @@ public class MainViewController {
             result = s.getVoltageLevelStream().anyMatch(v -> containsComponentType(type, v));
         } else if (container instanceof VoltageLevel v) {
             result = switch (type) {
-                case HVDC_LINE, BUSBAR_SECTION, LINE, TIE_LINE, TWO_WINDINGS_TRANSFORMER, THREE_WINDINGS_TRANSFORMER, GENERATOR, BATTERY, LOAD, SHUNT_COMPENSATOR, DANGLING_LINE, STATIC_VAR_COMPENSATOR, GROUND -> v.getConnectableStream().anyMatch(c -> c.getType() == type.toIidm());
+                case PHASE_SHIFT_TRANSFORMER -> v.getConnectableStream(TwoWindingsTransformer.class).anyMatch(TwoWindingsTransformer::hasPhaseTapChanger);
+                case RATIO_TAP_CHANGER_TRANSFORMER -> v.getConnectableStream(TwoWindingsTransformer.class).anyMatch(TwoWindingsTransformer::hasRatioTapChanger);
+                case HVDC_LINE, BUSBAR_SECTION, LINE, TIE_LINE, TWO_WINDINGS_TRANSFORMER, THREE_WINDINGS_TRANSFORMER,
+                        GENERATOR, BATTERY, LOAD, SHUNT_COMPENSATOR, DANGLING_LINE, STATIC_VAR_COMPENSATOR, GROUND
+                        -> v.getConnectableStream().anyMatch(c -> c.getType() == type.toIidm());
                 case LCC_CONVERTER_STATION -> v.getLccConverterStationCount() != 0;
                 case VSC_CONVERTER_STATION -> v.getVscConverterStationCount() != 0;
                 case SWITCH -> v.getSwitchCount() != 0;
