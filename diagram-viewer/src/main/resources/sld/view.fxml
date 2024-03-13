@@ -65,11 +65,14 @@
                         <ComboBox fx:id="substationLayoutComboBox"/>
                         <Label text="VoltageLevel Layout:"/>
                         <EnumChoiceBox enumType="com.powsybl.diagram.viewer.sld.SingleLineDiagramModel$VoltageLevelLayoutFactoryType" fx:id="voltageLevelLayoutComboBox" initialValue="SMART"/>
-                        <CheckBox fx:id="stackFeedersCheckBox" text="Stack feeders" selected="true"/>
-                        <CheckBox fx:id="exceptionWhenPatternUnhandledCheckBox" text="Exception when pattern unhandled"/>
-                        <CheckBox fx:id="handleShuntsCheckBox" text="Handle shunts"/>
-                        <CheckBox fx:id="removeFictitiousNodesCheckBox" text="Remove fictitious nodes" selected="true"/>
-                        <CheckBox fx:id="substituteSingularFictitiousNodesCheckBox" text="Substitute singular fictitious nodes" selected="true"/>
+                        <VBox fx:id="positionVoltageLevelLayoutFactoryParameters">
+                            <CheckBox fx:id="stackFeedersCheckBox" text="Stack feeders" selected="true"/>
+                            <CheckBox fx:id="exceptionWhenPatternUnhandledCheckBox" text="Exception when pattern unhandled"/>
+                            <CheckBox fx:id="handleShuntsCheckBox" text="Handle shunts"/>
+                            <CheckBox fx:id="removeFictitiousNodesCheckBox" text="Remove fictitious nodes" selected="true"/>
+                            <CheckBox fx:id="substituteSingularFictitiousNodesCheckBox" text="Substitute singular fictitious nodes" selected="true"/>
+                            <CheckBox fx:id="substituteInternalMiddle2wtByEquipmentNodesCheckBox" text="Intern cells for internal 2wt" selected="true"/>
+                        </VBox>
                         <Label text="CGMES-DL Diagrams:"/>
                         <ComboBox fx:id="cgmesDLDiagramsComboBox"/>
                         <Separator>
