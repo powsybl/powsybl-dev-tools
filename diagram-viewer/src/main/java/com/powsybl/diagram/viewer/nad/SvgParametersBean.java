@@ -8,7 +8,9 @@
 package com.powsybl.diagram.viewer.nad;
 
 import com.powsybl.nad.svg.SvgParameters;
-import javafx.beans.property.*;
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.Property;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.value.ChangeListener;
 
 /**
@@ -17,17 +19,17 @@ import javafx.beans.value.ChangeListener;
 public class SvgParametersBean {
 
     private final BooleanProperty idDisplayed = new SimpleBooleanProperty();
-    private final BooleanProperty edgeInfoAlongEdge = new SimpleBooleanProperty();
-    private final BooleanProperty edgeNameDisplayed = new SimpleBooleanProperty();
-    private final BooleanProperty insertNameDesc = new SimpleBooleanProperty();
-    private final BooleanProperty substationDescriptionDisplayed = new SimpleBooleanProperty();
-    private final BooleanProperty busLegend = new SimpleBooleanProperty();
-    private final BooleanProperty vlDetails = new SimpleBooleanProperty();
+    private final BooleanProperty edgeInfoAlongEdge;
+    private final BooleanProperty edgeNameDisplayed;
+    private final BooleanProperty insertNameDesc;
+    private final BooleanProperty substationDescriptionDisplayed;
+    private final BooleanProperty busLegend;
+    private final BooleanProperty vlDetails;
     // Diagram size
-    private final BooleanProperty widthHeightAdded = new SimpleBooleanProperty();
-    private final ObjectProperty<SvgParameters.SizeConstraint> sizeConstraint = new SimpleObjectProperty<>(this, "sizeConstraint", SvgParameters.SizeConstraint.NONE);
-    private final ObjectProperty<Double> fixedSize = new SimpleObjectProperty<>();
-    private final ObjectProperty<Double> fixedScale = new SimpleObjectProperty<>();
+    private final BooleanProperty widthHeightAdded;
+    private final Property<SvgParameters.SizeConstraint> sizeConstraint;
+    private final Property<Double> fixedSize;
+    private final Property<Double> fixedScale;
 
     public SvgParametersBean(// SVG parameters
                              BooleanProperty edgeInfoAlongEdge,
@@ -42,43 +44,17 @@ public class SvgParametersBean {
                              Property<Double> fixedSize,
                              Property<Double> fixedScale) {
         // bind
-        this.edgeInfoAlongEdge.bindBidirectional(edgeInfoAlongEdge);
-        this.edgeNameDisplayed.bindBidirectional(edgeNameDisplayed);
-        this.insertNameDesc.bindBidirectional(insertNameDesc);
-        this.substationDescriptionDisplayed.bindBidirectional(substationDescriptionDisplayed);
-        this.busLegend.bindBidirectional(busLegend);
-        this.vlDetails.bindBidirectional(vlDetails);
+        this.edgeInfoAlongEdge = edgeInfoAlongEdge;
+        this.edgeNameDisplayed = edgeNameDisplayed;
+        this.insertNameDesc = insertNameDesc;
+        this.substationDescriptionDisplayed = substationDescriptionDisplayed;
+        this.busLegend = busLegend;
+        this.vlDetails = vlDetails;
         // Diagram size
-        this.widthHeightAdded.bindBidirectional(widthHeightAdded);
-        this.sizeConstraint.bindBidirectional(sizeConstraint);
-        this.fixedSize.bindBidirectional(fixedSize);
-        this.fixedScale.bindBidirectional(fixedScale);
-
-        // Initialize
-        SvgParameters defaultParameters = new SvgParameters();
-        idDisplayed.setValue(defaultParameters.isIdDisplayed());
-        edgeInfoAlongEdge.setValue(defaultParameters.isEdgeInfoAlongEdge());
-        edgeNameDisplayed.setValue(defaultParameters.isEdgeNameDisplayed());
-        insertNameDesc.setValue(defaultParameters.isInsertNameDesc());
-        substationDescriptionDisplayed.setValue(defaultParameters.isSubstationDescriptionDisplayed());
-        busLegend.setValue(defaultParameters.isBusLegend());
-        vlDetails.setValue(defaultParameters.isVoltageLevelDetails());
-        // Diagram size
-        widthHeightAdded.setValue(defaultParameters.isSvgWidthAndHeightAdded());
-        sizeConstraint.setValue(defaultParameters.getSizeConstraint());
-        switch (defaultParameters.getSizeConstraint()) {
-            case FIXED_HEIGHT:
-                fixedSize.setValue((double) defaultParameters.getFixedHeight());
-                break;
-            case FIXED_WIDTH:
-                fixedSize.setValue((double) defaultParameters.getFixedWidth());
-                break;
-            case FIXED_SCALE:
-                fixedScale.setValue(defaultParameters.getFixedScale());
-                break;
-            default:
-                break;
-        }
+        this.widthHeightAdded = widthHeightAdded;
+        this.sizeConstraint = sizeConstraint;
+        this.fixedSize = fixedSize;
+        this.fixedScale = fixedScale;
     }
 
     public void bind(BooleanProperty useName) {
@@ -110,19 +86,12 @@ public class SvgParametersBean {
                 .setEdgeInfoAlongEdge(edgeInfoAlongEdge.get())
                 .setEdgeNameDisplayed(edgeNameDisplayed.get())
                 .setSvgWidthAndHeightAdded(widthHeightAdded.get())
-                .setSizeConstraint(sizeConstraint.get());
-        switch (sizeConstraint.get()) {
-            case FIXED_HEIGHT:
-                svgParameters.setFixedHeight((int) Math.round(fixedSize.get()));
-                break;
-            case FIXED_WIDTH:
-                svgParameters.setFixedWidth((int) Math.round(fixedSize.get()));
-                break;
-            case FIXED_SCALE:
-                svgParameters.setFixedScale(fixedScale.get());
-                break;
-            default:
-                break;
+                .setSizeConstraint(sizeConstraint.getValue());
+        switch (sizeConstraint.getValue()) {
+            case FIXED_HEIGHT -> svgParameters.setFixedHeight((int) Math.round(fixedSize.getValue()));
+            case FIXED_WIDTH -> svgParameters.setFixedWidth((int) Math.round(fixedSize.getValue()));
+            case FIXED_SCALE -> svgParameters.setFixedScale(fixedScale.getValue());
+            case NONE -> svgParameters.setSizeConstraint(SvgParameters.SizeConstraint.NONE);
         }
         return svgParameters;
     }
