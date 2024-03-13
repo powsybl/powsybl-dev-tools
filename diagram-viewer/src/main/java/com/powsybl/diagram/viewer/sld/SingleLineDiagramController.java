@@ -77,6 +77,10 @@ public class SingleLineDiagramController extends AbstractDiagramController {
                                      Container<?> container,
                                      // PositionVoltageLevelLayoutFactory
                                      VoltageLevelLayoutFactoryCreator voltageLevelLayoutFactoryCreator) {
+
+        if (container instanceof Network) {
+            return;
+        }
         Service<ContainerResult> sldService = new Service<>() {
             @Override
             protected Task<ContainerResult> createTask() {

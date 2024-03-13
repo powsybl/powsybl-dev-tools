@@ -17,10 +17,14 @@ import com.powsybl.diagram.viewer.sld.SingleLineDiagramViewController;
 import com.powsybl.iidm.network.*;
 import com.powsybl.iidm.network.test.*;
 import com.powsybl.loadflow.LoadFlow;
-import javafx.application.*;
+import javafx.application.Platform;
+import javafx.beans.binding.Bindings;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
+import javafx.collections.transformation.FilteredList;
 import javafx.concurrent.Service;
 import javafx.concurrent.Task;
-import javafx.event.*;
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
 import javafx.scene.control.*;
@@ -31,12 +35,14 @@ import javafx.util.StringConverter;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import java.io.*;
+
+import java.io.File;
+import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.util.*;
-import java.util.function.*;
+import java.util.function.Function;
+import java.util.function.Supplier;
 import java.util.prefs.Preferences;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 /**
  * @author Florian Dupuy <florian.dupuy at rte-france.com>
@@ -127,10 +133,6 @@ public class MainViewController {
     @FXML
     public TreeView<Container<?>> vlTree;
     @FXML
-    public CheckBox hideVoltageLevels;
-    @FXML
-    public CheckBox hideSubstations;
-    @FXML
     public CheckBox showNames;
 
     // Selection between sld and nad
@@ -162,11 +164,23 @@ public class MainViewController {
 
     private SingleLineDiagramJsHandler sldJsHandler;
 
+    /**
+     * Filtered list for the substation tree view.
+     * We need to keep a reference to this list, otherwise it gets garbage collected
+     */
+    private FilteredList<TreeItem<Container<?>>> filteredList;
+
+    private Set<String> containersChecked = new HashSet<>();
+
     @FXML
     private void initialize() {
         initializeNetworkFactories();
 
         sldJsHandler = new SingleLineDiagramJsHandler(vlTree);
+
+        // to avoid bug in TreeView: it does not calculate properly the selection shift, so clearing selection
+        filterField.textProperty().addListener((observable, oldValue, newValue) -> clearSelection());
+        componentTypeFilterChoice.valueProperty().addListener((observable, oldValue, newValue) -> clearSelection());
 
         String casePathPropertyValue = preferences.get(CASE_PATH_PROPERTY, null);
         if (casePathPropertyValue != null) {
@@ -180,35 +194,32 @@ public class MainViewController {
             initSubstationsTree(newNetwork);
         });
 
+        showNames.selectedProperty().addListener((observable, oldValue, newValue) -> vlTree.refresh());
+
         vlTree.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
             if (newValue != null) {
                 Container<?> c = newValue.getValue();
                 model.setSelectedContainer(c);
                 nadViewController.createDiagram(model.getNetwork(), c);
                 sldViewController.createDiagram(sldJsHandler, model.getNetwork(), c);
-            } else {
-                clean();
             }
         });
         vlTree.setCellFactory(param -> {
             CheckBoxTreeCell<Container<?>> treeCell = new CheckBoxTreeCell<>();
             treeCell.setConverter(new StringConverter<>() {
                 @Override
-                public String toString(TreeItem<Container<?>> c) {
-                    if (c.getValue() != null) {
-                        if (c.getValue().getContainerType() == ContainerType.NETWORK) {
-                            return "Full Network";
-                        }
-                        return getString(c.getValue());
+                public String toString(TreeItem<Container<?>> item) {
+                    var c = item.getValue();
+                    if (c == null) {
+                        return "";
                     }
-                    return "";
-                }
-
-                private String getString(Container<?> value) {
-                    String cNameOrId = showNames.isSelected() ? value.getNameOrId() : value.getId();
-                    if (value instanceof Substation substation && hideVoltageLevels.isSelected()) {
+                    if (c.getContainerType() == ContainerType.NETWORK) {
+                        return "Full Network";
+                    }
+                    String cNameOrId = getIdentifiableStringSupplier().apply(c);
+                    if (c instanceof Substation substation) {
                         long nbVoltageLevels = substation.getVoltageLevelStream().count();
-                        return cNameOrId + " [" + nbVoltageLevels + "]";
+                        cNameOrId += " [" + nbVoltageLevels + "]";
                     }
                     return cNameOrId;
                 }
@@ -223,6 +234,12 @@ public class MainViewController {
 
         nadViewController.addListener((observable, oldValue, newValue) -> updateNadDiagrams());
         sldViewController.addListener((observable, oldValue, newValue) -> updateSldDiagrams());
+    }
+
+    private void clearSelection() {
+        if (!vlTree.getSelectionModel().getSelectedItems().isEmpty()) {
+            vlTree.getSelectionModel().clearSelection();
+        }
     }
 
     private void initializeNetworkFactories() {
@@ -380,75 +397,70 @@ public class MainViewController {
     }
 
     @FXML
-    private void initSubstationsTree() {
-        initSubstationsTree(model.getNetwork());
+    private void collapseSubstationsTree() {
+        setSubstationsTreeExpanded(false);
+    }
+
+    @FXML
+    private void expandSubstationsTree() {
+        setSubstationsTreeExpanded(true);
+    }
+
+    private void setSubstationsTreeExpanded(boolean value) {
+        vlTree.getRoot().getChildren().forEach(item -> item.setExpanded(value));
     }
 
     private void initSubstationsTree(Network network) {
         if (network == null) {
             return;
         }
-        // Create root item if needed
-        CheckBoxTreeItem<Container<?>> rootTreeItem = (CheckBoxTreeItem<Container<?>>) vlTree.getRoot();
-        if (rootTreeItem == null) {
-            rootTreeItem = new CheckBoxTreeItem<>();
-            rootTreeItem.setIndependent(true);
-            rootTreeItem.setExpanded(true);
-            vlTree.setRoot(rootTreeItem);
-        }
-        // Store previous selection
-        Set<String> containersChecked = rootTreeItem.getChildren().stream()
-                .flatMap(s -> Stream.concat(Stream.of(s), s.getChildren().stream()))
-                .filter(CheckBoxTreeItem.class::isInstance).map(ti -> (CheckBoxTreeItem<Container<?>>) ti)
-                .filter(CheckBoxTreeItem::isSelected)
-                .map(item -> item.getValue().getId())
-                .collect(Collectors.toSet());
-        TreeItem<Container<?>> selectedItem = vlTree.getSelectionModel().getSelectedItem();
-        String selectedContainerId = selectedItem == null ? null : selectedItem.getValue().getId();
 
-        // Set root item to current Network instance
-        rootTreeItem.getChildren().clear();
-        rootTreeItem.setValue(network);
+        containersChecked = readSavedSelection();
 
-        // Filter parameters
-        ComponentFilterType idType = componentTypeFilterChoice.getValue();
-        String filter = filterField.getText();
+        ObservableList<TreeItem<Container<?>>> substationItems = FXCollections.observableArrayList();
         for (Substation s : network.getSubstations()) {
-            boolean sFilterOk = testPassed(filter, s) && containsComponentType(idType, s);
-            List<VoltageLevel> voltageLevels = s.getVoltageLevelStream()
-                    .filter(v -> (sFilterOk || testPassed(filter, v)) && containsComponentType(idType, v))
-                    .toList();
-            if ((sFilterOk || !voltageLevels.isEmpty()) && !hideSubstations.isSelected()) {
-                CheckBoxTreeItem<Container<?>> sItem = new CheckBoxTreeItem<>(s);
-                sItem.setIndependent(true);
-                sItem.setExpanded(true);
-                if (containersChecked.contains(s.getId())) {
-                    sItem.setSelected(true);
-                }
-                rootTreeItem.getChildren().add(sItem);
-                addListenerOnContainerItem(sItem);
-                initVoltageLevelsTree(sItem, voltageLevels, containersChecked);
-            } else {
-                initVoltageLevelsTree(rootTreeItem, voltageLevels, containersChecked);
-            }
+            var sItem = createSubLevelCheckBoxTreeItem(s, substationItems, containersChecked);
+            s.getVoltageLevelStream().forEach(v -> createSubLevelCheckBoxTreeItem(v, sItem.getChildren(), containersChecked));
         }
-
-        List<VoltageLevel> emptySubstationVoltageLevels = network.getVoltageLevelStream()
+        network.getVoltageLevelStream()
                 .filter(v -> v.getSubstation().isEmpty())
-                .filter(v -> testPassed(filter, v))
-                .toList();
-        initVoltageLevelsTree(rootTreeItem, emptySubstationVoltageLevels, containersChecked);
+                .forEach(v -> createSubLevelCheckBoxTreeItem(v, substationItems, containersChecked));
 
-        rootTreeItem.getChildren().stream()
-                .flatMap(s -> Stream.concat(Stream.of(s), s.getChildren().stream()))
-                .filter(item -> item.getValue().getId().equals(selectedContainerId))
-                .findFirst()
-                .ifPresentOrElse(item -> vlTree.getSelectionModel().select(item),
-                        () -> vlTree.getSelectionModel().clearSelection());
+        filteredList = new FilteredList<>(substationItems);
+        filteredList.predicateProperty().bind(Bindings.createObjectBinding(() -> this::treeItemFilter,
+                filterField.textProperty(),
+                componentTypeFilterChoice.valueProperty()));
 
-        loadSelectedContainersDiagrams();
-
+        var rootTreeItem = createCheckBoxTreeItem(network, containersChecked);
+        Bindings.bindContent(rootTreeItem.getChildren(), filteredList);
+        vlTree.setRoot(rootTreeItem);
         vlTree.setShowRoot(true);
+    }
+
+    private CheckBoxTreeItem<Container<?>> createCheckBoxTreeItem(Container<?> c, Set<String> selectedIds) {
+        CheckBoxTreeItem<Container<?>> cItem = new CheckBoxTreeItem<>(c);
+        cItem.setIndependent(true);
+        cItem.setExpanded(true);
+        addListenerOnContainerItem(cItem);
+        if (selectedIds.contains(c.getId())) {
+            cItem.setSelected(true);
+        }
+        return cItem;
+    }
+
+    private boolean treeItemFilter(TreeItem<Container<?>> item) {
+        String filter = filterField.getText();
+        ComponentFilterType idType = componentTypeFilterChoice.getValue();
+        var container = item.getValue();
+        if (StringUtils.isEmpty(filter)) {
+            return containsComponentType(idType, container);
+        } else {
+            boolean filterOk = getIdentifiableStringSupplier().apply(container)
+                    .toLowerCase(Locale.getDefault())
+                    .contains(filter.toLowerCase(Locale.getDefault()));
+            return (filterOk || item.getChildren().stream().anyMatch(this::treeItemFilter))
+                    && containsComponentType(idType, container);
+        }
     }
 
     private static boolean containsComponentType(ComponentFilterType type, Container<?> container) {
@@ -467,36 +479,24 @@ public class MainViewController {
         return result;
     }
 
-    private void initVoltageLevelsTree(TreeItem<Container<?>> parentItem, Collection<VoltageLevel> voltageLevels, Set<String> checkedContainers) {
-
-        for (VoltageLevel v : voltageLevels) {
-            if (!hideVoltageLevels.isSelected()) {
-                CheckBoxTreeItem<Container<?>> vItem = new CheckBoxTreeItem<>(v);
-                vItem.setIndependent(true);
-                if (checkedContainers.contains(v.getId())) {
-                    vItem.setSelected(true);
-                }
-                parentItem.getChildren().add(vItem);
-                addListenerOnContainerItem(vItem);
-            }
-        }
+    private CheckBoxTreeItem<Container<?>> createSubLevelCheckBoxTreeItem(Container<?> c, ObservableList<TreeItem<Container<?>>> treeItems, Set<String> selectedIds) {
+        var cItem = createCheckBoxTreeItem(c, selectedIds);
+        treeItems.add(cItem);
+        return cItem;
     }
 
     private Function<Identifiable<?>, String> getIdentifiableStringSupplier() {
         return showNames.isSelected() ? Identifiable::getNameOrId : Identifiable::getId;
     }
 
-    private boolean testPassed(String filter, Identifiable<?> identifiable) {
-        return StringUtils.isEmpty(filter)
-                || getIdentifiableStringSupplier().apply(identifiable)
-                .toLowerCase(Locale.getDefault())
-                .contains(filter.toLowerCase(Locale.getDefault()));
-    }
-
     private void addListenerOnContainerItem(CheckBoxTreeItem<Container<?>> containerTreeItem) {
         containerTreeItem.selectedProperty().addListener((obs, oldVal, newVal) -> {
+            String cId = containerTreeItem.getValue().getId();
             if (Boolean.TRUE.equals(newVal)) {
                 createCheckedTab(containerTreeItem);
+                containersChecked.add(cId);
+            } else {
+                containersChecked.remove(cId);
             }
             saveSelectedDiagrams();
         });
@@ -511,13 +511,6 @@ public class MainViewController {
 
     private void saveSelectedDiagrams() {
         try {
-            CheckBoxTreeItem<Container<?>> rootTreeItem = (CheckBoxTreeItem<Container<?>>) vlTree.getRoot();
-            Set<String> containersChecked = rootTreeItem.getChildren().stream()
-                    .flatMap(s -> Stream.concat(Stream.of(s), s.getChildren().stream()))
-                    .filter(CheckBoxTreeItem.class::isInstance).map(ti -> (CheckBoxTreeItem<Container<?>>) ti)
-                    .filter(CheckBoxTreeItem::isSelected)
-                    .map(item -> item.getValue().getId())
-                    .collect(Collectors.toSet());
             String selectedVoltageLevelIdsPropertyValue = objectMapper.writeValueAsString(containersChecked);
             preferences.put(SELECTED_VOLTAGE_LEVEL_AND_SUBSTATION_IDS_PROPERTY, selectedVoltageLevelIdsPropertyValue);
         } catch (IOException e) {
@@ -525,22 +518,18 @@ public class MainViewController {
         }
     }
 
-    private void loadSelectedContainersDiagrams() {
+    private Set<String> readSavedSelection() {
+        Set<String> selectedIds = new HashSet<>();
         String selectedIdsPropertyValue = preferences.get(SELECTED_VOLTAGE_LEVEL_AND_SUBSTATION_IDS_PROPERTY, null);
         if (selectedIdsPropertyValue != null) {
             try {
-                Set<String> selectedIds = new HashSet<>(objectMapper.readValue(selectedIdsPropertyValue, new TypeReference<List<String>>() {
+                selectedIds = new HashSet<>(objectMapper.readValue(selectedIdsPropertyValue, new TypeReference<List<String>>() {
                 }));
-                CheckBoxTreeItem<Container<?>> rootTreeItem = (CheckBoxTreeItem<Container<?>>) vlTree.getRoot();
-                rootTreeItem.getChildren().stream()
-                        .flatMap(s -> Stream.concat(Stream.of(s), s.getChildren().stream()))
-                        .filter(CheckBoxTreeItem.class::isInstance).map(ti -> (CheckBoxTreeItem<Container<?>>) ti)
-                        .filter(selectableObject -> selectedIds.contains(selectableObject.getValue().getId()))
-                        .forEach(i -> i.setSelected(true));
             } catch (IOException e) {
                 throw new UncheckedIOException(e);
             }
         }
+        return selectedIds;
     }
 
     public void processExit(ActionEvent actionEvent) {
