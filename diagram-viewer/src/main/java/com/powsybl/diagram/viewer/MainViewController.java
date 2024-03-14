@@ -93,6 +93,8 @@ public class MainViewController {
     private final Preferences preferences = Preferences.userNodeForPackage(DiagramViewer.class);
     private final ObjectMapper objectMapper = JsonUtil.createObjectMapper();
 
+    private Service<Network> networkService;
+
     @FXML
     public TextField filePath;
     @FXML
@@ -270,7 +272,10 @@ public class MainViewController {
 
     public void loadFile(File file) {
         if (file != null) {
-            Service<Network> networkService = new Service<>() {
+            if (networkService != null && networkService.isRunning()) {
+                networkService.cancel();
+            }
+            networkService = new Service<>() {
                 @Override
                 protected Task<Network> createTask() {
                     return new Task<>() {
@@ -289,7 +294,10 @@ public class MainViewController {
     }
 
     public void loadFactory(String name, Supplier<Network> supplier) {
-        Service<Network> networkService = new Service<>() {
+        if (networkService != null && networkService.isRunning()) {
+            networkService.cancel();
+        }
+        networkService = new Service<>() {
             @Override
             protected Task<Network> createTask() {
                 return new Task<>() {
@@ -324,6 +332,11 @@ public class MainViewController {
             LOGGER.error(exception.toString(), exception);
             filePath.setText("");
             loadingStatus.setStyle("-fx-background-color: red");
+        });
+
+        networkService.setOnCancelled(event -> {
+            filePath.setText("");
+            loadingStatus.setStyle("-fx-background-color: orange");
         });
     }
 
