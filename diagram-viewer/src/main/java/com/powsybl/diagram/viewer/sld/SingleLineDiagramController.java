@@ -7,19 +7,20 @@
  */
 package com.powsybl.diagram.viewer.sld;
 
+import com.powsybl.diagram.viewer.*;
 import com.powsybl.diagram.viewer.common.AbstractDiagramController;
 import com.powsybl.diagram.viewer.common.ContainerResult;
-import com.powsybl.iidm.network.Container;
-import com.powsybl.iidm.network.Network;
-import com.powsybl.iidm.network.Switch;
+import com.powsybl.iidm.network.*;
 import com.powsybl.sld.SingleLineDiagram;
 import com.powsybl.sld.SldParameters;
 import com.powsybl.sld.layout.VoltageLevelLayoutFactoryCreator;
 import com.powsybl.sld.svg.styles.StyleProvider;
-import javafx.beans.property.StringProperty;
+import javafx.beans.binding.*;
+import javafx.beans.property.*;
 import javafx.concurrent.Service;
 import javafx.concurrent.Task;
 import javafx.fxml.FXML;
+import javafx.scene.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -78,10 +79,6 @@ public class SingleLineDiagramController extends AbstractDiagramController {
                                      Container<?> container,
                                      // PositionVoltageLevelLayoutFactory
                                      VoltageLevelLayoutFactoryCreator voltageLevelLayoutFactoryCreator) {
-
-        if (container instanceof Network) {
-            return;
-        }
         Service<ContainerResult> sldService = new Service<>() {
             @Override
             protected Task<ContainerResult> createTask() {
@@ -100,12 +97,17 @@ public class SingleLineDiagramController extends AbstractDiagramController {
                                     .setSubstationLayoutFactory(model.getSubstationLayoutFactory())
                                     .setStyleProviderFactory(model::getStyleProvider)
                                     .setVoltageLevelLayoutFactoryCreator(voltageLevelLayoutFactoryCreator);
-
-                            SingleLineDiagram.draw(network, container.getId(),
-                                    svgWriter,
-                                    metadataWriter,
-                                    sldParameters);
-
+                            if (container instanceof Network network) {
+                                SingleLineDiagram.drawMultiSubstations(network, ((Network) container).getSubstationStream().map(Identifiable::getId).toList(),
+                                        svgWriter,
+                                        metadataWriter,
+                                        sldParameters);
+                            } else {
+                                SingleLineDiagram.draw(network, container.getId(),
+                                        svgWriter,
+                                        metadataWriter,
+                                        sldParameters);
+                            }
                             svgWriter.flush();
                             metadataWriter.flush();
                             result.svgContentProperty().set(svgWriter.toString());
@@ -117,6 +119,14 @@ public class SingleLineDiagramController extends AbstractDiagramController {
                 };
             }
         };
+        // Show waiting cursor during task execution
+        DiagramViewer.getPrimaryStage().getScene()
+                .getRoot()
+                .cursorProperty()
+                .bind(Bindings.when(sldService.runningProperty())
+                        .then(Cursor.WAIT)
+                        .otherwise(Cursor.DEFAULT)
+        );
 
         sldService.setOnSucceeded(event -> containerResult.setValue((ContainerResult) event.getSource().getValue()));
         sldService.setOnFailed(event -> {
