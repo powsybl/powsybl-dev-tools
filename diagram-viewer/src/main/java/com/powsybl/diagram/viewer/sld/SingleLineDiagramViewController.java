@@ -11,25 +11,26 @@ import com.powsybl.diagram.viewer.common.AbstractDiagramController;
 import com.powsybl.diagram.viewer.common.AbstractDiagramViewController;
 import com.powsybl.iidm.network.Container;
 import com.powsybl.iidm.network.Network;
-import com.powsybl.sld.cgmes.dl.iidm.extensions.*;
-import com.powsybl.sld.cgmes.layout.*;
+import com.powsybl.sld.cgmes.dl.iidm.extensions.NetworkDiagramData;
+import com.powsybl.sld.cgmes.layout.CgmesVoltageLevelLayoutFactory;
 import com.powsybl.sld.layout.*;
-import com.powsybl.sld.layout.positionbyclustering.*;
+import com.powsybl.sld.layout.positionbyclustering.PositionByClustering;
+import com.powsybl.sld.layout.positionfromextension.PositionFromExtension;
 import com.powsybl.sld.library.ComponentLibrary;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanBinding;
-import javafx.beans.property.*;
+import javafx.beans.property.ObjectProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.control.*;
-import javafx.scene.layout.*;
+import javafx.scene.layout.HBox;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.util.*;
+import java.util.Objects;
 
 /**
  * @author Thomas Adam <tadam at silicom.fr>
@@ -378,8 +379,8 @@ public class SingleLineDiagramViewController extends AbstractDiagramViewControll
         SingleLineDiagramModel.VoltageLevelLayoutFactoryType type = voltageLevelLayoutComboBox.getValue();
         return switch (type) {
             case SMART -> SmartVoltageLevelLayoutFactory::new;
-            case POSITION_WITH_EXTENSIONS -> network -> new PositionVoltageLevelLayoutFactory(new PositionByClustering(), parameters);
-            case POSITION_BY_CLUSTERING -> network -> new PositionVoltageLevelLayoutFactory(parameters);
+            case POSITION_WITH_EXTENSIONS -> network -> new PositionVoltageLevelLayoutFactory(new PositionFromExtension(), parameters);
+            case POSITION_BY_CLUSTERING -> network -> new PositionVoltageLevelLayoutFactory(new PositionByClustering(), parameters);
             case RANDOM -> network -> new RandomVoltageLevelLayoutFactory(500.0, 500.0);
             case CGMES -> CgmesVoltageLevelLayoutFactory::new;
         };
