@@ -50,66 +50,37 @@ import java.util.prefs.Preferences;
 public class MainViewController {
 
     public enum ComponentFilterType {
-        ALL,
-        HVDC_LINE,
-        SWITCH,
-        BUSBAR_SECTION,
-        LINE,
-        TIE_LINE,
-        TWO_WINDINGS_TRANSFORMER,
-        THREE_WINDINGS_TRANSFORMER,
-        GENERATOR,
-        BATTERY,
-        LOAD,
-        SHUNT_COMPENSATOR,
-        DANGLING_LINE,
-        STATIC_VAR_COMPENSATOR,
-        LCC_CONVERTER_STATION,
-        VSC_CONVERTER_STATION,
-        GROUND;
+        ALL(null, "All"),
+        HVDC_LINE(null, "HVDC line"),
+        SWITCH(null, "Switch"),
+        TIE_LINE(null, "Tie line"),
+        BUSBAR_SECTION(BusbarSection.class, "Busbar section"),
+        LINE(Line.class, "Line"),
+        TWO_WINDINGS_TRANSFORMER(TwoWindingsTransformer.class, "Two-winding transformer"),
+        PHASE_SHIFT_TRANSFORMER(TwoWindingsTransformer.class, "Phase-shift transformer"),
+        RATIO_TAP_CHANGER_TRANSFORMER(TwoWindingsTransformer.class, "Ratio-tap changer transformer"),
+        THREE_WINDINGS_TRANSFORMER(ThreeWindingsTransformer.class, "Three-winding transformer"),
+        GENERATOR(Generator.class, "Generator"),
+        BATTERY(Battery.class, "Battery"),
+        LOAD(Load.class, "Load"),
+        SHUNT_COMPENSATOR(ShuntCompensator.class, "Shunt compensator"),
+        DANGLING_LINE(DanglingLine.class, "Dangling line"),
+        STATIC_VAR_COMPENSATOR(StaticVarCompensator.class, "Static VAR compensator"),
+        LCC_CONVERTER_STATION(LccConverterStation.class, "LCC converter station"),
+        VSC_CONVERTER_STATION(VscConverterStation.class, "VSC converter station"),
+        GROUND(Ground.class, "Ground");
 
-        IdentifiableType toIidm() {
-            return switch (this) {
-                case ALL -> null;
-                case HVDC_LINE -> IdentifiableType.HVDC_LINE;
-                case SWITCH -> IdentifiableType.SWITCH;
-                case BUSBAR_SECTION -> IdentifiableType.BUSBAR_SECTION;
-                case LINE -> IdentifiableType.LINE;
-                case TIE_LINE -> IdentifiableType.TIE_LINE;
-                case TWO_WINDINGS_TRANSFORMER -> IdentifiableType.TWO_WINDINGS_TRANSFORMER;
-                case THREE_WINDINGS_TRANSFORMER -> IdentifiableType.THREE_WINDINGS_TRANSFORMER;
-                case GENERATOR -> IdentifiableType.GENERATOR;
-                case BATTERY -> IdentifiableType.BATTERY;
-                case LOAD -> IdentifiableType.LOAD;
-                case SHUNT_COMPENSATOR -> IdentifiableType.SHUNT_COMPENSATOR;
-                case DANGLING_LINE -> IdentifiableType.DANGLING_LINE;
-                case STATIC_VAR_COMPENSATOR -> IdentifiableType.STATIC_VAR_COMPENSATOR;
-                case VSC_CONVERTER_STATION, LCC_CONVERTER_STATION -> IdentifiableType.HVDC_CONVERTER_STATION;
-                case GROUND -> IdentifiableType.GROUND;
-            };
+        private final Class<? extends Connectable<?>> connectableClass;
+        private final String description;
+
+        ComponentFilterType(Class<? extends Connectable<?>> connectableClass, String description) {
+            this.connectableClass = connectableClass;
+            this.description = description;
         }
 
         @Override
         public String toString() {
-            return switch (this) {
-                case ALL -> "All";
-                case HVDC_LINE -> "HVDC line";
-                case SWITCH -> "Switch";
-                case BUSBAR_SECTION -> "Busbar section";
-                case LINE -> "Line";
-                case TIE_LINE -> "Tie line";
-                case TWO_WINDINGS_TRANSFORMER -> " Two-winding transformer";
-                case THREE_WINDINGS_TRANSFORMER -> "Three-winding transformer";
-                case GENERATOR -> "Generator";
-                case BATTERY -> "Battery";
-                case LOAD -> "Load";
-                case SHUNT_COMPENSATOR -> "Shunt compensator";
-                case DANGLING_LINE -> "Dangling line";
-                case STATIC_VAR_COMPENSATOR -> "SVC";
-                case LCC_CONVERTER_STATION -> "LCC";
-                case VSC_CONVERTER_STATION -> "VSC";
-                case GROUND -> "Ground";
-            };
+            return description;
         }
     }
 
@@ -464,19 +435,22 @@ public class MainViewController {
     }
 
     private static boolean containsComponentType(ComponentFilterType type, Container<?> container) {
-        boolean result = false;
         if (container instanceof Substation s) {
-            result = s.getVoltageLevelStream().anyMatch(v -> containsComponentType(type, v));
+            return s.getVoltageLevelStream().anyMatch(v -> containsComponentType(type, v));
         } else if (container instanceof VoltageLevel v) {
-            result = switch (type) {
-                case HVDC_LINE, BUSBAR_SECTION, LINE, TIE_LINE, TWO_WINDINGS_TRANSFORMER, THREE_WINDINGS_TRANSFORMER, GENERATOR, BATTERY, LOAD, SHUNT_COMPENSATOR, DANGLING_LINE, STATIC_VAR_COMPENSATOR, GROUND -> v.getConnectableStream().anyMatch(c -> c.getType() == type.toIidm());
-                case LCC_CONVERTER_STATION -> v.getLccConverterStationCount() != 0;
-                case VSC_CONVERTER_STATION -> v.getVscConverterStationCount() != 0;
-                case SWITCH -> v.getSwitchCount() != 0;
+            return switch (type) {
                 case ALL -> true;
+                case HVDC_LINE -> v.getConnectableStream(HvdcConverterStation.class).map(HvdcConverterStation::getHvdcLine).anyMatch(Objects::nonNull);
+                case SWITCH -> v.getSwitchCount() != 0;
+                case TIE_LINE -> v.getDanglingLineStream(DanglingLineFilter.PAIRED).findFirst().isPresent();
+                case DANGLING_LINE -> v.getDanglingLineStream(DanglingLineFilter.UNPAIRED).findFirst().isPresent();
+                case PHASE_SHIFT_TRANSFORMER -> v.getConnectableStream(TwoWindingsTransformer.class).anyMatch(TwoWindingsTransformer::hasPhaseTapChanger);
+                case RATIO_TAP_CHANGER_TRANSFORMER -> v.getConnectableStream(TwoWindingsTransformer.class).anyMatch(TwoWindingsTransformer::hasRatioTapChanger);
+                default -> v.getConnectableStream(type.connectableClass).findFirst().isPresent();
             };
+        } else {
+            return true;
         }
-        return result;
     }
 
     private CheckBoxTreeItem<Container<?>> createSubLevelCheckBoxTreeItem(Container<?> c, ObservableList<TreeItem<Container<?>>> treeItems, Set<String> selectedIds) {
