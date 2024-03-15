@@ -31,7 +31,7 @@ import java.util.*;
 public class SingleLineDiagramModel extends DiagramModel {
 
     public enum VoltageLevelLayoutFactoryType {
-        POSITION_WITH_EXTENSIONS, POSITION_BY_CLUSTERING, CGMES, RANDOM, SMART;
+        SMART, POSITION_WITH_EXTENSIONS, POSITION_BY_CLUSTERING, CGMES, RANDOM;
 
         @Override
         public String toString() {
