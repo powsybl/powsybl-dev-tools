@@ -39,6 +39,8 @@ import org.slf4j.LoggerFactory;
 import java.io.File;
 import java.io.IOException;
 import java.io.UncheckedIOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.*;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -263,7 +265,7 @@ public class MainViewController {
     private File selectFile() {
         FileChooser fileChooser = new FileChooser();
         String caseFolderPropertyValue = preferences.get(CASE_FOLDER_PROPERTY, null);
-        if (caseFolderPropertyValue != null) {
+        if (caseFolderPropertyValue != null && Files.isDirectory(Path.of(caseFolderPropertyValue))) {
             fileChooser.setInitialDirectory(new File(caseFolderPropertyValue));
         }
         fileChooser.setTitle("Open case File");
