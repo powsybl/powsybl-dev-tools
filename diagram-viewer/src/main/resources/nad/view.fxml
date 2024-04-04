@@ -117,18 +117,19 @@
                             </VBox.margin>
                         </Separator>
                         <CheckBox fx:id="widthHeightAdded" text="Add height and width" selected="true" GridPane.rowIndex="8"/>
-                        <EnumChoiceBox enumType="com.powsybl.nad.svg.SvgParameters$SizeConstraint" fx:id="sizeConstraintChoice" initialValue="FIXED_SCALE" GridPane.rowIndex="9"/>
-                        <Spinner fx:id="fixedSizeSpinner" GridPane.rowIndex="10">
+                        <Label text="Size constraint:" GridPane.rowIndex="9"/>
+                        <EnumChoiceBox enumType="com.powsybl.nad.svg.SvgParameters$SizeConstraint" fx:id="sizeConstraintChoice" initialValue="FIXED_SCALE" GridPane.rowIndex="10"/>
+                        <Spinner fx:id="fixedSizeSpinner" GridPane.rowIndex="11">
                             <valueFactory>
                                 <SpinnerValueFactory.IntegerSpinnerValueFactory min="1" max="2000" amountToStepBy="100" initialValue="400"/>
                             </valueFactory>
                         </Spinner>
-                        <Spinner fx:id="fixedScaleSpinner" GridPane.rowIndex="10">
+                        <Spinner fx:id="fixedScaleSpinner" GridPane.rowIndex="11">
                             <valueFactory>
                                 <SpinnerValueFactory.DoubleSpinnerValueFactory min="0" max="50" amountToStepBy=".01" initialValue="0.4"/>
                             </valueFactory>
                         </Spinner>
-                        <Separator GridPane.rowIndex="11">
+                        <Separator GridPane.rowIndex="12">
                             <VBox.margin>
                                 <Insets topRightBottomLeft="5"/>
                             </VBox.margin>
