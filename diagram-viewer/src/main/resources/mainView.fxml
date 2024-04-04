@@ -3,8 +3,9 @@
 <?import javafx.geometry.*?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
+<?import javafx.scene.shape.SVGPath?>
 <?import com.powsybl.diagram.viewer.common.EnumChoiceBox?>
-<BorderPane xmlns="http://javafx.com/javafx/17.0.1" xmlns:fx="http://javafx.com/fxml/1"
+<BorderPane xmlns="http://javafx.com/javafx/21.0.2" xmlns:fx="http://javafx.com/fxml/1"
             prefHeight="900.0" prefWidth="1000.0"
             fx:controller="com.powsybl.diagram.viewer.MainViewController">
     <top>
@@ -20,25 +21,31 @@
             <BorderPane.margin>
                 <Insets topRightBottomLeft="5"/>
             </BorderPane.margin>
-            <SplitPane orientation="VERTICAL">
-                <GridPane hgap="5" vgap="5">
-                    <Button onMouseClicked="#onClickLoadFlow" text="Run powsybl open-loadflow" GridPane.rowIndex="0"/>
-                    <CheckBox fx:id="showNames" onMouseClicked="#initSubstationsTree" text="Show names" selected="true" GridPane.rowIndex="1"/>
-                    <CheckBox fx:id="hideSubstations" onMouseClicked="#initSubstationsTree" text="Hide substations" GridPane.rowIndex="2"/>
-                    <CheckBox fx:id="hideVoltageLevels" onMouseClicked="#initSubstationsTree" text="Hide voltage levels" GridPane.rowIndex="3"/>
-                    <HBox GridPane.rowIndex="4" spacing="5">
-                        <Label text="Filter by name/id:" minWidth="120"/>
-                        <TextField fx:id="filterField" onKeyTyped="#initSubstationsTree" minWidth="40"/>
-                    </HBox>
-                    <HBox GridPane.rowIndex="5" spacing="5">
-                        <Label text="Filter by component:" minWidth="120"/>
-                        <EnumChoiceBox enumType="com.powsybl.diagram.viewer.MainViewController$ComponentFilterType" fx:id="componentTypeFilterChoice" initialValue="All" onAction="#initSubstationsTree"/>
-                    </HBox>
-                </GridPane>
-                <VBox minHeight="700">
-                    <TreeView VBox.vgrow="ALWAYS" maxHeight="Infinity" fx:id="vlTree"/>
-                </VBox>
-            </SplitPane>
+            <VBox spacing="7">
+                <Button onMouseClicked="#onClickLoadFlow" text="Run powsybl open-loadflow"/>
+                <CheckBox fx:id="showNames" text="Show names" selected="true"/>
+                <Label text="Filter:"/>
+                <TextField fx:id="filterField" minWidth="40"/>
+                <HBox spacing="5">
+                    <Label text="Filter by component:" minWidth="120"/>
+                    <EnumChoiceBox enumType="com.powsybl.diagram.viewer.MainViewController$ComponentFilterType" fx:id="componentTypeFilterChoice" initialValue="All"/>
+                </HBox>
+                <HBox>
+                    <Button onMouseClicked="#expandSubstationsTree">
+                        <tooltip><Tooltip text="Expand all"/></tooltip>
+                        <graphic>
+                            <SVGPath content="M4-2v-2h16v2H4Zm8-3L8-9l1.4-1.4 1.6 1.55v-6.3l-1.6 1.55-1.4-1.4 4-4 4 4-1.4 1.4-1.6-1.55v6.3l1.6-1.55 1.4 1.4-4 4ZM4-20v-2h16v2H4Z"/>
+                        </graphic>
+                    </Button>
+                    <Button onMouseClicked="#collapseSubstationsTree">
+                        <tooltip><Tooltip text="Collapse all"/></tooltip>
+                        <graphic>
+                            <SVGPath content="m7.4-2-1.4-1.4 6-6 6 6-1.4 1.4-4.6-4.6L7.4-2Zm4.6-12.6L6-20.6l1.4-1.4 4.6 4.6 4.6-4.6 1.4 1.4-6 6Z"  />
+                        </graphic>
+                    </Button>
+                </HBox>
+                <TreeView VBox.vgrow="ALWAYS" maxHeight="Infinity" fx:id="vlTree"/>
+         </VBox>
             <TabPane fx:id="sldOrNad">
                 <Tab text="Single Line" closable="false">
                     <fx:include fx:id="sldView" source="sld/view.fxml"/>

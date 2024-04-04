@@ -44,7 +44,7 @@ PowSyBl diagram-viewer Dev Tool is a JavaFX basic viewer used to display:
 
 **Note**: alternatively, you can launch the viewer by running `DiagramViewer::main` with your favorite IDE.
 To do that you need to:
-* install [JavaFX 17](https://openjfx.io/) or above
+* install [JavaFX 21](https://openjfx.io/) or above
 * add the following vm options in the launch configuration:
   ```
   --module-path /path/to/javafx/lib --add-modules=javafx.controls,javafx.fxml,javafx.web

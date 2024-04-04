@@ -9,12 +9,14 @@ package com.powsybl.diagram.viewer.sld;
 
 import com.powsybl.diagram.viewer.common.AbstractDiagramController;
 import com.powsybl.diagram.viewer.common.ContainerResult;
-import com.powsybl.iidm.network.*;
+import com.powsybl.iidm.network.Container;
+import com.powsybl.iidm.network.Network;
+import com.powsybl.iidm.network.Switch;
 import com.powsybl.sld.SingleLineDiagram;
 import com.powsybl.sld.SldParameters;
-import com.powsybl.sld.layout.*;
+import com.powsybl.sld.layout.VoltageLevelLayoutFactoryCreator;
 import com.powsybl.sld.svg.styles.StyleProvider;
-import javafx.beans.property.*;
+import javafx.beans.property.StringProperty;
 import javafx.concurrent.Service;
 import javafx.concurrent.Task;
 import javafx.fxml.FXML;
@@ -23,7 +25,6 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.io.StringWriter;
-import java.io.UncheckedIOException;
 
 /**
  * @author Thomas Adam <tadam at slicom.fr>
@@ -77,12 +78,16 @@ public class SingleLineDiagramController extends AbstractDiagramController {
                                      Container<?> container,
                                      // PositionVoltageLevelLayoutFactory
                                      VoltageLevelLayoutFactoryCreator voltageLevelLayoutFactoryCreator) {
+
+        if (container instanceof Network) {
+            return;
+        }
         Service<ContainerResult> sldService = new Service<>() {
             @Override
             protected Task<ContainerResult> createTask() {
                 return new Task<>() {
                     @Override
-                    protected ContainerResult call() {
+                    protected ContainerResult call() throws IOException {
                         ContainerResult result = new ContainerResult();
                         try (StringWriter svgWriter = new StringWriter();
                              StringWriter metadataWriter = new StringWriter();
@@ -106,8 +111,6 @@ public class SingleLineDiagramController extends AbstractDiagramController {
                             result.svgContentProperty().set(svgWriter.toString());
                             result.metadataContentProperty().set(metadataWriter.toString());
                             result.jsonContentProperty().set(jsonWriter.toString());
-                        } catch (IOException e) {
-                            throw new UncheckedIOException(e);
                         }
                         return result;
                     }
@@ -118,7 +121,8 @@ public class SingleLineDiagramController extends AbstractDiagramController {
         sldService.setOnSucceeded(event -> containerResult.setValue((ContainerResult) event.getSource().getValue()));
         sldService.setOnFailed(event -> {
             Throwable exception = event.getSource().getException();
-            LOGGER.error(exception.toString(), exception);
+            containerResult.clean();
+            LOGGER.error("Error while drawing single-line diagram {}", container.getId(), exception);
         });
         sldService.start();
     }
