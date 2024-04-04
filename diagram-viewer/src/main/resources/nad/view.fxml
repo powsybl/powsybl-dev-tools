@@ -90,6 +90,12 @@
                                 <SpinnerValueFactory.DoubleSpinnerValueFactory min="0" max="10" amountToStepBy="0.1"/>
                             </valueFactory>
                         </Spinner>
+                        <Label text="Max number of steps:" GridPane.rowIndex="6"/>
+                        <Spinner fx:id="nbMaxStepsSpinner" GridPane.rowIndex="7" editable="true">
+                            <valueFactory>
+                                <SpinnerValueFactory.IntegerSpinnerValueFactory min="0" max="2000" amountToStepBy="1" initialValue="500"/>
+                            </valueFactory>
+                        </Spinner>
                     </GridPane>
                     <Separator>
                         <VBox.margin>
