@@ -21,7 +21,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.util.*;
+import java.util.Objects;
 
 /**
  * @author Florian Dupuy <florian.dupuy at rte-france.com>
@@ -42,6 +42,8 @@ public class NetworkAreaDiagramViewController extends AbstractDiagramViewControl
     // Layout parameters
     @FXML
     public Spinner<Double> springRepulsionSpinner;
+    @FXML
+    public Spinner<Integer> nbMaxStepsSpinner;
     @FXML
     public CheckBox layoutIncludeTextNodes;
 
@@ -81,6 +83,7 @@ public class NetworkAreaDiagramViewController extends AbstractDiagramViewControl
                 layoutChoice.valueProperty(),
 
                 springRepulsionSpinner.getValueFactory().valueProperty(),
+                nbMaxStepsSpinner.getValueFactory().valueProperty(),
                 layoutIncludeTextNodes.selectedProperty(),
 
                 infoAlongEdge.selectedProperty(),
