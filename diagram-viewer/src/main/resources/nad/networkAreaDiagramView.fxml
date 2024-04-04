@@ -7,7 +7,7 @@
 <?import javafx.scene.control.TitledPane?>
 
 <?import javafx.scene.web.WebView?>
-<BorderPane xmlns="http://javafx.com/javafx/17.0.1" xmlns:fx="http://javafx.com/fxml/1"
+<BorderPane xmlns="http://javafx.com/javafx/21.0.2" xmlns:fx="http://javafx.com/fxml/1"
             prefHeight="900.0" prefWidth="1000.0"
             fx:controller="com.powsybl.diagram.viewer.nad.NetworkAreaDiagramController">
     <center>
