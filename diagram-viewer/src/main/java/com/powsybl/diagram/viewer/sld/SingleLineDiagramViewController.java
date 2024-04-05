@@ -70,6 +70,9 @@ public class SingleLineDiagramViewController extends AbstractDiagramViewControll
     public ComboBox<SubstationLayoutFactory> substationLayoutComboBox;
 
     @FXML
+    public ComboBox<ZoneLayoutFactory> zoneLayoutComboBox;
+
+    @FXML
     public ChoiceBox<SingleLineDiagramModel.VoltageLevelLayoutFactoryType> voltageLevelLayoutComboBox;
 
     @FXML
@@ -197,6 +200,7 @@ public class SingleLineDiagramViewController extends AbstractDiagramViewControll
                 // Providers
                 componentLibraryComboBox.valueProperty(),
                 substationLayoutComboBox.valueProperty(),
+                zoneLayoutComboBox.valueProperty(),
                 cgmesDLDiagramsComboBox.valueProperty(),
                 // - Styles
                 basicStyleProviderCheckBox.selectedProperty(),
@@ -253,6 +257,10 @@ public class SingleLineDiagramViewController extends AbstractDiagramViewControll
         substationLayoutComboBox.itemsProperty().bind(Bindings.createObjectBinding(() -> model.getSubstationLayouts()));
         substationLayoutComboBox.setConverter(model.getSubstationLayoutStringConverter());
         substationLayoutComboBox.getSelectionModel().selectFirst(); // Default selection without Network
+        // Zone layout
+        zoneLayoutComboBox.itemsProperty().bind(Bindings.createObjectBinding(() -> model.getZoneLayouts()));
+        zoneLayoutComboBox.setConverter(model.getZoneLayoutStringConverter());
+        zoneLayoutComboBox.getSelectionModel().selectFirst(); // Default selection without Network
 
         // CGMES-DL Diagrams
         cgmesDLDiagramsComboBox.itemsProperty().bind(Bindings.createObjectBinding(() -> model.getCgmesDLDiagramNames()));
@@ -273,6 +281,7 @@ public class SingleLineDiagramViewController extends AbstractDiagramViewControll
     public void addListener(ChangeListener<Object> changeListener) {
         componentLibraryComboBox.valueProperty().addListener(changeListener);
         substationLayoutComboBox.valueProperty().addListener(changeListener);
+        zoneLayoutComboBox.valueProperty().addListener(changeListener);
         cgmesDLDiagramsComboBox.valueProperty().addListener(changeListener);
 
         basicStyleProviderCheckBox.selectedProperty().addListener(changeListener);

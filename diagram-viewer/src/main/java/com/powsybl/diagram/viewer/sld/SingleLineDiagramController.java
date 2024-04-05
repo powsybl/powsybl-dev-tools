@@ -17,12 +17,12 @@ import com.powsybl.sld.layout.VoltageLevelLayoutFactoryCreator;
 import com.powsybl.sld.svg.styles.StyleProvider;
 import javafx.beans.binding.*;
 import javafx.beans.property.*;
-import javafx.concurrent.Service;
-import javafx.concurrent.Task;
+import javafx.concurrent.*;
 import javafx.fxml.FXML;
 import javafx.scene.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.w3c.dom.*;
 
 import java.io.IOException;
 import java.io.StringWriter;
@@ -34,6 +34,7 @@ public class SingleLineDiagramController extends AbstractDiagramController {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SingleLineDiagramController.class);
 
+    private static Service<ContainerResult> sldService;
     private StringProperty metadataContent;
     private StringProperty graphContent;
 
@@ -64,6 +65,17 @@ public class SingleLineDiagramController extends AbstractDiagramController {
             }
         });
         setUpListenerOnWebViewChanges(jsHandler);
+        // Manage cursor look above WebView
+        DiagramViewer.getPrimaryStage().getScene().getRoot().cursorProperty().addListener((observable, oldValue, newValue) -> {
+            if (Worker.State.SUCCEEDED == diagramWebView.getEngine().getLoadWorker().stateProperty().get()) {
+                Document doc = diagramWebView.getEngine().getDocument();
+                Element body = (Element)
+                        doc.getElementsByTagName("body").item(0);
+                String style = body.getAttribute("style");
+                body.setAttribute("style", "cursor: " + ((newValue == Cursor.WAIT) ? "wait" : "default") + ";" + style);
+            }
+        });
+
         containerResult.metadataContentProperty().addListener((obs, oldV, newV) -> jsHandler.setMetadata(containerResult.metadataContentProperty().get()));
 
         // Metadata & Graph binding
@@ -79,7 +91,10 @@ public class SingleLineDiagramController extends AbstractDiagramController {
                                      Container<?> container,
                                      // PositionVoltageLevelLayoutFactory
                                      VoltageLevelLayoutFactoryCreator voltageLevelLayoutFactoryCreator) {
-        Service<ContainerResult> sldService = new Service<>() {
+        if (sldService != null && sldService.isRunning()) {
+            sldService.cancel();
+        }
+        sldService = new Service<>() {
             @Override
             protected Task<ContainerResult> createTask() {
                 return new Task<>() {
@@ -96,7 +111,8 @@ public class SingleLineDiagramController extends AbstractDiagramController {
                                     .setComponentLibrary(model.getComponentLibrary())
                                     .setSubstationLayoutFactory(model.getSubstationLayoutFactory())
                                     .setStyleProviderFactory(model::getStyleProvider)
-                                    .setVoltageLevelLayoutFactoryCreator(voltageLevelLayoutFactoryCreator);
+                                    .setVoltageLevelLayoutFactoryCreator(voltageLevelLayoutFactoryCreator)
+                                    .setZoneLayoutFactory(model.getZoneLayoutFactory());
                             if (container instanceof Network network) {
                                 SingleLineDiagram.drawMultiSubstations(network, ((Network) container).getSubstationStream().map(Identifiable::getId).toList(),
                                         svgWriter,
@@ -127,7 +143,7 @@ public class SingleLineDiagramController extends AbstractDiagramController {
                         .then(Cursor.WAIT)
                         .otherwise(Cursor.DEFAULT)
         );
-
+        sldService.setOnCancelled(event -> DiagramViewer.getPrimaryStage().getScene().getRoot().setCursor(Cursor.DEFAULT));
         sldService.setOnSucceeded(event -> containerResult.setValue((ContainerResult) event.getSource().getValue()));
         sldService.setOnFailed(event -> {
             Throwable exception = event.getSource().getException();

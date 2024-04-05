@@ -61,6 +61,8 @@
                                 </valueFactory>
                             </Spinner>
                         </HBox>
+                        <Label text="Zone Layout:"/>
+                        <ComboBox fx:id="zoneLayoutComboBox"/>
                         <Label text="Substation Layout:"/>
                         <ComboBox fx:id="substationLayoutComboBox"/>
                         <Label text="VoltageLevel Layout:"/>
