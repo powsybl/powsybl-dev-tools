@@ -104,7 +104,7 @@
                     </Separator>
                     <GridPane hgap="5" vgap="5">
                         <Label style="-fx-font-weight: bold" text="SVG parameters:" GridPane.rowIndex="0"/>
-                        <CheckBox fx:id="edgeNameDisplayed" text="Display edge name" selected="true" GridPane.rowIndex="1"/>
+                        <CheckBox fx:id="edgeNameDisplayed" text="Display edge name" GridPane.rowIndex="1"/>
                         <CheckBox fx:id="infoAlongEdge" text="Set Info Along Edge" selected="true" GridPane.rowIndex="2"/>
                         <CheckBox fx:id="insertNameDesc" text="Insert desc elements" selected="true" GridPane.rowIndex="3"/>
                         <CheckBox fx:id="substationDescriptionDisplayed" text="Display substation" GridPane.rowIndex="4"/>
@@ -117,13 +117,19 @@
                             </VBox.margin>
                         </Separator>
                         <CheckBox fx:id="widthHeightAdded" text="Add height and width" selected="true" GridPane.rowIndex="8"/>
-                        <EnumChoiceBox enumType="com.powsybl.nad.svg.SvgParameters$SizeConstraint" fx:id="sizeConstraintChoice" initialValue="FIXED_HEIGHT" GridPane.rowIndex="9"/>
-                        <Spinner fx:id="fixedSizeSpinner" GridPane.rowIndex="10">
+                        <Label text="Size constraint:" GridPane.rowIndex="9"/>
+                        <EnumChoiceBox enumType="com.powsybl.nad.svg.SvgParameters$SizeConstraint" fx:id="sizeConstraintChoice" initialValue="FIXED_SCALE" GridPane.rowIndex="10"/>
+                        <Spinner fx:id="fixedSizeSpinner" GridPane.rowIndex="11">
                             <valueFactory>
-                                <SpinnerValueFactory.DoubleSpinnerValueFactory min="1" max="2000" amountToStepBy="100" initialValue="200"/>
+                                <SpinnerValueFactory.IntegerSpinnerValueFactory min="1" max="2000" amountToStepBy="100" initialValue="400"/>
                             </valueFactory>
                         </Spinner>
-                        <Separator GridPane.rowIndex="11">
+                        <Spinner fx:id="fixedScaleSpinner" GridPane.rowIndex="11">
+                            <valueFactory>
+                                <SpinnerValueFactory.DoubleSpinnerValueFactory min="0" max="50" amountToStepBy=".01" initialValue="0.4"/>
+                            </valueFactory>
+                        </Spinner>
+                        <Separator GridPane.rowIndex="12">
                             <VBox.margin>
                                 <Insets topRightBottomLeft="5"/>
                             </VBox.margin>
