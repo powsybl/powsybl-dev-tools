@@ -59,7 +59,7 @@ public class NetworkAreaDiagramController extends AbstractDiagramController {
                         NadParameters nadParameters = new NadParameters();
                         nadParameters.setLayoutParameters(model.getLayoutParameters());
                         nadParameters.setSvgParameters(model.getSvgParameters());
-                        nadParameters.setLayoutFactory(model.getLayoutFactory());
+                        nadParameters.setLayoutFactory(model.getLayoutFactory(network));
                         nadParameters.setStyleProviderFactory(model.getStyleProviderFactory());
                         nadParameters.setLabelProviderFactory(model.getLabelProviderFactory());
                         NetworkAreaDiagram.draw(network, writer, nadParameters, vls);

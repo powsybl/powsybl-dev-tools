@@ -42,6 +42,8 @@
                             <items>
                                 <FXCollections fx:factory="observableArrayList">
                                     <String fx:value="Basic"/>
+                                    <String fx:value="Fixed"/>
+                                    <String fx:value="Geographical"/>
                                 </FXCollections>
                             </items>
                         </ChoiceBox>

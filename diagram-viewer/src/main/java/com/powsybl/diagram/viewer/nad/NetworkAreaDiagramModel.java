@@ -8,9 +8,8 @@
 package com.powsybl.diagram.viewer.nad;
 
 import com.powsybl.diagram.viewer.common.DiagramModel;
-import com.powsybl.nad.layout.BasicForceLayoutFactory;
-import com.powsybl.nad.layout.LayoutFactory;
-import com.powsybl.nad.layout.LayoutParameters;
+import com.powsybl.iidm.network.*;
+import com.powsybl.nad.layout.*;
 import com.powsybl.nad.svg.SvgParameters;
 import com.powsybl.nad.svg.iidm.*;
 import javafx.beans.property.*;
@@ -22,6 +21,8 @@ import javafx.beans.value.ChangeListener;
 public class NetworkAreaDiagramModel extends DiagramModel {
     private static final String DEFAULT_LABEL_PROVIDER = "Default";
     private static final String BASIC_LAYOUT = "Basic";
+    private static final String FIXED_LAYOUT = "Fixed";
+    private static final String GEOGRAPHICAL_LAYOUT = "Geographical";
     private static final String TOPOLOGICAL_STYLE_PROVIDER = "Topological";
 
     // Layout Parameters
@@ -104,8 +105,13 @@ public class NetworkAreaDiagramModel extends DiagramModel {
                 : NominalVoltageStyleProvider::new;
     }
 
-    public LayoutFactory getLayoutFactory() {
-        return BASIC_LAYOUT.equals(layoutFactory.getValue()) ? new BasicForceLayoutFactory() : null;
+    public LayoutFactory getLayoutFactory(Network network) {
+        return switch (layoutFactory.getValue()) {
+            case BASIC_LAYOUT -> new BasicForceLayoutFactory();
+            //case FIXED_LAYOUT -> new FixedLayoutFactory();
+            case GEOGRAPHICAL_LAYOUT -> new GeographicalLayoutFactory(network);
+            default -> null;
+        };
     }
 
     public SvgParametersBean getSvgParametersBean() {
