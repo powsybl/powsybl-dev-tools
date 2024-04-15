@@ -10,10 +10,13 @@ package com.powsybl.diagram.viewer.nad;
 import com.powsybl.diagram.viewer.common.DiagramModel;
 import com.powsybl.iidm.network.*;
 import com.powsybl.nad.layout.*;
+import com.powsybl.nad.model.*;
 import com.powsybl.nad.svg.SvgParameters;
 import com.powsybl.nad.svg.iidm.*;
 import javafx.beans.property.*;
 import javafx.beans.value.ChangeListener;
+
+import java.util.*;
 
 /**
  * @author Florian Dupuy <florian.dupuy at rte-france.com>
@@ -106,9 +109,11 @@ public class NetworkAreaDiagramModel extends DiagramModel {
     }
 
     public LayoutFactory getLayoutFactory(Network network) {
+        // FIXME : user must be able to customize positions
+        Map<String, Point> initialPositions = new HashMap<>();
         return switch (layoutFactory.getValue()) {
             case BASIC_LAYOUT -> new BasicForceLayoutFactory();
-            //case FIXED_LAYOUT -> new FixedLayoutFactory();
+            case FIXED_LAYOUT -> new FixedLayoutFactory(initialPositions);
             case GEOGRAPHICAL_LAYOUT -> new GeographicalLayoutFactory(network);
             default -> null;
         };
