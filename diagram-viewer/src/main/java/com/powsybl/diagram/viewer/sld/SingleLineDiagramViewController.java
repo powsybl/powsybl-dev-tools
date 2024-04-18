@@ -14,8 +14,8 @@ import com.powsybl.iidm.network.Network;
 import com.powsybl.sld.cgmes.dl.iidm.extensions.NetworkDiagramData;
 import com.powsybl.sld.cgmes.layout.CgmesVoltageLevelLayoutFactory;
 import com.powsybl.sld.layout.*;
-import com.powsybl.sld.layout.positionbyclustering.PositionByClustering;
-import com.powsybl.sld.layout.positionfromextension.PositionFromExtension;
+import com.powsybl.sld.layout.position.clustering.PositionByClustering;
+import com.powsybl.sld.layout.position.predefined.PositionPredefined;
 import com.powsybl.sld.library.ComponentLibrary;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanBinding;
@@ -379,7 +379,7 @@ public class SingleLineDiagramViewController extends AbstractDiagramViewControll
         SingleLineDiagramModel.VoltageLevelLayoutFactoryType type = voltageLevelLayoutComboBox.getValue();
         return switch (type) {
             case SMART -> SmartVoltageLevelLayoutFactory::new;
-            case POSITION_WITH_EXTENSIONS -> network -> new PositionVoltageLevelLayoutFactory(new PositionFromExtension(), parameters);
+            case POSITION_WITH_EXTENSIONS -> network -> new PositionVoltageLevelLayoutFactory(new PositionPredefined(), parameters);
             case POSITION_BY_CLUSTERING -> network -> new PositionVoltageLevelLayoutFactory(new PositionByClustering(), parameters);
             case RANDOM -> network -> new RandomVoltageLevelLayoutFactory(500.0, 500.0);
             case CGMES -> CgmesVoltageLevelLayoutFactory::new;
