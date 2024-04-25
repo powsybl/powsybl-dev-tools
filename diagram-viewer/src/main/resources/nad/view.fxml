@@ -38,10 +38,10 @@
                     </Separator>
                     <GridPane hgap="5" vgap="5">
                         <Label text="Layout:" GridPane.rowIndex="0"/>
-                        <ChoiceBox fx:id="layoutChoice" GridPane.rowIndex="1" value="Basic">
+                        <ChoiceBox fx:id="layoutChoice" GridPane.rowIndex="1" value="Force layout">
                             <items>
                                 <FXCollections fx:factory="observableArrayList">
-                                    <String fx:value="Basic"/>
+                                    <String fx:value="Force layout"/>
                                     <String fx:value="Fixed"/>
                                     <String fx:value="Geographical"/>
                                 </FXCollections>

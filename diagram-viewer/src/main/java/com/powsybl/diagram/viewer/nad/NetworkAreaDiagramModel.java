@@ -23,7 +23,7 @@ import java.util.*;
  */
 public class NetworkAreaDiagramModel extends DiagramModel {
     private static final String DEFAULT_LABEL_PROVIDER = "Default";
-    private static final String BASIC_LAYOUT = "Basic";
+    private static final String FORCE_LAYOUT = "Force layout";
     private static final String FIXED_LAYOUT = "Fixed";
     private static final String GEOGRAPHICAL_LAYOUT = "Geographical";
     private static final String TOPOLOGICAL_STYLE_PROVIDER = "Topological";
@@ -112,7 +112,7 @@ public class NetworkAreaDiagramModel extends DiagramModel {
         // FIXME : user must be able to customize positions
         Map<String, Point> initialPositions = new HashMap<>();
         return switch (layoutFactory.getValue()) {
-            case BASIC_LAYOUT -> new BasicForceLayoutFactory();
+            case FORCE_LAYOUT -> new BasicForceLayoutFactory();
             case FIXED_LAYOUT -> new FixedLayoutFactory(initialPositions);
             case GEOGRAPHICAL_LAYOUT -> new GeographicalLayoutFactory(network);
             default -> null;
