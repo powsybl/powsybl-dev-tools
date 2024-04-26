@@ -53,6 +53,7 @@ public class NetworkAreaDiagramModel extends DiagramModel {
                                    // SVG parameters
                                    BooleanProperty infoAlongEdge,
                                    BooleanProperty edgeNameDisplayed,
+                                   BooleanProperty boundaryEdgeDisplayed,
                                    BooleanProperty insertNameDesc,
                                    BooleanProperty substationDescriptionDisplayed,
                                    BooleanProperty busLegend,
@@ -74,6 +75,7 @@ public class NetworkAreaDiagramModel extends DiagramModel {
         // SVG parameters
         svgParameters = new SvgParametersBean(infoAlongEdge,
                 edgeNameDisplayed,
+                boundaryEdgeDisplayed,
                 insertNameDesc,
                 substationDescriptionDisplayed,
                 busLegend,

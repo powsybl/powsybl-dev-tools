@@ -53,6 +53,8 @@ public class NetworkAreaDiagramViewController extends AbstractDiagramViewControl
     @FXML
     public CheckBox edgeNameDisplayed;
     @FXML
+    public CheckBox boundaryEdgeDisplayed;
+    @FXML
     public CheckBox insertNameDesc;
     @FXML
     public CheckBox substationDescriptionDisplayed;
@@ -88,6 +90,7 @@ public class NetworkAreaDiagramViewController extends AbstractDiagramViewControl
 
                 infoAlongEdge.selectedProperty(),
                 edgeNameDisplayed.selectedProperty(),
+                boundaryEdgeDisplayed.selectedProperty(),
                 insertNameDesc.selectedProperty(),
                 substationDescriptionDisplayed.selectedProperty(),
                 busLegend.selectedProperty(),

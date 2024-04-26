@@ -21,6 +21,7 @@ public class SvgParametersBean {
     private final BooleanProperty idDisplayed = new SimpleBooleanProperty();
     private final BooleanProperty edgeInfoAlongEdge;
     private final BooleanProperty edgeNameDisplayed;
+    private final BooleanProperty boundaryEdgeDisplayed;
     private final BooleanProperty insertNameDesc;
     private final BooleanProperty substationDescriptionDisplayed;
     private final BooleanProperty busLegend;
@@ -34,6 +35,7 @@ public class SvgParametersBean {
     public SvgParametersBean(// SVG parameters
                              BooleanProperty edgeInfoAlongEdge,
                              BooleanProperty edgeNameDisplayed,
+                             BooleanProperty boundaryEdgeDisplayed,
                              BooleanProperty insertNameDesc,
                              BooleanProperty substationDescriptionDisplayed,
                              BooleanProperty busLegend,
@@ -46,6 +48,7 @@ public class SvgParametersBean {
         // bind
         this.edgeInfoAlongEdge = edgeInfoAlongEdge;
         this.edgeNameDisplayed = edgeNameDisplayed;
+        this.boundaryEdgeDisplayed = boundaryEdgeDisplayed;
         this.insertNameDesc = insertNameDesc;
         this.substationDescriptionDisplayed = substationDescriptionDisplayed;
         this.busLegend = busLegend;
@@ -65,6 +68,7 @@ public class SvgParametersBean {
         this.idDisplayed.addListener(changeListener);
         this.edgeInfoAlongEdge.addListener(changeListener);
         this.edgeNameDisplayed.addListener(changeListener);
+        this.boundaryEdgeDisplayed.addListener(changeListener);
         this.insertNameDesc.addListener(changeListener);
         this.substationDescriptionDisplayed.addListener(changeListener);
         this.busLegend.addListener(changeListener);
@@ -85,6 +89,7 @@ public class SvgParametersBean {
                 .setVoltageLevelDetails(vlDetails.get())
                 .setEdgeInfoAlongEdge(edgeInfoAlongEdge.get())
                 .setEdgeNameDisplayed(edgeNameDisplayed.get())
+                .setBoundaryEdgeDisplayed(boundaryEdgeDisplayed.get())
                 .setSvgWidthAndHeightAdded(widthHeightAdded.get())
                 .setSizeConstraint(sizeConstraint.getValue());
         switch (sizeConstraint.getValue()) {
