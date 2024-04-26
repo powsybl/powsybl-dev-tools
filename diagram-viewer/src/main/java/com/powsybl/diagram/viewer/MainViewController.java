@@ -9,6 +9,7 @@ package com.powsybl.diagram.viewer;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.powsybl.cgmes.conversion.CgmesImport;
 import com.powsybl.commons.json.JsonUtil;
 import com.powsybl.computation.local.LocalComputationManager;
 import com.powsybl.diagram.viewer.nad.NetworkAreaDiagramViewController;
@@ -284,7 +285,7 @@ public class MainViewController {
                         @Override
                         protected Network call() {
                             Properties properties = new Properties();
-                            properties.put("iidm.import.cgmes.post-processors", "cgmesDLImport");
+                            properties.put("iidm.import.cgmes.post-processors", List.of("cgmesDLImport", "cgmesGLImport"));
                             properties.put("matpower.import.ignore-base-voltage", "false");
                             return Network.read(file.toPath(), LocalComputationManager.getDefault(), new ImportConfig(), properties);
                         }
