@@ -46,6 +46,20 @@
                                 </FXCollections>
                             </items>
                         </ChoiceBox>
+                        <VBox fx:id="geoParameters" GridPane.rowIndex="2">
+                            <Label text="Scaling Factor:"/>
+                            <Spinner fx:id="geoScalingFactorSpinner" editable="true">
+                                <valueFactory>
+                                    <SpinnerValueFactory.IntegerSpinnerValueFactory min="1" max="1000000" amountToStepBy="1000" initialValue="150000"/>
+                                </valueFactory>
+                            </Spinner>
+                            <Label text="Radius Factor:"/>
+                            <Spinner fx:id="geoRadiusFactorSpinner" editable="true">
+                                <valueFactory>
+                                    <SpinnerValueFactory.IntegerSpinnerValueFactory min="1" max="1000" amountToStepBy="10" initialValue="150"/>
+                                </valueFactory>
+                            </Spinner>
+                        </VBox>
                         <Label text="LabelProvider:" GridPane.rowIndex="3"/>
                         <ChoiceBox fx:id="labelProviderChoice" GridPane.rowIndex="4" value="Default">
                             <items>

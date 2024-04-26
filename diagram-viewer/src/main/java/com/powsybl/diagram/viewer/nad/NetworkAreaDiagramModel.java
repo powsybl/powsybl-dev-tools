@@ -24,7 +24,7 @@ import java.util.*;
 public class NetworkAreaDiagramModel extends DiagramModel {
     private static final String DEFAULT_LABEL_PROVIDER = "Default";
     private static final String FORCE_LAYOUT = "Force layout";
-    private static final String GEOGRAPHICAL_LAYOUT = "Geographical";
+    static final String GEOGRAPHICAL_LAYOUT = "Geographical";
     private static final String TOPOLOGICAL_STYLE_PROVIDER = "Topological";
 
     // Layout Parameters
@@ -34,11 +34,15 @@ public class NetworkAreaDiagramModel extends DiagramModel {
     private final SvgParametersBean svgParameters;
 
     private final IntegerProperty depth = new SimpleIntegerProperty();
+    private final IntegerProperty geoScalingFactor = new SimpleIntegerProperty();
+    private final IntegerProperty geoRadiusFactor = new SimpleIntegerProperty();
     private final StringProperty labelProvider = new SimpleStringProperty();
     private final StringProperty styleProvider = new SimpleStringProperty();
     private final StringProperty layoutFactory = new SimpleStringProperty();
 
     public NetworkAreaDiagramModel(ReadOnlyObjectProperty<Integer> depth,
+                                   ReadOnlyObjectProperty<Integer> geoScalingFactor,
+                                   ReadOnlyObjectProperty<Integer> geoRadiusFactor,
                                    ObjectProperty<String> label,
                                    ObjectProperty<String> style,
                                    ObjectProperty<String> layout,
@@ -62,6 +66,8 @@ public class NetworkAreaDiagramModel extends DiagramModel {
                                    Property<Double> fixedScale
     ) {
         this.depth.bind(depth);
+        this.geoScalingFactor.bind(geoScalingFactor);
+        this.geoRadiusFactor.bind(geoRadiusFactor);
         this.labelProvider.bind(label);
         this.styleProvider.bind(style);
         this.layoutFactory.bind(layout);
@@ -110,7 +116,7 @@ public class NetworkAreaDiagramModel extends DiagramModel {
     public LayoutFactory getLayoutFactory(Network network) {
         return switch (layoutFactory.getValue()) {
             case FORCE_LAYOUT -> new BasicForceLayoutFactory();
-            case GEOGRAPHICAL_LAYOUT -> new GeographicalLayoutFactory(network);
+            case GEOGRAPHICAL_LAYOUT -> new GeographicalLayoutFactory(network, geoScalingFactor.getValue(), geoRadiusFactor.getValue(), BasicForceLayout::new);
             default -> null;
         };
     }
