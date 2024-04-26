@@ -285,6 +285,7 @@ public class MainViewController {
                         protected Network call() {
                             Properties properties = new Properties();
                             properties.put("iidm.import.cgmes.post-processors", "cgmesDLImport");
+                            properties.put("matpower.import.ignore-base-voltage", "false");
                             return Network.read(file.toPath(), LocalComputationManager.getDefault(), new ImportConfig(), properties);
                         }
                     };
