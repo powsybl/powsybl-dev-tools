@@ -9,7 +9,6 @@ package com.powsybl.diagram.viewer;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.powsybl.cgmes.conversion.CgmesImport;
 import com.powsybl.commons.json.JsonUtil;
 import com.powsybl.computation.local.LocalComputationManager;
 import com.powsybl.diagram.viewer.nad.NetworkAreaDiagramViewController;
