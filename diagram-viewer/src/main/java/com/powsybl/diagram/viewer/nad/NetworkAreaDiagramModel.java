@@ -8,25 +8,23 @@
 package com.powsybl.diagram.viewer.nad;
 
 import com.powsybl.diagram.viewer.common.DiagramModel;
-import com.powsybl.iidm.network.Network;
-import com.powsybl.nad.layout.BasicForceLayoutFactory;
-import com.powsybl.nad.layout.LayoutFactory;
-import com.powsybl.nad.layout.LayoutParameters;
-import com.powsybl.nad.svg.LabelProvider;
-import com.powsybl.nad.svg.StyleProvider;
+import com.powsybl.iidm.network.*;
+import com.powsybl.nad.layout.*;
+import com.powsybl.nad.model.*;
 import com.powsybl.nad.svg.SvgParameters;
-import com.powsybl.nad.svg.iidm.DefaultLabelProvider;
-import com.powsybl.nad.svg.iidm.NominalVoltageStyleProvider;
-import com.powsybl.nad.svg.iidm.TopologicalStyleProvider;
+import com.powsybl.nad.svg.iidm.*;
 import javafx.beans.property.*;
 import javafx.beans.value.ChangeListener;
+
+import java.util.*;
 
 /**
  * @author Florian Dupuy <florian.dupuy at rte-france.com>
  */
 public class NetworkAreaDiagramModel extends DiagramModel {
     private static final String DEFAULT_LABEL_PROVIDER = "Default";
-    private static final String BASIC_LAYOUT = "Basic";
+    private static final String FORCE_LAYOUT = "Force layout";
+    static final String GEOGRAPHICAL_LAYOUT = "Geographical";
     private static final String TOPOLOGICAL_STYLE_PROVIDER = "Topological";
 
     // Layout Parameters
@@ -36,17 +34,22 @@ public class NetworkAreaDiagramModel extends DiagramModel {
     private final SvgParametersBean svgParameters;
 
     private final IntegerProperty depth = new SimpleIntegerProperty();
+    private final IntegerProperty geoScalingFactor = new SimpleIntegerProperty();
+    private final IntegerProperty geoRadiusFactor = new SimpleIntegerProperty();
     private final StringProperty labelProvider = new SimpleStringProperty();
     private final StringProperty styleProvider = new SimpleStringProperty();
     private final StringProperty layoutFactory = new SimpleStringProperty();
 
     public NetworkAreaDiagramModel(ReadOnlyObjectProperty<Integer> depth,
+                                   ReadOnlyObjectProperty<Integer> geoScalingFactor,
+                                   ReadOnlyObjectProperty<Integer> geoRadiusFactor,
                                    ObjectProperty<String> label,
                                    ObjectProperty<String> style,
                                    ObjectProperty<String> layout,
 
                                    // Layout parameters
                                    Property<Double> springRepulsionFactor,
+                                   Property<Integer> nbMaxSteps,
                                    BooleanProperty textNodesIncluded,
 
                                    // SVG parameters
@@ -59,15 +62,18 @@ public class NetworkAreaDiagramModel extends DiagramModel {
                                    // Diagram size
                                    BooleanProperty widthHeightAdded,
                                    Property<SvgParameters.SizeConstraint> sizeConstraint,
-                                   Property<Double> fixedSize
+                                   Property<Integer> fixedSize,
+                                   Property<Double> fixedScale
     ) {
         this.depth.bind(depth);
+        this.geoScalingFactor.bind(geoScalingFactor);
+        this.geoRadiusFactor.bind(geoRadiusFactor);
         this.labelProvider.bind(label);
         this.styleProvider.bind(style);
         this.layoutFactory.bind(layout);
 
         // Layout parameters
-        layoutParametersBean = new LayoutParametersBean(textNodesIncluded, springRepulsionFactor);
+        layoutParametersBean = new LayoutParametersBean(textNodesIncluded, springRepulsionFactor, nbMaxSteps);
 
         // SVG parameters
         svgParameters = new SvgParametersBean(infoAlongEdge,
@@ -79,7 +85,8 @@ public class NetworkAreaDiagramModel extends DiagramModel {
                 // Diagram size
                 widthHeightAdded,
                 sizeConstraint,
-                fixedSize);
+                fixedSize,
+                fixedScale);
     }
 
     public int getDepth() {
@@ -94,18 +101,24 @@ public class NetworkAreaDiagramModel extends DiagramModel {
         return layoutParametersBean.getLayoutParameters();
     }
 
-    public LabelProvider getLabelProvider(Network network) {
-        return DEFAULT_LABEL_PROVIDER.equals(labelProvider.getValue()) ? new DefaultLabelProvider(network, getSvgParameters()) : null;
+    public LabelProviderFactory getLabelProviderFactory() {
+        return DEFAULT_LABEL_PROVIDER.equals(labelProvider.getValue())
+                ? DefaultLabelProvider::new
+                : null;
     }
 
-    public StyleProvider getStyleProvider(Network network) {
+    public StyleProviderFactory getStyleProviderFactory() {
         return TOPOLOGICAL_STYLE_PROVIDER.equals(styleProvider.getValue())
-                ? new TopologicalStyleProvider(network)
-                : new NominalVoltageStyleProvider(network);
+                ? TopologicalStyleProvider::new
+                : NominalVoltageStyleProvider::new;
     }
 
-    public LayoutFactory getLayoutFactory() {
-        return BASIC_LAYOUT.equals(layoutFactory.getValue()) ? new BasicForceLayoutFactory() : null;
+    public LayoutFactory getLayoutFactory(Network network) {
+        return switch (layoutFactory.getValue()) {
+            case FORCE_LAYOUT -> new BasicForceLayoutFactory();
+            case GEOGRAPHICAL_LAYOUT -> new GeographicalLayoutFactory(network, geoScalingFactor.getValue(), geoRadiusFactor.getValue(), BasicForceLayout::new);
+            default -> null;
+        };
     }
 
     public SvgParametersBean getSvgParametersBean() {

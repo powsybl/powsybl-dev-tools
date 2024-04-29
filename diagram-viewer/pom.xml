@@ -43,7 +43,7 @@
         <junit.version>4.13.1</junit.version>
         <maven.compiler.source>17</maven.compiler.source>
         <maven.compiler.target>17</maven.compiler.target>
-        <powsybl.dependencies.version>2024.0.0</powsybl.dependencies.version>
+        <powsybl.dependencies.version>2024.1.0</powsybl.dependencies.version>
     </properties>
 
     <build>
@@ -97,6 +97,10 @@
         </dependency>
         <dependency>
             <groupId>com.powsybl</groupId>
+            <artifactId>powsybl-matpower-converter</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.powsybl</groupId>
             <artifactId>powsybl-ucte-converter</artifactId>
         </dependency>
         <dependency>
@@ -110,6 +114,10 @@
             <groupId>com.powsybl</groupId>
             <artifactId>powsybl-network-area-diagram</artifactId>
             <version>4.3.0</version>
+        </dependency>
+        <dependency>
+            <groupId>com.powsybl</groupId>
+            <artifactId>powsybl-cgmes-gl</artifactId>
         </dependency>
         <!-- __________________________________________________________________________ -->
         <!-- SLD                                                                        -->
