@@ -12,11 +12,13 @@ import com.powsybl.diagram.viewer.common.AbstractDiagramViewController;
 import com.powsybl.iidm.network.Container;
 import com.powsybl.iidm.network.Network;
 import com.powsybl.nad.svg.SvgParameters;
+import javafx.beans.binding.BooleanBinding;
 import javafx.beans.value.ChangeListener;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.control.*;
+import javafx.scene.layout.VBox;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -32,6 +34,12 @@ public class NetworkAreaDiagramViewController extends AbstractDiagramViewControl
 
     @FXML
     public Spinner<Integer> depthSpinner;
+    @FXML
+    public VBox geoParameters;
+    @FXML
+    public Spinner<Integer> geoScalingFactorSpinner;
+    @FXML
+    public Spinner<Integer> geoRadiusFactorSpinner;
     @FXML
     public ChoiceBox<String> labelProviderChoice;
     @FXML
@@ -78,6 +86,8 @@ public class NetworkAreaDiagramViewController extends AbstractDiagramViewControl
     @FXML
     private void initialize() {
         model = new NetworkAreaDiagramModel(depthSpinner.valueProperty(),
+                geoScalingFactorSpinner.valueProperty(),
+                geoRadiusFactorSpinner.valueProperty(),
                 labelProviderChoice.valueProperty(),
                 styleProviderChoice.valueProperty(),
                 layoutChoice.valueProperty(),
@@ -98,6 +108,11 @@ public class NetworkAreaDiagramViewController extends AbstractDiagramViewControl
                 fixedSizeSpinner.getValueFactory().valueProperty(),
                 fixedScaleSpinner.getValueFactory().valueProperty()
         );
+
+        BooleanBinding enableGeoParameters = this.layoutChoice.valueProperty().isEqualTo(NetworkAreaDiagramModel.GEOGRAPHICAL_LAYOUT);
+        this.geoParameters.visibleProperty().bind(enableGeoParameters);
+        this.geoParameters.managedProperty().bind(enableGeoParameters);
+
         // Diagram size
         this.sizeConstraintChoice.disableProperty().bind(widthHeightAdded.selectedProperty().not());
         this.fixedSizeSpinner.visibleProperty().bind(
@@ -113,6 +128,8 @@ public class NetworkAreaDiagramViewController extends AbstractDiagramViewControl
 
     public void addListener(ChangeListener<Object> changeListener) {
         depthSpinner.valueProperty().addListener(changeListener);
+        geoScalingFactorSpinner.valueProperty().addListener(changeListener);
+        geoRadiusFactorSpinner.valueProperty().addListener(changeListener);
         labelProviderChoice.valueProperty().addListener(changeListener);
         styleProviderChoice.valueProperty().addListener(changeListener);
         layoutChoice.valueProperty().addListener(changeListener);

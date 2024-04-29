@@ -114,6 +114,10 @@
             <groupId>com.powsybl</groupId>
             <artifactId>powsybl-network-area-diagram</artifactId>
         </dependency>
+        <dependency>
+            <groupId>com.powsybl</groupId>
+            <artifactId>powsybl-cgmes-gl</artifactId>
+        </dependency>
         <!-- __________________________________________________________________________ -->
         <!-- SLD                                                                        -->
         <!-- __________________________________________________________________________ -->
