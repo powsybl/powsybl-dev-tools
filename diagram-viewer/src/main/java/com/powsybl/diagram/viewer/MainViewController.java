@@ -106,6 +106,9 @@ public class MainViewController {
     public ChoiceBox<ComponentFilterType> componentTypeFilterChoice;
 
     @FXML
+    public ComboBox<String> countriesFilterComboBox;
+
+    @FXML
     public TreeView<Container<?>> vlTree;
     @FXML
     public CheckBox showNames;
@@ -156,6 +159,7 @@ public class MainViewController {
         // to avoid bug in TreeView: it does not calculate properly the selection shift, so clearing selection
         filterField.textProperty().addListener((observable, oldValue, newValue) -> clearSelection());
         componentTypeFilterChoice.valueProperty().addListener((observable, oldValue, newValue) -> clearSelection());
+        countriesFilterComboBox.valueProperty().addListener((observable, oldValue, newValue) -> clearSelection());
 
         String casePathPropertyValue = preferences.get(CASE_PATH_PROPERTY, null);
         if (casePathPropertyValue != null) {
@@ -170,6 +174,9 @@ public class MainViewController {
         });
 
         showNames.selectedProperty().addListener((observable, oldValue, newValue) -> vlTree.refresh());
+
+        countriesFilterComboBox.itemsProperty().bind(Bindings.createObjectBinding(() -> model.getCountriesNames()));
+        countriesFilterComboBox.disableProperty().bind(Bindings.createBooleanBinding(() -> model.getCountriesNames().isEmpty(), model.networkProperty()));
 
         vlTree.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
             if (newValue != null) {
@@ -416,7 +423,8 @@ public class MainViewController {
         filteredList = new FilteredList<>(substationItems);
         filteredList.predicateProperty().bind(Bindings.createObjectBinding(() -> this::treeItemFilter,
                 filterField.textProperty(),
-                componentTypeFilterChoice.valueProperty()));
+                componentTypeFilterChoice.valueProperty(),
+                countriesFilterComboBox.valueProperty()));
 
         var rootTreeItem = createCheckBoxTreeItem(network, containersChecked);
         Bindings.bindContent(rootTreeItem.getChildren(), filteredList);
@@ -438,15 +446,31 @@ public class MainViewController {
     private boolean treeItemFilter(TreeItem<Container<?>> item) {
         String filter = filterField.getText();
         ComponentFilterType idType = componentTypeFilterChoice.getValue();
+        String countryValue = countriesFilterComboBox.getValue();
+        Country country = countryValue != null ? Country.valueOf(countryValue) : null;
         var container = item.getValue();
         if (StringUtils.isEmpty(filter)) {
-            return containsComponentType(idType, container);
+            return containsComponentType(idType, container) && locatedIn(country, container);
         } else {
             boolean filterOk = getIdentifiableStringSupplier().apply(container)
                     .toLowerCase(Locale.getDefault())
                     .contains(filter.toLowerCase(Locale.getDefault()));
             return (filterOk || item.getChildren().stream().anyMatch(this::treeItemFilter))
-                    && containsComponentType(idType, container);
+                    && containsComponentType(idType, container)
+                    && locatedIn(country, container);
+        }
+    }
+
+    private static boolean locatedIn(Country country, Container<? extends Identifiable<?>> container) {
+        if (country == null) {
+            return true; // no selection
+        }
+        if (container instanceof Substation s) {
+            return s.getCountry().map(c -> c == country).orElse(false);
+        } else if (container instanceof VoltageLevel v) {
+            return v.getSubstation().flatMap(Substation::getCountry).map(c -> c == country).orElse(false);
+        } else {
+            return true; // network
         }
     }
 
@@ -465,7 +489,7 @@ public class MainViewController {
                 default -> v.getConnectableStream(type.connectableClass).findFirst().isPresent();
             };
         } else {
-            return true;
+            return true; // network
         }
     }
 

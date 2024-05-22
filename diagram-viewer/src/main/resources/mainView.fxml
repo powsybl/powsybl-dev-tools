@@ -30,6 +30,10 @@
                     <Label text="Filter by component:" minWidth="120"/>
                     <EnumChoiceBox enumType="com.powsybl.diagram.viewer.MainViewController$ComponentFilterType" fx:id="componentTypeFilterChoice" initialValue="All"/>
                 </HBox>
+                <HBox spacing="5">
+                    <Label text="Filter by country:" minWidth="120"/>
+                    <ComboBox fx:id="countriesFilterComboBox"/>
+                </HBox>
                 <HBox>
                     <Button onMouseClicked="#expandSubstationsTree">
                         <tooltip><Tooltip text="Expand all"/></tooltip>

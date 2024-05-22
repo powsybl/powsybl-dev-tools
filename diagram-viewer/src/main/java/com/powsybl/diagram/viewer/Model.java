@@ -10,14 +10,19 @@ package com.powsybl.diagram.viewer;
 import com.powsybl.diagram.viewer.nad.NetworkAreaDiagramModel;
 import com.powsybl.diagram.viewer.sld.SingleLineDiagramModel;
 import com.powsybl.iidm.network.Container;
+import com.powsybl.iidm.network.Country;
 import com.powsybl.iidm.network.Network;
 import javafx.beans.property.*;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 
 /**
  * @author Florian Dupuy <florian.dupuy at rte-france.com>
  */
 public class Model {
     private final ObjectProperty<Network> network = new SimpleObjectProperty<>();
+    private final ObservableList<String> countriesNames = FXCollections.observableArrayList();
+
     private Container<?> selectedContainer = null;
 
     private final NetworkAreaDiagramModel nadModel;
@@ -32,6 +37,7 @@ public class Model {
     }
 
     public void setNetwork(Network network) {
+        this.countriesNames.setAll(network.getCountries().stream().map(Country::toString).toList());
         this.network.setValue(network);
     }
 
@@ -55,5 +61,9 @@ public class Model {
         setSelectedContainer(null);
         nadModel.clean();
         sldModel.clean();
+    }
+
+    public ObservableList<String> getCountriesNames() {
+        return countriesNames;
     }
 }
