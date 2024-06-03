@@ -171,6 +171,11 @@ public class MainViewController {
         model.networkProperty().addListener((observableValue, oldNetwork, newNetwork) -> {
             sldViewController.updateFrom(model.networkProperty());
             initSubstationsTree(newNetwork);
+            try {
+                sldViewController.initMatrixSubstationList(newNetwork);
+            } catch (IOException e) {
+                throw new UncheckedIOException(e);
+            }
         });
 
         showNames.selectedProperty().addListener((observable, oldValue, newValue) -> vlTree.refresh());
@@ -216,6 +221,11 @@ public class MainViewController {
 
         nadViewController.addListener((observable, oldValue, newValue) -> updateNadDiagrams());
         sldViewController.addListener((observable, oldValue, newValue) -> updateSldDiagrams());
+        sldViewController.updateSldButton.setOnAction(actionEvent -> {
+            actionEvent.consume();
+            updateSldDiagrams();
+        });
+
     }
 
     private void clearSelection() {

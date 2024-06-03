@@ -9,14 +9,14 @@ package com.powsybl.diagram.viewer.sld;
 
 import com.powsybl.diagram.viewer.common.DiagramModel;
 import com.powsybl.iidm.network.Network;
-import com.powsybl.sld.cgmes.dl.iidm.extensions.*;
-import com.powsybl.sld.cgmes.layout.*;
+import com.powsybl.sld.cgmes.dl.iidm.extensions.NetworkDiagramData;
+import com.powsybl.sld.cgmes.layout.CgmesSubstationLayoutFactory;
 import com.powsybl.sld.layout.*;
-
 import com.powsybl.sld.library.ComponentLibrary;
 import com.powsybl.sld.svg.SvgParameters;
 import com.powsybl.sld.svg.styles.*;
-import com.powsybl.sld.svg.styles.iidm.*;
+import com.powsybl.sld.svg.styles.iidm.HighlightLineStateStyleProvider;
+import com.powsybl.sld.svg.styles.iidm.TopologicalStyleProvider;
 import javafx.beans.property.*;
 import javafx.beans.value.ChangeListener;
 import javafx.collections.FXCollections;
@@ -44,7 +44,6 @@ public class SingleLineDiagramModel extends DiagramModel {
             };
         }
     }
-
     private static final String UNKNOWN_ITEM = "???";
 
     // LayoutParameters
@@ -73,6 +72,16 @@ public class SingleLineDiagramModel extends DiagramModel {
     private final Map<String, SubstationLayoutFactory> nameToSubstationLayoutFactoryMap = new TreeMap<>(); // ordered
     private final ObservableList<SubstationLayoutFactory> substationLayouts = FXCollections.observableArrayList();
     private final ObjectProperty<SubstationLayoutFactory> currentSubstationLayoutFactory = new SimpleObjectProperty<>();
+    // Zone layout provider
+    private static final String HORIZONTAL_ZONE_LAYOUT = "Horizontal";
+    private static final String VERTICAL_ZONE_LAYOUT = "Vertical";
+    private static final String MATRIX_ZONE_LAYOUT = "Matrix";
+    private String[][] matrix = {{}};
+
+    private MatrixZoneLayoutFactory matrixZoneLayoutFactory = new MatrixZoneLayoutFactory(this.matrix);
+    private final Map<String, ZoneLayoutFactory> nameToZoneLayoutFactoryMap = new TreeMap<>(); // ordered
+    private final ObservableList<ZoneLayoutFactory> zoneLayouts = FXCollections.observableArrayList();
+    private final ObjectProperty<ZoneLayoutFactory> currentZoneLayoutFactory = new SimpleObjectProperty<>();
 
     // CGMES-DL names
     private final ObservableList<String> cgmesDLDiagramNames = FXCollections.observableArrayList();
@@ -81,6 +90,7 @@ public class SingleLineDiagramModel extends DiagramModel {
     public SingleLineDiagramModel(// Providers
                                   ReadOnlyObjectProperty<ComponentLibrary> componentLibrary,
                                   ReadOnlyObjectProperty<SubstationLayoutFactory> substationLayoutFactory,
+                                  ReadOnlyObjectProperty<ZoneLayoutFactory> zoneLayoutFactory,
                                   ReadOnlyObjectProperty<String> cgmesDLDiagramName,
                                   // Styles
                                   BooleanProperty basicStyleProvider,
@@ -129,6 +139,7 @@ public class SingleLineDiagramModel extends DiagramModel {
         // Providers
         this.currentComponentLibrary.bind(componentLibrary);
         this.currentSubstationLayoutFactory.bind(substationLayoutFactory);
+        this.currentZoneLayoutFactory.bind(zoneLayoutFactory);
         this.currentCgmesDLDiagramName.bind(cgmesDLDiagramName);
 
         // Styles
@@ -175,6 +186,11 @@ public class SingleLineDiagramModel extends DiagramModel {
     }
 
     public void initProviders() {
+        // zoneLayouts
+        nameToZoneLayoutFactoryMap.put(HORIZONTAL_ZONE_LAYOUT, new HorizontalZoneLayoutFactory());
+        nameToZoneLayoutFactoryMap.put(VERTICAL_ZONE_LAYOUT, new VerticalZoneLayoutFactory());
+        nameToZoneLayoutFactoryMap.put(MATRIX_ZONE_LAYOUT, this.matrixZoneLayoutFactory);
+
         // SubstationLayouts
         nameToSubstationLayoutFactoryMap.put(HORIZONTAL_SUBSTATION_LAYOUT, new HorizontalSubstationLayoutFactory());
         nameToSubstationLayoutFactoryMap.put(VERTICAL_SUBSTATION_LAYOUT, new VerticalSubstationLayoutFactory());
@@ -182,6 +198,7 @@ public class SingleLineDiagramModel extends DiagramModel {
         // Set all providers list
         componentLibraries.setAll(ComponentLibrary.findAll());
         substationLayouts.setAll(nameToSubstationLayoutFactoryMap.values());
+        zoneLayouts.setAll(nameToZoneLayoutFactoryMap.values());
     }
 
     public void updateFrom(Network network) {
@@ -248,12 +265,20 @@ public class SingleLineDiagramModel extends DiagramModel {
         return currentSubstationLayoutFactory.get();
     }
 
+    public ZoneLayoutFactory getZoneLayoutFactory() {
+        return currentZoneLayoutFactory.get();
+    }
+
     public ObservableList<ComponentLibrary> getComponentLibraries() {
         return componentLibraries;
     }
 
     public ObservableList<SubstationLayoutFactory> getSubstationLayouts() {
         return substationLayouts;
+    }
+
+    public ObservableList<ZoneLayoutFactory> getZoneLayouts() {
+        return zoneLayouts;
     }
 
     public ObservableList<String> getCgmesDLDiagramNames() {
@@ -287,5 +312,28 @@ public class SingleLineDiagramModel extends DiagramModel {
                 return nameToSubstationLayoutFactoryMap.get(item);
             }
         };
+    }
+
+    public StringConverter<ZoneLayoutFactory> getZoneLayoutStringConverter() {
+        return new StringConverter<>() {
+            @Override
+            public String toString(ZoneLayoutFactory object) {
+                Optional<String> label = nameToZoneLayoutFactoryMap.keySet().stream().filter(name -> nameToZoneLayoutFactoryMap.get(name) == object).findFirst();
+                return label.orElse(UNKNOWN_ITEM);
+            }
+
+            @Override
+            public ZoneLayoutFactory fromString(String item) {
+                return nameToZoneLayoutFactoryMap.get(item);
+            }
+        };
+    }
+
+    public void setMatrix(String[][] matrix) {
+        this.matrix = matrix;
+    }
+
+    public String[][] getMatrix() {
+        return matrix;
     }
 }

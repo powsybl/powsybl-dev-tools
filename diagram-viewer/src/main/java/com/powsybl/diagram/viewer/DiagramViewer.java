@@ -22,7 +22,11 @@ import java.util.Objects;
  */
 public class DiagramViewer extends Application {
 
+    private static Stage primaryStage;
+
     public void start(Stage primaryStage) throws IOException {
+        DiagramViewer.primaryStage = primaryStage;
+
         FXMLLoader loader = new FXMLLoader();
         loader.setLocation(Objects.requireNonNull(getClass().getResource("/mainView.fxml")));
         BorderPane root = loader.load();
@@ -34,5 +38,9 @@ public class DiagramViewer extends Application {
 
     public static void main(String[] args) {
         Application.launch(DiagramViewer.class);
+    }
+
+    public static Stage getPrimaryStage() {
+        return DiagramViewer.primaryStage;
     }
 }

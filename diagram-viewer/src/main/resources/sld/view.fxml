@@ -4,6 +4,7 @@
 <?import javafx.geometry.*?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
+<?import javafx.scene.text.Text?>
 <BorderPane xmlns="http://javafx.com/javafx/21.0.2" xmlns:fx="http://javafx.com/fxml/1"
             prefHeight="900.0" prefWidth="1000.0"
             fx:controller="com.powsybl.diagram.viewer.sld.SingleLineDiagramViewController">
@@ -52,27 +53,46 @@
                             </VBox.margin>
                             <Spinner fx:id="animationThreshold1Spinner" maxWidth="80" editable="true">
                                 <valueFactory>
-                                    <SpinnerValueFactory.DoubleSpinnerValueFactory min="0" max="300" amountToStepBy="5"/>
+                                    <SpinnerValueFactory.DoubleSpinnerValueFactory min="0" max="300"
+                                                                                   amountToStepBy="5"/>
                                 </valueFactory>
                             </Spinner>
                             <Spinner fx:id="animationThreshold2Spinner" maxWidth="80" editable="true">
                                 <valueFactory>
-                                    <SpinnerValueFactory.DoubleSpinnerValueFactory min="0" max="300" amountToStepBy="5"/>
+                                    <SpinnerValueFactory.DoubleSpinnerValueFactory min="0" max="300"
+                                                                                   amountToStepBy="5"/>
                                 </valueFactory>
                             </Spinner>
                         </HBox>
+                        <Label text="Zone Layout :"/>
+                        <ComboBox fx:id="zoneLayoutComboBox"/>
+                        <VBox fx:id="matrixShapeVBox">
+                            <HBox>
+                                <Button fx:id="updateSldButton" text="Update matrix"/>
+                                <Button text="Reset matrix" onAction="#resetMatrixShape"/>
+                            </HBox>
+                            <HBox fx:id="matrixShapeHBoxTitle">
+                                <Label text="Substation  " minWidth="80" maxWidth="80"/>
+                                <Label text="Row  " minWidth="80" maxWidth="80"/>
+                                <Label text="Column  " minWidth="80" maxWidth="80"/>
+                            </HBox>
+                            <ScrollPane fitToHeight="true" fitToWidth="true" minViewportHeight="220">
+                                <VBox fx:id="matrixShapeSubstationCoordinates"/>
+                            </ScrollPane>
+                        </VBox>
                         <Label text="Substation Layout:"/>
                         <ComboBox fx:id="substationLayoutComboBox"/>
                         <Label text="VoltageLevel Layout:"/>
-                        <EnumChoiceBox enumType="com.powsybl.diagram.viewer.sld.SingleLineDiagramModel$VoltageLevelLayoutFactoryType" fx:id="voltageLevelLayoutComboBox" initialValue="SMART"/>
-                        <VBox fx:id="positionVoltageLevelLayoutFactoryParameters">
-                            <CheckBox fx:id="stackFeedersCheckBox" text="Stack feeders" selected="true"/>
-                            <CheckBox fx:id="exceptionWhenPatternUnhandledCheckBox" text="Exception when pattern unhandled"/>
-                            <CheckBox fx:id="handleShuntsCheckBox" text="Handle shunts"/>
-                            <CheckBox fx:id="removeFictitiousNodesCheckBox" text="Remove fictitious nodes" selected="true"/>
-                            <CheckBox fx:id="substituteSingularFictitiousNodesCheckBox" text="Substitute singular fictitious nodes" selected="true"/>
-                            <CheckBox fx:id="substituteInternalMiddle2wtByEquipmentNodesCheckBox" text="Intern cells for internal 2wt" selected="true"/>
-                        </VBox>
+                        <EnumChoiceBox
+                                enumType="com.powsybl.diagram.viewer.sld.SingleLineDiagramModel$VoltageLevelLayoutFactoryType"
+                                fx:id="voltageLevelLayoutComboBox" initialValue="SMART"/>
+                        <CheckBox fx:id="stackFeedersCheckBox" text="Stack feeders" selected="true"/>
+                        <CheckBox fx:id="exceptionWhenPatternUnhandledCheckBox"
+                                  text="Exception when pattern unhandled"/>
+                        <CheckBox fx:id="handleShuntsCheckBox" text="Handle shunts"/>
+                        <CheckBox fx:id="removeFictitiousNodesCheckBox" text="Remove fictitious nodes" selected="true"/>
+                        <CheckBox fx:id="substituteSingularFictitiousNodesCheckBox"
+                                  text="Substitute singular fictitious nodes" selected="true"/>
                         <Label text="CGMES-DL Diagrams:"/>
                         <ComboBox fx:id="cgmesDLDiagramsComboBox"/>
                         <Separator>
@@ -148,7 +168,8 @@
                                 <SpinnerValueFactory.DoubleSpinnerValueFactory min="1" max="20" amountToStepBy="1"/>
                             </valueFactory>
                         </Spinner>
-                        <CheckBox fx:id="adaptCellHeightToContentCheckBox" text="Adapt cell height to content" selected="true"/>
+                        <CheckBox fx:id="adaptCellHeightToContentCheckBox" text="Adapt cell height to content"
+                                  selected="true"/>
                         <Label text="Min space between components:"/>
                         <Spinner fx:id="minSpaceBetweenComponentsSpinner" editable="true">
                             <valueFactory>
@@ -162,7 +183,8 @@
                             </valueFactory>
                         </Spinner>
                         <Label text="BusBar alignment:"/>
-                        <EnumChoiceBox enumType="com.powsybl.sld.layout.LayoutParameters$Alignment" fx:id="busBarAlignmentChoice" initialValue="FIRST"/>
+                        <EnumChoiceBox enumType="com.powsybl.sld.layout.LayoutParameters$Alignment"
+                                       fx:id="busBarAlignmentChoice" initialValue="FIRST"/>
                         <Label text="Space for feeder infos:"/>
                         <Spinner fx:id="spaceForFeederInfosSpinner" editable="true">
                             <valueFactory>
@@ -190,7 +212,8 @@
                         </Spinner>
                         <CheckBox fx:id="addNodesInfosCheckBox" text="Add nodes infos"/>
                         <CheckBox fx:id="feederInfoSymmetryCheckBox" text="Feeder info symmetry"/>
-                        <CheckBox fx:id="avoidSVGComponentsDuplicationCheckBox" text="Avoid SVG components duplication"/>
+                        <CheckBox fx:id="avoidSVGComponentsDuplicationCheckBox"
+                                  text="Avoid SVG components duplication"/>
                         <Label text="Feeder infos outer margin:"/>
                         <Spinner fx:id="feederInfosOuterMarginSpinner" editable="true">
                             <valueFactory>
@@ -203,6 +226,7 @@
                                 <SpinnerValueFactory.DoubleSpinnerValueFactory min="0" max="200" amountToStepBy="1"/>
                             </valueFactory>
                         </Spinner>
+                        <Label text="Matrix shape :"/>
                     </VBox>
                 </ScrollPane>
             </VBox>
