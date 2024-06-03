@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<HBox style="fx-border-width: 3" xmlns="http://javafx.com/javafx/21.0.2"
+      xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.powsybl.diagram.viewer.sld.MatrixShapeViewController">
+    <Label fx:id="substationName" textAlignment="CENTER" minWidth="80" maxWidth="80"/>
+    <Spinner fx:id="row" editable="true" maxWidth="80" minWidth="80">
+        <valueFactory>
+            <SpinnerValueFactory.IntegerSpinnerValueFactory min="0" max="50" />
+        </valueFactory>
+    </Spinner>
+    <Spinner fx:id="column" editable="true" maxWidth="80" minWidth="80">
+        <valueFactory>
+            <SpinnerValueFactory.IntegerSpinnerValueFactory min="0" max="50"/>
+        </valueFactory>
+    </Spinner>
+    <Label fx:id="substationId" visible="false"/>
+</HBox>

@@ -7,25 +7,37 @@
  */
 package com.powsybl.diagram.viewer.sld;
 
-import com.powsybl.diagram.viewer.*;
+import com.powsybl.diagram.viewer.DiagramViewer;
 import com.powsybl.diagram.viewer.common.AbstractDiagramController;
 import com.powsybl.diagram.viewer.common.ContainerResult;
-import com.powsybl.iidm.network.*;
+import com.powsybl.iidm.network.Container;
+import com.powsybl.iidm.network.Network;
+import com.powsybl.iidm.network.Switch;
 import com.powsybl.sld.SingleLineDiagram;
 import com.powsybl.sld.SldParameters;
+import com.powsybl.sld.layout.HorizontalZoneLayoutFactory;
+import com.powsybl.sld.layout.MatrixZoneLayoutFactory;
 import com.powsybl.sld.layout.VoltageLevelLayoutFactoryCreator;
+import com.powsybl.sld.layout.ZoneLayoutFactory;
 import com.powsybl.sld.svg.styles.StyleProvider;
-import javafx.beans.binding.*;
-import javafx.beans.property.*;
-import javafx.concurrent.*;
+import javafx.beans.binding.Bindings;
+import javafx.beans.property.StringProperty;
+import javafx.concurrent.Service;
+import javafx.concurrent.Task;
+import javafx.concurrent.Worker;
 import javafx.fxml.FXML;
-import javafx.scene.*;
+import javafx.scene.Cursor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.w3c.dom.*;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 
 import java.io.IOException;
 import java.io.StringWriter;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.function.Predicate;
 
 /**
  * @author Thomas Adam <tadam at slicom.fr>
@@ -101,10 +113,19 @@ public class SingleLineDiagramController extends AbstractDiagramController {
                     @Override
                     protected ContainerResult call() throws IOException {
                         ContainerResult result = new ContainerResult();
+                        List<String> substationList = new ArrayList<>();
                         try (StringWriter svgWriter = new StringWriter();
                              StringWriter metadataWriter = new StringWriter();
                              StringWriter jsonWriter = new StringWriter()) {
-
+                            ZoneLayoutFactory zoneLayoutFactory = model.getZoneLayoutFactory();
+                            if (model.getZoneLayoutFactory() instanceof MatrixZoneLayoutFactory) {
+                                substationList = Arrays.stream(model.getMatrix())
+                                        .flatMap(Arrays::stream)
+                                        .filter(Predicate.not(String::isEmpty))
+                                        .toList();
+                                zoneLayoutFactory = substationList.isEmpty() ?
+                                        new HorizontalZoneLayoutFactory() : new MatrixZoneLayoutFactory(model.getMatrix());
+                            }
                             SldParameters sldParameters = new SldParameters()
                                     .setLayoutParameters(model.getLayoutParameters())
                                     .setSvgParameters(model.getSvgParameters())
@@ -112,9 +133,9 @@ public class SingleLineDiagramController extends AbstractDiagramController {
                                     .setSubstationLayoutFactory(model.getSubstationLayoutFactory())
                                     .setStyleProviderFactory(model::getStyleProvider)
                                     .setVoltageLevelLayoutFactoryCreator(voltageLevelLayoutFactoryCreator)
-                                    .setZoneLayoutFactory(model.getZoneLayoutFactory());
-                            if (container instanceof Network network) {
-                                SingleLineDiagram.drawMultiSubstations(network, ((Network) container).getSubstationStream().map(Identifiable::getId).toList(),
+                                    .setZoneLayoutFactory(zoneLayoutFactory);
+                            if (container instanceof Network network && !substationList.isEmpty()) {
+                                SingleLineDiagram.drawMultiSubstations(network, substationList,
                                         svgWriter,
                                         metadataWriter,
                                         sldParameters);

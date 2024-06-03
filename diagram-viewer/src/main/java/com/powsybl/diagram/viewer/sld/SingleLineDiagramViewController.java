@@ -11,6 +11,7 @@ import com.powsybl.diagram.viewer.common.AbstractDiagramController;
 import com.powsybl.diagram.viewer.common.AbstractDiagramViewController;
 import com.powsybl.iidm.network.Container;
 import com.powsybl.iidm.network.Network;
+import com.powsybl.iidm.network.Substation;
 import com.powsybl.sld.cgmes.dl.iidm.extensions.NetworkDiagramData;
 import com.powsybl.sld.cgmes.layout.CgmesVoltageLevelLayoutFactory;
 import com.powsybl.sld.layout.*;
@@ -18,8 +19,10 @@ import com.powsybl.sld.layout.position.clustering.PositionByClustering;
 import com.powsybl.sld.layout.position.predefined.PositionPredefined;
 import com.powsybl.sld.library.ComponentLibrary;
 import javafx.beans.binding.Bindings;
+import javafx.beans.binding.BooleanBinding;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.value.ChangeListener;
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -30,6 +33,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.NoSuchElementException;
 import java.util.Objects;
 
 /**
@@ -53,6 +58,18 @@ public class SingleLineDiagramViewController extends AbstractDiagramViewControll
 
     @FXML
     public HBox animationHBox;
+
+    @FXML
+    public VBox matrixShapeVBox;
+
+    @FXML
+    public HBox matrixShapeHBoxTitle;
+
+    @FXML
+    public VBox matrixShapeSubstationCoordinates;
+
+    @FXML
+    public Button updateSldButton;
 
     @FXML
     public Spinner<Double> animationThreshold1Spinner;
@@ -122,9 +139,6 @@ public class SingleLineDiagramViewController extends AbstractDiagramViewControll
     public CheckBox disconnectorsOnBusCheckBox;
 
     @FXML
-    public VBox positionVoltageLevelLayoutFactoryParameters;
-
-    @FXML
     public CheckBox stackFeedersCheckBox;
 
     @FXML
@@ -138,8 +152,6 @@ public class SingleLineDiagramViewController extends AbstractDiagramViewControll
 
     @FXML
     public CheckBox substituteSingularFictitiousNodesCheckBox;
-    @FXML
-    public CheckBox substituteInternalMiddle2wtByEquipmentNodesCheckBox;
 
     @FXML
     public Spinner<Double> scaleFactorSpinner;
@@ -261,21 +273,27 @@ public class SingleLineDiagramViewController extends AbstractDiagramViewControll
         zoneLayoutComboBox.itemsProperty().bind(Bindings.createObjectBinding(() -> model.getZoneLayouts()));
         zoneLayoutComboBox.setConverter(model.getZoneLayoutStringConverter());
         zoneLayoutComboBox.getSelectionModel().selectFirst(); // Default selection without Network
-
+        zoneLayoutComboBox.valueProperty().addListener((observable, oldValue, newValue) -> showMatrixNodes()); // BooleanBinding doesn't work easily
+        // Matrix Shape
+        matrixShapeVBox.visibleProperty().setValue(false);
+        matrixShapeVBox.managedProperty().bind(matrixShapeVBox.visibleProperty());
         // CGMES-DL Diagrams
         cgmesDLDiagramsComboBox.itemsProperty().bind(Bindings.createObjectBinding(() -> model.getCgmesDLDiagramNames()));
         cgmesDLDiagramsComboBox.getSelectionModel().selectFirst(); // Default selection without Network
 
         // PositionVoltageLevelLayoutFactory
-        positionVoltageLevelLayoutFactoryParameters.visibleProperty().bind(Bindings.createBooleanBinding(
-                () -> voltageLevelLayoutFactoryParametersEnabled(voltageLevelLayoutComboBox.getSelectionModel().getSelectedItem()),
-                voltageLevelLayoutComboBox.getSelectionModel().selectedItemProperty()));
-        positionVoltageLevelLayoutFactoryParameters.managedProperty().bind(positionVoltageLevelLayoutFactoryParameters.visibleProperty()); // Force view layout calculations when nodes are shown or hidden
-    }
-
-    private boolean voltageLevelLayoutFactoryParametersEnabled(SingleLineDiagramModel.VoltageLevelLayoutFactoryType selectedItem) {
-        return selectedItem == SingleLineDiagramModel.VoltageLevelLayoutFactoryType.POSITION_WITH_EXTENSIONS
-                || selectedItem == SingleLineDiagramModel.VoltageLevelLayoutFactoryType.POSITION_BY_CLUSTERING;
+        BooleanBinding disableBinding = Bindings.createBooleanBinding(() -> voltageLevelLayoutComboBox.getSelectionModel().getSelectedItem() == SingleLineDiagramModel.VoltageLevelLayoutFactoryType.POSITION_WITH_EXTENSIONS || voltageLevelLayoutComboBox.getSelectionModel().getSelectedItem() == SingleLineDiagramModel.VoltageLevelLayoutFactoryType.POSITION_BY_CLUSTERING, voltageLevelLayoutComboBox.getSelectionModel().selectedItemProperty());
+        stackFeedersCheckBox.visibleProperty().bind(disableBinding);
+        exceptionWhenPatternUnhandledCheckBox.visibleProperty().bind(disableBinding);
+        handleShuntsCheckBox.visibleProperty().bind(disableBinding);
+        removeFictitiousNodesCheckBox.visibleProperty().bind(disableBinding);
+        substituteSingularFictitiousNodesCheckBox.visibleProperty().bind(disableBinding);
+        // Force layout calculations when nodes are shown or hidden
+        stackFeedersCheckBox.managedProperty().bind(stackFeedersCheckBox.visibleProperty());
+        exceptionWhenPatternUnhandledCheckBox.managedProperty().bind(exceptionWhenPatternUnhandledCheckBox.visibleProperty());
+        handleShuntsCheckBox.managedProperty().bind(handleShuntsCheckBox.visibleProperty());
+        removeFictitiousNodesCheckBox.managedProperty().bind(removeFictitiousNodesCheckBox.visibleProperty());
+        substituteSingularFictitiousNodesCheckBox.managedProperty().bind(substituteSingularFictitiousNodesCheckBox.visibleProperty());
     }
 
     public void addListener(ChangeListener<Object> changeListener) {
@@ -296,13 +314,15 @@ public class SingleLineDiagramViewController extends AbstractDiagramViewControll
         handleShuntsCheckBox.selectedProperty().addListener(changeListener);
         removeFictitiousNodesCheckBox.selectedProperty().addListener(changeListener);
         substituteSingularFictitiousNodesCheckBox.selectedProperty().addListener(changeListener);
-        substituteInternalMiddle2wtByEquipmentNodesCheckBox.selectedProperty().addListener(changeListener);
 
         // LayoutParameters
         model.addListener(changeListener);
     }
 
     public void updateAllDiagrams(Network network, Container<?> selectedContainer) {
+        if (this.model.getZoneLayoutFactory() instanceof MatrixZoneLayoutFactory) {
+            this.updateMatrixShape();
+        }
         if (selectedContainer != null) {
             SingleLineDiagramController.updateDiagram(network, model, model.getSelectedContainerResult(), selectedContainer,
                     getVoltageLevelLayoutFactoryCreator());
@@ -387,8 +407,7 @@ public class SingleLineDiagramViewController extends AbstractDiagramViewControll
                 .setExceptionIfPatternNotHandled(exceptionWhenPatternUnhandledCheckBox.isSelected())
                 .setHandleShunts(handleShuntsCheckBox.isSelected())
                 .setRemoveUnnecessaryFictitiousNodes(removeFictitiousNodesCheckBox.isSelected())
-                .setSubstituteSingularFictitiousByFeederNode(substituteSingularFictitiousNodesCheckBox.isSelected())
-                .setSubstituteInternalMiddle2wtByEquipmentNodes(substituteInternalMiddle2wtByEquipmentNodesCheckBox.isSelected());
+                .setSubstituteSingularFictitiousByFeederNode(substituteSingularFictitiousNodesCheckBox.isSelected());
         SingleLineDiagramModel.VoltageLevelLayoutFactoryType type = voltageLevelLayoutComboBox.getValue();
         return switch (type) {
             case SMART -> SmartVoltageLevelLayoutFactory::new;
@@ -397,5 +416,61 @@ public class SingleLineDiagramViewController extends AbstractDiagramViewControll
             case RANDOM -> network -> new RandomVoltageLevelLayoutFactory(500.0, 500.0);
             case CGMES -> CgmesVoltageLevelLayoutFactory::new;
         };
+    }
+
+    public void initMatrixSubstationList(Network network) throws IOException {
+        this.matrixShapeSubstationCoordinates.getChildren().clear();
+        for (Substation s : network.getSubstations()) {
+            FXMLLoader loader = new FXMLLoader();
+            HBox nodeCoordinate = loader.load(Objects.requireNonNull(getClass().getResource("/sld/matrixShapeView.fxml")).openStream());
+            this.matrixShapeSubstationCoordinates.getChildren().add(nodeCoordinate);
+            MatrixShapeViewController controller = loader.getController();
+            controller.setSubstationNameValue(s.getNameOrId());
+            controller.setSubstationIdValue(s.getId());
+            controller.setRowValue(0);
+            controller.setColumnValue(0);
+        }
+    }
+
+    public void updateMatrixShape() {
+        int maxRow = this.matrixShapeSubstationCoordinates.getChildren().stream().mapToInt(n ->
+                (int) ((Spinner<?>) ((HBox) n).getChildren().get(1)).getValue())
+                .max().orElseThrow(NoSuchElementException::new);
+
+        int maxColumn = this.matrixShapeSubstationCoordinates.getChildren().stream().mapToInt(n ->
+            (int) ((Spinner<?>) ((HBox) n).getChildren().get(2)).getValue())
+                .max().orElseThrow(NoSuchElementException::new);
+
+        String[][] matrix = new String[maxRow][maxColumn];
+        Arrays.stream(matrix).forEach(row -> Arrays.fill(row, ""));
+
+        this.matrixShapeSubstationCoordinates.getChildren().forEach(node -> {
+            if (node instanceof HBox) {
+                int nodeRow = (int) ((Spinner<?>) ((HBox) node).getChildren().get(1)).getValue();
+                int nodeColumn = (int) ((Spinner<?>) ((HBox) node).getChildren().get(2)).getValue();
+                String nodeId = ((Label) ((HBox) node).getChildren().get(3)).getText();
+                if (nodeRow > 0 && nodeColumn > 0) {
+                    matrix[nodeRow - 1][nodeColumn - 1] = nodeId;
+                }
+            }
+        });
+        this.model.setMatrix(matrix);
+    }
+
+    public void resetMatrixShape(ActionEvent event) {
+        event.consume();
+        this.matrixShapeSubstationCoordinates.getChildren().forEach(node -> {
+            if (node instanceof HBox) {
+                if (((HBox) node).getChildren().get(1) instanceof Spinner<?> &&
+                        ((Spinner<?>) ((HBox) node).getChildren().get(1)).getValue() instanceof Integer) {
+                    ((Spinner<Integer>) ((HBox) node).getChildren().get(1)).getValueFactory().setValue(0);
+                    ((Spinner<Integer>) ((HBox) node).getChildren().get(2)).getValueFactory().setValue(0);
+                }
+            }
+        });
+    }
+
+    private void showMatrixNodes() {
+        matrixShapeVBox.visibleProperty().setValue(zoneLayoutComboBox.valueProperty().getValue() instanceof MatrixZoneLayoutFactory);
     }
 }

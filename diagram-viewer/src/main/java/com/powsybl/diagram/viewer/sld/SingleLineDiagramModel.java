@@ -9,14 +9,14 @@ package com.powsybl.diagram.viewer.sld;
 
 import com.powsybl.diagram.viewer.common.DiagramModel;
 import com.powsybl.iidm.network.Network;
-import com.powsybl.sld.cgmes.dl.iidm.extensions.*;
-import com.powsybl.sld.cgmes.layout.*;
+import com.powsybl.sld.cgmes.dl.iidm.extensions.NetworkDiagramData;
+import com.powsybl.sld.cgmes.layout.CgmesSubstationLayoutFactory;
 import com.powsybl.sld.layout.*;
-
 import com.powsybl.sld.library.ComponentLibrary;
 import com.powsybl.sld.svg.SvgParameters;
 import com.powsybl.sld.svg.styles.*;
-import com.powsybl.sld.svg.styles.iidm.*;
+import com.powsybl.sld.svg.styles.iidm.HighlightLineStateStyleProvider;
+import com.powsybl.sld.svg.styles.iidm.TopologicalStyleProvider;
 import javafx.beans.property.*;
 import javafx.beans.value.ChangeListener;
 import javafx.collections.FXCollections;
@@ -44,7 +44,6 @@ public class SingleLineDiagramModel extends DiagramModel {
             };
         }
     }
-
     private static final String UNKNOWN_ITEM = "???";
 
     // LayoutParameters
@@ -77,6 +76,9 @@ public class SingleLineDiagramModel extends DiagramModel {
     private static final String HORIZONTAL_ZONE_LAYOUT = "Horizontal";
     private static final String VERTICAL_ZONE_LAYOUT = "Vertical";
     private static final String MATRIX_ZONE_LAYOUT = "Matrix";
+    private String[][] matrix = {{}};
+
+    private MatrixZoneLayoutFactory matrixZoneLayoutFactory = new MatrixZoneLayoutFactory(this.matrix);
     private final Map<String, ZoneLayoutFactory> nameToZoneLayoutFactoryMap = new TreeMap<>(); // ordered
     private final ObservableList<ZoneLayoutFactory> zoneLayouts = FXCollections.observableArrayList();
     private final ObjectProperty<ZoneLayoutFactory> currentZoneLayoutFactory = new SimpleObjectProperty<>();
@@ -187,6 +189,7 @@ public class SingleLineDiagramModel extends DiagramModel {
         // zoneLayouts
         nameToZoneLayoutFactoryMap.put(HORIZONTAL_ZONE_LAYOUT, new HorizontalZoneLayoutFactory());
         nameToZoneLayoutFactoryMap.put(VERTICAL_ZONE_LAYOUT, new VerticalZoneLayoutFactory());
+        nameToZoneLayoutFactoryMap.put(MATRIX_ZONE_LAYOUT, this.matrixZoneLayoutFactory);
 
         // SubstationLayouts
         nameToSubstationLayoutFactoryMap.put(HORIZONTAL_SUBSTATION_LAYOUT, new HorizontalSubstationLayoutFactory());
@@ -324,5 +327,13 @@ public class SingleLineDiagramModel extends DiagramModel {
                 return nameToZoneLayoutFactoryMap.get(item);
             }
         };
+    }
+
+    public void setMatrix(String[][] matrix) {
+        this.matrix = matrix;
+    }
+
+    public String[][] getMatrix() {
+        return matrix;
     }
 }
