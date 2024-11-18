@@ -33,14 +33,11 @@ public class SingleLineDiagramController extends AbstractDiagramController {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SingleLineDiagramController.class);
 
-    private StringProperty metadataContent;
     private StringProperty graphContent;
 
     @FXML
     private void initialize() throws IOException {
         super.init("sld");
-
-        metadataContent = addAdditionalTab("Metadata", "JSON file", "*.json");
         graphContent = addAdditionalTab("Graph", "JSON file", "*.json");
     }
 
@@ -50,14 +47,14 @@ public class SingleLineDiagramController extends AbstractDiagramController {
                               ContainerResult containerResult,
                               Container<?> container,
                               VoltageLevelLayoutFactoryCreator voltageLevelLayoutFactoryCreator) {
-        super.createDiagram(container, containerResult.svgContentProperty());
+        super.createDiagram(container, containerResult);
 
         // JSHandler management
         jsHandler.setOperateSwitch(swId -> {
             Switch sw = network.getSwitch(swId);
             if (sw != null) {
                 sw.setOpen(!sw.isOpen());
-                StyleProvider styleProvider = model.getStyleProvider(network);
+                StyleProvider styleProvider = model.getStyleProvider(network, model.getSvgParameters());
                 styleProvider.reset();
                 updateDiagram(network, model, containerResult, container, voltageLevelLayoutFactoryCreator);
             }
@@ -66,7 +63,6 @@ public class SingleLineDiagramController extends AbstractDiagramController {
         containerResult.metadataContentProperty().addListener((obs, oldV, newV) -> jsHandler.setMetadata(containerResult.metadataContentProperty().get()));
 
         // Metadata & Graph binding
-        metadataContent.bind(containerResult.metadataContentProperty());
         graphContent.bind(containerResult.jsonContentProperty());
 
         updateDiagram(network, model, containerResult, container, voltageLevelLayoutFactoryCreator);

@@ -43,7 +43,8 @@
                         <Label text="Styles:"/>
                         <CheckBox fx:id="basicStyleProviderCheckBox" text="Basic"/>
                         <CheckBox fx:id="nominalStyleProviderCheckBox" text="Nominal voltage"/>
-                        <CheckBox fx:id="highlightStyleProviderCheckBox" text="Highlight"/>
+                        <CheckBox fx:id="highlightLineStateStyleProviderCheckBox" text="Line state highlight"/>
+                        <CheckBox fx:id="highlightLimitStyleProviderCheckBox" text="Limit highlight"/>
                         <CheckBox fx:id="topologicalStyleProviderCheckBox" text="Topology (default)"/>
                         <CheckBox fx:id="animatedStyleProviderCheckBox" text="Animated"/>
                         <HBox fx:id="animationHBox" spacing="5">
@@ -188,8 +189,9 @@
                                 <SpinnerValueFactory.DoubleSpinnerValueFactory min="-360" max="360" amountToStepBy="1"/>
                             </valueFactory>
                         </Spinner>
-                        <CheckBox fx:id="addNodesInfosCheckBox" text="Add nodes infos"/>
+                        <CheckBox fx:id="busesLegendAddedCheckBox" text="Add nodes infos"/>
                         <CheckBox fx:id="feederInfoSymmetryCheckBox" text="Feeder info symmetry"/>
+                        <CheckBox fx:id="unifyVlColorsCheckBox" text="Unify voltage level colors"/>
                         <CheckBox fx:id="avoidSVGComponentsDuplicationCheckBox" text="Avoid SVG components duplication"/>
                         <Label text="Feeder infos outer margin:"/>
                         <Spinner fx:id="feederInfosOuterMarginSpinner" editable="true">

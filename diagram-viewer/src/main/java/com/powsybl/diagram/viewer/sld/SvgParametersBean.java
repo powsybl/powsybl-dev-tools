@@ -27,8 +27,9 @@ public class SvgParametersBean {
     private final BooleanProperty displayConnectivityNodesId = new SimpleBooleanProperty();
 
     private final ObjectProperty<Double>angleLabel = new SimpleObjectProperty<>();
-    private final BooleanProperty addNodesInfos = new SimpleBooleanProperty();
+    private final BooleanProperty busesLegendAdded = new SimpleBooleanProperty();
     private final BooleanProperty feederInfoSymmetry = new SimpleBooleanProperty();
+    private final BooleanProperty unifyVlColors = new SimpleBooleanProperty();
     private final ObjectProperty<Double>feederInfosOuterMargin = new SimpleObjectProperty<>();
     private final ObjectProperty<Double>feederInfosIntraMargin = new SimpleObjectProperty<>();
 
@@ -41,8 +42,9 @@ public class SvgParametersBean {
                              BooleanProperty displayEquipmentNodesLabel,
                              BooleanProperty displayConnectivityNodesId,
                              Property<Double> angleLabel,
-                             BooleanProperty addNodesInfos,
+                             BooleanProperty busesLegendAdded,
                              BooleanProperty feederInfoSymmetry,
+                             BooleanProperty unifyVlColors,
                              Property<Double> feederInfosOuterMargin,
                              Property<Double> feederInfosIntraMargin) {
         // bind
@@ -55,8 +57,9 @@ public class SvgParametersBean {
         this.displayEquipmentNodesLabel.bindBidirectional(displayEquipmentNodesLabel);
         this.displayConnectivityNodesId.bindBidirectional(displayConnectivityNodesId);
         this.angleLabel.bindBidirectional(angleLabel);
-        this.addNodesInfos.bindBidirectional(addNodesInfos);
+        this.busesLegendAdded.bindBidirectional(busesLegendAdded);
         this.feederInfoSymmetry.bindBidirectional(feederInfoSymmetry);
+        this.unifyVlColors.bindBidirectional(unifyVlColors);
         this.feederInfosOuterMargin.bindBidirectional(feederInfosOuterMargin);
         this.feederInfosIntraMargin.bindBidirectional(feederInfosIntraMargin);
 
@@ -74,8 +77,9 @@ public class SvgParametersBean {
         displayEquipmentNodesLabel.setValue(defaultSvgParameters.isDisplayEquipmentNodesLabel());
         displayConnectivityNodesId.setValue(defaultSvgParameters.isDisplayConnectivityNodesId());
         angleLabel.setValue(defaultSvgParameters.getAngleLabelShift());
-        addNodesInfos.setValue(defaultSvgParameters.isAddNodesInfos());
+        busesLegendAdded.setValue(defaultSvgParameters.isBusesLegendAdded());
         feederInfoSymmetry.setValue(defaultSvgParameters.isFeederInfoSymmetry());
+        unifyVlColors.setValue(defaultSvgParameters.isUnifyVoltageLevelColors());
         feederInfosOuterMargin.setValue(defaultSvgParameters.getFeederInfosOuterMargin());
         feederInfosIntraMargin.setValue(defaultSvgParameters.getFeederInfosIntraMargin());
     }
@@ -95,8 +99,9 @@ public class SvgParametersBean {
         this.displayEquipmentNodesLabel.addListener(changeListener);
         this.displayConnectivityNodesId.addListener(changeListener);
         this.angleLabel.addListener(changeListener);
-        this.addNodesInfos.addListener(changeListener);
+        this.busesLegendAdded.addListener(changeListener);
         this.feederInfoSymmetry.addListener(changeListener);
+        this.unifyVlColors.addListener(changeListener);
         this.feederInfosOuterMargin.addListener(changeListener);
         this.feederInfosIntraMargin.addListener(changeListener);
     }
@@ -112,8 +117,9 @@ public class SvgParametersBean {
                 .setDisplayEquipmentNodesLabel(displayEquipmentNodesLabel.get())
                 .setDisplayConnectivityNodesId(displayConnectivityNodesId.get())
                 .setAngleLabelShift(angleLabel.get())
-                .setAddNodesInfos(addNodesInfos.get())
+                .setBusesLegendAdded(busesLegendAdded.get())
                 .setFeederInfoSymmetry(feederInfoSymmetry.get())
+                .setUnifyVoltageLevelColors(unifyVlColors.get())
                 .setFeederInfosOuterMargin(feederInfosOuterMargin.get())
                 .setFeederInfosIntraMargin(feederInfosIntraMargin.get())
                 .setDiagramName(diagramName)
