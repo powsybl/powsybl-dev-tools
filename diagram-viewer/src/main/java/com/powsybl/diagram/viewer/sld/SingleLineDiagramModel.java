@@ -221,7 +221,7 @@ public class SingleLineDiagramModel extends DiagramModel {
         return currentComponentLibrary.getValue();
     }
 
-    public StyleProvider getStyleProvider(Network network) {
+    public StyleProvider getStyleProvider(Network network, SvgParameters svgParameters) {
         List<StyleProvider> styles = new ArrayList<>();
         if (this.basicStyleProvider.get()) {
             styles.add(new BasicStyleProvider());
@@ -236,7 +236,7 @@ public class SingleLineDiagramModel extends DiagramModel {
             styles.add(new HighlightLineStateStyleProvider(network));
         }
         if (this.topologicalStyleProvider.get()) {
-            styles.add(new TopologicalStyleProvider(network));
+            styles.add(new TopologicalStyleProvider(network, svgParameters));
         }
         if (styles.isEmpty()) {
             styles.add(new EmptyStyleProvider());
