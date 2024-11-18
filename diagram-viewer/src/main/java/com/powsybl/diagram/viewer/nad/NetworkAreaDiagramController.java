@@ -42,8 +42,7 @@ public class NetworkAreaDiagramController extends AbstractDiagramController {
     }
 
     public void createDiagram(Network network, NetworkAreaDiagramModel model, ContainerResult containerResult, Container<?> container) {
-        super.createDiagram(container, containerResult.svgContentProperty());
-
+        super.createDiagram(container, containerResult);
         updateDiagram(network, model, containerResult, container);
     }
 
@@ -79,7 +78,7 @@ public class NetworkAreaDiagramController extends AbstractDiagramController {
             }
         };
 
-        nadService.setOnSucceeded(event -> containerResult.svgContentProperty().setValue((String) event.getSource().getValue()));
+        nadService.setOnSucceeded(event -> containerResult.setValue((ContainerResult) event.getSource().getValue()));
         nadService.setOnFailed(event -> {
             Throwable exception = event.getSource().getException();
             LOGGER.error(exception.toString(), exception);

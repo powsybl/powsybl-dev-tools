@@ -34,6 +34,7 @@ public abstract class AbstractDiagramController {
     public WebView diagramWebView;
 
     private StringProperty svgContent;
+    private StringProperty metadataContent;
 
     @FXML
     public TextArea info;
@@ -80,15 +81,20 @@ public abstract class AbstractDiagramController {
         js = new String(ByteStreams.toByteArray(Objects.requireNonNull(getClass().getResourceAsStream("/" + prefix + "/svg.js"))));
 
         svgContent = addAdditionalTab("SVG", "SVG file", "*.svg");
+        metadataContent = addAdditionalTab("Metadata", "JSON file", "*.json");
     }
 
     public void createDiagram(Container<?> container,
-                              StringProperty svgContentProperty) {
+                              ContainerResult containerResult) {
         info.setText(String.join(System.lineSeparator(), "id: " + container.getId(), "name: " + container.getNameOrId()));
 
         // SVG content listener & binding
+        StringProperty svgContentProperty = containerResult.svgContentProperty();
         svgContentProperty.addListener((obs, oldV, newV) -> updateSVGContent(newV));
         svgContent.bind(svgContentProperty);
+
+        // Metadata binding
+        metadataContent.bind(containerResult.metadataContentProperty());
     }
 
     protected void updateSVGContent(String newContent) {
