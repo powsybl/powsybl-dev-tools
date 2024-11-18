@@ -48,22 +48,32 @@ public class NetworkAreaDiagramController extends AbstractDiagramController {
     }
 
     public static void updateDiagram(Network network, NetworkAreaDiagramModel model, ContainerResult containerResult, Container<?> container) {
-        StringWriter writer = new StringWriter();
-        Service<String> nadService = new Service<>() {
+        Service<ContainerResult> nadService = new Service<>() {
             @Override
-            protected Task<String> createTask() {
+            protected Task<ContainerResult> createTask() {
                 return new Task<>() {
                     @Override
-                    protected String call() {
-                        Predicate<VoltageLevel> vls = getVoltageLevelFilter(network, model, container);
-                        NadParameters nadParameters = new NadParameters();
-                        nadParameters.setLayoutParameters(model.getLayoutParameters());
-                        nadParameters.setSvgParameters(model.getSvgParameters());
-                        nadParameters.setLayoutFactory(model.getLayoutFactory(network));
-                        nadParameters.setStyleProviderFactory(model.getStyleProviderFactory());
-                        nadParameters.setLabelProviderFactory(model.getLabelProviderFactory());
-                        NetworkAreaDiagram.draw(network, writer, nadParameters, vls);
-                        return writer.toString();
+                    protected ContainerResult call() throws IOException {
+                        ContainerResult result = new ContainerResult();
+                        try (StringWriter svgWriter = new StringWriter();
+                             StringWriter metadataWriter = new StringWriter()) {
+
+                            Predicate<VoltageLevel> vls = getVoltageLevelFilter(network, model, container);
+                            NadParameters nadParameters = new NadParameters();
+                            nadParameters.setLayoutParameters(model.getLayoutParameters());
+                            nadParameters.setSvgParameters(model.getSvgParameters());
+                            nadParameters.setLayoutFactory(model.getLayoutFactory(network));
+                            nadParameters.setStyleProviderFactory(model.getStyleProviderFactory());
+                            nadParameters.setLabelProviderFactory(model.getLabelProviderFactory());
+                            NetworkAreaDiagram.draw(network, svgWriter, metadataWriter, nadParameters, vls);
+
+                            svgWriter.flush();
+                            metadataWriter.flush();
+
+                            result.svgContentProperty().set(svgWriter.toString());
+                            result.metadataContentProperty().set(metadataWriter.toString());
+                        }
+                        return result;
                     }
                 };
             }
