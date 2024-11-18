@@ -63,7 +63,8 @@ public class SingleLineDiagramModel extends DiagramModel {
     private final BooleanProperty animatedStyleProvider = new SimpleBooleanProperty();
     private final Property<Double> animationThreshold1 = new SimpleObjectProperty<>();
     private final Property<Double> animationThreshold2 = new SimpleObjectProperty<>();
-    private final BooleanProperty highlightStyleProvider = new SimpleBooleanProperty();
+    private final BooleanProperty highlightLineStateStyleProvider = new SimpleBooleanProperty();
+    private final BooleanProperty highlightLimitStyleProvider = new SimpleBooleanProperty();
     private final BooleanProperty topologicalStyleProvider = new SimpleBooleanProperty();
 
     // Substation layout provider
@@ -88,7 +89,8 @@ public class SingleLineDiagramModel extends DiagramModel {
                                   BooleanProperty animatedStyleProvider,
                                   Property<Double> animationThreshold1,
                                   Property<Double> animationThreshold2,
-                                  BooleanProperty highlightStyleProvider,
+                                  BooleanProperty highlightLineStateStyleProvider,
+                                  BooleanProperty highlightLimitStyleProvider,
                                   BooleanProperty topologicalStyleProvider,
                                   // LayoutParameters
                                   Property<Double> diagramPaddingTopBottom,
@@ -137,7 +139,8 @@ public class SingleLineDiagramModel extends DiagramModel {
         this.animatedStyleProvider.bindBidirectional(animatedStyleProvider);
         this.animationThreshold1.bindBidirectional(animationThreshold1);
         this.animationThreshold2.bindBidirectional(animationThreshold2);
-        this.highlightStyleProvider.bindBidirectional(highlightStyleProvider);
+        this.highlightLineStateStyleProvider.bindBidirectional(highlightLineStateStyleProvider);
+        this.highlightLimitStyleProvider.bindBidirectional(highlightLimitStyleProvider);
         this.topologicalStyleProvider.bindBidirectional(topologicalStyleProvider);
 
         // LayoutParameters
@@ -232,8 +235,11 @@ public class SingleLineDiagramModel extends DiagramModel {
         if (this.animatedStyleProvider.get()) {
             styles.add(new AnimatedFeederInfoStyleProvider(this.animationThreshold1.getValue(), this.animationThreshold2.getValue()));
         }
-        if (this.highlightStyleProvider.get()) {
+        if (this.highlightLineStateStyleProvider.get()) {
             styles.add(new HighlightLineStateStyleProvider(network));
+        }
+        if (this.highlightLimitStyleProvider.get()) {
+            styles.add(new LimitHighlightStyleProvider(network));
         }
         if (this.topologicalStyleProvider.get()) {
             styles.add(new TopologicalStyleProvider(network, svgParameters));

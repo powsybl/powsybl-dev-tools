@@ -61,7 +61,10 @@ public class SingleLineDiagramViewController extends AbstractDiagramViewControll
     public Spinner<Double> animationThreshold2Spinner;
 
     @FXML
-    public CheckBox highlightStyleProviderCheckBox;
+    public CheckBox highlightLineStateStyleProviderCheckBox;
+
+    @FXML
+    public CheckBox highlightLimitStyleProviderCheckBox;
 
     @FXML
     public CheckBox topologicalStyleProviderCheckBox;
@@ -204,7 +207,8 @@ public class SingleLineDiagramViewController extends AbstractDiagramViewControll
                 animatedStyleProviderCheckBox.selectedProperty(),
                 animationThreshold1Spinner.getValueFactory().valueProperty(),
                 animationThreshold2Spinner.getValueFactory().valueProperty(),
-                highlightStyleProviderCheckBox.selectedProperty(),
+                highlightLineStateStyleProviderCheckBox.selectedProperty(),
+                highlightLimitStyleProviderCheckBox.selectedProperty(),
                 topologicalStyleProviderCheckBox.selectedProperty(),
                 // LayoutParameters
                 diagramPaddingTopBottomSpinner.getValueFactory().valueProperty(),
@@ -278,7 +282,7 @@ public class SingleLineDiagramViewController extends AbstractDiagramViewControll
         basicStyleProviderCheckBox.selectedProperty().addListener(changeListener);
         nominalStyleProviderCheckBox.selectedProperty().addListener(changeListener);
         animatedStyleProviderCheckBox.selectedProperty().addListener(changeListener);
-        highlightStyleProviderCheckBox.selectedProperty().addListener(changeListener);
+        highlightLineStateStyleProviderCheckBox.selectedProperty().addListener(changeListener);
         topologicalStyleProviderCheckBox.selectedProperty().addListener(changeListener);
 
         voltageLevelLayoutComboBox.valueProperty().addListener(changeListener);
@@ -348,12 +352,12 @@ public class SingleLineDiagramViewController extends AbstractDiagramViewControll
         // Topology selection by default
         basicStyleProviderCheckBox.setSelected(false);
         animatedStyleProviderCheckBox.setSelected(false);
-        highlightStyleProviderCheckBox.setSelected(false);
+        highlightLineStateStyleProviderCheckBox.setSelected(false);
         nominalStyleProviderCheckBox.setSelected(networkProperty.get() == null);
         topologicalStyleProviderCheckBox.setSelected(networkProperty.get() != null);
         // Only available if network
-        highlightStyleProviderCheckBox.disableProperty().unbind();
-        highlightStyleProviderCheckBox.disableProperty().bind(Bindings.createBooleanBinding(() -> networkProperty.get() != null, networkProperty).not());
+        highlightLineStateStyleProviderCheckBox.disableProperty().unbind();
+        highlightLineStateStyleProviderCheckBox.disableProperty().bind(Bindings.createBooleanBinding(() -> networkProperty.get() != null, networkProperty).not());
         topologicalStyleProviderCheckBox.disableProperty().unbind();
         topologicalStyleProviderCheckBox.disableProperty().bind(Bindings.createBooleanBinding(() -> networkProperty.get() != null, networkProperty).not());
         // Horizontal selection
