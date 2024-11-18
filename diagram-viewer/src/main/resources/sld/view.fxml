@@ -43,8 +43,8 @@
                         <Label text="Styles:"/>
                         <CheckBox fx:id="basicStyleProviderCheckBox" text="Basic"/>
                         <CheckBox fx:id="nominalStyleProviderCheckBox" text="Nominal voltage"/>
-                        <CheckBox fx:id="highlightLineStateStyleProviderCheckBox" text="Highlight"/>
-                        <CheckBox fx:id="highlightLimitStyleProviderCheckBox" text="Highlight"/>
+                        <CheckBox fx:id="highlightLineStateStyleProviderCheckBox" text="Line state highlight"/>
+                        <CheckBox fx:id="highlightLimitStyleProviderCheckBox" text="Limit highlight"/>
                         <CheckBox fx:id="topologicalStyleProviderCheckBox" text="Topology (default)"/>
                         <CheckBox fx:id="animatedStyleProviderCheckBox" text="Animated"/>
                         <HBox fx:id="animationHBox" spacing="5">
