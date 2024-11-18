@@ -117,7 +117,7 @@ public class SingleLineDiagramModel extends DiagramModel {
                                   BooleanProperty displayEquipmentNodesLabel,
                                   BooleanProperty displayConnectivityNodesId,
                                   Property<Double> angleLabel,
-                                  BooleanProperty addNodesInfos,
+                                  BooleanProperty busesLegendAdded,
                                   BooleanProperty feederInfoSymmetry,
                                   BooleanProperty avoidSVGComponentsDuplication,
                                   Property<Double> feederInfosOuterMargin,
@@ -168,7 +168,7 @@ public class SingleLineDiagramModel extends DiagramModel {
                 displayEquipmentNodesLabel,
                 displayConnectivityNodesId,
                 angleLabel,
-                addNodesInfos,
+                busesLegendAdded,
                 feederInfoSymmetry,
                 feederInfosOuterMargin,
                 feederInfosIntraMargin);

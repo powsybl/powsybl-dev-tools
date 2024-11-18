@@ -172,7 +172,7 @@ public class SingleLineDiagramViewController extends AbstractDiagramViewControll
     public Spinner<Double> angleLabelSpinner;
 
     @FXML
-    public CheckBox addNodesInfosCheckBox;
+    public CheckBox busesLegendAddedCheckBox;
 
     @FXML
     public CheckBox feederInfoSymmetryCheckBox;
@@ -234,7 +234,7 @@ public class SingleLineDiagramViewController extends AbstractDiagramViewControll
                 displayEquipmentNodesLabelCheckBox.selectedProperty(),
                 displayConnectivityNodesIdCheckBox.selectedProperty(),
                 angleLabelSpinner.getValueFactory().valueProperty(),
-                addNodesInfosCheckBox.selectedProperty(),
+                busesLegendAddedCheckBox.selectedProperty(),
                 feederInfoSymmetryCheckBox.selectedProperty(),
                 avoidSVGComponentsDuplicationCheckBox.selectedProperty(),
                 feederInfosOuterMarginSpinner.getValueFactory().valueProperty(),

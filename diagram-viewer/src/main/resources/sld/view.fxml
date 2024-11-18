@@ -188,7 +188,7 @@
                                 <SpinnerValueFactory.DoubleSpinnerValueFactory min="-360" max="360" amountToStepBy="1"/>
                             </valueFactory>
                         </Spinner>
-                        <CheckBox fx:id="addNodesInfosCheckBox" text="Add nodes infos"/>
+                        <CheckBox fx:id="busesLegendAddedCheckBox" text="Add nodes infos"/>
                         <CheckBox fx:id="feederInfoSymmetryCheckBox" text="Feeder info symmetry"/>
                         <CheckBox fx:id="avoidSVGComponentsDuplicationCheckBox" text="Avoid SVG components duplication"/>
                         <Label text="Feeder infos outer margin:"/>
