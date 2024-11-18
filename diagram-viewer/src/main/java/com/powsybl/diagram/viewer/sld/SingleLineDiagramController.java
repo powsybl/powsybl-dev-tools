@@ -54,7 +54,7 @@ public class SingleLineDiagramController extends AbstractDiagramController {
             Switch sw = network.getSwitch(swId);
             if (sw != null) {
                 sw.setOpen(!sw.isOpen());
-                StyleProvider styleProvider = model.getStyleProvider(network);
+                StyleProvider styleProvider = model.getStyleProvider(network, model.getSvgParameters());
                 styleProvider.reset();
                 updateDiagram(network, model, containerResult, container, voltageLevelLayoutFactoryCreator);
             }
