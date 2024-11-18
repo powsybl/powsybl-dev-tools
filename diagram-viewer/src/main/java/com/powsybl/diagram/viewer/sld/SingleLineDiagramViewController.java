@@ -181,6 +181,9 @@ public class SingleLineDiagramViewController extends AbstractDiagramViewControll
     public CheckBox feederInfoSymmetryCheckBox;
 
     @FXML
+    public CheckBox unifyVlColorsCheckBox;
+
+    @FXML
     public Spinner<Double> spaceForFeederInfosSpinner;
 
     @FXML
@@ -241,7 +244,7 @@ public class SingleLineDiagramViewController extends AbstractDiagramViewControll
                 busesLegendAddedCheckBox.selectedProperty(),
                 feederInfoSymmetryCheckBox.selectedProperty(),
                 avoidSVGComponentsDuplicationCheckBox.selectedProperty(),
-                feederInfosOuterMarginSpinner.getValueFactory().valueProperty(),
+                unifyVlColorsCheckBox.selectedProperty(), feederInfosOuterMarginSpinner.getValueFactory().valueProperty(),
                 feederInfosIntraMarginSpinner.getValueFactory().valueProperty()
         );
 

@@ -122,7 +122,7 @@ public class SingleLineDiagramModel extends DiagramModel {
                                   BooleanProperty busesLegendAdded,
                                   BooleanProperty feederInfoSymmetry,
                                   BooleanProperty avoidSVGComponentsDuplication,
-                                  Property<Double> feederInfosOuterMargin,
+                                  BooleanProperty unifyVlColors, Property<Double> feederInfosOuterMargin,
                                   Property<Double> feederInfosIntraMargin
     ) {
         // Update providers observable lists
@@ -173,8 +173,9 @@ public class SingleLineDiagramModel extends DiagramModel {
                 angleLabel,
                 busesLegendAdded,
                 feederInfoSymmetry,
-                feederInfosOuterMargin,
-                feederInfosIntraMargin);
+                unifyVlColors, feederInfosOuterMargin,
+                feederInfosIntraMargin
+        );
     }
 
     public void initProviders() {

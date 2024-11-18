@@ -191,6 +191,7 @@
                         </Spinner>
                         <CheckBox fx:id="busesLegendAddedCheckBox" text="Add nodes infos"/>
                         <CheckBox fx:id="feederInfoSymmetryCheckBox" text="Feeder info symmetry"/>
+                        <CheckBox fx:id="unifyVlColorsCheckBox" text="Unify voltage level colors"/>
                         <CheckBox fx:id="avoidSVGComponentsDuplicationCheckBox" text="Avoid SVG components duplication"/>
                         <Label text="Feeder infos outer margin:"/>
                         <Spinner fx:id="feederInfosOuterMarginSpinner" editable="true">
