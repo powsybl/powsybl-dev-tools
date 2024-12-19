@@ -17,6 +17,7 @@ function displayInfo() {
     echo "Entsoe: $ENTSOE_VERSION (branch $ENTSOE_BRANCH)"
     echo "Open RAO: $OPENRAO_VERSION (branch $OPENRAO_BRANCH)"
     echo "Dynawo: $DYNAWO_VERSION (branch $DYNAWO_BRANCH)"
+    echo "Dependencies: $DEPENDENCIES_VERSION (branch $DEPENDENCIES_BRANCH)"
     echo
     echo
     echo "Maven parameters"
@@ -28,13 +29,14 @@ function displayInfo() {
 function usage() {
     echo "Usage: $0 <build_from>"
     echo "  with <build_from> in:"
-    echo "    - \"CORE\":    build all repos;"
-    echo "    - \"OLF\":     build OFL, Diagram, Entsoe, Open-RAO and Dynawo;"
-    echo "    - \"DIAGRAM\": build      Diagram, Entsoe, Open-RAO and Dynawo;"
-    echo "    - \"ENTSOE\":  build               Entsoe, Open-RAO and Dynawo;"
-    echo "    - \"OPENRAO\": build                       Open-RAO and Dynawo;"
-    echo "    - \"DYNAWO\":  build                                    Dynawo;"
-    echo "    - \"NONE\":    don't build anything (but retrieve the missing repos"
+    echo "    - \"CORE\":          build all repos;"
+    echo "    - \"OLF\":           build OFL, Diagram, Entsoe, Open-RAO, Dynawo and Dependencies;"
+    echo "    - \"DIAGRAM\":       build      Diagram, Entsoe, Open-RAO, Dynawo and Dependencies;"
+    echo "    - \"ENTSOE\":        build               Entsoe, Open-RAO, Dynawo and Dependencies;"
+    echo "    - \"OPENRAO\":       build                       Open-RAO, Dynawo and Dependencies;"
+    echo "    - \"DYNAWO\":        build                                 Dynawo and Dependencies;"
+    echo "    - \"DEPENDENCIES\":  build                                            Dependencies;"
+    echo "    - \"NONE\":          don't build anything (but retrieve the missing repos)"
 }
 
 function success() {
@@ -76,6 +78,10 @@ case $1 in
     START_FROM=5
     ;;
 
+  DEPENDENCIES)
+    START_FROM=6
+    ;;
+
   NONE)
     START_FROM=99
     ;;
@@ -95,6 +101,7 @@ esac
 # - 3: Entsoe
 # - 4: Open-RAO
 # - 5: Dynawo
+# - 6: Dependencies
 # - Greater: Won't build anything
 #START_FROM=99
 #START_FROM=0
@@ -195,6 +202,25 @@ DYNAWO_BRANCH=$(git rev-parse --abbrev-ref HEAD)
 cd ..
 
 
+# == powsybl-dependencies ==
+REPO=powsybl-dependencies
+echo "- $REPO"
+if [ ! -e $REPO ]; then
+  SNAPSHOT_BRANCH=$($SCRIPTS_PATH/check_snapshot_branch.sh "https://github.com/powsybl/$REPO.git" "$CORE_VERSION")
+  git clone "$CLONE_OPT" -b "$SNAPSHOT_BRANCH" "https://github.com/powsybl/$REPO.git"
+fi
+cd $REPO
+mvn versions:set-property -Dproperty=powsybl-core.version -DnewVersion="$CORE_VERSION" $SET_PROPERTY_OPT
+mvn versions:set-property -Dproperty=powsybl-open-loadflow.version -DnewVersion="$LOADFLOW_VERSION" $SET_PROPERTY_OPT
+mvn versions:set-property -Dproperty=powsybl-diagram.version -DnewVersion="$DIAGRAM_VERSION" $SET_PROPERTY_OPT
+mvn versions:set-property -Dproperty=powsybl-dynawo.version -DnewVersion="$DYNAWO_VERSION" $SET_PROPERTY_OPT
+mvn versions:set-property -Dproperty=powsybl-entsoe.version -DnewVersion="$ENTSOE_VERSION" $SET_PROPERTY_OPT
+mvn versions:set-property -Dproperty=powsybl-open-rao.version -DnewVersion="$OPENRAO_VERSION" $SET_PROPERTY_OPT
+DEPENDENCIES_VERSION=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)
+DEPENDENCIES_BRANCH=$(git rev-parse --abbrev-ref HEAD)
+cd ..
+
+
 if [ $START_FROM -eq 99 ]
 then
     success
@@ -259,6 +285,16 @@ then
   fi
   cd ..
 fi
+if [ $START_FROM -lt 7 ]
+then
+  cd powsybl-dependencies
+  mvn -batch-mode --no-transfer-progress clean install
+  if [[ "$?" -ne 0 ]] ; then
+    exit 1
+  fi
+  cd ..
+fi
+
 
 success
 
