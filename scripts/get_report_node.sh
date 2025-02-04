@@ -1,12 +1,10 @@
 #!/bin/bash
 
-# Steps left:
-# - Apply that to any repository with a recursive path
-
+path="$1"
 function getReportNode() {
   echo
   echo
-  grep --color='auto' -R "newReportNode().withMessageTemplate" --exclude="*Test*" --exclude="*Reports.java" /.
+  grep --color='auto' -R "newReportNode().withMessageTemplate" --exclude="*Test*" --exclude="*Reports.java" "$path"
   echo
 }
 
