@@ -1,0 +1,22 @@
+      1 busBreaker =  Test on bus/breaker network
+      1 CGMESConversion =  Importing CGMES file(s)
+      1 CGMESTriplestore =  Reading CGMES Triplestore
+      1 extensionsNotFound =  Not found extensions
+      1 fixUcteLines =  Fix UCTE lines
+      1 fixUcteNodes =  Fix UCTE nodes
+      1 fixUcteRegulations =  Fix UCTE regulations
+      1 fixUcteTransformer =  Fix UCTE transformers
+      1 importedExtensions =  Imported extensions
+      1 key2 =  message2
+      1 key3 =  message3
+      2 key =  defaultMessage
+      1 MockShortCircuit =  Running mock short circuit
+      1 nodeBreaker =  Test on node/breaker network
+      1 novalueReport =  No value report
+      1 reportKey =  message
+      1 UcteReading =  Reading UCTE network file
+      1 UnsupportedTTBlock =  TT block not supported
+      1 validationWarnings =  Validation warnings
+      4 withoutThrowException =  throwException = false
+      4 withThrowException =  throwException = true
+      1 xiidmImportDone =  XIIDM import done
