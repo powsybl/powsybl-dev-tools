@@ -2,16 +2,16 @@
 
 path="$1"
 function getMessageTemplates() {
-  echo
-  echo
-  grep -R "newReportNode().withMessageTemplate" "$path" | awk -F '"' '{print $2, $3, $4}' | sort -g | uniq -c | sed "s/,/=/g" > message_templates.txt
-  echo
+  grep -R "\\.withMessageTemplate" --exclude="*Test*" --exclude="*.class" "$path" | awk -F'"' '{sub(/[ \t]+$/, "", $2); sub(/[ \t]+$/, "", $3); print $2, $3, $4}' | sort -g | uniq -u | sed "s/,/=/g" > dictionary.properties
+  echo "==== Duplicated lines ===="
+  grep -R "\\.withMessageTemplate" --exclude="*Test*" --exclude="*.class" "$path" | awk -F'"' '{sub(/[ \t]+$/, "", $2); sub(/[ \t]+$/, "", $3); print $2, $3, $4}' | sort -g | uniq -d -c | sed "s/,/=/g"
+  echo "==== End ===="
+  chmod u+x dictionary.properties
 }
 
 function main() {
-  echo
   getMessageTemplates
-  echo "INFO : message_templates.txt generated successfully"
+  echo "INFO : dictionary.properties generated successfully."
 }
 
 main
