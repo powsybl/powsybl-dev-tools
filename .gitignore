@@ -19,4 +19,4 @@ org.eclipse.jdt.groovy.core.prefs
 .vscode
 
 # Text Files
-dictionary.properties
+**/dictionary.properties
