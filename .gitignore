@@ -17,3 +17,6 @@ org.eclipse.jdt.groovy.core.prefs
 
 # VS Code
 .vscode
+
+# Text Files
+**/dictionary.properties
