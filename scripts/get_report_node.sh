@@ -1,7 +1,6 @@
 #!/bin/bash
 
 path="$1"
-chmod u+x get_report_node.sh
 
 function getReportNode() {
   grep --color='auto' -R "\\.withMessageTemplate" --include="*.java" --exclude="*Test*" --exclude="*Reports.java" "$path"

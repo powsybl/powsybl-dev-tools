@@ -1,7 +1,6 @@
 #!/bin/bash
 
 path="$1"
-chmod u+x get_message_templates.sh
 
 function getMessageTemplates() {
   grep -h -A 1 -R "\\.withMessageTemplate" --include="*.java" --exclude="*Test*" "$path" | \
