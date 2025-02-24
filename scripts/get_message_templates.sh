@@ -1,5 +1,10 @@
 #!/bin/bash
 
+if [ "$#" -ne 1 ]; then
+    echo "Usage: $0 <directory>"
+    exit -1
+fi
+
 path="$1"
 
 function getMessageTemplates() {
@@ -12,8 +17,8 @@ function getMessageTemplates() {
   awk 'NF {print $1}' temp.properties | sort -g | uniq -d -c
   echo
   echo "==== Potential errors - Please check those lines ===="
-  grep "\\\\" dictionary.properties
-  grep -v "=" dictionary.properties | grep -vE "^   $"
+  grep "\\\\" temp.properties
+  grep -v "=" temp.properties | grep -vE "^   $"
   echo
   echo "==== End ===="
   sort -u -t= -k1,1 temp.properties > dictionary.properties ; rm temp.properties
