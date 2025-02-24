@@ -2,7 +2,7 @@
 
 path="$1"
 function getReportNode() {
-  grep --color='auto' -R "\\.withMessageTemplate" --exclude="*Test*" --exclude="*Reports.java" "$path"
+  grep --color='auto' -R "\\.withMessageTemplate" --include="*.java" --exclude="*Test*" --exclude="*Reports.java" "$path"
 }
 
 function main() {
