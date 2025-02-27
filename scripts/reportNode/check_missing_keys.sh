@@ -13,10 +13,10 @@ function getReportNode() {
      pcregrep -M "\.withLocaleMessageTemplate\((.|\n)*?\)" | \
      awk '{ if (prev) $0 = prev " " $0; if ($0 ~ /[,+]$/) { prev = $0; next } prev = ""; print $0 } END { if (prev) print prev }' | \
      awk -F'"' '{sub(/[ \t]+$/, "", $2); print $2}' | \
-     sort -g > /tmp/found_keys
+     sort -g | uniq > /tmp/found_keys
 
-     diff "$dictionary" /tmp/found_keys | grep -E "^>" | cut -c 3-
-
+     sed 's/ =.*$//' $dictionary | uniq > /tmp/dictionary_keys
+     diff /tmp/dictionary_keys /tmp/found_keys | grep -E "^>" | cut -c 3-
 }
 
 function main() {
@@ -24,6 +24,7 @@ function main() {
   getReportNode
   echo "==== End ===="
   rm /tmp/found_keys
+  rm /tmp/dictionary_keys
 }
 
 main
