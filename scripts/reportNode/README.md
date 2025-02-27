@@ -11,7 +11,7 @@ script: `check_missing_keys.sh`
 use: `check_missing_keys.sh <path to folder> <path to a dictionary>`  
 example: `check_missing_keys.sh powsybl-core dictionary.properties`
 
-The script compare the given dictionary keys with the `ReportNode` keys detected within the given folder. Then dictionary missing keys are displayed.
+The script compares the given dictionary keys with the `ReportNode` keys detected within the given folder. Then dictionary missing keys are displayed.
 
 It retrieves the `ReportNode` keys within the folder by scanning its `.java` files except for the filenames matching "Test".
 
