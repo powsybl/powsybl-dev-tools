@@ -21,7 +21,7 @@ script: `get_report_node.sh`
 use: `get_report_node.sh <path to folder>`  
 example: `get_report_node.sh powsybl-core`
 
-As the good practice is to put each repository `ReportNode` definition in one Java class ending by `Reports.java`, the goal here is to list the repository Java files containing `ReportNode` definitions.
+As the good practice is to put each repository `ReportNode` definition in one Java class ending by `Reports.java`. The goal here is to list the repository Java files containing `ReportNode` definitions which are not in a `XxxReports.java` file.
 
 It retrieves the `.java` files within the given folder except for the filenames:
 - matching "Test"
