@@ -112,7 +112,7 @@ CLONE_OPT="--filter=blob:none"
 #SET_PROPERTY_OPT="-DgenerateBackupPoms=false -batch-mode --no-transfer-progress"
 SET_PROPERTY_OPT="-DgenerateBackupPoms=false -q"
 
-SCRIPTS_PATH=$(pwd)
+SCRIPTS_PATH=$(pwd)/$(dirname "$0")
 mkdir -p $BUILD_DIR
 cd $BUILD_DIR
 
