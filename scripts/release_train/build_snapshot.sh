@@ -6,6 +6,8 @@ CLONE_OPT="--filter=blob:none"
 SET_PROPERTY_OPT="-DgenerateBackupPoms=false -q"
 HELP_EVAL_OPT="-q -DforceStdout"
 
+TEST_OPT=""
+
 MVN="mvn -Dmaven.repo.local=$BUILD_DIR/m2_repository"
 
 
@@ -35,7 +37,7 @@ function displayInfo() {
 }
 
 function usage() {
-    echo "Usage: $0 <build_from>"
+    echo "Usage: $0 <build_from> [OPTIONS]"
     echo "  with <build_from> in:"
     echo "    - \"CORE\":          build all repos;"
     echo "    - \"OLF\":           build OFL, Diagram, Entsoe, Open-RAO, Dynawo and Dependencies;"
@@ -45,6 +47,8 @@ function usage() {
     echo "    - \"DYNAWO\":        build                                 Dynawo and Dependencies;"
     echo "    - \"DEPENDENCIES\":  build                                            Dependencies;"
     echo "    - \"NONE\":          don't build anything (but retrieve the missing repos)"
+    echo "  Possible options:"
+    echo "    * --skip-tests:      skip tests"
 }
 
 function success() {
@@ -53,6 +57,27 @@ function success() {
     echo "=== End ==="
     displayInfo
 }
+
+
+# Handle non-positional options
+POSITIONAL=()
+while [[ $# -gt 0 ]]
+do
+key="$1"
+
+case $key in
+    --skip-tests)
+    TEST_OPT=$TEST_OPT" -DskipTests"
+    echo "-> skipping tests" 
+    shift # past argument
+    ;;
+    *)    # unknown option
+    POSITIONAL+=("$1") # save it in an array for later
+    shift # past argument
+    ;;
+esac
+done
+set -- "${POSITIONAL[@]}" # restore positional parameters
 
 
 if [ "$#" -ne 1 ]; then
@@ -258,7 +283,7 @@ fi
 if [ $START_FROM -lt 2 ]
 then
   cd powsybl-open-loadflow
-  $MVN -batch-mode --no-transfer-progress clean install
+  $MVN -batch-mode --no-transfer-progress clean install $TEST_OPT
   if [[ "$?" -ne 0 ]] ; then
     exit 1
   fi
@@ -267,7 +292,7 @@ fi
 if [ $START_FROM -lt 3 ]
 then
   cd powsybl-diagram
-  $MVN -batch-mode --no-transfer-progress clean install
+  $MVN -batch-mode --no-transfer-progress clean install $TEST_OPT
   if [[ "$?" -ne 0 ]] ; then
     exit 1
   fi
@@ -276,7 +301,7 @@ fi
 if [ $START_FROM -lt 4 ]
 then
   cd powsybl-entsoe
-  $MVN -batch-mode --no-transfer-progress clean install
+  $MVN -batch-mode --no-transfer-progress clean install $TEST_OPT
   if [[ "$?" -ne 0 ]] ; then
     exit 1
   fi
@@ -285,7 +310,7 @@ fi
 if [ $START_FROM -lt 5 ]
 then
   cd powsybl-open-rao
-  $MVN -batch-mode --no-transfer-progress clean install
+  $MVN -batch-mode --no-transfer-progress clean install $TEST_OPT
   if [[ "$?" -ne 0 ]] ; then
     exit 1
   fi
@@ -294,7 +319,7 @@ fi
 if [ $START_FROM -lt 6 ]
 then
   cd powsybl-dynawo
-  $MVN -batch-mode --no-transfer-progress clean install
+  $MVN -batch-mode --no-transfer-progress clean install $TEST_OPT
   if [[ "$?" -ne 0 ]] ; then
     exit 1
   fi
@@ -303,7 +328,7 @@ fi
 if [ $START_FROM -lt 7 ]
 then
   cd powsybl-dependencies
-  $MVN -batch-mode --no-transfer-progress clean install
+  $MVN -batch-mode --no-transfer-progress clean install $TEST_OPT
   if [[ "$?" -ne 0 ]] ; then
     exit 1
   fi
