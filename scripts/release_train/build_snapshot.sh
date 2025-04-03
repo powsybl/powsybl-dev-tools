@@ -1,6 +1,14 @@
 #!/bin/bash
 BUILD_DIR=/tmp/snapshot
 
+CLONE_OPT="--filter=blob:none"
+#SET_PROPERTY_OPT="-DgenerateBackupPoms=false -batch-mode --no-transfer-progress"
+SET_PROPERTY_OPT="-DgenerateBackupPoms=false -q"
+HELP_EVAL_OPT="-q -DforceStdout"
+
+MVN="mvn -Dmaven.repo.local=$BUILD_DIR/m2_repository"
+
+
 function pause() {
     read -s -n 1 -p "Press any key to continue..."
     echo
@@ -107,13 +115,8 @@ esac
 #START_FROM=0
 
 
-
-CLONE_OPT="--filter=blob:none"
-#SET_PROPERTY_OPT="-DgenerateBackupPoms=false -batch-mode --no-transfer-progress"
-SET_PROPERTY_OPT="-DgenerateBackupPoms=false -q"
-
 SCRIPTS_PATH=$(pwd)/$(dirname "$0")
-mkdir -p $BUILD_DIR
+mkdir -p $BUILD_DIR/.versions
 cd $BUILD_DIR
 
 echo
@@ -125,7 +128,7 @@ if [ ! -e powsybl-core ]; then
   git clone "$CLONE_OPT" https://github.com/powsybl/powsybl-core.git
 fi
 cd powsybl-core
-CORE_VERSION=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)
+CORE_VERSION=$($MVN help:evaluate -Dexpression=project.version $HELP_EVAL_OPT)
 cd ..
 
 
@@ -137,9 +140,10 @@ if [ ! -e $REPO ]; then
   git clone "$CLONE_OPT" -b "$SNAPSHOT_BRANCH" "https://github.com/powsybl/$REPO.git"
 fi
 cd $REPO
-mvn versions:set-property -Dproperty=powsybl-core.version -DnewVersion="$CORE_VERSION" $SET_PROPERTY_OPT
-LOADFLOW_VERSION=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)
+git restore pom.xml
+LOADFLOW_VERSION=$($MVN help:evaluate -Dexpression=project.version $HELP_EVAL_OPT)
 LOADFLOW_BRANCH=$(git rev-parse --abbrev-ref HEAD)
+$MVN versions:set-property -Dproperty=powsybl-core.version -DnewVersion="$CORE_VERSION" $SET_PROPERTY_OPT
 cd ..
 
 
@@ -151,9 +155,10 @@ if [ ! -e $REPO ]; then
   git clone "$CLONE_OPT" -b "$SNAPSHOT_BRANCH" "https://github.com/powsybl/$REPO.git"
 fi
 cd $REPO
-mvn versions:set-property -Dproperty=powsybl-core.version -DnewVersion="$CORE_VERSION" $SET_PROPERTY_OPT
-DIAGRAM_VERSION=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)
+git restore pom.xml
+DIAGRAM_VERSION=$($MVN help:evaluate -Dexpression=project.version $HELP_EVAL_OPT)
 DIAGRAM_BRANCH=$(git rev-parse --abbrev-ref HEAD)
+$MVN versions:set-property -Dproperty=powsybl-core.version -DnewVersion="$CORE_VERSION" $SET_PROPERTY_OPT
 cd ..
 
 
@@ -164,11 +169,14 @@ if [ ! -e $REPO ]; then
   SNAPSHOT_BRANCH=$($SCRIPTS_PATH/check_snapshot_branch.sh "https://github.com/powsybl/$REPO.git" "$CORE_VERSION")
   git clone "$CLONE_OPT" -b "$SNAPSHOT_BRANCH" "https://github.com/powsybl/$REPO.git"
 fi
+echo -e "\
+   powsyblcore.version=$CORE_VERSION\n\
+   powsyblopenloadflow.version=$LOADFLOW_VERSION" > .versions/entsoe
 cd $REPO
-mvn versions:set-property -Dproperty=powsyblcore.version -DnewVersion="$CORE_VERSION" $SET_PROPERTY_OPT
-mvn versions:set-property -Dproperty=powsyblopenloadflow.version -DnewVersion="$LOADFLOW_VERSION" $SET_PROPERTY_OPT
-ENTSOE_VERSION=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)
+git restore pom.xml
+ENTSOE_VERSION=$($MVN help:evaluate -Dexpression=project.version $HELP_EVAL_OPT)
 ENTSOE_BRANCH=$(git rev-parse --abbrev-ref HEAD)
+$MVN versions:set-property -DpropertiesVersionsFile="../.versions/entsoe" $SET_PROPERTY_OPT
 cd ..
 
 
@@ -179,12 +187,15 @@ if [ ! -e $REPO ]; then
   SNAPSHOT_BRANCH=$($SCRIPTS_PATH/check_snapshot_branch.sh "https://github.com/powsybl/$REPO.git" "$CORE_VERSION")
   git clone "$CLONE_OPT" -b "$SNAPSHOT_BRANCH" "https://github.com/powsybl/$REPO.git"
 fi
+echo -e "\
+   powsybl.core.version=$CORE_VERSION\n\
+   powsybl.entsoe.version=$ENTSOE_VERSION\n\
+   powsybl.openloadflow.version=$LOADFLOW_VERSION" > .versions/open-rao
 cd $REPO
-mvn versions:set-property -Dproperty=powsybl.core.version -DnewVersion="$CORE_VERSION" $SET_PROPERTY_OPT
-mvn versions:set-property -Dproperty=powsybl.entsoe.version -DnewVersion="$ENTSOE_VERSION" $SET_PROPERTY_OPT
-mvn versions:set-property -Dproperty=powsybl.openloadflow.version -DnewVersion="$LOADFLOW_VERSION" $SET_PROPERTY_OPT
-OPENRAO_VERSION=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)
+git restore pom.xml
+OPENRAO_VERSION=$($MVN help:evaluate -Dexpression=project.version $HELP_EVAL_OPT)
 OPENRAO_BRANCH=$(git rev-parse --abbrev-ref HEAD)
+$MVN versions:set-property -DpropertiesVersionsFile="../.versions/open-rao" $SET_PROPERTY_OPT
 cd ..
 
 
@@ -196,9 +207,10 @@ if [ ! -e $REPO ]; then
   git clone "$CLONE_OPT" -b "$SNAPSHOT_BRANCH" "https://github.com/powsybl/$REPO.git"
 fi
 cd $REPO
-mvn versions:set-property -Dproperty=powsybl-core.version -DnewVersion="$CORE_VERSION" $SET_PROPERTY_OPT
-DYNAWO_VERSION=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)
+git restore pom.xml
+DYNAWO_VERSION=$($MVN help:evaluate -Dexpression=project.version $HELP_EVAL_OPT)
 DYNAWO_BRANCH=$(git rev-parse --abbrev-ref HEAD)
+$MVN versions:set-property -Dproperty=powsybl-core.version -DnewVersion="$CORE_VERSION" $SET_PROPERTY_OPT
 cd ..
 
 
@@ -209,15 +221,18 @@ if [ ! -e $REPO ]; then
   SNAPSHOT_BRANCH=$($SCRIPTS_PATH/check_snapshot_branch.sh "https://github.com/powsybl/$REPO.git" "$CORE_VERSION")
   git clone "$CLONE_OPT" -b "$SNAPSHOT_BRANCH" "https://github.com/powsybl/$REPO.git"
 fi
+echo -e "\
+   powsybl-core.version=$CORE_VERSION\n\
+   powsybl-open-loadflow.version=$LOADFLOW_VERSION\n\
+   powsybl-diagram.version=$DIAGRAM_VERSION\n\
+   powsybl-dynawo.version=$DYNAWO_VERSION\n\
+   powsybl-entsoe.version=$ENTSOE_VERSION\n\
+   powsybl-open-rao.version=$OPENRAO_VERSION" > .versions/dependencies
 cd $REPO
-mvn versions:set-property -Dproperty=powsybl-core.version -DnewVersion="$CORE_VERSION" $SET_PROPERTY_OPT
-mvn versions:set-property -Dproperty=powsybl-open-loadflow.version -DnewVersion="$LOADFLOW_VERSION" $SET_PROPERTY_OPT
-mvn versions:set-property -Dproperty=powsybl-diagram.version -DnewVersion="$DIAGRAM_VERSION" $SET_PROPERTY_OPT
-mvn versions:set-property -Dproperty=powsybl-dynawo.version -DnewVersion="$DYNAWO_VERSION" $SET_PROPERTY_OPT
-mvn versions:set-property -Dproperty=powsybl-entsoe.version -DnewVersion="$ENTSOE_VERSION" $SET_PROPERTY_OPT
-mvn versions:set-property -Dproperty=powsybl-open-rao.version -DnewVersion="$OPENRAO_VERSION" $SET_PROPERTY_OPT
-DEPENDENCIES_VERSION=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)
+git restore pom.xml
+DEPENDENCIES_VERSION=$($MVN help:evaluate -Dexpression=project.version $HELP_EVAL_OPT)
 DEPENDENCIES_BRANCH=$(git rev-parse --abbrev-ref HEAD)
+$MVN versions:set-property -DpropertiesVersionsFile="../.versions/dependencies" $SET_PROPERTY_OPT
 cd ..
 
 
@@ -234,7 +249,7 @@ pause
 if [ $START_FROM -lt 1 ]
 then
   cd powsybl-core
-  mvn -batch-mode --no-transfer-progress clean install -DskipTests
+  $MVN -batch-mode --no-transfer-progress clean install -DskipTests
   if [[ "$?" -ne 0 ]] ; then
     exit 1
   fi
@@ -243,7 +258,7 @@ fi
 if [ $START_FROM -lt 2 ]
 then
   cd powsybl-open-loadflow
-  mvn -batch-mode --no-transfer-progress clean install
+  $MVN -batch-mode --no-transfer-progress clean install
   if [[ "$?" -ne 0 ]] ; then
     exit 1
   fi
@@ -252,7 +267,7 @@ fi
 if [ $START_FROM -lt 3 ]
 then
   cd powsybl-diagram
-  mvn -batch-mode --no-transfer-progress clean install
+  $MVN -batch-mode --no-transfer-progress clean install
   if [[ "$?" -ne 0 ]] ; then
     exit 1
   fi
@@ -261,7 +276,7 @@ fi
 if [ $START_FROM -lt 4 ]
 then
   cd powsybl-entsoe
-  mvn -batch-mode --no-transfer-progress clean install
+  $MVN -batch-mode --no-transfer-progress clean install
   if [[ "$?" -ne 0 ]] ; then
     exit 1
   fi
@@ -270,7 +285,7 @@ fi
 if [ $START_FROM -lt 5 ]
 then
   cd powsybl-open-rao
-  mvn -batch-mode --no-transfer-progress clean install
+  $MVN -batch-mode --no-transfer-progress clean install
   if [[ "$?" -ne 0 ]] ; then
     exit 1
   fi
@@ -279,7 +294,7 @@ fi
 if [ $START_FROM -lt 6 ]
 then
   cd powsybl-dynawo
-  mvn -batch-mode --no-transfer-progress clean install
+  $MVN -batch-mode --no-transfer-progress clean install
   if [[ "$?" -ne 0 ]] ; then
     exit 1
   fi
@@ -288,7 +303,7 @@ fi
 if [ $START_FROM -lt 7 ]
 then
   cd powsybl-dependencies
-  mvn -batch-mode --no-transfer-progress clean install
+  $MVN -batch-mode --no-transfer-progress clean install
   if [[ "$?" -ne 0 ]] ; then
     exit 1
   fi
