@@ -3,7 +3,7 @@
 repo=$1
 core_version=$2
 
-SNAPSHOT_BRANCH=$(git ls-remote --heads "$repo" | grep -E "refs/heads/$(echo $core_version | grep -q SNAPSHOT && echo "$core_version" || echo "$core_version-SNAPSHOT")" | sed 's/.*refs\/heads\///')
+SNAPSHOT_BRANCH=$(git ls-remote --heads "$repo" | grep -E "refs/heads/ci/core-$(echo $core_version | grep -q SNAPSHOT && echo "$core_version" || echo "$core_version-SNAPSHOT")" | sed 's/.*refs\/heads\///')
 if [ -n "$SNAPSHOT_BRANCH" ]; then
     # SNAPSHOT version exists
     echo "$SNAPSHOT_BRANCH"
