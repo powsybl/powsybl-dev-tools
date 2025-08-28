@@ -22,7 +22,7 @@ function displayInfo() {
     echo
     echo "Used versions"
     echo "============="
-    echo "Core: $CORE_VERSION (branch main)"
+    echo "Core: $CORE_VERSION (branch $CORE_BRANCH)"
     echo "OLF: $LOADFLOW_VERSION (branch $LOADFLOW_BRANCH)"
     echo "Diagram: $DIAGRAM_VERSION (branch $DIAGRAM_BRANCH)"
     echo "Entsoe: $ENTSOE_VERSION (branch $ENTSOE_BRANCH)"
@@ -161,6 +161,7 @@ if [ ! -e powsybl-core ]; then
 fi
 cd powsybl-core
 CORE_VERSION=$($MVN help:evaluate -Dexpression=project.version $HELP_EVAL_OPT)
+CORE_BRANCH=$(git rev-parse --abbrev-ref HEAD)
 cd ..
 
 
