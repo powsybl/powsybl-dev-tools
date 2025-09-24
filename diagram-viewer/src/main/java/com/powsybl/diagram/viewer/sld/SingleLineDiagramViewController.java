@@ -16,7 +16,7 @@ import com.powsybl.sld.cgmes.layout.CgmesVoltageLevelLayoutFactory;
 import com.powsybl.sld.layout.*;
 import com.powsybl.sld.layout.position.clustering.PositionByClustering;
 import com.powsybl.sld.layout.position.predefined.PositionPredefined;
-import com.powsybl.sld.library.ComponentLibrary;
+import com.powsybl.sld.library.SldComponentLibrary;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.value.ChangeListener;
@@ -40,7 +40,7 @@ public class SingleLineDiagramViewController extends AbstractDiagramViewControll
     private static final Logger LOGGER = LoggerFactory.getLogger(SingleLineDiagramViewController.class);
 
     @FXML
-    public ComboBox<ComponentLibrary> componentLibraryComboBox;
+    public ComboBox<SldComponentLibrary> componentLibraryComboBox;
 
     @FXML
     public CheckBox basicStyleProviderCheckBox;
