@@ -8,7 +8,7 @@
 package com.powsybl.diagram.viewer.sld;
 
 import com.powsybl.sld.layout.*;
-import com.powsybl.sld.library.ComponentTypeName;
+import com.powsybl.sld.library.SldComponentTypeName;
 import javafx.beans.property.*;
 import javafx.beans.value.ChangeListener;
 
@@ -88,7 +88,7 @@ public class LayoutParametersBean {
         externCellHeight.setValue(defaultLayoutParameters.getExternCellHeight());
         internCellHeight.setValue(defaultLayoutParameters.getInternCellHeight());
         stackHeight.setValue(defaultLayoutParameters.getStackHeight());
-        disconnectorsOnBus.setValue(defaultLayoutParameters.getComponentsOnBusbars().equals(List.of(ComponentTypeName.DISCONNECTOR)));
+        disconnectorsOnBus.setValue(defaultLayoutParameters.getComponentsOnBusbars().equals(List.of(SldComponentTypeName.DISCONNECTOR)));
         adaptCellHeightToContent.setValue(defaultLayoutParameters.isAdaptCellHeightToContent());
         minSpaceBetweenComponents.setValue(defaultLayoutParameters.getMinSpaceBetweenComponents());
         minimumExternCellHeight.setValue(defaultLayoutParameters.getMinExternCellHeight());
@@ -134,7 +134,7 @@ public class LayoutParametersBean {
                 .setExternCellHeight(externCellHeight.get())
                 .setInternCellHeight(internCellHeight.get())
                 .setStackHeight(stackHeight.get())
-                .setComponentsOnBusbars(disconnectorsOnBus.get() ? List.of(ComponentTypeName.DISCONNECTOR) : Collections.emptyList())
+                .setComponentsOnBusbars(disconnectorsOnBus.get() ? List.of(SldComponentTypeName.DISCONNECTOR) : Collections.emptyList())
                 .setCgmesScaleFactor(scaleFactor.get())
                 .setAdaptCellHeightToContent(adaptCellHeightToContent.get())
                 .setMinSpaceBetweenComponents(minSpaceBetweenComponents.get())
