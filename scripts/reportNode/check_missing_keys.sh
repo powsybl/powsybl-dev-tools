@@ -9,8 +9,8 @@ path="$1"
 dictionary="$2"
 
 function getReportNode() {
-  grep -h -A 1 -R "\\.withLocaleMessageTemplate(" --include="*.java" --exclude="*Test*" "$path" | \
-     pcregrep -M "\.withLocaleMessageTemplate\((.|\n)*?\)" | \
+  grep -h -A 1 -R "\\.withMessageTemplate(" --include="*.java" --exclude="*Test*" "$path" | \
+     pcregrep -M "\.withMessageTemplate\((.|\n)*?\)" | \
      awk '{ if (prev) $0 = prev " " $0; if ($0 ~ /[,+]$/) { prev = $0; next } prev = ""; print $0 } END { if (prev) print prev }' | \
      awk -F'"' '{sub(/[ \t]+$/, "", $2); print $2}' | \
      sort -g | uniq > /tmp/found_keys
