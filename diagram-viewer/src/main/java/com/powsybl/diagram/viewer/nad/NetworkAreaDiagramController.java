@@ -88,7 +88,7 @@ public class NetworkAreaDiagramController extends AbstractDiagramController {
 
     private static Predicate<VoltageLevel> getVoltageLevelFilter(Network network, NetworkAreaDiagramModel model, Container<?> container) {
         return switch (container.getContainerType()) {
-            case NETWORK -> VoltageLevelFilter.NO_FILTER;
+            case NETWORK -> null;
             case SUBSTATION -> VoltageLevelFilter.createVoltageLevelsDepthFilter(network, ((Substation) container).getVoltageLevelStream().map(VoltageLevel::getId).toList(), model.getDepth());
             case VOLTAGE_LEVEL -> VoltageLevelFilter.createVoltageLevelDepthFilter(network, container.getId(), model.getDepth());
         };
