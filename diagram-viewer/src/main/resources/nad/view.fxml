@@ -118,33 +118,52 @@
                         </VBox.margin>
                     </Separator>
                     <GridPane hgap="5" vgap="5">
-                        <Label style="-fx-font-weight: bold" text="SVG parameters:" GridPane.rowIndex="0"/>
-                        <CheckBox fx:id="edgeNameDisplayed" text="Display edge name" GridPane.rowIndex="1"/>
-                        <CheckBox fx:id="infoAlongEdge" text="Set Info Along Edge" selected="true" GridPane.rowIndex="2"/>
-                        <CheckBox fx:id="insertNameDesc" text="Insert desc elements" selected="true" GridPane.rowIndex="3"/>
-                        <CheckBox fx:id="substationDescriptionDisplayed" text="Display substation" GridPane.rowIndex="4"/>
-                        <CheckBox fx:id="busLegend" text="Bus legend" selected="true" GridPane.rowIndex="5"/>
-                        <CheckBox fx:id="vlDetails" text="Voltage level details" GridPane.rowIndex="6"/>
-
-                        <Separator GridPane.rowIndex="7">
+                        <Label style="-fx-font-weight: bold" text="Edge Informations:" GridPane.rowIndex="0"/>
+                        <Label text="External:" GridPane.rowIndex="1"/>
+                        <EnumChoiceBox enumType="com.powsybl.nad.svg.iidm.DefaultLabelProvider$EdgeInfoEnum"
+                                       fx:id="infoSideExternal" initialValue="ACTIVE_POWER" GridPane.rowIndex="2"/>
+                        <Label text="Side 1:" GridPane.rowIndex="3"/>
+                        <EnumChoiceBox enumType="com.powsybl.nad.svg.iidm.DefaultLabelProvider$EdgeInfoEnum"
+                                       fx:id="infoMiddleSide1" initialValue="EMPTY" GridPane.rowIndex="4"/>
+                        <Label text="Side 2:" GridPane.rowIndex="5"/>
+                        <EnumChoiceBox enumType="com.powsybl.nad.svg.iidm.DefaultLabelProvider$EdgeInfoEnum"
+                                       fx:id="infoMiddleSide2" initialValue="EMPTY" GridPane.rowIndex="6"/>
+                        <Label text="Internal:" GridPane.rowIndex="7"/>
+                        <EnumChoiceBox enumType="com.powsybl.nad.svg.iidm.DefaultLabelProvider$EdgeInfoEnum"
+                                       fx:id="infoSideInternal" initialValue="EMPTY" GridPane.rowIndex="8"/>
+                        <Separator GridPane.rowIndex="9">
                             <VBox.margin>
                                 <Insets topRightBottomLeft="5"/>
                             </VBox.margin>
                         </Separator>
-                        <CheckBox fx:id="widthHeightAdded" text="Add height and width" selected="true" GridPane.rowIndex="8"/>
-                        <Label text="Size constraint:" GridPane.rowIndex="9"/>
-                        <EnumChoiceBox enumType="com.powsybl.nad.svg.SvgParameters$SizeConstraint" fx:id="sizeConstraintChoice" initialValue="FIXED_SCALE" GridPane.rowIndex="10"/>
-                        <Spinner fx:id="fixedSizeSpinner" GridPane.rowIndex="11">
+                    </GridPane>
+                    <GridPane hgap="5" vgap="5">
+                        <Label style="-fx-font-weight: bold" text="SVG parameters:" GridPane.rowIndex="0"/>
+                        <CheckBox fx:id="infoAlongEdge" text="Set Info Along Edge" selected="true" GridPane.rowIndex="1"/>
+                        <CheckBox fx:id="insertNameDesc" text="Insert desc elements" selected="true" GridPane.rowIndex="2"/>
+                        <CheckBox fx:id="substationDescriptionDisplayed" text="Display substation" GridPane.rowIndex="3"/>
+                        <CheckBox fx:id="busLegend" text="Bus legend" selected="true" GridPane.rowIndex="4"/>
+                        <CheckBox fx:id="vlDetails" text="Voltage level details" GridPane.rowIndex="5"/>
+
+                        <Separator GridPane.rowIndex="6">
+                            <VBox.margin>
+                                <Insets topRightBottomLeft="5"/>
+                            </VBox.margin>
+                        </Separator>
+                        <CheckBox fx:id="widthHeightAdded" text="Add height and width" selected="true" GridPane.rowIndex="7"/>
+                        <Label text="Size constraint:" GridPane.rowIndex="8"/>
+                        <EnumChoiceBox enumType="com.powsybl.nad.svg.SvgParameters$SizeConstraint" fx:id="sizeConstraintChoice" initialValue="FIXED_SCALE" GridPane.rowIndex="9"/>
+                        <Spinner fx:id="fixedSizeSpinner" GridPane.rowIndex="10">
                             <valueFactory>
                                 <SpinnerValueFactory.IntegerSpinnerValueFactory min="1" max="2000" amountToStepBy="100" initialValue="400"/>
                             </valueFactory>
                         </Spinner>
-                        <Spinner fx:id="fixedScaleSpinner" GridPane.rowIndex="11">
+                        <Spinner fx:id="fixedScaleSpinner" GridPane.rowIndex="10">
                             <valueFactory>
                                 <SpinnerValueFactory.DoubleSpinnerValueFactory min="0" max="50" amountToStepBy=".01" initialValue="0.4"/>
                             </valueFactory>
                         </Spinner>
-                        <Separator GridPane.rowIndex="12">
+                        <Separator GridPane.rowIndex="11">
                             <VBox.margin>
                                 <Insets topRightBottomLeft="5"/>
                             </VBox.margin>
