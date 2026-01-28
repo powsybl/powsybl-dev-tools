@@ -40,7 +40,7 @@
         <javafx.version>21.0.8</javafx.version>
         <javafx-mvn-plugin.version>0.0.8</javafx-mvn-plugin.version>
         <slf4j-api.version>2.0.17</slf4j-api.version>
-        <powsybl.dependencies.version>2025.1.0</powsybl.dependencies.version>
+        <powsybl.dependencies.version>2025.2.0</powsybl.dependencies.version>
     </properties>
 
     <build>
