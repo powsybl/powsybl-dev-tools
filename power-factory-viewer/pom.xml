@@ -14,34 +14,18 @@
 
     <parent>
         <groupId>com.powsybl</groupId>
-        <artifactId>powsybl-parent</artifactId>
-        <version>24</version>
-        <relativePath/>
+        <artifactId>powsybl-dev-tools</artifactId>
+        <version>1.0.0-SNAPSHOT</version>
     </parent>
 
     <artifactId>powsybl-powerfactory-viewer</artifactId>
     <name>PowerFactory Viewer</name>
-    <version>1.0.0-SNAPSHOT</version>
-
-    <properties>
-        <java.version>21</java.version>
-
-        <javafx-maven-plugin.version>0.0.8</javafx-maven-plugin.version>
-
-        <controlsfx.version>11.1.2</controlsfx.version>
-        <javafx.version>21.0.8</javafx.version>
-        <slf4j.version>2.0.17</slf4j.version>
-
-        <powsybl-core.version>7.1.1</powsybl-core.version>
-        <powsybl-powerfactory-db-native.version>1.0.0-SNAPSHOT</powsybl-powerfactory-db-native.version>
-    </properties>
 
     <build>
         <plugins>
             <plugin>
                 <groupId>org.openjfx</groupId>
                 <artifactId>javafx-maven-plugin</artifactId>
-                <version>${javafx-maven-plugin.version}</version>
                 <configuration>
                     <mainClass>com.powsybl.powerfactory.viewer.PowerFactoryViewer</mainClass>
                 </configuration>
@@ -50,52 +34,48 @@
     </build>
 
     <dependencies>
-        <dependency>
-            <groupId>org.openjfx</groupId>
-            <artifactId>javafx-controls</artifactId>
-            <version>${javafx.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.controlsfx</groupId>
-            <artifactId>controlsfx</artifactId>
-            <version>${controlsfx.version}</version>
-        </dependency>
-
-        <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-api</artifactId>
-            <version>${slf4j.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-simple</artifactId>
-            <version>${slf4j.version}</version>
-        </dependency>
-
+        <!-- powsybl-core dependencies -->
         <dependency>
             <groupId>com.powsybl</groupId>
             <artifactId>powsybl-config-classic</artifactId>
-            <version>${powsybl-core.version}</version>
         </dependency>
         <dependency>
             <groupId>com.powsybl</groupId>
             <artifactId>powsybl-powerfactory-model</artifactId>
-            <version>${powsybl-core.version}</version>
         </dependency>
         <dependency>
             <groupId>com.powsybl</groupId>
             <artifactId>powsybl-powerfactory-db</artifactId>
-            <version>${powsybl-core.version}</version>
         </dependency>
         <dependency>
             <groupId>com.powsybl</groupId>
             <artifactId>powsybl-powerfactory-dgs</artifactId>
-            <version>${powsybl-core.version}</version>
         </dependency>
-<!--        <dependency>-->
-<!--            <groupId>com.powsybl</groupId>-->
-<!--            <artifactId>powsybl-powerfactory-db-native</artifactId>-->
-<!--            <version>${powsybl-powerfactory-db-native.version}</version>-->
-<!--        </dependency>-->
+
+        <!-- Optional PowSyBl dependency -->
+        <!--        <dependency>-->
+        <!--            <groupId>com.powsybl</groupId>-->
+        <!--            <artifactId>powsybl-powerfactory-db-native</artifactId>-->
+        <!--        </dependency>-->
+
+        <!-- JavaFX dependencies -->
+        <dependency>
+            <groupId>org.openjfx</groupId>
+            <artifactId>javafx-controls</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.controlsfx</groupId>
+            <artifactId>controlsfx</artifactId>
+        </dependency>
+
+        <!-- Logging dependencies -->
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-simple</artifactId>
+        </dependency>
     </dependencies>
 </project>

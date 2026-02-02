@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    Copyright (c) 2023, RTE (http://www.rte-france.com)
+    This Source Code Form is subject to the terms of the Mozilla Public
+    License, v. 2.0. If a copy of the MPL was not distributed with this
+    file, You can obtain one at http://mozilla.org/MPL/2.0/.
+
+-->
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>com.powsybl</groupId>
+        <artifactId>powsybl-parent</artifactId>
+        <version>24</version>
+        <relativePath/>
+    </parent>
+
+    <artifactId>powsybl-dev-tools</artifactId>
+    <name>Development Tools</name>
+    <version>1.0.0-SNAPSHOT</version>
+    <description>A set of development tools for Powsybl, including diagram viewer and debugging utilities</description>
+    <packaging>pom</packaging>
+    <url>https://www.powsybl.org</url>
+
+    <developers>
+        <developer>
+            <name>Florian DUPUY</name>
+            <email>florian.dupuy@rte-france.com</email>
+            <organization>RTE</organization>
+            <organizationUrl>https://www.rte-france.com</organizationUrl>
+        </developer>
+    </developers>
+
+    <modules>
+        <module>diagram-viewer</module>
+        <module>power-factory-viewer</module>
+    </modules>
+
+    <properties>
+        <java.version>21</java.version>
+
+        <!-- PowSyBl dependencies -->
+        <powsybl.dependencies.version>2025.3.1</powsybl.dependencies.version>
+
+        <!-- Optional PowSyBl dependency -->
+        <powsybl-powerfactory-db-native.version>1.0.0-SNAPSHOT</powsybl-powerfactory-db-native.version>
+
+        <!-- JavaFX dependencies -->
+        <controlsfx.version>11.1.2</controlsfx.version>
+        <javafx.version>21.0.8</javafx.version>
+        <javafx-mvn-plugin.version>0.0.8</javafx-mvn-plugin.version>
+    </properties>
+
+    <build>
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <groupId>org.openjfx</groupId>
+                    <artifactId>javafx-maven-plugin</artifactId>
+                    <version>${javafx-mvn-plugin.version}</version>
+                </plugin>
+            </plugins>
+        </pluginManagement>
+    </build>
+
+    <dependencyManagement>
+        <dependencies>
+            <!-- PowSyBl dependencies -->
+            <dependency>
+                <groupId>com.powsybl</groupId>
+                <artifactId>powsybl-dependencies</artifactId>
+                <version>${powsybl.dependencies.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+
+            <!-- Optional PowSyBl dependency -->
+            <!--        <dependency>-->
+            <!--            <groupId>com.powsybl</groupId>-->
+            <!--            <artifactId>powsybl-powerfactory-db-native</artifactId>-->
+            <!--            <version>${powsybl-powerfactory-db-native.version}</version>-->
+            <!--        </dependency>-->
+
+            <!-- JavaFX dependencies -->
+            <dependency>
+                <groupId>org.controlsfx</groupId>
+                <artifactId>controlsfx</artifactId>
+                <version>${controlsfx.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.openjfx</groupId>
+                <artifactId>javafx-controls</artifactId>
+                <version>${javafx.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.openjfx</groupId>
+                <artifactId>javafx-fxml</artifactId>
+                <version>${javafx.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.openjfx</groupId>
+                <artifactId>javafx-web</artifactId>
+                <version>${javafx.version}</version>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+</project>
