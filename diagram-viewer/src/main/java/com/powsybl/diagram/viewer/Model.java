@@ -32,7 +32,7 @@ public class Model {
     public Model(BooleanProperty showNames, NetworkAreaDiagramModel nadModel, SingleLineDiagramModel sldModel) {
         this.nadModel = nadModel;
         this.sldModel = sldModel;
-        this.nadModel.getSvgParametersBean().bind(showNames);
+        this.nadModel.getLabelProviderParametersBean().bind(showNames);
         this.sldModel.getSvgParametersBean().bind(showNames);
     }
 

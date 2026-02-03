@@ -13,7 +13,7 @@ import com.powsybl.sld.cgmes.dl.iidm.extensions.*;
 import com.powsybl.sld.cgmes.layout.*;
 import com.powsybl.sld.layout.*;
 
-import com.powsybl.sld.library.ComponentLibrary;
+import com.powsybl.sld.library.SldComponentLibrary;
 import com.powsybl.sld.svg.SvgParameters;
 import com.powsybl.sld.svg.styles.*;
 import com.powsybl.sld.svg.styles.iidm.*;
@@ -54,8 +54,8 @@ public class SingleLineDiagramModel extends DiagramModel {
     private final SvgParametersBean svgParametersBean;
 
     // Component library provider
-    private final ObservableList<ComponentLibrary> componentLibraries = FXCollections.observableArrayList();
-    private final ObjectProperty<ComponentLibrary> currentComponentLibrary = new SimpleObjectProperty<>();
+    private final ObservableList<SldComponentLibrary> componentLibraries = FXCollections.observableArrayList();
+    private final ObjectProperty<SldComponentLibrary> currentComponentLibrary = new SimpleObjectProperty<>();
 
     // Style provider
     private final BooleanProperty basicStyleProvider = new SimpleBooleanProperty();
@@ -80,7 +80,7 @@ public class SingleLineDiagramModel extends DiagramModel {
     private final StringProperty currentCgmesDLDiagramName = new SimpleStringProperty();
 
     public SingleLineDiagramModel(// Providers
-                                  ReadOnlyObjectProperty<ComponentLibrary> componentLibrary,
+                                  ReadOnlyObjectProperty<SldComponentLibrary> componentLibrary,
                                   ReadOnlyObjectProperty<SubstationLayoutFactory> substationLayoutFactory,
                                   ReadOnlyObjectProperty<String> cgmesDLDiagramName,
                                   // Styles
@@ -184,7 +184,7 @@ public class SingleLineDiagramModel extends DiagramModel {
         nameToSubstationLayoutFactoryMap.put(VERTICAL_SUBSTATION_LAYOUT, new VerticalSubstationLayoutFactory());
 
         // Set all providers list
-        componentLibraries.setAll(ComponentLibrary.findAll());
+        componentLibraries.setAll(SldComponentLibrary.findAll());
         substationLayouts.setAll(nameToSubstationLayoutFactoryMap.values());
     }
 
@@ -221,7 +221,7 @@ public class SingleLineDiagramModel extends DiagramModel {
         return svgParametersBean;
     }
 
-    public ComponentLibrary getComponentLibrary() {
+    public SldComponentLibrary getComponentLibrary() {
         return currentComponentLibrary.getValue();
     }
 
@@ -255,7 +255,7 @@ public class SingleLineDiagramModel extends DiagramModel {
         return currentSubstationLayoutFactory.get();
     }
 
-    public ObservableList<ComponentLibrary> getComponentLibraries() {
+    public ObservableList<SldComponentLibrary> getComponentLibraries() {
         return componentLibraries;
     }
 
@@ -267,15 +267,15 @@ public class SingleLineDiagramModel extends DiagramModel {
         return cgmesDLDiagramNames;
     }
 
-    StringConverter<ComponentLibrary> getComponentLibraryStringConverter() {
+    StringConverter<SldComponentLibrary> getComponentLibraryStringConverter() {
         return new StringConverter<>() {
             @Override
-            public String toString(ComponentLibrary value) {
+            public String toString(SldComponentLibrary value) {
                 return value != null ? value.getName() : UNKNOWN_ITEM;
             }
 
             @Override
-            public ComponentLibrary fromString(String label) {
+            public SldComponentLibrary fromString(String label) {
                 return componentLibraries.stream().filter(c -> c.getName().compareTo(label) == 0).findAny().orElse(null);
             }
         };
