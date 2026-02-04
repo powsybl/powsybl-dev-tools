@@ -5,6 +5,7 @@
     This Source Code Form is subject to the terms of the Mozilla Public
     License, v. 2.0. If a copy of the MPL was not distributed with this
     file, You can obtain one at http://mozilla.org/MPL/2.0/.
+    SPDX-License-Identifier: MPL-2.0
 
 -->
 <project xmlns="http://maven.apache.org/POM/4.0.0"
@@ -14,14 +15,12 @@
 
     <parent>
         <groupId>com.powsybl</groupId>
-        <artifactId>powsybl-parent</artifactId>
-        <version>24</version>
-        <relativePath/>
+        <artifactId>powsybl-dev-tools</artifactId>
+        <version>1.0.0-SNAPSHOT</version>
     </parent>
 
     <artifactId>powsybl-diagram-viewer</artifactId>
     <name>Diagram JavaFX viewer</name>
-    <version>1.0.0-SNAPSHOT</version>
     <description>A JavaFX application for single line and network area diagrams visualization and debugging</description>
 
     <developers>
@@ -33,40 +32,17 @@
         </developer>
     </developers>
 
-    <properties>
-        <java.version>21</java.version>
-
-        <logback.version>1.5.26</logback.version>
-        <javafx.version>21.0.8</javafx.version>
-        <javafx-mvn-plugin.version>0.0.8</javafx-mvn-plugin.version>
-        <slf4j-api.version>2.0.17</slf4j-api.version>
-        <powsybl.dependencies.version>2025.3.1</powsybl.dependencies.version>
-    </properties>
-
     <build>
         <plugins>
             <plugin>
                 <groupId>org.openjfx</groupId>
                 <artifactId>javafx-maven-plugin</artifactId>
-                <version>${javafx-mvn-plugin.version}</version>
                 <configuration>
                     <mainClass>com.powsybl.diagram.viewer.DiagramViewer</mainClass>
                 </configuration>
             </plugin>
         </plugins>
     </build>
-
-    <dependencyManagement>
-        <dependencies>
-            <dependency>
-                <groupId>com.powsybl</groupId>
-                <artifactId>powsybl-dependencies</artifactId>
-                <version>${powsybl.dependencies.version}</version>
-                <type>pom</type>
-                <scope>import</scope>
-            </dependency>
-        </dependencies>
-    </dependencyManagement>
 
     <dependencies>
         <!-- powsybl-core dependencies -->
@@ -129,34 +105,28 @@
         <dependency>
             <groupId>org.openjfx</groupId>
             <artifactId>javafx-controls</artifactId>
-            <version>${javafx.version}</version>
         </dependency>
         <dependency>
             <groupId>org.openjfx</groupId>
             <artifactId>javafx-web</artifactId>
-            <version>${javafx.version}</version>
         </dependency>
         <dependency>
             <groupId>org.openjfx</groupId>
             <artifactId>javafx-fxml</artifactId>
-            <version>${javafx.version}</version>
         </dependency>
 
         <!-- Logging dependencies -->
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
-            <version>${slf4j-api.version}</version>
         </dependency>
         <dependency>
             <groupId>ch.qos.logback</groupId>
             <artifactId>logback-classic</artifactId>
-            <version>${logback.version}</version>
         </dependency>
         <dependency>
             <groupId>ch.qos.logback</groupId>
             <artifactId>logback-core</artifactId>
-            <version>${logback.version}</version>
         </dependency>
     </dependencies>
 </project>
