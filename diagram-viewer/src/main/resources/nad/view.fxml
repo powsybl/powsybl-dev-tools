@@ -111,6 +111,9 @@
                                 <SpinnerValueFactory.IntegerSpinnerValueFactory min="0" max="2000" amountToStepBy="1" initialValue="500"/>
                             </valueFactory>
                         </Spinner>
+                        <Label text="Scale factor:" GridPane.rowIndex="8"/>
+                        <Slider fx:id="scaleFactorSlider" min="0.1" max="5.0" value="1.0"
+                                showTickLabels="true" showTickMarks="true" GridPane.rowIndex="9"/>
                     </GridPane>
                     <Separator>
                         <VBox.margin>

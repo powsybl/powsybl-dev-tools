@@ -78,10 +78,10 @@ public class LayoutParametersBean {
         LayoutParameters defaultLayoutParameters = new LayoutParameters()
                 .setAdaptCellHeightToContent(true);
 
-        diagramPaddingTopBottom.setValue(defaultLayoutParameters.getDiagramPadding().getTop());
-        diagramPaddingLeftRight.setValue(defaultLayoutParameters.getDiagramPadding().getLeft());
-        voltagePaddingTopBottom.setValue(defaultLayoutParameters.getVoltageLevelPadding().getTop());
-        voltagePaddingLeftRight.setValue(defaultLayoutParameters.getVoltageLevelPadding().getLeft());
+        diagramPaddingTopBottom.setValue(defaultLayoutParameters.getDiagramPadding().top());
+        diagramPaddingLeftRight.setValue(defaultLayoutParameters.getDiagramPadding().left());
+        voltagePaddingTopBottom.setValue(defaultLayoutParameters.getVoltageLevelPadding().top());
+        voltagePaddingLeftRight.setValue(defaultLayoutParameters.getVoltageLevelPadding().left());
         busbarVerticalSpace.setValue(defaultLayoutParameters.getVerticalSpaceBus());
         busbarHorizontalSpace.setValue(defaultLayoutParameters.getHorizontalBusPadding());
         cellWidth.setValue(defaultLayoutParameters.getCellWidth());
