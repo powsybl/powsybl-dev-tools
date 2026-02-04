@@ -22,6 +22,15 @@
     <artifactId>powsybl-powerfactory-viewer</artifactId>
     <name>PowerFactory Viewer</name>
 
+    <developers>
+        <developer>
+            <name>Geoffroy JAMGOTCHIAN</name>
+            <email>geoffroy.jamgotchian@rte-france.com</email>
+            <organization>RTE</organization>
+            <organizationUrl>https://www.rte-france.com</organizationUrl>
+        </developer>
+    </developers>
+
     <build>
         <plugins>
             <plugin>

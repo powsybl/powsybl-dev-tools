@@ -55,6 +55,8 @@ public class NetworkAreaDiagramViewController extends AbstractDiagramViewControl
     public Spinner<Integer> nbMaxStepsSpinner;
     @FXML
     public CheckBox layoutIncludeTextNodes;
+    @FXML
+    public Slider scaleFactorSlider;
 
     // NAD Edge info parameters
     @FXML
@@ -104,6 +106,7 @@ public class NetworkAreaDiagramViewController extends AbstractDiagramViewControl
                 springRepulsionSpinner.getValueFactory().valueProperty(),
                 nbMaxStepsSpinner.getValueFactory().valueProperty(),
                 layoutIncludeTextNodes.selectedProperty(),
+                scaleFactorSlider.valueProperty(),
 
                 infoAlongEdge.selectedProperty(),
                 insertNameDesc.selectedProperty(),
