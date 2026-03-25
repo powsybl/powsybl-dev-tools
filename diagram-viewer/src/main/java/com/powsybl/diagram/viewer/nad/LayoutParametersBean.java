@@ -33,7 +33,6 @@ public class LayoutParametersBean {
         // Initialize
         LayoutParameters defaultParameters = new LayoutParameters();
         textNodesIncluded.setValue(defaultParameters.isTextNodesForceLayout());
-        springRepulsionFactor.setValue(defaultParameters.getSpringRepulsionFactorForceLayout());
     }
 
     public void addListener(ChangeListener<Object> changeListener) {
@@ -45,7 +44,6 @@ public class LayoutParametersBean {
     public LayoutParameters getLayoutParameters() {
         return new LayoutParameters()
                 .setTextNodesForceLayout(textNodesIncluded.get())
-                .setSpringRepulsionFactorForceLayout(springRepulsionFactor.getValue())
                 .setMaxSteps(nbMaxSteps.getValue());
     }
 }

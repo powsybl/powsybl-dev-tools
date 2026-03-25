@@ -12,6 +12,7 @@ import com.powsybl.diagram.viewer.common.AbstractDiagramViewController;
 import com.powsybl.iidm.network.Container;
 import com.powsybl.iidm.network.Network;
 import com.powsybl.nad.svg.SvgParameters;
+import com.powsybl.nad.svg.iidm.DefaultLabelProvider;
 import javafx.beans.binding.BooleanBinding;
 import javafx.beans.value.ChangeListener;
 import javafx.fxml.FXML;
@@ -55,11 +56,19 @@ public class NetworkAreaDiagramViewController extends AbstractDiagramViewControl
     @FXML
     public CheckBox layoutIncludeTextNodes;
 
+    // NAD Edge info parameters
+    @FXML
+    public ChoiceBox<DefaultLabelProvider.EdgeInfoEnum> infoSideExternal;
+    @FXML
+    public ChoiceBox<DefaultLabelProvider.EdgeInfoEnum> infoMiddleSide1;
+    @FXML
+    public ChoiceBox<DefaultLabelProvider.EdgeInfoEnum> infoMiddleSide2;
+    @FXML
+    public ChoiceBox<DefaultLabelProvider.EdgeInfoEnum> infoSideInternal;
+
     // SVG parameters
     @FXML
     public CheckBox infoAlongEdge;
-    @FXML
-    public CheckBox edgeNameDisplayed;
     @FXML
     public CheckBox insertNameDesc;
     @FXML
@@ -97,7 +106,6 @@ public class NetworkAreaDiagramViewController extends AbstractDiagramViewControl
                 layoutIncludeTextNodes.selectedProperty(),
 
                 infoAlongEdge.selectedProperty(),
-                edgeNameDisplayed.selectedProperty(),
                 insertNameDesc.selectedProperty(),
                 substationDescriptionDisplayed.selectedProperty(),
                 busLegend.selectedProperty(),
@@ -106,8 +114,12 @@ public class NetworkAreaDiagramViewController extends AbstractDiagramViewControl
                 widthHeightAdded.selectedProperty(),
                 sizeConstraintChoice.valueProperty(),
                 fixedSizeSpinner.getValueFactory().valueProperty(),
-                fixedScaleSpinner.getValueFactory().valueProperty()
-        );
+                fixedScaleSpinner.getValueFactory().valueProperty(),
+                infoSideExternal.valueProperty(),
+                infoMiddleSide1.valueProperty(),
+                infoMiddleSide2.valueProperty(),
+                infoSideInternal.valueProperty()
+            );
 
         BooleanBinding enableGeoParameters = this.layoutChoice.valueProperty().isEqualTo(NetworkAreaDiagramModel.GEOGRAPHICAL_LAYOUT);
         this.geoParameters.visibleProperty().bind(enableGeoParameters);
