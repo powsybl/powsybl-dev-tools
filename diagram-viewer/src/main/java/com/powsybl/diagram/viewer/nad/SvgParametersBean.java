@@ -10,7 +10,6 @@ package com.powsybl.diagram.viewer.nad;
 import com.powsybl.nad.svg.SvgParameters;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.Property;
-import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.value.ChangeListener;
 
 /**
@@ -18,13 +17,8 @@ import javafx.beans.value.ChangeListener;
  */
 public class SvgParametersBean {
 
-    private final BooleanProperty idDisplayed = new SimpleBooleanProperty();
     private final BooleanProperty edgeInfoAlongEdge;
-    private final BooleanProperty edgeNameDisplayed;
     private final BooleanProperty insertNameDesc;
-    private final BooleanProperty substationDescriptionDisplayed;
-    private final BooleanProperty busLegend;
-    private final BooleanProperty vlDetails;
     // Diagram size
     private final BooleanProperty widthHeightAdded;
     private final Property<SvgParameters.SizeConstraint> sizeConstraint;
@@ -33,11 +27,7 @@ public class SvgParametersBean {
 
     public SvgParametersBean(// SVG parameters
                              BooleanProperty edgeInfoAlongEdge,
-                             BooleanProperty edgeNameDisplayed,
                              BooleanProperty insertNameDesc,
-                             BooleanProperty substationDescriptionDisplayed,
-                             BooleanProperty busLegend,
-                             BooleanProperty vlDetails,
                              // Diagram size
                              BooleanProperty widthHeightAdded,
                              Property<SvgParameters.SizeConstraint> sizeConstraint,
@@ -45,11 +35,7 @@ public class SvgParametersBean {
                              Property<Double> fixedScale) {
         // bind
         this.edgeInfoAlongEdge = edgeInfoAlongEdge;
-        this.edgeNameDisplayed = edgeNameDisplayed;
         this.insertNameDesc = insertNameDesc;
-        this.substationDescriptionDisplayed = substationDescriptionDisplayed;
-        this.busLegend = busLegend;
-        this.vlDetails = vlDetails;
         // Diagram size
         this.widthHeightAdded = widthHeightAdded;
         this.sizeConstraint = sizeConstraint;
@@ -57,18 +43,9 @@ public class SvgParametersBean {
         this.fixedScale = fixedScale;
     }
 
-    public void bind(BooleanProperty useName) {
-        this.idDisplayed.bind(useName.not());
-    }
-
     public void addListener(ChangeListener<Object> changeListener) {
-        this.idDisplayed.addListener(changeListener);
         this.edgeInfoAlongEdge.addListener(changeListener);
-        this.edgeNameDisplayed.addListener(changeListener);
         this.insertNameDesc.addListener(changeListener);
-        this.substationDescriptionDisplayed.addListener(changeListener);
-        this.busLegend.addListener(changeListener);
-        this.vlDetails.addListener(changeListener);
         // Diagram size
         this.widthHeightAdded.addListener(changeListener);
         this.sizeConstraint.addListener(changeListener);
@@ -78,13 +55,8 @@ public class SvgParametersBean {
 
     public SvgParameters getSvgParameters() {
         SvgParameters svgParameters = new SvgParameters()
-                .setIdDisplayed(idDisplayed.get())
                 .setInsertNameDesc(insertNameDesc.get())
-                .setSubstationDescriptionDisplayed(substationDescriptionDisplayed.get())
-                .setBusLegend(busLegend.get())
-                .setVoltageLevelDetails(vlDetails.get())
                 .setEdgeInfoAlongEdge(edgeInfoAlongEdge.get())
-                .setEdgeNameDisplayed(edgeNameDisplayed.get())
                 .setSvgWidthAndHeightAdded(widthHeightAdded.get())
                 .setSizeConstraint(sizeConstraint.getValue());
         switch (sizeConstraint.getValue()) {
