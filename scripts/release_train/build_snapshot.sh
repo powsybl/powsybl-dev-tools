@@ -13,7 +13,7 @@ MVN="mvn -Dmaven.repo.local=$BUILD_DIR/m2_repository"
 
 
 function pause() {
-    read -s -n 1 -p "Press any key to continue..."
+    read -r -s -n 1 -p "Press any key to continue..."
     echo
 }
 
@@ -148,8 +148,8 @@ esac
 
 
 SCRIPTS_PATH=$(pwd)/$(dirname "$0")
-mkdir -p $BUILD_DIR/.versions
-cd $BUILD_DIR
+mkdir -p "$BUILD_DIR/.versions"
+cd "$BUILD_DIR" || exit
 
 echo
 echo "Retrieve missing repositories + set versions in pom.xml files:"
@@ -159,7 +159,7 @@ echo "- powsybl-core"
 if [ ! -e powsybl-core ]; then
   git clone "$CLONE_OPT" https://github.com/powsybl/powsybl-core.git
 fi
-cd powsybl-core
+cd powsybl-core || exit
 CORE_VERSION=$($MVN help:evaluate -Dexpression=project.version $HELP_EVAL_OPT)
 CORE_BRANCH=$(git rev-parse --abbrev-ref HEAD)
 cd ..
@@ -169,10 +169,10 @@ cd ..
 REPO=powsybl-open-loadflow
 echo "- $REPO"
 if [ ! -e $REPO ]; then
-  SNAPSHOT_BRANCH=$($SCRIPTS_PATH/check_snapshot_branch.sh "https://github.com/powsybl/$REPO.git" "$CORE_VERSION")
+  SNAPSHOT_BRANCH=$("$SCRIPTS_PATH"/check_snapshot_branch.sh "https://github.com/powsybl/$REPO.git" "$CORE_VERSION")
   git clone "$CLONE_OPT" -b "$SNAPSHOT_BRANCH" "https://github.com/powsybl/$REPO.git"
 fi
-cd $REPO
+cd $REPO || exit
 git restore pom.xml
 LOADFLOW_VERSION=$($MVN help:evaluate -Dexpression=project.version $HELP_EVAL_OPT)
 LOADFLOW_BRANCH=$(git rev-parse --abbrev-ref HEAD)
@@ -184,10 +184,10 @@ cd ..
 REPO=powsybl-diagram
 echo "- $REPO"
 if [ ! -e $REPO ]; then
-  SNAPSHOT_BRANCH=$($SCRIPTS_PATH/check_snapshot_branch.sh "https://github.com/powsybl/$REPO.git" "$CORE_VERSION")
+  SNAPSHOT_BRANCH=$("$SCRIPTS_PATH"/check_snapshot_branch.sh "https://github.com/powsybl/$REPO.git" "$CORE_VERSION")
   git clone "$CLONE_OPT" -b "$SNAPSHOT_BRANCH" "https://github.com/powsybl/$REPO.git"
 fi
-cd $REPO
+cd $REPO || exit
 git restore pom.xml
 DIAGRAM_VERSION=$($MVN help:evaluate -Dexpression=project.version $HELP_EVAL_OPT)
 DIAGRAM_BRANCH=$(git rev-parse --abbrev-ref HEAD)
@@ -199,13 +199,13 @@ cd ..
 REPO=powsybl-entsoe
 echo "- $REPO"
 if [ ! -e $REPO ]; then
-  SNAPSHOT_BRANCH=$($SCRIPTS_PATH/check_snapshot_branch.sh "https://github.com/powsybl/$REPO.git" "$CORE_VERSION")
+  SNAPSHOT_BRANCH=$("$SCRIPTS_PATH"/check_snapshot_branch.sh "https://github.com/powsybl/$REPO.git" "$CORE_VERSION")
   git clone "$CLONE_OPT" -b "$SNAPSHOT_BRANCH" "https://github.com/powsybl/$REPO.git"
 fi
 echo -e "\
    powsyblcore.version=$CORE_VERSION\n\
    powsyblopenloadflow.version=$LOADFLOW_VERSION" > .versions/entsoe
-cd $REPO
+cd $REPO || exit
 git restore pom.xml
 ENTSOE_VERSION=$($MVN help:evaluate -Dexpression=project.version $HELP_EVAL_OPT)
 ENTSOE_BRANCH=$(git rev-parse --abbrev-ref HEAD)
@@ -217,14 +217,14 @@ cd ..
 REPO=powsybl-open-rao
 echo "- $REPO"
 if [ ! -e $REPO ]; then
-  SNAPSHOT_BRANCH=$($SCRIPTS_PATH/check_snapshot_branch.sh "https://github.com/powsybl/$REPO.git" "$CORE_VERSION")
+  SNAPSHOT_BRANCH=$("$SCRIPTS_PATH"/check_snapshot_branch.sh "https://github.com/powsybl/$REPO.git" "$CORE_VERSION")
   git clone "$CLONE_OPT" -b "$SNAPSHOT_BRANCH" "https://github.com/powsybl/$REPO.git"
 fi
 echo -e "\
    powsybl.core.version=$CORE_VERSION\n\
    powsybl.entsoe.version=$ENTSOE_VERSION\n\
    powsybl.openloadflow.version=$LOADFLOW_VERSION" > .versions/open-rao
-cd $REPO
+cd $REPO || exit
 git restore pom.xml
 OPENRAO_VERSION=$($MVN help:evaluate -Dexpression=project.version $HELP_EVAL_OPT)
 OPENRAO_BRANCH=$(git rev-parse --abbrev-ref HEAD)
@@ -236,10 +236,10 @@ cd ..
 REPO=powsybl-dynawo
 echo "- $REPO"
 if [ ! -e $REPO ]; then
-  SNAPSHOT_BRANCH=$($SCRIPTS_PATH/check_snapshot_branch.sh "https://github.com/powsybl/$REPO.git" "$CORE_VERSION")
+  SNAPSHOT_BRANCH=$("$SCRIPTS_PATH"/check_snapshot_branch.sh "https://github.com/powsybl/$REPO.git" "$CORE_VERSION")
   git clone "$CLONE_OPT" -b "$SNAPSHOT_BRANCH" "https://github.com/powsybl/$REPO.git"
 fi
-cd $REPO
+cd $REPO || exit
 git restore pom.xml
 DYNAWO_VERSION=$($MVN help:evaluate -Dexpression=project.version $HELP_EVAL_OPT)
 DYNAWO_BRANCH=$(git rev-parse --abbrev-ref HEAD)
@@ -251,7 +251,7 @@ cd ..
 REPO=powsybl-dependencies
 echo "- $REPO"
 if [ ! -e $REPO ]; then
-  SNAPSHOT_BRANCH=$($SCRIPTS_PATH/check_snapshot_branch.sh "https://github.com/powsybl/$REPO.git" "$CORE_VERSION")
+  SNAPSHOT_BRANCH=$("$SCRIPTS_PATH"/check_snapshot_branch.sh "https://github.com/powsybl/$REPO.git" "$CORE_VERSION")
   git clone "$CLONE_OPT" -b "$SNAPSHOT_BRANCH" "https://github.com/powsybl/$REPO.git"
 fi
 echo -e "\
@@ -261,7 +261,7 @@ echo -e "\
    powsybl-dynawo.version=$DYNAWO_VERSION\n\
    powsybl-entsoe.version=$ENTSOE_VERSION\n\
    powsybl-open-rao.version=$OPENRAO_VERSION" > .versions/dependencies
-cd $REPO
+cd $REPO || exit
 git restore pom.xml
 DEPENDENCIES_VERSION=$($MVN help:evaluate -Dexpression=project.version $HELP_EVAL_OPT)
 DEPENDENCIES_BRANCH=$(git rev-parse --abbrev-ref HEAD)
@@ -281,63 +281,56 @@ pause
 # == BUILD ==
 if [ $START_FROM -lt 1 ]
 then
-  cd powsybl-core
-  $MVN -batch-mode --no-transfer-progress clean install $BUILD_OPT -DskipTests
-  if [[ "$?" -ne 0 ]] ; then
+  cd powsybl-core || exit
+  if ! $MVN -batch-mode --no-transfer-progress clean install $BUILD_OPT -DskipTests ; then
     exit 1
   fi
   cd ..
 fi
 if [ $START_FROM -lt 2 ]
 then
-  cd powsybl-open-loadflow
-  $MVN -batch-mode --no-transfer-progress clean install $BUILD_OPT $TEST_OPT
-  if [[ "$?" -ne 0 ]] ; then
+  cd powsybl-open-loadflow || exit
+  if ! $MVN -batch-mode --no-transfer-progress clean install $BUILD_OPT $TEST_OPT ; then
     exit 1
   fi
   cd ..
 fi
 if [ $START_FROM -lt 3 ]
 then
-  cd powsybl-diagram
-  $MVN -batch-mode --no-transfer-progress clean install $BUILD_OPT $TEST_OPT
-  if [[ "$?" -ne 0 ]] ; then
+  cd powsybl-diagram || exit
+  if ! $MVN -batch-mode --no-transfer-progress clean install $BUILD_OPT $TEST_OPT ; then
     exit 1
   fi
   cd ..
 fi
 if [ $START_FROM -lt 4 ]
 then
-  cd powsybl-entsoe
-  $MVN -batch-mode --no-transfer-progress clean install $BUILD_OPT $TEST_OPT
-  if [[ "$?" -ne 0 ]] ; then
+  cd powsybl-entsoe || exit
+  if ! $MVN -batch-mode --no-transfer-progress clean install $BUILD_OPT $TEST_OPT ; then
     exit 1
   fi
   cd ..
 fi
 if [ $START_FROM -lt 5 ]
 then
-  cd powsybl-open-rao
-  $MVN -batch-mode --no-transfer-progress clean install $BUILD_OPT $TEST_OPT
-  if [[ "$?" -ne 0 ]] ; then
+  cd powsybl-open-rao || exit
+  if ! $MVN -batch-mode --no-transfer-progress clean install $BUILD_OPT $TEST_OPT ; then
     exit 1
   fi
   cd ..
 fi
 if [ $START_FROM -lt 6 ]
 then
-  cd powsybl-dynawo
-  $MVN -batch-mode --no-transfer-progress clean install $BUILD_OPT $TEST_OPT
-  if [[ "$?" -ne 0 ]] ; then
+  cd powsybl-dynawo || exit
+  if ! $MVN -batch-mode --no-transfer-progress clean install $BUILD_OPT $TEST_OPT ; then
     exit 1
   fi
   cd ..
 fi
 if [ $START_FROM -lt 7 ]
 then
-  cd powsybl-dependencies
-  $MVN -batch-mode --no-transfer-progress clean install $BUILD_OPT $TEST_OPT
-  if [[ "$?" -ne 0 ]] ; then
+  cd powsybl-dependencies || exit
+  if ! $MVN -batch-mode --no-transfer-progress clean install $BUILD_OPT $TEST_OPT ; then
     exit 1
   fi
   cd ..
