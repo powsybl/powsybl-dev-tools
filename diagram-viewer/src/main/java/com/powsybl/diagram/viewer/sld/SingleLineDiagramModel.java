@@ -195,7 +195,7 @@ public class SingleLineDiagramModel extends DiagramModel {
         if (network != null) {
             // SubstationLayouts
             nameToSubstationLayoutFactoryMap.put(CGMES_SUBSTATION_LAYOUT,
-                new CgmesSubstationLayoutFactory(network, null, cgmesScaleFactor.getValue()));
+                new CgmesSubstationLayoutFactory(network, currentCgmesDLDiagramName.getValue(), cgmesScaleFactor.getValue()));
             // CGMES-DL names
             if (NetworkDiagramData.checkNetworkDiagramData(network)) {
                 cgmesDLDiagramNames.setAll(NetworkDiagramData.getDiagramsNames(network));

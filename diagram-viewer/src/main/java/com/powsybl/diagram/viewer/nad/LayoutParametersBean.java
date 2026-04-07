@@ -22,16 +22,13 @@ import javafx.beans.value.ChangeListener;
 public class LayoutParametersBean {
 
     private final BooleanProperty textNodesIncluded = new SimpleBooleanProperty();
-
-    private final Property<Double> springRepulsionFactor = new SimpleObjectProperty<>();
     private final Property<Integer> nbMaxSteps = new SimpleObjectProperty<>();
     private final DoubleProperty scaleFactor = new SimpleDoubleProperty();
 
-    public LayoutParametersBean(BooleanProperty textNodesIncluded, Property<Double> springRepulsionFactor,
+    public LayoutParametersBean(BooleanProperty textNodesIncluded,
                                 Property<Integer> nbMaxSteps, DoubleProperty scaleFactor) {
         // bind
         this.textNodesIncluded.bindBidirectional(textNodesIncluded);
-        this.springRepulsionFactor.bindBidirectional(springRepulsionFactor);
         this.nbMaxSteps.bindBidirectional(nbMaxSteps);
         this.scaleFactor.bindBidirectional(scaleFactor);
 
@@ -42,7 +39,6 @@ public class LayoutParametersBean {
 
     public void addListener(ChangeListener<Object> changeListener) {
         this.textNodesIncluded.addListener(changeListener);
-        this.springRepulsionFactor.addListener(changeListener);
         this.nbMaxSteps.addListener(changeListener);
         this.scaleFactor.addListener(changeListener);
     }

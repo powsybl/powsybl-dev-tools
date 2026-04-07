@@ -50,8 +50,6 @@ public class NetworkAreaDiagramViewController extends AbstractDiagramViewControl
 
     // Layout parameters
     @FXML
-    public Spinner<Double> springRepulsionSpinner;
-    @FXML
     public Spinner<Integer> nbMaxStepsSpinner;
     @FXML
     public CheckBox layoutIncludeTextNodes;
@@ -106,7 +104,6 @@ public class NetworkAreaDiagramViewController extends AbstractDiagramViewControl
             layoutChoice.valueProperty(),
 
             // Layout parameters
-            springRepulsionSpinner.getValueFactory().valueProperty(),
             nbMaxStepsSpinner.getValueFactory().valueProperty(),
             layoutIncludeTextNodes.selectedProperty(),
             scaleFactorSlider.valueProperty(),
@@ -157,7 +154,6 @@ public class NetworkAreaDiagramViewController extends AbstractDiagramViewControl
         layoutChoice.valueProperty().addListener(changeListener);
 
         layoutIncludeTextNodes.selectedProperty().addListener(changeListener);
-        springRepulsionSpinner.valueProperty().addListener(changeListener);
 
         // SvgParameters & layoutParameters
         model.addListener(changeListener);

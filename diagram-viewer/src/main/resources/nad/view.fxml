@@ -105,18 +105,13 @@
                             <Label text="Layout parameters:" style="-fx-font-weight: bold" GridPane.rowIndex="0"/>
                             <CheckBox fx:id="layoutIncludeTextNodes" text="Include info nodes in layout" GridPane.rowIndex="2"/>
                             <Label text="Spring repulsion factor:" GridPane.rowIndex="4"/>
-                            <Spinner fx:id="springRepulsionSpinner" GridPane.rowIndex="5">
-                                <valueFactory>
-                                    <SpinnerValueFactory.DoubleSpinnerValueFactory min="0" max="10" amountToStepBy="0.1"/>
-                                </valueFactory>
-                            </Spinner>
-                            <Label text="Max number of steps:" GridPane.rowIndex="6"/>
-                            <Spinner fx:id="nbMaxStepsSpinner" GridPane.rowIndex="7" editable="true">
+                            <Label text="Max number of steps:" GridPane.rowIndex="5"/>
+                            <Spinner fx:id="nbMaxStepsSpinner" GridPane.rowIndex="6" editable="true">
                                 <valueFactory>
                                     <SpinnerValueFactory.IntegerSpinnerValueFactory min="0" max="2000" amountToStepBy="1" initialValue="500"/>
                                 </valueFactory>
                             </Spinner>
-                            <Label text="Scale factor:" GridPane.rowIndex="8"/>
+                            <Label text="Scale factor:" GridPane.rowIndex="7"/>
                             <Slider fx:id="scaleFactorSlider" min="0.1" max="5.0" value="1.0"
                                     showTickLabels="true" showTickMarks="true" GridPane.rowIndex="9"/>
                         </GridPane>
