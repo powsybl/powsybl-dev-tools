@@ -50,6 +50,8 @@ public class NetworkAreaDiagramViewController extends AbstractDiagramViewControl
 
     // Layout parameters
     @FXML
+    public CheckBox layoutIncludeInjections;
+    @FXML
     public Spinner<Integer> nbMaxStepsSpinner;
     @FXML
     public CheckBox layoutIncludeTextNodes;
@@ -104,6 +106,7 @@ public class NetworkAreaDiagramViewController extends AbstractDiagramViewControl
             layoutChoice.valueProperty(),
 
             // Layout parameters
+            layoutIncludeInjections.selectedProperty(),
             nbMaxStepsSpinner.getValueFactory().valueProperty(),
             layoutIncludeTextNodes.selectedProperty(),
             scaleFactorSlider.valueProperty(),
@@ -153,6 +156,7 @@ public class NetworkAreaDiagramViewController extends AbstractDiagramViewControl
         styleProviderChoice.valueProperty().addListener(changeListener);
         layoutChoice.valueProperty().addListener(changeListener);
 
+        layoutIncludeInjections.selectedProperty().addListener(changeListener);
         layoutIncludeTextNodes.selectedProperty().addListener(changeListener);
 
         // SvgParameters & layoutParameters

@@ -21,13 +21,17 @@ import javafx.beans.value.ChangeListener;
  */
 public class LayoutParametersBean {
 
+    private final BooleanProperty injectionAdded = new SimpleBooleanProperty();
     private final BooleanProperty textNodesIncluded = new SimpleBooleanProperty();
     private final Property<Integer> nbMaxSteps = new SimpleObjectProperty<>();
     private final DoubleProperty scaleFactor = new SimpleDoubleProperty();
 
-    public LayoutParametersBean(BooleanProperty textNodesIncluded,
-                                Property<Integer> nbMaxSteps, DoubleProperty scaleFactor) {
+    public LayoutParametersBean(BooleanProperty injectionAdded,
+                                BooleanProperty textNodesIncluded,
+                                Property<Integer> nbMaxSteps,
+                                DoubleProperty scaleFactor) {
         // bind
+        this.injectionAdded.bindBidirectional(injectionAdded);
         this.textNodesIncluded.bindBidirectional(textNodesIncluded);
         this.nbMaxSteps.bindBidirectional(nbMaxSteps);
         this.scaleFactor.bindBidirectional(scaleFactor);
@@ -38,6 +42,7 @@ public class LayoutParametersBean {
     }
 
     public void addListener(ChangeListener<Object> changeListener) {
+        this.injectionAdded.addListener(changeListener);
         this.textNodesIncluded.addListener(changeListener);
         this.nbMaxSteps.addListener(changeListener);
         this.scaleFactor.addListener(changeListener);
@@ -45,6 +50,7 @@ public class LayoutParametersBean {
 
     public LayoutParameters getLayoutParameters() {
         return new LayoutParameters()
+                .setInjectionsAdded(injectionAdded.get())
                 .setTextNodesForceLayout(textNodesIncluded.get())
                 .setMaxSteps(nbMaxSteps.getValue())
                 .setScaleFactor(scaleFactor.getValue());
