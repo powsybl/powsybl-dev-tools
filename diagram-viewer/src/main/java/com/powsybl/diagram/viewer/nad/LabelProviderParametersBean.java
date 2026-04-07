@@ -16,20 +16,20 @@ import javafx.beans.value.ChangeListener;
 /**
  * @author Nicolas Rol {@literal <nicolas.rol at rte-france.com>}
  */
-public class LabelProviderParametersBeam {
+public class LabelProviderParametersBean {
 
     private final BooleanProperty busLegend;
     private final BooleanProperty idDisplayed = new SimpleBooleanProperty();
     private final BooleanProperty substationDescriptionDisplayed;
     private final BooleanProperty voltageLevelDetails;
     private final BooleanProperty doubleArrowsDisplayed;
-    private final EdgeInfoParametersBeam edgeInfoParameters;
+    private final EdgeInfoParametersBean edgeInfoParameters;
 
-    public LabelProviderParametersBeam(BooleanProperty substationDescriptionDisplayed,
+    public LabelProviderParametersBean(BooleanProperty substationDescriptionDisplayed,
                                        BooleanProperty busLegend,
                                        BooleanProperty voltageLevelDetails,
                                        BooleanProperty doubleArrowsDisplayed,
-                                       EdgeInfoParametersBeam edgeInfoParameters) {
+                                       EdgeInfoParametersBean edgeInfoParameters) {
         this.substationDescriptionDisplayed = substationDescriptionDisplayed;
         this.busLegend = busLegend;
         this.voltageLevelDetails = voltageLevelDetails;

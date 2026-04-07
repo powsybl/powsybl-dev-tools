@@ -16,14 +16,14 @@ import javafx.beans.value.ChangeListener;
 /**
  * @author Nicolas Rol {@literal <nicolas.rol at rte-france.com>}
  */
-public class EdgeInfoParametersBeam {
+public class EdgeInfoParametersBean {
 
     private final Property<EdgeInfoEnum> infoSideExternal;
     private final Property<EdgeInfoEnum> infoMiddleSide1;
     private final Property<EdgeInfoEnum> infoMiddleSide2;
     private final Property<EdgeInfoEnum> infoSideInternal;
 
-    public EdgeInfoParametersBeam(Property<EdgeInfoEnum> infoSideExternal,
+    public EdgeInfoParametersBean(Property<EdgeInfoEnum> infoSideExternal,
                                   Property<EdgeInfoEnum> infoMiddleSide1,
                                   Property<EdgeInfoEnum> infoMiddleSide2,
                                   Property<EdgeInfoEnum> infoSideInternal) {

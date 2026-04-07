@@ -33,7 +33,7 @@ public class NetworkAreaDiagramModel extends DiagramModel {
     private final SvgParametersBean svgParameters;
 
     // Label provider Parameters
-    private final LabelProviderParametersBeam labelProviderParametersBeam;
+    private final LabelProviderParametersBean labelProviderParametersBean;
 
     private final IntegerProperty depth = new SimpleIntegerProperty();
     private final IntegerProperty geoScalingFactor = new SimpleIntegerProperty();
@@ -94,13 +94,13 @@ public class NetworkAreaDiagramModel extends DiagramModel {
                 fixedScale);
 
         // Edge info parameters
-        EdgeInfoParametersBeam edgeInfoParameters = new EdgeInfoParametersBeam(infoSideExternal,
+        EdgeInfoParametersBean edgeInfoParameters = new EdgeInfoParametersBean(infoSideExternal,
             infoMiddleSide1,
             infoMiddleSide2,
             infoSideInternal);
 
         // Label provider Parameters
-        labelProviderParametersBeam = new LabelProviderParametersBeam(substationDescriptionDisplayed,
+        labelProviderParametersBean = new LabelProviderParametersBean(substationDescriptionDisplayed,
             busLegend,
             vlDetails,
             doubleArrowsDisplayed,
@@ -120,7 +120,7 @@ public class NetworkAreaDiagramModel extends DiagramModel {
     }
 
     public LabelProviderParameters getLabelProviderParameters() {
-        return labelProviderParametersBeam.getLabelProviderParameters();
+        return labelProviderParametersBean.getLabelProviderParameters();
     }
 
     public LabelProviderFactory getLabelProviderFactory() {
@@ -145,13 +145,13 @@ public class NetworkAreaDiagramModel extends DiagramModel {
         };
     }
 
-    public LabelProviderParametersBeam getLabelProviderParametersBean() {
-        return labelProviderParametersBeam;
+    public LabelProviderParametersBean getLabelProviderParametersBean() {
+        return labelProviderParametersBean;
     }
 
     public void addListener(ChangeListener<Object> changeListener) {
         svgParameters.addListener(changeListener);
         layoutParametersBean.addListener(changeListener);
-        labelProviderParametersBeam.addListener(changeListener);
+        labelProviderParametersBean.addListener(changeListener);
     }
 }
