@@ -104,7 +104,6 @@ public class SingleLineDiagramModel extends DiagramModel {
                                   Property<Double> internCellHeight,
                                   Property<Double> stackHeight,
                                   BooleanProperty disconnectorsOnBus,
-                                  Property<Double> scaleFactor,
                                   BooleanProperty adaptCellHeightToContent,
                                   Property<Double> minSpaceBetweenComponents,
                                   Property<Double> minimumExternCellHeight,
@@ -155,7 +154,6 @@ public class SingleLineDiagramModel extends DiagramModel {
                 internCellHeight,
                 stackHeight,
                 disconnectorsOnBus,
-                scaleFactor,
                 adaptCellHeightToContent,
                 minSpaceBetweenComponents,
                 minimumExternCellHeight,
@@ -191,7 +189,8 @@ public class SingleLineDiagramModel extends DiagramModel {
     public void updateFrom(Network network) {
         if (network != null) {
             // SubstationLayouts
-            nameToSubstationLayoutFactoryMap.put(CGMES_SUBSTATION_LAYOUT, new CgmesSubstationLayoutFactory(network));
+            nameToSubstationLayoutFactoryMap.put(CGMES_SUBSTATION_LAYOUT,
+                new CgmesSubstationLayoutFactory(network, null, 3.0));
             // CGMES-DL names
             if (NetworkDiagramData.checkNetworkDiagramData(network)) {
                 cgmesDLDiagramNames.setAll(NetworkDiagramData.getDiagramsNames(network));

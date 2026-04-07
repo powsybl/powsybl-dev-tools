@@ -22,13 +22,19 @@ public class LabelProviderParametersBeam {
     private final BooleanProperty idDisplayed = new SimpleBooleanProperty();
     private final BooleanProperty substationDescriptionDisplayed;
     private final BooleanProperty voltageLevelDetails;
+    private final BooleanProperty doubleArrowsDisplayed;
+    private final EdgeInfoParametersBeam edgeInfoParameters;
 
     public LabelProviderParametersBeam(BooleanProperty substationDescriptionDisplayed,
                                        BooleanProperty busLegend,
-                                       BooleanProperty voltageLevelDetails) {
+                                       BooleanProperty voltageLevelDetails,
+                                       BooleanProperty doubleArrowsDisplayed,
+                                       EdgeInfoParametersBeam edgeInfoParameters) {
         this.substationDescriptionDisplayed = substationDescriptionDisplayed;
         this.busLegend = busLegend;
         this.voltageLevelDetails = voltageLevelDetails;
+        this.doubleArrowsDisplayed = doubleArrowsDisplayed;
+        this.edgeInfoParameters = edgeInfoParameters;
     }
 
     public void bind(BooleanProperty useName) {
@@ -40,6 +46,8 @@ public class LabelProviderParametersBeam {
         this.substationDescriptionDisplayed.addListener(changeListener);
         this.busLegend.addListener(changeListener);
         this.voltageLevelDetails.addListener(changeListener);
+        this.doubleArrowsDisplayed.addListener(changeListener);
+        this.edgeInfoParameters.addListener(changeListener);
     }
 
     public LabelProviderParameters getLabelProviderParameters() {
@@ -47,6 +55,8 @@ public class LabelProviderParametersBeam {
             .setBusLegend(busLegend.get())
             .setIdDisplayed(idDisplayed.get())
             .setSubstationDescriptionDisplayed(substationDescriptionDisplayed.get())
-            .setVoltageLevelDetails(voltageLevelDetails.get());
+            .setVoltageLevelDetails(voltageLevelDetails.get())
+            .setDoubleArrowsDisplayed(doubleArrowsDisplayed.get())
+            .setEdgeInfoParameters(edgeInfoParameters.getEdgeInfoParameters());
     }
 }

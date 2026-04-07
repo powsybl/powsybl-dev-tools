@@ -30,7 +30,6 @@ public class LayoutParametersBean {
     private final ObjectProperty<Double> internCellHeight = new SimpleObjectProperty<>();
     private final ObjectProperty<Double> stackHeight = new SimpleObjectProperty<>();
     private final BooleanProperty disconnectorsOnBus = new SimpleBooleanProperty();
-    private final ObjectProperty<Double> scaleFactor = new SimpleObjectProperty<>();
     private final BooleanProperty adaptCellHeightToContent = new SimpleBooleanProperty();
     private final ObjectProperty<Double>minSpaceBetweenComponents = new SimpleObjectProperty<>();
     private final ObjectProperty<Double>minimumExternCellHeight = new SimpleObjectProperty<>();
@@ -48,7 +47,6 @@ public class LayoutParametersBean {
                              Property<Double> internCellHeight,
                              Property<Double> stackHeight,
                              BooleanProperty disconnectorsOnBus,
-                             Property<Double> scaleFactor,
                              BooleanProperty adaptCellHeightToContent,
                              Property<Double> minSpaceBetweenComponents,
                              Property<Double> minimumExternCellHeight,
@@ -67,7 +65,6 @@ public class LayoutParametersBean {
         this.internCellHeight.bindBidirectional(internCellHeight);
         this.stackHeight.bindBidirectional(stackHeight);
         this.disconnectorsOnBus.bindBidirectional(disconnectorsOnBus);
-        this.scaleFactor.bindBidirectional(scaleFactor);
         this.adaptCellHeightToContent.bindBidirectional(adaptCellHeightToContent);
         this.minSpaceBetweenComponents.bindBidirectional(minSpaceBetweenComponents);
         this.minimumExternCellHeight.bindBidirectional(minimumExternCellHeight);
@@ -94,7 +91,6 @@ public class LayoutParametersBean {
         minimumExternCellHeight.setValue(defaultLayoutParameters.getMinExternCellHeight());
         busBarAlignment.setValue(defaultLayoutParameters.getBusbarsAlignment());
         spaceForFeederInfos.setValue(defaultLayoutParameters.getSpaceForFeederInfos());
-        scaleFactor.setValue(defaultLayoutParameters.getCgmesScaleFactor());
     }
 
     public void addListener(ChangeListener<Object> changeListener) {
@@ -110,7 +106,6 @@ public class LayoutParametersBean {
         this.internCellHeight.addListener(changeListener);
         this.stackHeight.addListener(changeListener);
         this.disconnectorsOnBus.addListener(changeListener);
-        this.scaleFactor.addListener(changeListener);
         this.adaptCellHeightToContent.addListener(changeListener);
         this.minSpaceBetweenComponents.addListener(changeListener);
         this.minimumExternCellHeight.addListener(changeListener);
@@ -135,7 +130,6 @@ public class LayoutParametersBean {
                 .setInternCellHeight(internCellHeight.get())
                 .setStackHeight(stackHeight.get())
                 .setComponentsOnBusbars(disconnectorsOnBus.get() ? List.of(SldComponentTypeName.DISCONNECTOR) : Collections.emptyList())
-                .setCgmesScaleFactor(scaleFactor.get())
                 .setAdaptCellHeightToContent(adaptCellHeightToContent.get())
                 .setMinSpaceBetweenComponents(minSpaceBetweenComponents.get())
                 .setMinExternCellHeight(minimumExternCellHeight.get())

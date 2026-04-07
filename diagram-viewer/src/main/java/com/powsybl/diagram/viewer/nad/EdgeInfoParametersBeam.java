@@ -8,7 +8,8 @@
 
 package com.powsybl.diagram.viewer.nad;
 
-import com.powsybl.nad.svg.iidm.DefaultLabelProvider;
+import com.powsybl.nad.svg.EdgeInfoEnum;
+import com.powsybl.nad.svg.EdgeInfoParameters;
 import javafx.beans.property.Property;
 import javafx.beans.value.ChangeListener;
 
@@ -17,15 +18,15 @@ import javafx.beans.value.ChangeListener;
  */
 public class EdgeInfoParametersBeam {
 
-    private final Property<DefaultLabelProvider.EdgeInfoEnum> infoSideExternal;
-    private final Property<DefaultLabelProvider.EdgeInfoEnum> infoMiddleSide1;
-    private final Property<DefaultLabelProvider.EdgeInfoEnum> infoMiddleSide2;
-    private final Property<DefaultLabelProvider.EdgeInfoEnum> infoSideInternal;
+    private final Property<EdgeInfoEnum> infoSideExternal;
+    private final Property<EdgeInfoEnum> infoMiddleSide1;
+    private final Property<EdgeInfoEnum> infoMiddleSide2;
+    private final Property<EdgeInfoEnum> infoSideInternal;
 
-    public EdgeInfoParametersBeam(Property<DefaultLabelProvider.EdgeInfoEnum> infoSideExternal,
-                                  Property<DefaultLabelProvider.EdgeInfoEnum> infoMiddleSide1,
-                                  Property<DefaultLabelProvider.EdgeInfoEnum> infoMiddleSide2,
-                                  Property<DefaultLabelProvider.EdgeInfoEnum> infoSideInternal) {
+    public EdgeInfoParametersBeam(Property<EdgeInfoEnum> infoSideExternal,
+                                  Property<EdgeInfoEnum> infoMiddleSide1,
+                                  Property<EdgeInfoEnum> infoMiddleSide2,
+                                  Property<EdgeInfoEnum> infoSideInternal) {
         this.infoSideExternal = infoSideExternal;
         this.infoMiddleSide1 = infoMiddleSide1;
         this.infoMiddleSide2 = infoMiddleSide2;
@@ -39,8 +40,8 @@ public class EdgeInfoParametersBeam {
         this.infoSideInternal.addListener(changeListener);
     }
 
-    public DefaultLabelProvider.EdgeInfoParameters getEdgeInfoParameters() {
-        return new DefaultLabelProvider.EdgeInfoParameters(
+    public EdgeInfoParameters getEdgeInfoParameters() {
+        return new EdgeInfoParameters(
             infoSideExternal.getValue(),
             infoMiddleSide1.getValue(),
             infoMiddleSide2.getValue(),

@@ -8,7 +8,7 @@
             prefHeight="900.0" prefWidth="1000.0"
             fx:controller="com.powsybl.diagram.viewer.sld.SingleLineDiagramViewController">
     <center>
-        <SplitPane dividerPositions="0.65, 0.35" style="-fx-box-border: transparent">
+        <SplitPane dividerPositions="0.65" style="-fx-box-border: transparent">
             <BorderPane.margin>
                 <Insets topRightBottomLeft="5"/>
             </BorderPane.margin>
@@ -21,6 +21,7 @@
                 </Tab>
             </TabPane>
             <VBox>
+                <SplitPane.resizableWithParent>false</SplitPane.resizableWithParent>
                 <HBox spacing="5">
                     <VBox.margin>
                         <Insets topRightBottomLeft="5"/>

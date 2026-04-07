@@ -10,6 +10,7 @@ package com.powsybl.diagram.viewer.nad;
 import com.powsybl.diagram.viewer.common.DiagramModel;
 import com.powsybl.iidm.network.*;
 import com.powsybl.nad.layout.*;
+import com.powsybl.nad.svg.EdgeInfoEnum;
 import com.powsybl.nad.svg.LabelProviderParameters;
 import com.powsybl.nad.svg.SvgParameters;
 import com.powsybl.nad.svg.iidm.*;
@@ -34,9 +35,6 @@ public class NetworkAreaDiagramModel extends DiagramModel {
     // Label provider Parameters
     private final LabelProviderParametersBeam labelProviderParametersBeam;
 
-    // Edge info parameters
-    private final EdgeInfoParametersBeam edgeInfoParameters;
-
     private final IntegerProperty depth = new SimpleIntegerProperty();
     private final IntegerProperty geoScalingFactor = new SimpleIntegerProperty();
     private final IntegerProperty geoRadiusFactor = new SimpleIntegerProperty();
@@ -60,18 +58,22 @@ public class NetworkAreaDiagramModel extends DiagramModel {
                                    // SVG parameters
                                    BooleanProperty infoAlongEdge,
                                    BooleanProperty insertNameDesc,
-                                   BooleanProperty substationDescriptionDisplayed,
-                                   BooleanProperty busLegend,
-                                   BooleanProperty vlDetails,
+
                                    // Diagram size
                                    BooleanProperty widthHeightAdded,
                                    Property<SvgParameters.SizeConstraint> sizeConstraint,
                                    Property<Integer> fixedSize,
                                    Property<Double> fixedScale,
-                                   Property<DefaultLabelProvider.EdgeInfoEnum> infoSideExternal,
-                                   Property<DefaultLabelProvider.EdgeInfoEnum> infoMiddleSide1,
-                                   Property<DefaultLabelProvider.EdgeInfoEnum> infoMiddleSide2,
-                                   Property<DefaultLabelProvider.EdgeInfoEnum> infoSideInternal) {
+
+                                   // Label provider parameters
+                                   BooleanProperty substationDescriptionDisplayed,
+                                   BooleanProperty busLegend,
+                                   BooleanProperty vlDetails,
+                                   BooleanProperty doubleArrowsDisplayed,
+                                   Property<EdgeInfoEnum> infoSideExternal,
+                                   Property<EdgeInfoEnum> infoMiddleSide1,
+                                   Property<EdgeInfoEnum> infoMiddleSide2,
+                                   Property<EdgeInfoEnum> infoSideInternal) {
         this.depth.bind(depth);
         this.geoScalingFactor.bind(geoScalingFactor);
         this.geoRadiusFactor.bind(geoRadiusFactor);
@@ -91,16 +93,18 @@ public class NetworkAreaDiagramModel extends DiagramModel {
                 fixedSize,
                 fixedScale);
 
+        // Edge info parameters
+        EdgeInfoParametersBeam edgeInfoParameters = new EdgeInfoParametersBeam(infoSideExternal,
+            infoMiddleSide1,
+            infoMiddleSide2,
+            infoSideInternal);
+
         // Label provider Parameters
         labelProviderParametersBeam = new LabelProviderParametersBeam(substationDescriptionDisplayed,
-                busLegend,
-                vlDetails);
-
-        // Edge info parameters
-        edgeInfoParameters = new EdgeInfoParametersBeam(infoSideExternal,
-                infoMiddleSide1,
-                infoMiddleSide2,
-                infoSideInternal);
+            busLegend,
+            vlDetails,
+            doubleArrowsDisplayed,
+            edgeInfoParameters);
     }
 
     public int getDepth() {
@@ -119,14 +123,9 @@ public class NetworkAreaDiagramModel extends DiagramModel {
         return labelProviderParametersBeam.getLabelProviderParameters();
     }
 
-    public DefaultLabelProvider.EdgeInfoParameters getEdgeInfoParameters() {
-        return edgeInfoParameters.getEdgeInfoParameters();
-    }
-
     public LabelProviderFactory getLabelProviderFactory() {
         return DEFAULT_LABEL_PROVIDER.equals(labelProvider.getValue()) ?
             (Network network, SvgParameters svgParams) -> new DefaultLabelProvider(network,
-                getEdgeInfoParameters(),
                 svgParams.createValueFormatter(),
                 getLabelProviderParameters()) :
             null;
@@ -154,6 +153,5 @@ public class NetworkAreaDiagramModel extends DiagramModel {
         svgParameters.addListener(changeListener);
         layoutParametersBean.addListener(changeListener);
         labelProviderParametersBeam.addListener(changeListener);
-        edgeInfoParameters.addListener(changeListener);
     }
 }
