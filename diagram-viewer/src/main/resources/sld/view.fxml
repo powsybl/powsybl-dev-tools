@@ -144,8 +144,8 @@
                             </valueFactory>
                         </Spinner>
                         <CheckBox fx:id="disconnectorsOnBusCheckBox" text="Disconnectors on bus"/>
-                        <Label text="Scale factor:"/>
-                        <Spinner fx:id="scaleFactorSpinner" editable="true">
+                        <Label text="CGMES scale factor:"/>
+                        <Spinner fx:id="cgmesScaleFactorSpinner" editable="true">
                             <valueFactory>
                                 <SpinnerValueFactory.DoubleSpinnerValueFactory min="1" max="20" amountToStepBy="1"/>
                             </valueFactory>

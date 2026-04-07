@@ -74,6 +74,7 @@ public class SingleLineDiagramModel extends DiagramModel {
     private final Map<String, SubstationLayoutFactory> nameToSubstationLayoutFactoryMap = new TreeMap<>(); // ordered
     private final ObservableList<SubstationLayoutFactory> substationLayouts = FXCollections.observableArrayList();
     private final ObjectProperty<SubstationLayoutFactory> currentSubstationLayoutFactory = new SimpleObjectProperty<>();
+    private final Property<Double> cgmesScaleFactor = new SimpleObjectProperty<>();
 
     // CGMES-DL names
     private final ObservableList<String> cgmesDLDiagramNames = FXCollections.observableArrayList();
@@ -104,6 +105,7 @@ public class SingleLineDiagramModel extends DiagramModel {
                                   Property<Double> internCellHeight,
                                   Property<Double> stackHeight,
                                   BooleanProperty disconnectorsOnBus,
+                                  Property<Double> scaleFactor,
                                   BooleanProperty adaptCellHeightToContent,
                                   Property<Double> minSpaceBetweenComponents,
                                   Property<Double> minimumExternCellHeight,
@@ -174,6 +176,9 @@ public class SingleLineDiagramModel extends DiagramModel {
                 unifyVlColors, feederInfosOuterMargin,
                 feederInfosIntraMargin
         );
+
+        // Other
+        this.cgmesScaleFactor.bindBidirectional(scaleFactor);
     }
 
     public void initProviders() {
@@ -190,7 +195,7 @@ public class SingleLineDiagramModel extends DiagramModel {
         if (network != null) {
             // SubstationLayouts
             nameToSubstationLayoutFactoryMap.put(CGMES_SUBSTATION_LAYOUT,
-                new CgmesSubstationLayoutFactory(network, null, 3.0));
+                new CgmesSubstationLayoutFactory(network, null, cgmesScaleFactor.getValue()));
             // CGMES-DL names
             if (NetworkDiagramData.checkNetworkDiagramData(network)) {
                 cgmesDLDiagramNames.setAll(NetworkDiagramData.getDiagramsNames(network));
