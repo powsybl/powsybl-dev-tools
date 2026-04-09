@@ -74,6 +74,7 @@ public class SingleLineDiagramModel extends DiagramModel {
     private final Map<String, SubstationLayoutFactory> nameToSubstationLayoutFactoryMap = new TreeMap<>(); // ordered
     private final ObservableList<SubstationLayoutFactory> substationLayouts = FXCollections.observableArrayList();
     private final ObjectProperty<SubstationLayoutFactory> currentSubstationLayoutFactory = new SimpleObjectProperty<>();
+    private final Property<Double> cgmesScaleFactor = new SimpleObjectProperty<>();
 
     // CGMES-DL names
     private final ObservableList<String> cgmesDLDiagramNames = FXCollections.observableArrayList();
@@ -155,7 +156,6 @@ public class SingleLineDiagramModel extends DiagramModel {
                 internCellHeight,
                 stackHeight,
                 disconnectorsOnBus,
-                scaleFactor,
                 adaptCellHeightToContent,
                 minSpaceBetweenComponents,
                 minimumExternCellHeight,
@@ -176,6 +176,9 @@ public class SingleLineDiagramModel extends DiagramModel {
                 unifyVlColors, feederInfosOuterMargin,
                 feederInfosIntraMargin
         );
+
+        // Other
+        this.cgmesScaleFactor.bindBidirectional(scaleFactor);
     }
 
     public void initProviders() {
@@ -191,7 +194,8 @@ public class SingleLineDiagramModel extends DiagramModel {
     public void updateFrom(Network network) {
         if (network != null) {
             // SubstationLayouts
-            nameToSubstationLayoutFactoryMap.put(CGMES_SUBSTATION_LAYOUT, new CgmesSubstationLayoutFactory(network));
+            nameToSubstationLayoutFactoryMap.put(CGMES_SUBSTATION_LAYOUT,
+                new CgmesSubstationLayoutFactory(network, currentCgmesDLDiagramName.getValue(), cgmesScaleFactor.getValue()));
             // CGMES-DL names
             if (NetworkDiagramData.checkNetworkDiagramData(network)) {
                 cgmesDLDiagramNames.setAll(NetworkDiagramData.getDiagramsNames(network));

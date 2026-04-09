@@ -9,8 +9,10 @@ package com.powsybl.diagram.viewer.nad;
 
 import com.powsybl.nad.layout.LayoutParameters;
 import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.Property;
 import javafx.beans.property.SimpleBooleanProperty;
+import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
 
@@ -19,16 +21,20 @@ import javafx.beans.value.ChangeListener;
  */
 public class LayoutParametersBean {
 
+    private final BooleanProperty injectionAdded = new SimpleBooleanProperty();
     private final BooleanProperty textNodesIncluded = new SimpleBooleanProperty();
-
-    private final Property<Double> springRepulsionFactor = new SimpleObjectProperty<>();
     private final Property<Integer> nbMaxSteps = new SimpleObjectProperty<>();
+    private final DoubleProperty scaleFactor = new SimpleDoubleProperty();
 
-    public LayoutParametersBean(BooleanProperty textNodesIncluded, Property<Double> springRepulsionFactor, Property<Integer> nbMaxSteps) {
+    public LayoutParametersBean(BooleanProperty injectionAdded,
+                                BooleanProperty textNodesIncluded,
+                                Property<Integer> nbMaxSteps,
+                                DoubleProperty scaleFactor) {
         // bind
+        this.injectionAdded.bindBidirectional(injectionAdded);
         this.textNodesIncluded.bindBidirectional(textNodesIncluded);
-        this.springRepulsionFactor.bindBidirectional(springRepulsionFactor);
         this.nbMaxSteps.bindBidirectional(nbMaxSteps);
+        this.scaleFactor.bindBidirectional(scaleFactor);
 
         // Initialize
         LayoutParameters defaultParameters = new LayoutParameters();
@@ -36,14 +42,17 @@ public class LayoutParametersBean {
     }
 
     public void addListener(ChangeListener<Object> changeListener) {
+        this.injectionAdded.addListener(changeListener);
         this.textNodesIncluded.addListener(changeListener);
-        this.springRepulsionFactor.addListener(changeListener);
         this.nbMaxSteps.addListener(changeListener);
+        this.scaleFactor.addListener(changeListener);
     }
 
     public LayoutParameters getLayoutParameters() {
         return new LayoutParameters()
+                .setInjectionsAdded(injectionAdded.get())
                 .setTextNodesForceLayout(textNodesIncluded.get())
-                .setMaxSteps(nbMaxSteps.getValue());
+                .setMaxSteps(nbMaxSteps.getValue())
+                .setScaleFactor(scaleFactor.getValue());
     }
 }

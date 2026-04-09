@@ -28,7 +28,7 @@
             <name>Florian DUPUY</name>
             <email>florian.dupuy@rte-france.com</email>
             <organization>RTE</organization>
-            <organizationUrl>http://www.rte-france.com</organizationUrl>
+            <organizationUrl>https://www.rte-france.com</organizationUrl>
         </developer>
     </developers>
 
@@ -64,6 +64,10 @@
         </dependency>
         <dependency>
             <groupId>com.powsybl</groupId>
+            <artifactId>powsybl-cgmes-gl</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.powsybl</groupId>
             <artifactId>powsybl-triple-store-impl-rdf4j</artifactId>
         </dependency>
         <dependency>
@@ -80,10 +84,6 @@
         </dependency>
 
         <!-- powsybl-diagram dependencies -->
-        <dependency>
-            <groupId>com.powsybl</groupId>
-            <artifactId>powsybl-cgmes-gl</artifactId>
-        </dependency>
         <dependency>
             <groupId>com.powsybl</groupId>
             <artifactId>powsybl-network-area-diagram</artifactId>

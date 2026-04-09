@@ -16,19 +16,25 @@ import javafx.beans.value.ChangeListener;
 /**
  * @author Nicolas Rol {@literal <nicolas.rol at rte-france.com>}
  */
-public class LabelProviderParametersBeam {
+public class LabelProviderParametersBean {
 
     private final BooleanProperty busLegend;
     private final BooleanProperty idDisplayed = new SimpleBooleanProperty();
     private final BooleanProperty substationDescriptionDisplayed;
     private final BooleanProperty voltageLevelDetails;
+    private final BooleanProperty doubleArrowsDisplayed;
+    private final EdgeInfoParametersBean edgeInfoParameters;
 
-    public LabelProviderParametersBeam(BooleanProperty substationDescriptionDisplayed,
+    public LabelProviderParametersBean(BooleanProperty substationDescriptionDisplayed,
                                        BooleanProperty busLegend,
-                                       BooleanProperty voltageLevelDetails) {
+                                       BooleanProperty voltageLevelDetails,
+                                       BooleanProperty doubleArrowsDisplayed,
+                                       EdgeInfoParametersBean edgeInfoParameters) {
         this.substationDescriptionDisplayed = substationDescriptionDisplayed;
         this.busLegend = busLegend;
         this.voltageLevelDetails = voltageLevelDetails;
+        this.doubleArrowsDisplayed = doubleArrowsDisplayed;
+        this.edgeInfoParameters = edgeInfoParameters;
     }
 
     public void bind(BooleanProperty useName) {
@@ -40,6 +46,8 @@ public class LabelProviderParametersBeam {
         this.substationDescriptionDisplayed.addListener(changeListener);
         this.busLegend.addListener(changeListener);
         this.voltageLevelDetails.addListener(changeListener);
+        this.doubleArrowsDisplayed.addListener(changeListener);
+        this.edgeInfoParameters.addListener(changeListener);
     }
 
     public LabelProviderParameters getLabelProviderParameters() {
@@ -47,6 +55,8 @@ public class LabelProviderParametersBeam {
             .setBusLegend(busLegend.get())
             .setIdDisplayed(idDisplayed.get())
             .setSubstationDescriptionDisplayed(substationDescriptionDisplayed.get())
-            .setVoltageLevelDetails(voltageLevelDetails.get());
+            .setVoltageLevelDetails(voltageLevelDetails.get())
+            .setDoubleArrowsDisplayed(doubleArrowsDisplayed.get())
+            .setEdgeInfoParameters(edgeInfoParameters.getEdgeInfoParameters());
     }
 }

@@ -66,7 +66,7 @@ public class MainViewController {
         BATTERY(Battery.class, "Battery"),
         LOAD(Load.class, "Load"),
         SHUNT_COMPENSATOR(ShuntCompensator.class, "Shunt compensator"),
-        DANGLING_LINE(DanglingLine.class, "Dangling line"),
+        BOUNDARY_LINE(BoundaryLine.class, "Boundary Line"),
         STATIC_VAR_COMPENSATOR(StaticVarCompensator.class, "Static VAR compensator"),
         LCC_CONVERTER_STATION(LccConverterStation.class, "LCC converter station"),
         VSC_CONVERTER_STATION(VscConverterStation.class, "VSC converter station"),
@@ -227,7 +227,7 @@ public class MainViewController {
     private void initializeNetworkFactories() {
         Map<String, Supplier<Network>> suppliers = new HashMap<>();
         suppliers.put("BatteryNetwork", BatteryNetworkFactory::create);
-        suppliers.put("DanglingLineNetwork", DanglingLineNetworkFactory::create);
+        suppliers.put("BoundaryLineNetwork", BoundaryLineNetworkFactory::create);
         suppliers.put("EuropeanLvTestFeeder", EuropeanLvTestFeederFactory::create);
         suppliers.put("EurostagTutorialExample1", EurostagTutorialExample1Factory::create);
         suppliers.put("FictitiousSwitch", FictitiousSwitchFactory::create);
@@ -482,8 +482,8 @@ public class MainViewController {
                 case ALL -> true;
                 case HVDC_LINE -> v.getConnectableStream(HvdcConverterStation.class).map(HvdcConverterStation::getHvdcLine).anyMatch(Objects::nonNull);
                 case SWITCH -> v.getSwitchCount() != 0;
-                case TIE_LINE -> v.getDanglingLineStream(DanglingLineFilter.PAIRED).findFirst().isPresent();
-                case DANGLING_LINE -> v.getDanglingLineStream(DanglingLineFilter.UNPAIRED).findFirst().isPresent();
+                case TIE_LINE -> v.getBoundaryLineStream(BoundaryLineFilter.PAIRED).findFirst().isPresent();
+                case BOUNDARY_LINE -> v.getBoundaryLineStream(BoundaryLineFilter.UNPAIRED).findFirst().isPresent();
                 case PHASE_SHIFT_TRANSFORMER -> v.getConnectableStream(TwoWindingsTransformer.class).anyMatch(TwoWindingsTransformer::hasPhaseTapChanger);
                 case RATIO_TAP_CHANGER_TRANSFORMER -> v.getConnectableStream(TwoWindingsTransformer.class).anyMatch(TwoWindingsTransformer::hasRatioTapChanger);
                 default -> v.getConnectableStream(type.connectableClass).findFirst().isPresent();

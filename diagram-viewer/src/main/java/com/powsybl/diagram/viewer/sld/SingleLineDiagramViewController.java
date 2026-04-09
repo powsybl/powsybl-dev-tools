@@ -142,7 +142,7 @@ public class SingleLineDiagramViewController extends AbstractDiagramViewControll
     public CheckBox substituteInternalMiddle2wtByEquipmentNodesCheckBox;
 
     @FXML
-    public Spinner<Double> scaleFactorSpinner;
+    public Spinner<Double> cgmesScaleFactorSpinner;
 
     @FXML
     public CheckBox avoidSVGComponentsDuplicationCheckBox;
@@ -225,7 +225,7 @@ public class SingleLineDiagramViewController extends AbstractDiagramViewControll
                 internCellHeightSpinner.getValueFactory().valueProperty(),
                 stackHeightSpinner.getValueFactory().valueProperty(),
                 disconnectorsOnBusCheckBox.selectedProperty(),
-                scaleFactorSpinner.getValueFactory().valueProperty(),
+                cgmesScaleFactorSpinner.getValueFactory().valueProperty(),
                 adaptCellHeightToContentCheckBox.selectedProperty(),
                 minSpaceBetweenComponentsSpinner.getValueFactory().valueProperty(),
                 minimumExternCellHeightSpinner.getValueFactory().valueProperty(),
@@ -393,7 +393,7 @@ public class SingleLineDiagramViewController extends AbstractDiagramViewControll
             case POSITION_WITH_EXTENSIONS -> network -> new PositionVoltageLevelLayoutFactory(new PositionPredefined(), parameters);
             case POSITION_BY_CLUSTERING -> network -> new PositionVoltageLevelLayoutFactory(new PositionByClustering(), parameters);
             case RANDOM -> network -> new RandomVoltageLevelLayoutFactory(500.0, 500.0);
-            case CGMES -> CgmesVoltageLevelLayoutFactory::new;
+            case CGMES -> network -> new CgmesVoltageLevelLayoutFactory(network, cgmesDLDiagramsComboBox.getValue(), cgmesScaleFactorSpinner.getValue());
         };
     }
 }

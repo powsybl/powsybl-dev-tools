@@ -11,8 +11,8 @@ import com.powsybl.diagram.viewer.common.AbstractDiagramController;
 import com.powsybl.diagram.viewer.common.AbstractDiagramViewController;
 import com.powsybl.iidm.network.Container;
 import com.powsybl.iidm.network.Network;
+import com.powsybl.nad.svg.EdgeInfoEnum;
 import com.powsybl.nad.svg.SvgParameters;
-import com.powsybl.nad.svg.iidm.DefaultLabelProvider;
 import javafx.beans.binding.BooleanBinding;
 import javafx.beans.value.ChangeListener;
 import javafx.fxml.FXML;
@@ -50,21 +50,23 @@ public class NetworkAreaDiagramViewController extends AbstractDiagramViewControl
 
     // Layout parameters
     @FXML
-    public Spinner<Double> springRepulsionSpinner;
+    public CheckBox layoutIncludeInjections;
     @FXML
     public Spinner<Integer> nbMaxStepsSpinner;
     @FXML
     public CheckBox layoutIncludeTextNodes;
+    @FXML
+    public Slider scaleFactorSlider;
 
     // NAD Edge info parameters
     @FXML
-    public ChoiceBox<DefaultLabelProvider.EdgeInfoEnum> infoSideExternal;
+    public ChoiceBox<EdgeInfoEnum> infoSideExternal;
     @FXML
-    public ChoiceBox<DefaultLabelProvider.EdgeInfoEnum> infoMiddleSide1;
+    public ChoiceBox<EdgeInfoEnum> infoMiddleSide1;
     @FXML
-    public ChoiceBox<DefaultLabelProvider.EdgeInfoEnum> infoMiddleSide2;
+    public ChoiceBox<EdgeInfoEnum> infoMiddleSide2;
     @FXML
-    public ChoiceBox<DefaultLabelProvider.EdgeInfoEnum> infoSideInternal;
+    public ChoiceBox<EdgeInfoEnum> infoSideInternal;
 
     // SVG parameters
     @FXML
@@ -77,6 +79,8 @@ public class NetworkAreaDiagramViewController extends AbstractDiagramViewControl
     public CheckBox busLegend;
     @FXML
     public CheckBox vlDetails;
+    @FXML
+    public CheckBox doubleArrowsDisplayed;
     // Diagram size
     @FXML
     public CheckBox widthHeightAdded;
@@ -95,31 +99,37 @@ public class NetworkAreaDiagramViewController extends AbstractDiagramViewControl
     @FXML
     private void initialize() {
         model = new NetworkAreaDiagramModel(depthSpinner.valueProperty(),
-                geoScalingFactorSpinner.valueProperty(),
-                geoRadiusFactorSpinner.valueProperty(),
-                labelProviderChoice.valueProperty(),
-                styleProviderChoice.valueProperty(),
-                layoutChoice.valueProperty(),
+            geoScalingFactorSpinner.valueProperty(),
+            geoRadiusFactorSpinner.valueProperty(),
+            labelProviderChoice.valueProperty(),
+            styleProviderChoice.valueProperty(),
+            layoutChoice.valueProperty(),
 
-                springRepulsionSpinner.getValueFactory().valueProperty(),
-                nbMaxStepsSpinner.getValueFactory().valueProperty(),
-                layoutIncludeTextNodes.selectedProperty(),
+            // Layout parameters
+            layoutIncludeInjections.selectedProperty(),
+            nbMaxStepsSpinner.getValueFactory().valueProperty(),
+            layoutIncludeTextNodes.selectedProperty(),
+            scaleFactorSlider.valueProperty(),
 
-                infoAlongEdge.selectedProperty(),
-                insertNameDesc.selectedProperty(),
-                substationDescriptionDisplayed.selectedProperty(),
-                busLegend.selectedProperty(),
-                vlDetails.selectedProperty(),
-                // Diagram size
-                widthHeightAdded.selectedProperty(),
-                sizeConstraintChoice.valueProperty(),
-                fixedSizeSpinner.getValueFactory().valueProperty(),
-                fixedScaleSpinner.getValueFactory().valueProperty(),
-                infoSideExternal.valueProperty(),
-                infoMiddleSide1.valueProperty(),
-                infoMiddleSide2.valueProperty(),
-                infoSideInternal.valueProperty()
-            );
+            // SVG parameters
+            infoAlongEdge.selectedProperty(),
+            insertNameDesc.selectedProperty(),
+            // Diagram size
+            widthHeightAdded.selectedProperty(),
+            sizeConstraintChoice.valueProperty(),
+            fixedSizeSpinner.getValueFactory().valueProperty(),
+            fixedScaleSpinner.getValueFactory().valueProperty(),
+
+            // Label provider parameters
+            substationDescriptionDisplayed.selectedProperty(),
+            busLegend.selectedProperty(),
+            vlDetails.selectedProperty(),
+            doubleArrowsDisplayed.selectedProperty(),
+            infoSideExternal.valueProperty(),
+            infoMiddleSide1.valueProperty(),
+            infoMiddleSide2.valueProperty(),
+            infoSideInternal.valueProperty()
+        );
 
         BooleanBinding enableGeoParameters = this.layoutChoice.valueProperty().isEqualTo(NetworkAreaDiagramModel.GEOGRAPHICAL_LAYOUT);
         this.geoParameters.visibleProperty().bind(enableGeoParameters);
@@ -146,8 +156,8 @@ public class NetworkAreaDiagramViewController extends AbstractDiagramViewControl
         styleProviderChoice.valueProperty().addListener(changeListener);
         layoutChoice.valueProperty().addListener(changeListener);
 
+        layoutIncludeInjections.selectedProperty().addListener(changeListener);
         layoutIncludeTextNodes.selectedProperty().addListener(changeListener);
-        springRepulsionSpinner.valueProperty().addListener(changeListener);
 
         // SvgParameters & layoutParameters
         model.addListener(changeListener);
